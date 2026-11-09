@@ -34,6 +34,91 @@
 		}
 	}
 
+	/* Open issues of a failed save, next to the actions they block. */
+	& .problems[hidden] {
+		display: none;
+	}
+
+	& .cms-problems {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-1-5);
+		min-height: var(--cms-button-height);
+		padding: 0 var(--cms-space-3);
+		border: 1px solid var(--cms-color-danger-border-soft);
+		border-radius: var(--cms-button-radius);
+		background: var(--cms-color-danger-surface);
+		color: var(--cms-color-danger-text);
+		font: inherit;
+		font-size: var(--cms-font-size-sm);
+		font-weight: 600;
+		white-space: nowrap;
+		cursor: pointer;
+
+		&:hover {
+			background: color-mix(in oklch, var(--cms-color-danger), var(--cms-color-surface) 84%);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		& > .mark {
+			display: grid;
+			place-items: center;
+			width: 1rem;
+			height: 1rem;
+			border-radius: var(--cms-radius-full);
+			background: var(--cms-color-danger);
+			color: var(--cms-color-text-on-fill);
+			font-size: 0.6875rem;
+			font-weight: 700;
+			line-height: 1;
+		}
+	}
+
+	& .cms-problems-menu {
+		--width: 18rem;
+
+		& .heading {
+			margin: 0;
+			padding: var(--cms-space-1-5) var(--cms-space-2-5);
+			color: var(--cms-color-text-subtle);
+			font-size: var(--cms-font-size-xs);
+		}
+
+		& .entries {
+			display: contents;
+		}
+
+		& button {
+			justify-content: space-between;
+		}
+
+		& .text {
+			min-width: 0;
+			color: var(--cms-color-text-muted);
+			overflow-wrap: anywhere;
+
+			& strong {
+				color: var(--cms-color-text);
+				font-weight: 600;
+			}
+		}
+
+		& .arrow {
+			color: var(--cms-color-text-faint);
+		}
+
+		& .general {
+			margin: 0;
+			padding: var(--cms-space-1-5) var(--cms-space-2-5);
+			color: var(--cms-color-danger-text);
+			font-size: var(--cms-font-size-sm);
+		}
+	}
+
 	& .panes {
 		display: flex;
 		align-items: stretch;
@@ -146,35 +231,124 @@
 		}
 	}
 
+	/* The summary of a failed save: what keeps the entry from saving, each
+	   field a chip that jumps to it. */
 	& .errors {
-		margin-bottom: var(--cms-space-4);
-		padding: var(--cms-space-3) var(--cms-space-4);
-		border: 1px solid var(--cms-color-danger-border);
-		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-danger-surface);
-		color: var(--cms-color-danger-text);
+		display: flex;
+		align-items: flex-start;
+		gap: var(--cms-space-3-5);
+		margin-bottom: var(--cms-space-6);
+		padding: var(--cms-space-4);
+		border: 1px solid var(--cms-color-danger-border-soft);
+		border-radius: var(--cms-radius-lg);
+		background: var(--cms-color-surface);
 		font-size: var(--cms-font-size-sm);
-
-		& ul {
-			margin: 0;
-			padding-left: var(--cms-space-4);
-		}
-
-		/* Issue jump targets rendered as links, not buttons. */
-		& button {
-			padding: 0;
-			border: 0;
-			background: none;
-			color: inherit;
-			font: inherit;
-			text-align: left;
-			text-decoration: underline;
-			text-underline-offset: 0.15em;
-			cursor: pointer;
-		}
 
 		&[hidden] {
 			display: none;
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		& > .mark {
+			flex: none;
+			display: grid;
+			place-items: center;
+			width: 1.375rem;
+			height: 1.375rem;
+			border-radius: var(--cms-radius-full);
+			background: var(--cms-color-danger);
+			color: var(--cms-color-text-on-fill);
+			font-size: 0.8125rem;
+			font-weight: 700;
+			line-height: 1;
+		}
+
+		& .summary {
+			display: flex;
+			flex: 1 1 auto;
+			flex-direction: column;
+			gap: var(--cms-space-2-5);
+			min-width: 0;
+			padding-top: 0.125rem;
+		}
+
+		& .title {
+			margin: 0;
+			font-weight: 600;
+
+			&[hidden] {
+				display: none;
+			}
+		}
+
+		/* The lead belongs to the title above it, not to the chips below. */
+		& .title + .lead {
+			margin-top: calc(0.125rem - var(--cms-space-2-5));
+		}
+
+		& .lead {
+			margin: 0;
+			color: var(--cms-color-text-muted);
+		}
+
+		& .chips {
+			display: flex;
+			flex-wrap: wrap;
+			gap: var(--cms-space-2);
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+
+		& .chip {
+			display: inline-flex;
+			align-items: center;
+			gap: var(--cms-space-1-5);
+			min-height: 1.75rem;
+			padding: 0 var(--cms-space-2-5);
+			border: 1px solid var(--cms-color-danger-border-soft);
+			border-radius: var(--cms-radius-md);
+			background: var(--cms-color-danger-surface);
+			color: var(--cms-color-danger-text);
+			font: inherit;
+			text-align: start;
+			cursor: pointer;
+
+			&:hover {
+				background: color-mix(in oklch, var(--cms-color-danger), var(--cms-color-surface) 84%);
+			}
+
+			&:focus-visible {
+				outline: var(--cms-focus-outline);
+				outline-offset: var(--cms-focus-offset);
+			}
+		}
+
+		& .general {
+			margin: 0;
+			padding-left: var(--cms-space-4);
+			color: var(--cms-color-danger-text);
+		}
+
+		&.is-resolved {
+			align-items: center;
+			border-color: color-mix(in oklch, var(--cms-color-success), transparent 70%);
+
+			& > .mark {
+				background: var(--cms-color-success);
+			}
+
+			& .summary {
+				padding-top: 0;
+			}
+
+			& .lead {
+				color: var(--cms-color-success-text);
+			}
 		}
 	}
 

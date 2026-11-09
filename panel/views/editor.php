@@ -86,6 +86,22 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 
 		<div class="actions">
 			<output id="editor-status" class="status" role="status"></output>
+			<?php // Filled and shown by errors.js while a failed save has open issues. ?>
+			<div id="editor-problems" class="problems" hidden>
+				<button class="cms-problems" type="button" popovertarget="editor-problems-menu">
+					<span class="mark" aria-hidden="true">!</span>
+					<span class="count"></span>
+				</button>
+				<div
+					id="editor-problems-menu"
+					class="cms-action-menu cms-problems-menu"
+					popover="auto"
+					data-action-menu
+					data-align="end">
+					<p class="heading"><?= escape(__('editor:problems-heading')) ?></p>
+					<div class="entries"></div>
+				</div>
+			</div>
 			<?php if ($embed !== null): ?>
 				<button class="cms-button secondary" type="button" data-embed-cancel>
 					<?= escape(__('editor:cancel')) ?>

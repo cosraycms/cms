@@ -85,6 +85,23 @@ foreach (['focal', 'crop', 'texts', 'strict', 'gallery', 'video', 'restore', 'la
 		->execute(['node' => (int) $node->fetchColumn(), 'path' => "/{$name}"]);
 }
 
+$type = (int) $db->query("INSERT INTO cms.types (handle) VALUES ('article') RETURNING type")->fetchColumn();
+$node = $db->prepare(
+	'INSERT INTO cms.nodes (uid, published, hidden, locked, type, creator, editor, content, title)
+	VALUES (:uid, true, false, false, :type, 1, 1, :content, :title) RETURNING node',
+);
+$node->execute([
+	'uid' => 'browserarticle',
+	'type' => $type,
+	'content' => json_encode([
+		'title' => ['type' => 'text', 'value' => ['zxx' => 'Article']],
+		'date' => ['type' => 'date', 'value' => ['zxx' => '2026-05-10']],
+	]),
+	'title' => json_encode(['en' => 'Article']),
+]);
+$db->prepare("INSERT INTO cms.url_paths (node, path, locale, creator, editor) VALUES (:node, '/article', 'en', 1, 1)")
+	->execute(['node' => (int) $node->fetchColumn()]);
+
 /** Four colored quarters, so a cut shows in the pixels. */
 $photo = static function (string $file, int $width, int $height, int $tint = 0): void {
 	$image = imagecreatetruecolor($width, $height);

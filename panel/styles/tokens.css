@@ -286,6 +286,7 @@
 	--cms-focus-outline: 2px solid var(--cms-color-focus);
 	--cms-focus-offset: 2px;
 	--cms-focus-ring: 0 0 0 1px var(--cms-color-focus);
+	--cms-error-ring: 0 0 0 3px color-mix(in oklch, var(--cms-color-danger), transparent 82%);
 
 	/**
 	 * Semantic — depth
@@ -359,6 +360,7 @@
 
 	/* The palette's own vermillion clears only 3:1: edges and markers, never text. */
 	--cms-color-danger-border: light-dark(var(--cms-color-red-500), var(--cms-color-red-400));
+	--cms-color-danger-border-soft: color-mix(in oklch, var(--cms-color-danger), transparent 70%);
 
 	/**
 	 * Component — controls

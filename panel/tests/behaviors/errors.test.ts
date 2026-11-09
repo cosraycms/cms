@@ -5,10 +5,14 @@ import { install as installContentLocales } from '../../src/behaviors/content-lo
 
 function editor(): void {
 	document.body.innerHTML = `
+		<div id="editor-problems" hidden>
+			<button type="button" popovertarget="editor-problems-menu"><span class="count"></span></button>
+			<div id="editor-problems-menu" popover="auto" data-action-menu><div class="entries"></div></div>
+		</div>
 		<form id="node-editor-form">
 			<div id="editor-errors" class="errors" tabindex="-1" hidden></div>
 			<div class="cms-field" data-field="title">
-				<label class="label"><div>Title</div></label>
+				<label class="label"><div><span class="name">Title</span></div></label>
 				<div class="control">
 					<div class="variant" data-locale="en">
 						<input name="content[title][value][en]" type="text" />
@@ -23,7 +27,7 @@ function editor(): void {
 				<div class="control"><x-host name="content[body][json]"></x-host></div>
 			</div>
 			<div class="cms-field" data-field="styled">
-				<label class="label"><div>Styled</div>
+				<label class="label"><div><span class="name">Styled</span></div>
 					<button type="button" class="meta-button" data-dialog-open="meta">Meta</button>
 				</label>
 				<div class="control"><input name="content[styled][value][zxx]" type="text" /></div>
@@ -121,30 +125,52 @@ function editor(): void {
 	}
 }
 
-function respond(items: Array<{ path: unknown; message: string }>): HTMLElement {
+type Item = { path: unknown; message: string; code?: string };
+
+function respond(items: Item[]): HTMLElement {
 	const box = document.createElement('div');
 	box.id = 'editor-errors';
 	box.className = 'errors';
 	box.tabIndex = -1;
 	box.hidden = items.length === 0;
+	box.innerHTML =
+		'<span class="mark">!</span><div class="summary"><p class="title">Not saved</p></div>';
 
 	const list = document.createElement('ul');
+	list.className = 'issues';
 
 	for (const item of items) {
 		const entry = document.createElement('li');
-		const button = document.createElement('button');
-		button.type = 'button';
-		button.setAttribute('data-error-path', JSON.stringify(item.path));
-		button.textContent = item.message;
-		entry.append(button);
+
+		if (item.path === null) {
+			entry.textContent = item.message;
+		} else {
+			const button = document.createElement('button');
+			button.type = 'button';
+			button.setAttribute('data-error-path', JSON.stringify(item.path));
+			button.setAttribute('data-error-code', item.code ?? 'rule.minlen');
+			button.textContent = item.message;
+			entry.append(button);
+		}
+
 		list.append(entry);
 	}
 
-	box.append(list);
+	box.querySelector('.summary')!.append(list);
 	document.getElementById('editor-errors')?.replaceWith(box);
 	document.dispatchEvent(new CustomEvent('htmx:after:swap'));
 
 	return box;
+}
+
+function chips(box: HTMLElement): string[] {
+	return Array.from(box.querySelectorAll('.chips [data-error-jump]'), (chip) =>
+		(chip.textContent ?? '').trim(),
+	);
+}
+
+function input(name: string): HTMLInputElement {
+	return document.querySelector<HTMLInputElement>(`[name="${name.replace(/[[\]]/g, '\\$&')}"]`)!;
 }
 
 function field(name: string): HTMLElement {
@@ -188,10 +214,17 @@ describe('errors behavior', () => {
 		expect(input?.getAttribute('aria-describedby')).toBe(note?.id);
 	});
 
-	it('focuses the summary box on arrival', () => {
-		const box = respond([
+	it('focuses the first field on arrival', () => {
+		respond([
 			{ path: ['content', 'title', 'value', 'en'], message: 'Title is required' },
+			{ path: ['content', 'styled', 'value', 'zxx'], message: 'Styled is invalid' },
 		]);
+
+		expect(document.activeElement).toBe(input('content[title][value][en]'));
+	});
+
+	it('focuses the summary box when the first field is out of sight', () => {
+		const box = respond([{ path: ['content', 'title', 'value', 'de'], message: 'Titel fehlt' }]);
 
 		expect(document.activeElement).toBe(box);
 	});
@@ -224,7 +257,7 @@ describe('errors behavior', () => {
 
 		const control = form.querySelector<HTMLElement>('[data-content-locale-control]')!;
 		const german = control.querySelector<HTMLElement>('[data-content-locale-option="de"]')!;
-		document.querySelector<HTMLElement>('[data-error-path]')?.click();
+		document.querySelector<HTMLElement>('[data-error-jump]')?.click();
 		expect(german.getAttribute('aria-checked')).toBe('true');
 		expect(field('title').querySelector<HTMLElement>('[data-locale="de"]')?.hidden).toBe(false);
 	});
@@ -244,7 +277,7 @@ describe('errors behavior', () => {
 		expect(
 			form.querySelector<HTMLElement>('[data-content-locale-control]')?.dataset.errorLocales,
 		).toBe('de');
-		box.querySelector<HTMLElement>('[data-error-path]')?.click();
+		box.querySelector<HTMLElement>('[data-error-jump]')?.click();
 		expect(form.getAttribute('data-content-locale')).toBe('de');
 	});
 
@@ -324,7 +357,7 @@ describe('errors behavior', () => {
 		expect(field('block').querySelector('.gear')?.classList.contains('has-error')).toBe(true);
 		expect(dialog.querySelector('select')?.getAttribute('aria-invalid')).toBe('true');
 
-		box.querySelector('button')?.click();
+		box.querySelector<HTMLElement>('[data-error-jump]')?.click();
 		document.removeEventListener('click', listener);
 		expect(opened).toBe(1);
 	});
@@ -340,11 +373,21 @@ describe('errors behavior', () => {
 		expect(field('sub').getAttribute('data-invalid')).toBe('true');
 	});
 
-	it('leaves unresolvable paths as summary-only entries', () => {
-		respond([{ path: ['content', 'gone', 'value', 'zxx'], message: 'Gone is invalid' }]);
+	it('lists unresolvable paths and pathless issues in the summary only', () => {
+		const box = respond([
+			{ path: ['content', 'gone', 'value', 'zxx'], message: 'Gone is invalid' },
+			{ path: null, message: 'Something else failed' },
+		]);
 
 		expect(document.querySelectorAll('[data-invalid]').length).toBe(0);
 		expect(document.querySelectorAll('[data-error-message]').length).toBe(0);
+		expect(Array.from(box.querySelectorAll('.general li'), (item) => item.textContent)).toEqual([
+			'Gone is invalid',
+			'Something else failed',
+		]);
+		expect(document.querySelector('#editor-problems .count')?.textContent).toBe(
+			'editor:problems-plural',
+		);
 	});
 
 	it('wipes every mark when the next save response arrives clean', () => {
@@ -381,7 +424,7 @@ describe('errors behavior', () => {
 		);
 		const box = respond([{ path: ['content', 'title', 'value', 'de'], message: 'Titel fehlt' }]);
 
-		box.querySelector('button')?.click();
+		box.querySelector<HTMLElement>('[data-error-jump]')?.click();
 
 		const variant = field('title').querySelector<HTMLElement>('.variant[data-locale="de"]');
 		const input = document.querySelector('[name="content[title][value][de]"]');
@@ -399,7 +442,7 @@ describe('errors behavior', () => {
 			},
 		]);
 
-		box.querySelector('button')?.click();
+		box.querySelector<HTMLElement>('[data-error-jump]')?.click();
 
 		const body = document.querySelector<HTMLElement>('[data-repeater-body]');
 
@@ -424,7 +467,7 @@ describe('errors behavior', () => {
 		const box = respond([
 			{ path: ['content', 'styled', 'meta', 'cssClass', 'zxx'], message: 'Class is invalid' },
 		]);
-		box.querySelector('button')?.click();
+		box.querySelector<HTMLElement>('[data-error-jump]')?.click();
 
 		document.removeEventListener('click', listener);
 		expect(opened).toBe(1);
@@ -449,7 +492,7 @@ describe('errors behavior', () => {
 		expect(shortcut.classList.contains('has-error')).toBe(true);
 		expect(panel.hidden).toBe(true);
 
-		box.querySelector('button')?.click();
+		box.querySelector<HTMLElement>('[data-error-jump]')?.click();
 
 		// Opened for the jump, not remembered as the editor's choice.
 		expect(inspector.hasAttribute('data-collapsed')).toBe(false);
@@ -475,27 +518,120 @@ describe('errors behavior', () => {
 		document.addEventListener('click', listener);
 
 		const box = respond([{ path: ['paths', 'en'], message: 'Path is taken' }]);
-		box.querySelector('button')?.click();
+		box.querySelector<HTMLElement>('[data-error-jump]')?.click();
 
 		document.removeEventListener('click', listener);
 		expect(opened).toBe(1);
 	});
 
-	it('clears the marks of a field the user edits, keeping the summary', () => {
+	it('clears the marks of a field the user edits and drops it from the summary', () => {
 		const box = respond([
 			{ path: ['content', 'title', 'value', 'en'], message: 'Title is required' },
 			{ path: ['content', 'styled', 'value', 'zxx'], message: 'Styled is invalid' },
 		]);
 
-		const input = document.querySelector('[name="content[title][value][en]"]');
-		input?.dispatchEvent(new Event('input', { bubbles: true }));
+		const title = input('content[title][value][en]');
+		title.dispatchEvent(new Event('input', { bubbles: true }));
 
 		expect(field('title').hasAttribute('data-invalid')).toBe(false);
 		expect(field('title').querySelector('[data-error-message]')).toBeNull();
-		expect(input?.hasAttribute('aria-invalid')).toBe(false);
-		// The untouched field and the summary stay.
+		expect(title.hasAttribute('aria-invalid')).toBe(false);
+		// The untouched field stays, in the summary too.
 		expect(field('styled').getAttribute('data-invalid')).toBe('true');
 		expect(box.hidden).toBe(false);
-		expect(box.querySelectorAll('[data-error-path]').length).toBe(2);
+		expect(chips(box)).toEqual(['Styled →']);
+	});
+
+	it('names each field once however many issues it has', () => {
+		const box = respond([
+			{ path: ['content', 'title', 'value', 'en'], message: 'Title is too short' },
+			{ path: ['content', 'title', 'value', 'en'], message: 'Title has a bad format' },
+			{
+				path: ['content', 'entries', 'value', 'zxx', 0, 'fields', 'sub', 'value', 'zxx'],
+				message: 'Sub is required',
+			},
+		]);
+
+		expect(chips(box)).toEqual(['Title →', 'sub →']);
+		expect(box.querySelector('.lead')?.textContent).toBe('editor:errors-invalid-plural');
+		expect(
+			Array.from(
+				field('title').querySelectorAll('[data-error-message]'),
+				(note) => note.textContent,
+			),
+		).toEqual(['Title is too short', 'Title has a bad format']);
+	});
+
+	it('asks for a missing value instead of repeating the label', () => {
+		const box = respond([
+			{
+				path: ['content', 'title', 'value', 'en'],
+				message: 'Title is required',
+				code: 'rule.required',
+			},
+		]);
+
+		expect(field('title').querySelector('[data-error-message]')?.textContent).toBe(
+			'editor:error-fill',
+		);
+		expect(box.querySelector('.lead')?.textContent).toBe('editor:errors-empty');
+		expect(box.querySelector('.title')?.textContent).toBe('Not saved');
+	});
+
+	it('counts the open problems in the header and jumps from its menu', () => {
+		respond([
+			{ path: ['content', 'title', 'value', 'de'], message: 'Titel fehlt', code: 'missing' },
+			{ path: ['content', 'styled', 'value', 'zxx'], message: 'Styled is invalid' },
+		]);
+
+		const holder = document.getElementById('editor-problems')!;
+		const entries = Array.from(
+			holder.querySelectorAll<HTMLElement>('.entries [data-error-jump]'),
+			(entry) => entry.textContent,
+		);
+
+		expect(holder.hidden).toBe(false);
+		expect(holder.querySelector('.count')?.textContent).toBe('editor:problems-plural');
+		expect(entries).toEqual(['Title – editor:error-missing→', 'Styled – editor:error-invalid→']);
+
+		holder.querySelector<HTMLElement>('.entries [data-error-jump]')?.click();
+
+		expect(document.activeElement).toBe(input('content[title][value][de]'));
+	});
+
+	it('says so once every reported field has been edited', () => {
+		const box = respond([
+			{ path: ['content', 'styled', 'value', 'zxx'], message: 'Styled is invalid' },
+		]);
+
+		input('content[styled][value][zxx]').dispatchEvent(new Event('change', { bubbles: true }));
+
+		expect(box.classList.contains('is-resolved')).toBe(true);
+		expect(box.querySelector('.lead')?.textContent).toBe('editor:errors-resolved');
+		expect(box.querySelector<HTMLElement>('.title')?.hidden).toBe(true);
+		expect(document.getElementById('editor-problems')?.hidden).toBe(true);
+	});
+
+	it('keeps an empty required field open and reopens it when emptied again', () => {
+		const box = respond([
+			{ path: ['content', 'title', 'value', 'en'], message: 'Title is required', code: 'missing' },
+		]);
+		const title = input('content[title][value][en]');
+
+		title.value = ' ';
+		title.dispatchEvent(new Event('input', { bubbles: true }));
+		expect(field('title').getAttribute('data-invalid')).toBe('true');
+
+		title.value = 'Hello';
+		title.dispatchEvent(new Event('input', { bubbles: true }));
+		expect(field('title').hasAttribute('data-invalid')).toBe(false);
+		expect(box.classList.contains('is-resolved')).toBe(true);
+
+		title.value = '';
+		title.dispatchEvent(new Event('input', { bubbles: true }));
+		title.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+		expect(field('title').getAttribute('data-invalid')).toBe('true');
+		expect(title.getAttribute('aria-invalid')).toBe('true');
+		expect(chips(box)).toEqual(['Title →']);
 	});
 });

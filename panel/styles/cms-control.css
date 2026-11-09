@@ -56,7 +56,8 @@
 	}
 
 	&[aria-invalid='true'] {
-		border-color: var(--cms-color-danger-border);
+		border-color: var(--cms-color-danger);
+		box-shadow: var(--cms-error-ring);
 	}
 }
 
@@ -110,7 +111,7 @@
 	& .cms-input,
 	& .cms-select,
 	& .cms-textarea {
-		border-color: var(--cms-color-danger-border);
+		border-color: var(--cms-color-danger);
 	}
 }
 

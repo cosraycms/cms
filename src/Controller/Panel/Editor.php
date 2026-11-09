@@ -684,11 +684,12 @@ final class Editor extends Panel
 
 	/**
 	 * The issues behind a rejected save, reduced to what the error box
-	 * renders: the message plus the data path locating the field — the
-	 * client resolves the path to the matching form control.
+	 * renders: the message, the data path locating the field — the
+	 * client resolves the path to the matching form control — and the
+	 * code that tells a missing value from an invalid one.
 	 *
 	 * @param array<string, mixed> $payload
-	 * @return list<array{message: string, path: list<string|int>}>
+	 * @return list<array{message: string, path: list<string|int>, code: string}>
 	 */
 	private function issues(array $payload): array
 	{
@@ -702,6 +703,7 @@ final class Editor extends Panel
 			static fn(Issue $issue): array => [
 				'message' => $issue->message,
 				'path' => $issue->path,
+				'code' => $issue->code,
 			],
 			array_filter($issues, static fn(mixed $issue): bool => $issue instanceof Issue),
 		));

@@ -76,7 +76,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		<?= $variants ? 'data-locale-label-for="' . escape($idRoot) . '"' : '' ?>
 		class="label<?= $bareLabel && !is_array($metaControl) ? ' sr-only' : '' ?>">
 		<div<?= $bareLabel ? ' class="sr-only"' : '' ?>>
-			<?= escape((string) ($field['label'] ?? $fieldName)) ?>
+			<span class="name"><?= escape((string) ($field['label'] ?? $fieldName)) ?></span>
 			<?php // A field the editor cannot change is never also required of them. ?>
 			<?php if ($immutable): ?>
 				<span class="state">(<?= escape(__('field:readonly')) ?>)</span>

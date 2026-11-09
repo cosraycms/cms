@@ -17,12 +17,17 @@ $alignmentFields = (array) u($alignmentFields);
 					</div>
 					<div id="editor-errors" class="errors" tabindex="-1" hidden></div>
 					<template id="alignment-errors">
-						<div id="editor-errors" class="errors" tabindex="-1">
-							<ul>
-								<li><button type="button" data-error-path='["content","alignmentShort","value","zxx"]'>Enter a value.</button></li>
-								<li><button type="button" data-error-path='["content","alignmentShort","value","zxx"]'>This second message stays with the same input.</button></li>
-								<li><button type="button" data-error-path='["content","alignmentDate","value","zxx"]'>Enter a valid date.</button></li>
-							</ul>
+						<div id="editor-errors" class="errors" tabindex="-1" role="alert">
+							<span class="mark" aria-hidden="true">!</span>
+							<div class="summary">
+								<p class="title">Entry was not saved</p>
+								<ul class="issues">
+									<li><button type="button" data-error-path='["content","alignmentShort","value","zxx"]' data-error-code="rule.required">Short is required</button></li>
+									<li><button type="button" data-error-path='["content","alignmentShort","value","zxx"]' data-error-code="rule.regex">This second message stays with the same input.</button></li>
+									<li><button type="button" data-error-path='["content","alignmentDate","value","zxx"]' data-error-code="rfc3339">Enter a valid date.</button></li>
+									<li>A message without a field lands in the summary only.</li>
+								</ul>
+							</div>
 						</div>
 					</template>
 					<div class="cms-fields" data-sample="fields:alignment">

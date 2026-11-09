@@ -888,6 +888,8 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			'data-error-path=\'["content","title","value","zxx"]\'',
 			$html,
 		);
+		// The code tells the client a missing value from an invalid one.
+		$this->assertStringContainsString('data-error-code="rule.minlen"', $html);
 		$this->assertStringContainsString('Document Title must be at least 3 characters', $html);
 		$this->assertSame(
 			'Valid Title',

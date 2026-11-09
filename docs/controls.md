@@ -194,15 +194,21 @@ When the user opens a node they hold an autosave for, the editor offers to show 
 
 ## Validation errors
 
-Failed saves preserve the mounted form. Messages are in the panel language: [Validators](../src/Validation/Validators.php) translates Sire's own messages, and Cosray's rules translate theirs. Error-summary items carry Sire paths:
+Failed saves preserve the mounted form. Messages are in the panel language: [Validators](../src/Validation/Validators.php) translates Sire's own messages, and Cosray's rules translate theirs. The save response lists the issues in the `#editor-errors` summary, each with its Sire path and code:
 
 ```html
-<button type="button" data-error-path='["content","title","value","en"]'>
+<button
+	type="button"
+	data-error-path='["content","title","value","en"]'
+	data-error-code="rule.required"
+>
 	Title (English) is required
 </button>
 ```
 
-[errors.js](../panel/src/behaviors/errors.js) resolves paths to form controls, falling back to containing element hosts for nested values. It marks fields and reveals hidden targets by switching locale, opening the relevant inspector/tab/dialog, or expanding an entry. Editing clears field marks; the summary remains until another save.
+[errors.js](../panel/src/behaviors/errors.js) resolves paths to form controls, falling back to containing element hosts for nested values, and groups the issues per field. The summary shows one jump chip per field, and the editor head a problem count whose menu lists the same fields. A missing value (`missing`, `null`, `rule.required`) asks the user to fill in or choose a value at the field, without repeating its label; other issues show their message there. Issues without a resolvable path stay as text in the summary. After the save, focus goes to the first field when it is in view, otherwise to the summary.
+
+A jump reveals hidden targets by switching locale, opening the relevant inspector/tab/dialog, or expanding an entry. Editing a field closes its problem in the summary, the head, and at the field; a required native control counts as fixed only once it holds a value, and opens again on blur when emptied. When every reported field has been edited, the summary says so; nothing is validated in the browser, so only the next save confirms it.
 
 Current styling hooks include `.cms-field[data-invalid='true']`, `.cms-field-error`, and `.has-error`. Native controls receive accessible invalid/error associations. Custom elements currently receive field-level marking rather than a standardized per-sub-value error API.
 

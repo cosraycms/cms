@@ -8,7 +8,7 @@
 .cms-field {
 	display: flex;
 	flex-direction: column;
-	gap: var(--cms-space-1);
+	gap: var(--cms-space-1-5);
 	min-width: 0;
 	padding-inline: var(--cms-space-2);
 
@@ -46,7 +46,7 @@
 	& > .field-body {
 		display: flex;
 		flex-direction: column;
-		gap: var(--cms-space-1);
+		gap: var(--cms-space-1-5);
 		min-width: 0;
 	}
 
@@ -90,13 +90,33 @@
 	}
 }
 
-/* Inline validation message painted below the control by errors.ts;
-   also used standalone for inspector fields outside .cms-field. */
+/* Inline validation message painted below the control by errors.js;
+   also used standalone for inspector fields outside .cms-field. The mark
+   keeps the message from resting on its colour alone. */
 .cms-field-error {
+	display: flex;
+	align-items: baseline;
+	gap: var(--cms-space-1-5);
 	margin: 0;
 	color: var(--cms-color-danger-text);
-	font-size: var(--cms-font-size-xs);
+	font-size: 0.8125rem;
 	line-height: 1.45;
+
+	&::before {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 0.875rem;
+		height: 0.875rem;
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-danger);
+		color: var(--cms-color-text-on-fill);
+		font-size: 0.625rem;
+		font-weight: 700;
+		line-height: 1;
+		content: '!' / '';
+		translate: 0 0.125rem;
+	}
 }
 
 .cms-fieldset {

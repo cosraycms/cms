@@ -277,10 +277,10 @@ describe('YouTube control', () => {
 				.querySelector('form')!
 				.insertAdjacentHTML(
 					'afterbegin',
-					`<div id="editor-errors" tabindex="-1"><button type="button" data-error-path='["content","video","value","zxx"]'>Video is required</button></div>`,
+					`<div id="editor-errors" tabindex="-1"><span class="mark">!</span><div class="summary"><ul class="issues"><li><button type="button" data-error-path='["content","video","value","zxx"]' data-error-code="missing">Video is required</button></li></ul></div></div>`,
 				);
 			document.dispatchEvent(new Event('htmx:after:swap'));
-			document.querySelector<HTMLButtonElement>('[data-error-path]')!.click();
+			document.querySelector<HTMLButtonElement>('[data-error-jump]')!.click();
 			expect(document.activeElement).toBe(value === '' ? input() : button('replace'));
 			expect(input().getAttribute('aria-invalid')).toBe('true');
 			expect(submitted()).toBe(value);

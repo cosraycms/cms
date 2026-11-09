@@ -26,36 +26,47 @@ $issues = array_values(array_filter(
 ));
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
+<?php // With issues to show, the summary box speaks for the failed save. ?>
 <output
 	id="editor-status"
 	class="status <?= $saved ? 'is-success' : 'is-error' ?>"
 	role="status"
 	<?= $saved ? 'data-saved="true"' : '' ?>
-	hx-swap-oob="true"><?= escape($message) ?></output>
+	hx-swap-oob="true"><?= $saved || $issues === [] ? escape($message) : '' ?></output>
+<?php // errors.js turns the issues into the jump chips, the field messages and
+
+// the header's problem count, and keeps them current while the user edits. ?>
 <div
 	id="editor-errors"
 	class="errors"
 	tabindex="-1"
 	hx-swap-oob="true"
-	<?= $saved || $issues === [] ? 'hidden' : '' ?>>
+	<?= $saved || $issues === [] ? 'hidden' : 'role="alert"' ?>>
 	<?php if (!$saved && $issues !== []): ?>
-		<ul>
-			<?php foreach ($issues as $issue): ?>
-				<?php $path = $issue['path'] ?? null; ?>
-				<li>
-					<?php if (is_array($path) && $path !== []): ?>
-						<?php // Single-quoted like data-when: JSON_HEX_APOS keeps the
+		<span class="mark" aria-hidden="true">!</span>
+		<div class="summary">
+			<p class="title"><?= escape(__('editor:not-saved')) ?></p>
+			<ul class="issues">
+				<?php foreach ($issues as $issue): ?>
+					<?php $path = $issue['path'] ?? null; ?>
+					<li>
+						<?php if (is_array($path) && $path !== []): ?>
+							<?php // Single-quoted like data-when: JSON_HEX_APOS keeps the
 
-						// JSON safe inside the attribute without double-escaping. ?>
-						<button type="button" data-error-path='<?= json_encode($path, $jsonFlags) ?>'>
+							// JSON safe inside the attribute without double-escaping. ?>
+							<button
+								type="button"
+								data-error-path='<?= json_encode($path, $jsonFlags) ?>'
+								data-error-code="<?= escape((string) ($issue['code'] ?? '')) ?>">
+								<?= escape($issue['message']) ?>
+							</button>
+						<?php else: ?>
 							<?= escape($issue['message']) ?>
-						</button>
-					<?php else: ?>
-						<?= escape($issue['message']) ?>
-					<?php endif ?>
-				</li>
-			<?php endforeach ?>
-		</ul>
+						<?php endif ?>
+					</li>
+				<?php endforeach ?>
+			</ul>
+		</div>
 	<?php endif ?>
 </div>
 <?php if ($saved && $renderable): ?>
