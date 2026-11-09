@@ -20,9 +20,9 @@ $width = (int) ($width ?? 50);
 	data-field="<?= escape($name) ?>">
 	<label class="label" for="user-<?= escape($name) ?>">
 		<div>
-			<?= escape($label) ?>
+			<span class="name"><?= escape($label) ?></span>
 			<?php if ($required): ?>
-				<span class="requirement">(<?= escape(__('field:required')) ?>)</span>
+				<span class="requirement"><?= escape(__('field:required')) ?></span>
 			<?php endif ?>
 		</div>
 	</label>

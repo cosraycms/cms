@@ -235,7 +235,7 @@ export function metaFields({
 		if (demanded) {
 			const requirement = document.createElement('span');
 			requirement.className = 'requirement';
-			requirement.textContent = `(${__('field:required')})`;
+			requirement.textContent = __('field:required');
 			label.append(labels[name], ' ', ...(name === 'alt' ? [remark, ' '] : []), requirement);
 		} else {
 			label.append(labels[name], ' ', remark);

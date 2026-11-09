@@ -552,8 +552,8 @@ describe('image details', () => {
 		it('marks them in the dialog instead of calling them optional', async () => {
 			await details({ uid: 'cover' }, { requiredItems: ['alt', 'caption'], attribution: true });
 
-			expect(requirement('alt')).toBe('(field:required)');
-			expect(requirement('caption')).toBe('(field:required)');
+			expect(requirement('alt')).toBe('field:required');
+			expect(requirement('caption')).toBe('field:required');
 			expect(requirement('attribution')).toBeUndefined();
 			expect(document.querySelector('.cms-modal label[for$="-caption"] .remark')).toBeNull();
 		});
@@ -562,7 +562,7 @@ describe('image details', () => {
 			await details({ uid: 'cover' }, { link: true, requiredItems: ['link'] });
 
 			expect(document.querySelector('.cms-link-row .requirement')?.textContent).toBe(
-				'(field:required)',
+				'field:required',
 			);
 		});
 

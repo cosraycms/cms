@@ -71,7 +71,7 @@ export function linkRow({
 		const heading = create('span', 'caption', `${caption} `);
 		heading.append(
 			required
-				? create('span', 'requirement', `(${__('field:required')})`)
+				? create('span', 'requirement', __('field:required'))
 				: create('span', 'remark', __('field:optional')),
 		);
 		entry.append(heading);

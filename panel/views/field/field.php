@@ -79,9 +79,9 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			<span class="name"><?= escape((string) ($field['label'] ?? $fieldName)) ?></span>
 			<?php // A field the editor cannot change is never also required of them. ?>
 			<?php if ($immutable): ?>
-				<span class="state">(<?= escape(__('field:readonly')) ?>)</span>
+				<span class="state"><?= escape(__('field:readonly')) ?></span>
 			<?php elseif ($required): ?>
-				<span class="requirement">(<?= escape(__('field:required')) ?>)</span>
+				<span class="requirement"><?= escape(__('field:required')) ?></span>
 			<?php endif ?>
 			<?php if ($changed): ?>
 				<span class="cms-changed" data-restored-mark><?= escape(__('editor:changed')) ?></span>

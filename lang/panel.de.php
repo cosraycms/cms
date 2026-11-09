@@ -59,7 +59,7 @@ return [
 		'field:item-count' => [':count Element', ':count Elemente'],
 		'field:no-block-results' => 'Keine passenden Blocktypen.',
 		'field:optional' => 'optional',
-		'field:required' => 'erforderlich',
+		'field:required' => 'Pflichtfeld',
 		'image:add' => 'Bilder hinzufügen',
 		'image:alt-text' => 'Alt-Text',
 		'image:alt-text-add' => 'hinzufügen',
