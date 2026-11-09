@@ -3,6 +3,7 @@
 import { __ } from './locale.js';
 import { csrfToken, HEADER, noticeRefusal } from './csrf.js';
 import { openModal } from './modal.js';
+import { toast } from './toast.js';
 
 /**
  * Installs window.Cosray without the editor island: the system payload
@@ -62,31 +63,4 @@ export function installBridge(system) {
 	};
 
 	window.Cosray = bridge;
-}
-
-const TIMEOUTS = { success: 3000, error: 30000 };
-
-/**
- * @param {'success' | 'error'} kind
- * @param {string} message
- */
-function toast(kind, message) {
-	let stack = document.querySelector('.cms-toasts');
-
-	if (!stack) {
-		stack = document.createElement('div');
-		stack.className = 'cms-toasts';
-		document.body.append(stack);
-	}
-
-	const item = document.createElement('button');
-	item.type = 'button';
-	item.className = `toast is-${kind}`;
-	const content = document.createElement('div');
-	content.className = 'cms-toast-content';
-	content.textContent = message;
-	item.append(content);
-	item.addEventListener('click', () => item.remove());
-	stack.prepend(item);
-	setTimeout(() => item.remove(), TIMEOUTS[kind]);
 }

@@ -225,12 +225,32 @@ describe('layout preview', () => {
 	it('reports a failed request as a toast and keeps the dialog closed', async () => {
 		page();
 		respond('', false);
-		const error = vi.fn();
-		window.Cosray = { toast: { error, success: vi.fn() } } as unknown as typeof window.Cosray;
 
 		button().click();
-		await vi.waitFor(() => expect(error).toHaveBeenCalledWith('Preview failed'));
+		await vi.waitFor(() =>
+			expect(document.querySelector('.toast.is-error .message')?.textContent).toBe(
+				'Preview failed',
+			),
+		);
 
+		expect(dialog().open).toBe(false);
+	});
+
+	it('leaves a refused token to the refusal dialog', async () => {
+		page();
+		const refused = vi.fn();
+		document.addEventListener('cosray:csrf-expired', refused, { once: true });
+		const fetchMock = vi.fn().mockResolvedValue({
+			ok: false,
+			status: 403,
+			headers: new Headers({ 'HX-Trigger': 'cosray:csrf-expired' }),
+		});
+		vi.stubGlobal('fetch', fetchMock);
+
+		button().click();
+		await vi.waitFor(() => expect(refused).toHaveBeenCalled());
+
+		expect(document.querySelector('.toast')).toBeNull();
 		expect(dialog().open).toBe(false);
 	});
 });

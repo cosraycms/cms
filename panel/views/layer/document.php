@@ -36,6 +36,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 
 <body hx-boost:inherited="true">
 	<?= $this->slot() ?>
+	<div id="cms-toasts" class="cms-toasts" aria-live="polite"></div>
 
 	<?php $this->component('component/dialog', ['name' => 'csrf-expired', 'size' => 'compact', 'title' => __('auth:expired-title')]) ?>
 		<div class="modal-body">

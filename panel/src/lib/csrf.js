@@ -12,11 +12,17 @@ export function csrfToken() {
 /**
  * Raises the refusal event for a fetch() response that is the server's
  * refusal of the token; htmx raises it from the HX-Trigger header itself.
+ * The event's dialog reports the refusal, so a caller need not.
  *
  * @param {Response} response
+ * @returns {boolean} Whether the response was such a refusal.
  */
 export function noticeRefusal(response) {
 	if (response.status === 403 && response.headers.get('HX-Trigger') === EVENT) {
 		document.dispatchEvent(new CustomEvent(EVENT));
+
+		return true;
 	}
+
+	return false;
 }

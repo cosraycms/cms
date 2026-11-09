@@ -171,23 +171,12 @@ describe('standalone bridge', () => {
 		expect(document.querySelector('dialog')).toBeNull();
 	});
 
-	it('stacks dismissible toasts and expires them by severity', () => {
-		vi.useFakeTimers();
-
+	it('shows toasts through the shared region', () => {
 		bridge().toast.success('Saved');
 		bridge().toast.error('Failed');
-		const items = document.querySelectorAll<HTMLButtonElement>('.cms-toasts .toast');
 
-		expect(items).toHaveLength(2);
-		expect(items[0].classList.contains('is-error')).toBe(true);
-		expect(items[0].textContent).toBe('Failed');
-		expect(items[1].classList.contains('is-success')).toBe(true);
-
-		vi.advanceTimersByTime(3000);
-		expect(document.querySelector('.toast.is-success')).toBeNull();
-		expect(document.querySelector('.toast.is-error')).not.toBeNull();
-
-		document.querySelector<HTMLButtonElement>('.toast.is-error')!.click();
-		expect(document.querySelector('.toast.is-error')).toBeNull();
+		expect(
+			Array.from(document.querySelectorAll('#cms-toasts .toast .message'), (m) => m.textContent),
+		).toEqual(['Saved', 'Failed']);
 	});
 });

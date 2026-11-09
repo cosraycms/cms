@@ -470,7 +470,7 @@ class Routes
 						'editor.delete',
 					)
 					->middleware($panelAuth)
-					->after($renderers->get('editor-save'));
+					->after($renderers->get('toast'));
 				$panel
 					->post(
 						'/node/{node:[A-Za-z0-9-_.]{1,64}}/discard',

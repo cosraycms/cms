@@ -46,6 +46,7 @@ import { install as installYoutube } from './behaviors/youtube.js';
 import { installBridge } from './lib/bridge-standalone.js';
 import { installHost } from './lib/host.js';
 import { configureRuntime } from './lib/runtime.js';
+import { install as installToasts } from './lib/toast.js';
 
 /**
  * @param {KeyboardEvent} event
@@ -98,6 +99,7 @@ function bootEditor() {
 
 document.addEventListener('keydown', focusSearch);
 installActionMenus();
+installToasts();
 installAutosubmit();
 installDirty();
 installAutosave();

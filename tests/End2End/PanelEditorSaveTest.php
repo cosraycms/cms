@@ -1209,7 +1209,10 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			'headers' => ['HX-Request' => 'true'],
 		]);
 
-		$this->assertStringContainsString('This entry is locked', $this->getHtmlResponse($response));
+		$this->assertHtmlNodeExists(
+			'//*[@hx-swap-oob="beforeend:#cms-toasts"]/*[@data-toast="error"][contains(., "This entry is locked")]',
+			$this->getHtmlResponse($response),
+		);
 		$this->assertResponseOk($this->makeRequest('GET', '/panel/node/panel-locked-delete'));
 	}
 

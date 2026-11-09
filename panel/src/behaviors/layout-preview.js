@@ -2,6 +2,7 @@ import { openDialog } from '../lib/dialogs.js';
 import { nest } from '../lib/form-json.js';
 import { thumbnail } from './youtube.js';
 import { csrfToken, HEADER, noticeRefusal } from '../lib/csrf.js';
+import { toast } from '../lib/toast.js';
 
 // The layout preview of a blocks field: the field rendered through the
 // site's render path from the form as it stands, in the frame of the one
@@ -155,7 +156,7 @@ function fail(dialog) {
 	const message = dialog.dataset.error ?? '';
 
 	if (message !== '') {
-		window.Cosray?.toast.error(message);
+		toast('error', message);
 	}
 }
 
@@ -221,7 +222,9 @@ async function load(dialog, field) {
 			headers: { 'Content-Type': 'application/json', Accept: 'text/html', [HEADER]: csrfToken() },
 			body: body(form),
 		});
-		noticeRefusal(response);
+		if (noticeRefusal(response)) {
+			return false;
+		}
 
 		if (!response.ok) {
 			fail(dialog);

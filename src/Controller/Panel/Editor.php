@@ -450,17 +450,11 @@ final class Editor extends Panel
 		try {
 			$store->delete($nodeObj, $this->actor());
 		} catch (HttpConflict $e) {
-			// Rendered through the editor-save view: the refusal lands in
-			// the status chip, the form stays as it is.
 			$payload = is_array($e->payload()) ? $e->payload() : [];
 
 			return [
-				'saved' => false,
+				'kind' => 'error',
 				'message' => (string) ($payload['message'] ?? __('node:has-children')),
-				'errors' => [],
-				'published' => (bool) $result->meta->get('published'),
-				'renderable' => (bool) $this->types()->get($nodeObj::class, 'renderable', false),
-				'preview' => null,
 			];
 		}
 
