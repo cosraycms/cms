@@ -1,17 +1,19 @@
 // Keeps the editor's unsaved edits on the server while they are made, so a
-// reload, a closed tab or a crash loses nothing, and offers them back when
-// the editor opens again. An autosave is not a save: it never changes the
-// node, and leaving the editor still asks. The editor page's
-// #editor-autosave element says where to send the edits and whether there
-// is one to restore; without it, as for a new node, nothing is kept.
+// reload, a closed tab or a crash loses nothing, and offers to show or
+// discard them when the editor opens again. An autosave is not a save: it
+// never changes the node, and leaving the editor still asks. The editor
+// page's #editor-autosave element says where to send the edits and whether
+// there is one to restore; without it, as for a new node, nothing is kept.
 
 import { csrfToken, HEADER, noticeRefusal } from '../lib/csrf.js';
 import { nest } from '../lib/form-json.js';
 import { __ } from '../lib/locale.js';
-import { confirm } from '../lib/modal.js';
+import { button, frame, openModal } from '../lib/modal.js';
 
 const FORM = '#node-editor-form';
 const STATE = 'editor-autosave';
+// A form that drops the autosave, so its pending edits must not outlive it.
+const DROP = '[data-autosave-drop]';
 const PAUSE = 2000;
 const LONGEST = 15000;
 // Browsers refuse a keepalive request whose body exceeds 64 KiB.
@@ -157,7 +159,14 @@ function leave(event) {
 	const ctx = /** @type {CustomEvent<{ ctx?: { sourceElement?: Element } }>} */ (event).detail?.ctx;
 	const source = ctx?.sourceElement ?? (event.target instanceof Element ? event.target : null);
 
-	if (form && edits !== kept && !(source instanceof Element && source.closest(FORM))) {
+	if (!form || edits === kept || (source instanceof Element && source.closest(FORM))) {
+		return;
+	}
+
+	if (source instanceof Element && source.closest(DROP)) {
+		kept = edits;
+		clear();
+	} else {
 		void send();
 	}
 }
@@ -185,6 +194,9 @@ function settle() {
 	if (element?.hasAttribute('data-saved')) {
 		element.removeAttribute('data-saved');
 		kept = Math.max(kept, submitted);
+		document.getElementById('editor-restored')?.remove();
+		document.getElementById('editor-autosave-discard')?.remove();
+		document.querySelectorAll('[data-restored-mark]').forEach((mark) => mark.remove());
 
 		if (edits === kept) {
 			clear();
@@ -194,6 +206,65 @@ function settle() {
 	}
 
 	void offer();
+}
+
+/**
+ * Asks what becomes of the autosave. Discard drops it, Show loads it into
+ * the editor; closing the dialog leaves it for the next time.
+ *
+ * @param {HTMLElement} owner
+ * @param {string} message
+ * @returns {Promise<'show' | 'discard' | null>}
+ */
+function ask(owner, message) {
+	return new Promise((resolve) => {
+		/** @type {'show' | 'discard' | null} */
+		let answer = null;
+		/** @param {'show' | 'discard'} choice */
+		const choose = (choice) => () => {
+			answer = choice;
+			handle.close();
+		};
+		const handle = openModal(
+			(host) => {
+				const discard = button(__('editor:restore-discard'), 'danger', choose('discard'));
+				const show = button(__('editor:restore'), 'primary', choose('show'));
+				show.dataset.dialogFocus = '';
+				const text = document.createElement('p');
+				text.className = 'question';
+				text.textContent = message;
+				frame(host, __('editor:unsaved'), [text], [discard, show]).classList.add('cms-confirm');
+
+				return () => resolve(answer);
+			},
+			{ owner, size: 'compact' },
+		);
+	});
+}
+
+/**
+ * @param {string} url
+ */
+async function discard(url) {
+	if (!url) {
+		return;
+	}
+
+	try {
+		noticeRefusal(
+			await fetch(url, {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: {
+					Accept: 'application/json',
+					'X-Requested-With': 'xmlhttprequest',
+					[HEADER]: csrfToken(),
+				},
+			}),
+		);
+	} catch {
+		// Offline: the autosave stays and is offered again.
+	}
 }
 
 async function offer() {
@@ -206,20 +277,23 @@ async function offer() {
 
 	element.setAttribute('data-asked', '');
 	const stale = element.hasAttribute('data-restore-stale');
-	const restore = await confirm({
-		title: __('editor:unsaved'),
-		message: [
+	const answer = await ask(
+		element,
+		[
 			__('editor:restore-confirm', { time: element.dataset.restoreTime ?? '' }),
 			stale ? __('editor:restore-stale') : '',
 		]
 			.filter(Boolean)
 			.join(' '),
-		action: __('editor:restore'),
-		cancel: __('editor:restore-later'),
-		owner: element,
-	});
+	);
 
-	if (restore && element.isConnected) {
+	if (!element.isConnected) {
+		return;
+	}
+
+	if (answer === 'discard') {
+		await discard(element.dataset.discardUrl ?? '');
+	} else if (answer === 'show') {
 		await htmx.ajax('GET', url, {
 			target: '#main',
 			swap: 'innerHTML show:top',

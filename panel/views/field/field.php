@@ -15,6 +15,7 @@ $assets = (array) (u($assets ?? null) ?? []);
 $gridStyle = (string) ($gridStyle ?? '');
 $pathSource = (bool) (u($pathSource ?? null) ?? false);
 $fullRow = (bool) (u($fullRow ?? null) ?? false);
+$changed = (bool) (u($changed ?? null) ?? false);
 
 $control = $field['control'] ?? ['name' => '', 'props' => []];
 $controlName = (string) ($control['name'] ?? '');
@@ -81,6 +82,9 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				<span class="state">(<?= escape(__('field:readonly')) ?>)</span>
 			<?php elseif ($required): ?>
 				<span class="requirement">(<?= escape(__('field:required')) ?>)</span>
+			<?php endif ?>
+			<?php if ($changed): ?>
+				<span class="cms-changed" data-restored-mark><?= escape(__('editor:changed')) ?></span>
 			<?php endif ?>
 		</div>
 		<?php if (is_array($metaControl)): ?>

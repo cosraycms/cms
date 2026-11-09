@@ -112,6 +112,40 @@
 		}
 	}
 
+	/* An editor restored from an autosave says so above its fields. */
+	& .restored {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--cms-space-2) var(--cms-space-4);
+		margin-bottom: var(--cms-space-6);
+		padding: var(--cms-space-3) var(--cms-space-4);
+		border: 1px solid color-mix(in oklch, var(--cms-color-warning), transparent 70%);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-warning-surface);
+
+		& .copy {
+			flex: 1 1 18rem;
+		}
+
+		& p {
+			margin: 0;
+		}
+
+		& .title {
+			color: var(--cms-color-warning-text);
+			font-size: var(--cms-font-size-sm);
+			font-weight: 500;
+		}
+
+		& .help {
+			color: var(--cms-color-text-subtle);
+			font-size: var(--cms-font-size-xs);
+			line-height: 1.4;
+		}
+	}
+
 	& .errors {
 		margin-bottom: var(--cms-space-4);
 		padding: var(--cms-space-3) var(--cms-space-4);

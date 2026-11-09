@@ -487,6 +487,13 @@ class Routes
 					->middleware($panelAuth);
 				$panel
 					->post(
+						'/node/{node:[A-Za-z0-9-_.]{1,64}}/autosave/discard',
+						[Panel\Editor::class, 'discardAutosave'],
+						'editor.autosave.discard',
+					)
+					->middleware($panelAuth);
+				$panel
+					->post(
 						'/node/{node:[A-Za-z0-9-_.]{1,64}}/paths',
 						[Panel\Editor::class, 'paths'],
 						'editor.paths',

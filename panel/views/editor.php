@@ -43,6 +43,8 @@ $showSettings = $showSettings && $embed === null;
 $action = $edit
 	? $links->edit($uid)
 	: $links->create((string) ($type['handle'] ?? ''), $parent);
+$autosave = u($autosave ?? null);
+$restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $autosave['restored'] : null;
 ?>
 
 <div
@@ -128,6 +130,7 @@ $action = $edit
 					data-confirm-action="<?= escape(__('editor:discard-changes')) ?>"
 					data-confirm-tone="danger"
 					data-dirty-bypass
+					data-autosave-drop
 					hidden><?php $this->include('component/csrf') ?></form>
 			<?php endif ?>
 			<?php if ($edit && $routable && $renderable): ?>
@@ -184,6 +187,9 @@ $action = $edit
 		<div class="pane">
 			<div class="pane-scroll">
 				<div class="inner">
+					<?php if ($restored !== null): ?>
+						<?php $this->include('node/restored', ['restored' => $restored]) ?>
+					<?php endif ?>
 					<div id="editor-errors" class="errors" hidden></div>
 					<?php if ($embed !== null): ?>
 						<?php // The embedding application reads live content: its saves publish. ?>
@@ -213,6 +219,7 @@ $action = $edit
 						'uid' => $uid,
 						'assets' => $assets,
 						'pathSourceFields' => $pathSourceFields,
+						'changed' => $restored['fields'] ?? [],
 					]) ?>
 				</div>
 			</div>
@@ -232,6 +239,7 @@ $action = $edit
 				'meta' => $meta,
 				'contentLocales' => $contentLocales,
 				'collapsed' => $panelCookie->is('inspector', 'collapsed'),
+				'changed' => $restored['settings'] ?? [],
 			]) ?>
 		<?php endif ?>
 
@@ -243,8 +251,25 @@ $action = $edit
 	</form>
 
 	<div id="editor-preview" hidden></div>
-	<?php if (is_array(u($autosave ?? null))): ?>
+	<?php if (is_array($autosave)): ?>
 		<?php $this->include('node/autosave', ['autosave' => $autosave]) ?>
+	<?php endif ?>
+	<?php if ($restored !== null): ?>
+		<?php // Submitted from the restored note; outside the editor form, as
+
+		// forms cannot nest. data-autosave-drop keeps the pending edits from
+		// being autosaved on the way out. ?>
+		<form
+			id="editor-autosave-discard"
+			method="post"
+			action="<?= escape((string) $restored['discard']) ?>"
+			hx-swap="none"
+			hx-confirm="<?= escape(__('editor:restored-discard-confirm')) ?>"
+			data-confirm-action="<?= escape(__('editor:restored-discard')) ?>"
+			data-confirm-tone="danger"
+			data-dirty-bypass
+			data-autosave-drop
+			hidden><?php $this->include('component/csrf') ?></form>
 	<?php endif ?>
 	<?php if (array_any(
 		$fields,

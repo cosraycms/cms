@@ -28,10 +28,14 @@ export async function openNode(page: Page, name: string): Promise<void> {
 
 	// Tests share nodes, and edits a test leaves unsaved come back as an autosave.
 	if ((await page.locator('#editor-autosave[data-restore-url]').count()) > 0) {
+		const discarded = page.waitForResponse((response) =>
+			response.url().endsWith('/autosave/discard'),
+		);
 		await page
 			.getByRole('dialog', { name: 'Unsaved changes' })
-			.getByRole('button', { name: 'Not now' })
+			.getByRole('button', { name: 'Discard' })
 			.click();
+		await discarded;
 	}
 }
 

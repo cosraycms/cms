@@ -9,6 +9,7 @@ $assets = (array) u($assets);
 $pathSourceFields = (array) u($pathSourceFields);
 $fieldName = (string) ($field['name'] ?? '');
 $isPathSource = in_array($fieldName, $pathSourceFields, true);
+$changed = in_array($fieldName, (array) u($changed ?? []), true);
 $width = is_int($field['width'] ?? null) ? $field['width'] : 100;
 $rowspan = is_int($field['rowspan'] ?? null) ? $field['rowspan'] : 1;
 
@@ -33,4 +34,5 @@ $gridStyle = "grid-column: span {$width} / span {$width}; --rows: {$rowspan}";
 	'gridStyle' => $gridStyle,
 	'fullRow' => $width === 100,
 	'pathSource' => $isPathSource,
+	'changed' => $changed,
 ]) ?>

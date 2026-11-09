@@ -24,6 +24,7 @@ $generatedPaths = (array) u($generatedPaths ?? []);
 $meta = (array) (u($meta ?? null) ?? []);
 $paths = is_array($node['paths'] ?? null) ? $node['paths'] : [];
 $handle = $node['handle'] ?? null;
+$changed = (array) u($changed ?? []);
 
 $typeLabel = $node['type']['label'] ?? null;
 $created = $meta['created'] ?? null;
@@ -49,6 +50,15 @@ $icons = ['status' => 'toggles', 'paths' => 'link-45deg', 'advanced' => 'sliders
 $show = __('editor:settings-show');
 $hide = __('editor:settings-hide');
 $publishedLabel = __('editor:published-label');
+// Settings an editor restored from an autosave changes, by the tab they are in.
+$changedIn = [
+	'status' => array_intersect(['published', 'hidden'], $changed) !== [],
+	'paths' => in_array('paths', $changed, true),
+	'advanced' => in_array('handle', $changed, true),
+];
+$mark = static fn(string $setting): string => in_array($setting, $changed, true)
+	? '<span class="cms-changed" data-restored-mark>' . escape(__('editor:changed')) . '</span>'
+	: '';
 ?>
 <aside
 	class="cms-inspector"
@@ -109,6 +119,12 @@ $publishedLabel = __('editor:published-label');
 						aria-selected="<?= $key === $first ? 'true' : 'false' ?>"
 						tabindex="<?= $key === $first ? '0' : '-1' ?>">
 						<?= escape($label) ?>
+						<?php if ($changedIn[$key]): ?>
+							<span
+								class="cms-changed-dot"
+								data-restored-mark
+								title="<?= escape(__('editor:changed')) ?>"></span>
+						<?php endif ?>
 					</button>
 				<?php endforeach ?>
 			</div>
@@ -141,7 +157,7 @@ $publishedLabel = __('editor:published-label');
 						<section class="section">
 							<label class="toggle">
 								<span class="copy">
-									<span class="title"><?= escape(__('editor:published-label')) ?></span>
+									<span class="title"><?= escape(__('editor:published-label')) ?><?= $mark('published') ?></span>
 									<span class="help"><?= escape(__('editor:published-help')) ?></span>
 								</span>
 								<input type="hidden" name="published" value="" />
@@ -157,7 +173,7 @@ $publishedLabel = __('editor:published-label');
 
 							<label class="toggle">
 								<span class="copy">
-									<span class="title"><?= escape(__('editor:hidden-label')) ?></span>
+									<span class="title"><?= escape(__('editor:hidden-label')) ?><?= $mark('hidden') ?></span>
 									<span class="help"><?= escape(__('editor:hidden-help')) ?></span>
 								</span>
 								<input type="hidden" name="hidden" value="" />
@@ -187,7 +203,7 @@ $publishedLabel = __('editor:published-label');
 						data-note-generated="<?= escape(__('editor:path-generated')) ?>"
 						data-note-none="<?= escape(__('editor:path-none')) ?>">
 						<div class="bar">
-							<h2 class="heading"><?= escape(__('editor:paths')) ?></h2>
+							<h2 class="heading"><?= escape(__('editor:paths')) ?><?= $mark('paths') ?></h2>
 							<button type="button" class="cms-button secondary small" data-dialog-open="paths">
 								<?= escape(__('editor:paths-edit')) ?>
 							</button>
@@ -255,7 +271,7 @@ $publishedLabel = __('editor:published-label');
 				<?= $first === 'advanced' ? '' : 'hidden' ?>>
 				<section class="section">
 					<div class="field">
-						<label class="label" for="cms-node-handle"><?= escape(__('editor:handle')) ?></label>
+						<label class="label" for="cms-node-handle"><?= escape(__('editor:handle')) ?><?= $mark('handle') ?></label>
 						<input
 							id="cms-node-handle"
 							class="cms-input js-path-source"

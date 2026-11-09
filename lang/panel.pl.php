@@ -47,9 +47,9 @@ return [
 		'editor:leave' => 'Wyjdź bez zapisywania',
 		'editor:leave-confirm' => 'Są niezapisane zmiany. Mimo to opuścić edytor?',
 		'editor:leave-kept' => 'Są niezapisane zmiany. Zostaną zachowane i zaproponowane przy ponownym otwarciu wpisu. Opuścić edytor?',
-		'editor:restore' => 'Przywróć',
-		'editor:restore-confirm' => 'Zmiany z :time nie zostały zapisane. Przywrócić je?',
-		'editor:restore-later' => 'Nie teraz',
+		'editor:restore' => 'Pokaż',
+		'editor:restore-confirm' => 'Zmiany z :time nie zostały zapisane. Pokaż wczytuje je do edytora bez zapisywania.',
+		'editor:restore-discard' => 'Odrzuć',
 		'editor:restore-stale' => 'Wpis został od tego czasu zapisany. Zapisanie przywróconych zmian zastąpi tamtą wersję.',
 		'editor:unsaved' => 'Niezapisane zmiany',
 		'field:block-results' => [

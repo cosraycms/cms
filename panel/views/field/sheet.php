@@ -10,6 +10,7 @@ $defaultLocale = (string) $defaultLocale;
 $uid = (string) $uid;
 $assets = (array) u($assets ?? []);
 $pathSourceFields = (array) u($pathSourceFields ?? []);
+$changed = (array) u($changed ?? []);
 
 $fieldsByName = [];
 
@@ -84,6 +85,7 @@ foreach ($fields as $field) {
 				'uid' => $uid,
 				'assets' => $assets,
 				'pathSourceFields' => $pathSourceFields,
+				'changed' => $changed,
 			]) ?>
 		<?php else: ?>
 			<div class="cms-fields">
@@ -96,6 +98,7 @@ foreach ($fields as $field) {
 						'uid' => $uid,
 						'assets' => $assets,
 						'pathSourceFields' => $pathSourceFields,
+						'changed' => $changed,
 					]) ?>
 				<?php endforeach ?>
 			</div>

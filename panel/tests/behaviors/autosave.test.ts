@@ -200,25 +200,31 @@ describe('autosave', () => {
 
 describe('restoring', () => {
 	const pending =
-		'data-restore-url="/panel/node/page?restore=1" data-restore-time="6 Nov 2026, 14:32"';
+		'data-restore-url="/panel/node/page?restore=1" data-discard-url="/panel/node/page/autosave/discard" data-restore-time="6 Nov 2026, 14:32"';
 
-	it('asks and restores into the editor', async () => {
+	async function answer(selector: string): Promise<void> {
+		document.querySelector<HTMLElement>(`dialog[open] ${selector}`)!.click();
+		await vi.advanceTimersByTimeAsync(0);
+	}
+
+	it('asks and shows the autosave in the editor', async () => {
 		start(pending);
 		const dialog = document.querySelector('dialog[open]')!;
 
 		expect(dialog.querySelector('.modal-title')!.textContent).toBe('Unsaved changes');
 		expect(dialog.querySelector('.question')!.textContent).toBe(
-			'Changes from 6 Nov 2026, 14:32 were not saved. Restore them?',
+			'Changes from 6 Nov 2026, 14:32 were not saved. Show loads them into the editor without saving them.',
 		);
-		expect(dialog.querySelector('.modal-footer .secondary')!.textContent).toBe('Not now');
-		dialog.querySelector<HTMLElement>('.modal-footer .primary')!.click();
-		await vi.advanceTimersByTimeAsync(0);
+		expect(dialog.querySelector('.modal-footer .danger')!.textContent).toBe('Discard');
+		expect(dialog.querySelector('.modal-footer .primary')!.textContent).toBe('Show');
+		await answer('.modal-footer .primary');
 
 		expect(ajax).toHaveBeenCalledWith(
 			'GET',
 			'/panel/node/page?restore=1',
 			expect.objectContaining({ target: '#main' }),
 		);
+		expect(post).not.toHaveBeenCalled();
 	});
 
 	it('says when the entry was saved since', () => {
@@ -229,13 +235,52 @@ describe('restoring', () => {
 		);
 	});
 
-	it('asks once and leaves the autosave alone on Not now', async () => {
+	it('discards the autosave on request', async () => {
 		start(pending);
-		document.querySelector<HTMLElement>('dialog[open] .modal-footer .secondary')!.click();
-		await vi.advanceTimersByTimeAsync(0);
+		await answer('.modal-footer .danger');
+
+		expect(post).toHaveBeenCalledOnce();
+		const [url, init] = post.mock.calls[0] as [string, RequestInit];
+		expect(url).toBe('/panel/node/page/autosave/discard');
+		expect(init.method).toBe('POST');
+		expect((init.headers as Record<string, string>)['X-CSRF-Token']).toBe('token-a');
+		expect(ajax).not.toHaveBeenCalled();
+	});
+
+	it('asks once and leaves the autosave alone when closed', async () => {
+		start(pending);
+		await answer('.modal-close');
 		document.dispatchEvent(new Event('htmx:after:swap'));
 
+		expect(post).not.toHaveBeenCalled();
 		expect(ajax).not.toHaveBeenCalled();
 		expect(document.querySelector('dialog[open]')).toBeNull();
+	});
+
+	it('drops the pending edits for a form that discards the autosave', async () => {
+		start('data-restored');
+		document.body.insertAdjacentHTML('beforeend', '<form id="drop" data-autosave-drop></form>');
+		edit();
+		document
+			.getElementById('drop')!
+			.dispatchEvent(new Event('htmx:before:request', { bubbles: true }));
+		await vi.advanceTimersByTimeAsync(20000);
+
+		expect(post).not.toHaveBeenCalled();
+	});
+
+	it('removes the restored note and marks once a save took the edits', () => {
+		start('data-restored');
+		document
+			.getElementById('main')!
+			.insertAdjacentHTML(
+				'afterbegin',
+				'<div id="editor-restored"></div><span data-restored-mark></span>',
+			);
+		document.getElementById('editor-autosave')!.setAttribute('data-saved', '');
+		document.dispatchEvent(new Event('htmx:after:swap'));
+
+		expect(document.getElementById('editor-restored')).toBeNull();
+		expect(document.querySelector('[data-restored-mark]')).toBeNull();
 	});
 });

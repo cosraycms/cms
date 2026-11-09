@@ -10,6 +10,7 @@ $content = (array) u($content);
 $locales = (array) u($locales);
 $assets = (array) u($assets);
 $pathSourceFields = (array) u($pathSourceFields);
+$changed = (array) u($changed ?? []);
 $name = (string) ($fieldset['name'] ?? '');
 $label = $fieldset['label'] ?? null;
 $description = $fieldset['description'] ?? null;
@@ -43,6 +44,7 @@ $descriptionId = "fieldset-{$name}-description";
 				'uid' => $uid,
 				'assets' => $assets,
 				'pathSourceFields' => $pathSourceFields,
+				'changed' => $changed,
 			]) ?>
 		<?php endforeach ?>
 	</div>

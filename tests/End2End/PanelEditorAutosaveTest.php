@@ -69,7 +69,8 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 
 		$this->assertHtmlNodeExists('//input[@name="content[title][value][en]"][@value="Live"]', $offered);
 		$this->assertHtmlNodeExists(
-			'//*[@id="editor-autosave"][contains(@data-restore-url, "restore=1")][not(@data-restore-stale)]',
+			'//*[@id="editor-autosave"][contains(@data-restore-url, "restore=1")][not(@data-restore-stale)]'
+				. '[contains(@data-discard-url, "/autosave/discard")]',
 			$offered,
 		);
 
@@ -78,6 +79,34 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//input[@name="content[title][value][en]"][@value="Edited"]', $restored);
 		$this->assertHtmlNodeExists('//*[@id="editor-autosave"][@data-restored][not(@data-restore-url)]', $restored);
 		$this->assertSame('Live', $this->liveTitle('autosave-restored'));
+	}
+
+	public function testTheRestoredEditorMarksWhatTheAutosaveChanges(): void
+	{
+		$this->createPage('autosave-marked', 'Live');
+		$this->autosave('autosave-marked', 'Edited');
+
+		$restored = $this->editor('autosave-marked', '?restore=1');
+
+		$this->assertHtmlNodeExists('//*[@id="editor-restored"]', $restored);
+		$this->assertHtmlNodeExists(
+			'//form[@id="editor-autosave-discard"][contains(@action, "/autosave/discard")]',
+			$restored,
+		);
+		$this->assertHtmlNodeExists('//*[@data-field="title"]//*[@data-restored-mark]', $restored);
+		$this->assertSame(1, substr_count($restored, 'data-restored-mark'));
+	}
+
+	public function testTheRestoredEditorMarksChangedSettingsAndTheirTab(): void
+	{
+		$this->createPage('autosave-settings', 'Live');
+		$this->autosave('autosave-settings', 'Live', settings: ['handle' => 'renamed']);
+
+		$restored = $this->editor('autosave-settings', '?restore=1');
+
+		$this->assertHtmlNodeExists('//label[@for="cms-node-handle"]/*[@data-restored-mark]', $restored);
+		$this->assertHtmlNodeExists('//*[@id="cms-inspector-tab-advanced"]/*[@data-restored-mark]', $restored);
+		$this->assertSame(2, substr_count($restored, 'data-restored-mark'));
 	}
 
 	public function testAnAutosaveFromBeforeTheLastSaveIsMarkedStale(): void
@@ -119,12 +148,43 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		$this->assertSame(0, $this->rows('autosaves', 'autosave-discarded'));
 	}
 
-	private function autosave(string $uid, string $title, string $base = ''): object
+	public function testDiscardingTheAutosaveKeepsTheNode(): void
+	{
+		$this->createPage('autosave-dropped', 'Live');
+		$this->autosave('autosave-dropped', 'Edited');
+
+		$response = $this->makeRequest('POST', '/panel/node/autosave-dropped/autosave/discard', [
+			'headers' => ['Accept' => 'application/json', 'X-Requested-With' => 'xmlhttprequest'],
+		]);
+
+		$this->assertResponseOk($response);
+		$this->assertSame(0, $this->rows('autosaves', 'autosave-dropped'));
+		$this->assertSame('Live', $this->liveTitle('autosave-dropped'));
+	}
+
+	public function testDiscardingTheRestoredEditsLoadsTheStoredState(): void
+	{
+		$this->createPage('autosave-reloaded', 'Live');
+		$this->autosave('autosave-reloaded', 'Edited');
+
+		$response = $this->makeRequest('POST', '/panel/node/autosave-reloaded/autosave/discard', [
+			'headers' => ['HX-Request' => 'true'],
+		]);
+
+		$this->assertSame(0, $this->rows('autosaves', 'autosave-reloaded'));
+		$location = json_decode($response->getHeaderLine('HX-Location'), true);
+		$this->assertSame('/panel/node/autosave-reloaded', $location['path']);
+		$this->assertSame('#editor-autosave-discard', $location['source']);
+	}
+
+	/** @param array<string, mixed> $settings */
+	private function autosave(string $uid, string $title, string $base = '', array $settings = []): object
 	{
 		return $this->makeRequest('POST', '/panel/node/' . $uid . '/autosave', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'content' => ['title' => ['value' => ['en' => $title]]],
+				...$settings,
 				'_complete' => '1',
 				'_base' => $base,
 			],

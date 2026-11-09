@@ -41,8 +41,8 @@ use Throwable;
  * @phpstan-type AutosaveState array{
  *     url: string,
  *     base: string,
- *     restored: bool,
- *     pending: ?array{url: string, time: string, stale: bool},
+ *     restored: ?array{time: string, stale: bool, discard: string, fields: list<string>, settings: list<string>},
+ *     pending: ?array{url: string, discard: string, time: string, stale: bool},
  * }
  */
 final class Editor extends Panel
@@ -243,7 +243,7 @@ final class Editor extends Panel
 					: [
 						'url' => $links->autosave($node),
 						'base' => $this->workingChanged(NodeFactory::dataFor(Wrapper::unwrap($saved))),
-						'restored' => false,
+						'restored' => null,
 						'pending' => null,
 					],
 		];
@@ -271,16 +271,46 @@ final class Editor extends Panel
 			return $response->redirect($links->edit($node), 303);
 		}
 
-		// A followed redirect would land on the discard form's hx-swap="none"
-		// and render nothing. HX-Location has htmx fetch the editor from the
-		// live row into the main region itself; sourced from the discard
-		// form, so the unsaved-changes guard stands aside for that request,
-		// and without the form's confirmation, which the POST already asked.
+		return $this->reload($response, $links->edit($node), '#node-editor-discard');
+	}
+
+	/**
+	 * Drops the user's autosave of the node. The restored editor asks with
+	 * htmx and shows the stored state again; the offer to restore asks
+	 * with a script and keeps showing it.
+	 */
+	public function discardAutosave(Context $context, Cms $cms, Factory $factory, string $node): Response
+	{
+		$result = $cms->node->working($node);
+
+		if (!$result) {
+			throw new HttpNotFound($this->request);
+		}
+
+		new Autosaves($context->db)->delete($this->nodeId(Wrapper::unwrap($result)), $this->actor()->id);
+		$response = Response::create($factory);
+
+		if (!$this->request->hasHeader('HX-Request')) {
+			return $response->json(['ok' => true]);
+		}
+
+		return $this->reload($response, $this->origin()['links']->edit($node), '#editor-autosave-discard');
+	}
+
+	/**
+	 * Has htmx load the editor again after a form dropped what it showed.
+	 * A followed redirect would land on the form's hx-swap="none" and
+	 * render nothing; sourced from the form, the unsaved-changes guard
+	 * stands aside, and the form's confirmation, which the POST already
+	 * asked, is not asked again.
+	 */
+	private function reload(Response $response, string $editor, string $source): Response
+	{
 		return $response->header('HX-Location', json_encode([
-			'path' => $links->edit($node),
+			'path' => $editor,
 			'target' => '#main',
 			'swap' => 'innerHTML show:top',
-			'source' => '#node-editor-discard',
+			'source' => $source,
 			'confirm' => false,
 			'replace' => 'true',
 		], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
@@ -1113,7 +1143,8 @@ final class Editor extends Panel
 
 	/**
 	 * The editor's autosave state, and for `?restore=1` the data with the
-	 * user's autosave in place of the stored content and settings.
+	 * user's autosave in place of the stored content and settings, and
+	 * which fields and settings it changes.
 	 *
 	 * @param array<string, mixed> $data
 	 * @return array{array<string, mixed>, AutosaveState}
@@ -1127,48 +1158,78 @@ final class Editor extends Panel
 	): array {
 		$links = $this->origin()['links'];
 		$base = $this->workingChanged($data);
-		$state = ['url' => $links->autosave($uid), 'base' => $base, 'restored' => false, 'pending' => null];
+		$state = ['url' => $links->autosave($uid), 'base' => $base, 'restored' => null, 'pending' => null];
 		$saved = new Autosaves($context->db)->get($this->nodeId($node), $this->actor()->id);
 
 		if ($saved === null) {
 			return [$data, $state];
 		}
 
-		if ($this->request->param('restore', '') === '1') {
-			$data['content'] = $saved['content'];
-			$settings = $saved['settings'];
+		$current = $this->timestamp($base);
+		$started = $this->timestamp($saved['base']);
+		$time = $this->displayDate($saved['changed'], IntlDateFormatter::SHORT) ?? '';
+		$stale = $current !== null && $started !== null && $current > $started;
+		$discard = $links->discardAutosave($uid);
 
-			if (array_key_exists('handle', $settings)) {
-				$data['handle'] = is_string($settings['handle']) ? $settings['handle'] : null;
-			}
-
-			if (is_array($settings['paths'] ?? null)) {
-				$data['paths'] = $settings['paths'];
-			}
-
-			foreach (['published', 'hidden'] as $flag) {
-				if (array_key_exists($flag, $settings)) {
-					$data[$flag] = (bool) $settings[$flag];
-				}
-			}
-
-			$data['assets'] = $serializer->assetMap($data['content']);
-			$data['nodePaths'] = $serializer->pathMap($data['content']);
-			$state['restored'] = true;
+		if ($this->request->param('restore', '') !== '1') {
+			$edit = $links->edit($uid);
+			$state['pending'] = [
+				'url' => $edit . (str_contains($edit, '?') ? '&' : '?') . 'restore=1',
+				'discard' => $discard,
+				'time' => $time,
+				'stale' => $stale,
+			];
 
 			return [$data, $state];
 		}
 
-		$edit = $links->edit($uid);
-		$current = $this->timestamp($base);
-		$started = $this->timestamp($saved['base']);
-		$state['pending'] = [
-			'url' => $edit . (str_contains($edit, '?') ? '&' : '?') . 'restore=1',
-			'time' => $this->displayDate($saved['changed'], IntlDateFormatter::SHORT) ?? '',
-			'stale' => $current !== null && $started !== null && $current > $started,
+		$stored = $this->autosaveSettings($data);
+		$content = is_array($data['content'] ?? null) ? $data['content'] : [];
+		$state['restored'] = [
+			'time' => $time,
+			'stale' => $stale,
+			'discard' => $discard,
+			'fields' => $this->changedKeys($content, $saved['content']),
+			'settings' => $this->changedKeys($stored, $saved['settings']),
 		];
+		$data['content'] = $saved['content'];
+		$settings = $saved['settings'];
+
+		if (array_key_exists('handle', $settings)) {
+			$data['handle'] = is_string($settings['handle']) ? $settings['handle'] : null;
+		}
+
+		if (is_array($settings['paths'] ?? null)) {
+			$data['paths'] = $settings['paths'];
+		}
+
+		foreach (['published', 'hidden'] as $flag) {
+			if (array_key_exists($flag, $settings)) {
+				$data[$flag] = (bool) $settings[$flag];
+			}
+		}
+
+		$data['assets'] = $serializer->assetMap($data['content']);
+		$data['nodePaths'] = $serializer->pathMap($data['content']);
 
 		return [$data, $state];
+	}
+
+	/**
+	 * The keys whose values an editor can tell apart.
+	 *
+	 * @param array<array-key, mixed> $stored
+	 * @param array<array-key, mixed> $edited
+	 * @return list<string>
+	 */
+	private function changedKeys(array $stored, array $edited): array
+	{
+		$keys = array_unique(array_map(strval(...), [...array_keys($stored), ...array_keys($edited)]));
+
+		return array_values(array_filter(
+			$keys,
+			static fn(string $key): bool => !Essence::same($stored[$key] ?? null, $edited[$key] ?? null),
+		));
 	}
 
 	/**
