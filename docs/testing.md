@@ -80,4 +80,6 @@ Each test begins a transaction on the app's database connection and rolls it bac
 
 The code under test works inside that transaction. A transaction it begins is a savepoint: its rollback undoes only its own work, and one it leaves open ends with the request, as it would on the server. A statement that fails outside the code's own transaction undoes the work of its request only, so the test can go on. Beginning a second transaction inside the first fails as it would without a test.
 
+The active Verba translator is global. Whatever translator a test activates, `service()` included, is replaced again by the one active before the test.
+
 Sessions end with the test. Settings the app reads from `.env` still apply unless `phpunit.xml.dist` sets them, such as a provider's API token or the [breach check](application.md#passwords).

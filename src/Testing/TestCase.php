@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Cosray\Testing;
 
 use Celema\Quma\Database as QumaDatabase;
+use Celema\Verba\Translator;
+use Celema\Verba\Verba;
 use Composer\InstalledVersions;
 use Cosray\App;
 use Cosray\Console\Runtime;
@@ -27,11 +29,14 @@ abstract class TestCase extends PHPUnitTestCase
 	protected App $app;
 	private ?Database $db = null;
 	private ?Runtime $runtime = null;
+	private ?Translator $previousTranslator = null;
 
 	#[Override]
 	protected function setUp(): void
 	{
 		parent::setUp();
+
+		$this->previousTranslator = Verba::translator();
 
 		$this->app = Bootstrap::within($this->createApp(...))->boot();
 		$db = $this->app->container()->get(QumaDatabase::class);
@@ -48,7 +53,14 @@ abstract class TestCase extends PHPUnitTestCase
 	protected function tearDown(): void
 	{
 		try {
-			// Restores the translator the scope activated.
+			// Whatever the test activated, service() included, ends with it.
+			if ($this->previousTranslator !== null) {
+				Verba::activate($this->previousTranslator);
+			} else {
+				Verba::deactivate();
+			}
+
+			$this->previousTranslator = null;
 			$this->runtime = null;
 			$this->db?->discard();
 			$this->db = null;
@@ -151,7 +163,11 @@ abstract class TestCase extends PHPUnitTestCase
 	 */
 	protected function service(string $class): object
 	{
-		$this->runtime ??= new Runtime($this->app->container());
+		if ($this->runtime === null) {
+			$this->runtime = new Runtime($this->app->container());
+			Verba::activate($this->runtime->translator());
+		}
+
 		$service = $this->runtime->get($class);
 
 		if (!$service instanceof $class) {

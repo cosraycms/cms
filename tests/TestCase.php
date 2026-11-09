@@ -9,6 +9,8 @@ use Celema\Core\Factory\Factory;
 use Celema\Core\Factory\Nyholm;
 use Celema\Core\Request;
 use Celema\Quma\Delimiters;
+use Celema\Verba\Translator;
+use Celema\Verba\Verba;
 use Cosray\Config;
 use Cosray\Field\Services;
 use Cosray\Locales;
@@ -29,6 +31,8 @@ use ValueError;
  */
 class TestCase extends BaseTestCase
 {
+	private ?Translator $previousTranslator = null;
+
 	/** Rendition URLs without what only says which definition of a size made them. */
 	protected static function withoutFingerprints(string $html): string
 	{
@@ -38,6 +42,8 @@ class TestCase extends BaseTestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
+
+		$this->previousTranslator = Verba::translator();
 
 		$_SERVER['HTTP_ACCEPT'] = 'text/html,application/xhtml+xml,text/plain';
 		$_SERVER['HTTP_ACCEPT_ENCODING'] = 'gzip, deflate, br';
@@ -94,6 +100,14 @@ class TestCase extends BaseTestCase
 
 	protected function tearDown(): void
 	{
+		// The translator is global; one a test leaves active, such as a
+		// console command's, would translate for the tests after it.
+		if ($this->previousTranslator !== null) {
+			Verba::activate($this->previousTranslator);
+		} else {
+			Verba::deactivate();
+		}
+
 		unset(
 			$_SERVER['CONTENT_TYPE'],
 			$_SERVER['HTTPS'],

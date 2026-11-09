@@ -17,6 +17,7 @@ use Celema\Verba\Command\StatusCommand;
 use Celema\Verba\Command\SyncCommand;
 use Celema\Verba\Tool\Domain;
 use Celema\Verba\Tool\PhpScanner;
+use Celema\Verba\Verba;
 use Cosray\App;
 use Cosray\Commands\ActivateUser;
 use Cosray\Commands\CleanMedia;
@@ -271,9 +272,19 @@ final class Commands
 		return $this->app->container();
 	}
 
-	/** @param class-string $class */
+	/**
+	 * Builds a command in the console scope. The first one activates the
+	 * scope's translator for the rest of the process.
+	 *
+	 * @param class-string $class
+	 */
 	private function resolve(string $class): object
 	{
-		return ($this->runtime ??= new Runtime($this->app->container()))->get($class);
+		if ($this->runtime === null) {
+			$this->runtime = new Runtime($this->app->container());
+			Verba::activate($this->runtime->translator());
+		}
+
+		return $this->runtime->get($class);
 	}
 }

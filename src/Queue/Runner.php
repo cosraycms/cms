@@ -39,27 +39,36 @@ final class Runner
 	/**
 	 * @param Closure(class-string<Job>): object $resolve builds a job
 	 * @param ?Closure(): float $clock seconds, for the time limit
+	 * @param ?Closure(Closure(): void): void $scope runs the building and
+	 *     handling of a job, so it can set up and restore what a job needs
 	 */
 	public function __construct(
 		private readonly Database $db,
 		private readonly Logger $logger,
 		private readonly Closure $resolve,
 		private readonly ?Closure $clock = null,
+		private readonly ?Closure $scope = null,
 	) {}
 
 	/**
 	 * A runner that builds jobs in a request-free scope of the container,
-	 * made on first use and dropped with the runner.
+	 * made on first use, and handles each with the scope's translator.
 	 */
 	public static function scoped(Database $db, Logger $logger, Container $container): self
 	{
 		$runtime = null;
+		$scoped = static function () use (&$runtime, $container): Runtime {
+			return $runtime ??= new Runtime($container);
+		};
 
-		return new self($db, $logger, static function (string $class) use (&$runtime, $container): object {
-			$runtime ??= new Runtime($container);
-
-			return $runtime->get($class);
-		});
+		return new self(
+			$db,
+			$logger,
+			static fn(string $class): object => $scoped()->get($class),
+			scope: static function (Closure $work) use ($scoped): void {
+				$scoped()->run($work);
+			},
+		);
 	}
 
 	/**
@@ -134,7 +143,7 @@ final class Runner
 
 		$wasInTransaction = $this->db->getConn()->inTransaction();
 
-		try {
+		$work = function () use ($class, $claimed): void {
 			$job = ($this->resolve)($class);
 
 			if (!$job instanceof Job) {
@@ -143,6 +152,14 @@ final class Runner
 
 			$payload = json_decode($claimed['payload'], true, flags: JSON_THROW_ON_ERROR);
 			$job->handle(is_array($payload) ? $payload : []);
+		};
+
+		try {
+			if ($this->scope === null) {
+				$work();
+			} else {
+				($this->scope)($work);
+			}
 		} catch (JobFailed $e) {
 			$this->endTransaction($wasInTransaction);
 

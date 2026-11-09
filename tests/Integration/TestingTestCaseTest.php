@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests\Integration;
 
 use Celema\Quma\Database;
+use Celema\Verba\Verba;
 use Cosray\App;
 use Cosray\Exception\RuntimeException;
 use Cosray\Mailer;
@@ -55,6 +56,13 @@ final class TestingTestCaseTest extends TestCase
 
 		$this->assertCount(1, $mails);
 		$this->assertSame('erika@example.com', $mails[0]->getTo()[0]->getAddress());
+	}
+
+	public function testServicesTranslateAsAJobDoes(): void
+	{
+		$this->service(Queue::class);
+
+		$this->assertNotNull(Verba::translator());
 	}
 
 	public function testAFailingTransactionUndoesOnlyItsOwnWork(): void
