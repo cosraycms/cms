@@ -67,7 +67,7 @@
 	"scripts": {
 		"test": [
 			"Composer\\Config::disableProcessTimeout",
-			"@php vendor/bin/phpunit --testdox --no-coverage --colors=always"
+			"@php tests/phpunit.php --testdox --no-coverage --colors=always"
 		],
 		"docs:format": "npx prettier@3.6.2 --write --config docs/.prettierrc README.md 'docs/**/*.md' contract/README.md tests/README.md panel/README.md",
 		"docs:lint": "npx markdownlint-cli2@0.22.1 README.md 'docs/**/*.md' contract/README.md tests/README.md panel/README.md",
@@ -78,7 +78,7 @@
 		],
 		"coverage:test": [
 			"Composer\\Config::disableProcessTimeout",
-			"@php -d xdebug.mode=coverage vendor/bin/phpunit --testdox --colors=always"
+			"@php tests/phpunit.php --testdox --colors=always"
 		],
 		"coverage:analyze": "@php vendor/bin/coverlyzer .coverage/coverage.php",
 		"coverage": [
@@ -86,6 +86,12 @@
 			"@coverage:analyze"
 		],
 		"license:lint": "if command -v reuse >/dev/null 2>&1; then reuse lint; else echo 'Skipping REUSE lint: reuse not installed'; fi",
+		"check": [
+			"Composer\\Config::disableProcessTimeout",
+			"@lint",
+			"@types",
+			"@php tests/phpunit.php --no-coverage --colors=always"
+		],
 		"ci": [
 			"@lint",
 			"@types",

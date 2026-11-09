@@ -7,6 +7,7 @@ The PHP suite uses PHPUnit with unit, PostgreSQL integration, and in-process HTT
 Run from the repository root:
 
 ```bash
+composer check
 composer test
 composer lint
 composer types
@@ -14,17 +15,21 @@ composer coverage
 composer docs:lint
 ```
 
-`composer types` runs PHPStan with [phpstan.neon.dist](../phpstan.neon.dist). `composer ci` runs PHP linting, static analysis, coverage, and the license check; `composer ci:full` adds documentation linting. Coverage needs Xdebug and writes HTML to `.coverage/html/index.html`.
+`composer check` runs PHP linting, static analysis and the tests without coverage, the quick check before a commit. `composer types` runs PHPStan with [phpstan.neon.dist](../phpstan.neon.dist). `composer ci` runs PHP linting, static analysis, coverage, and the license check; `composer ci:full` adds documentation linting. Coverage writes HTML to `.coverage/html/index.html`.
+
+The scripts run PHPUnit through [phpunit.php](phpunit.php), which turns Xdebug off, as a loaded Xdebug slows every test, and measures coverage with PCOV when it is loaded, with Xdebug otherwise. PCOV takes about half the time.
 
 For a narrower run:
 
 ```bash
-vendor/bin/phpunit --no-coverage --testsuite unit
-vendor/bin/phpunit --no-coverage --testsuite integration
-vendor/bin/phpunit --no-coverage --testsuite end2end
-vendor/bin/phpunit --no-coverage tests/Unit/RoutePathGeneratorTest.php
-vendor/bin/phpunit --no-coverage --filter Fulltext
+php tests/phpunit.php --no-coverage --testsuite unit
+php tests/phpunit.php --no-coverage --testsuite integration
+php tests/phpunit.php --no-coverage --testsuite end2end
+php tests/phpunit.php --no-coverage tests/Unit/RoutePathGeneratorTest.php
+php tests/phpunit.php --no-coverage --filter Fulltext
 ```
+
+All suites use the one test database, so do not run them in parallel: migration tests lock tables, and tests that count or order rows see the other run's.
 
 Tests run in random order, so a test that depends on another's state fails sooner or later. PHPUnit prints the order's seed at the top of each run; repeat a failing order with `--order-by=random --random-order-seed=<seed>`, or run in file order with `--order-by=default`.
 
