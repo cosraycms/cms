@@ -379,7 +379,7 @@ final class Editor extends Panel
 			return $response->redirect($links->edit($node), 303);
 		}
 
-		return $this->reload($response, $links->edit($node), '#node-editor-discard');
+		return $this->reload($response, $links->edit($node));
 	}
 
 	/**
@@ -402,7 +402,7 @@ final class Editor extends Panel
 			return $response->json(['ok' => true]);
 		}
 
-		return $this->reload($response, $this->origin()['links']->edit($node), '#editor-autosave-discard');
+		return $this->reload($response, $this->origin()['links']->edit($node));
 	}
 
 	/**
@@ -533,7 +533,7 @@ final class Editor extends Panel
 			return $response->redirect($edit, 303);
 		}
 
-		return $this->reload($response, $edit, '#node-editor-duplicate');
+		return $this->reload($response, $edit);
 	}
 
 	/**
@@ -635,17 +635,17 @@ final class Editor extends Panel
 	/**
 	 * Has htmx load the editor again after a form dropped what it showed.
 	 * A followed redirect would land on the form's hx-swap="none" and
-	 * render nothing; sourced from the form, the unsaved-changes guard
-	 * stands aside, and the form's confirmation, which the POST already
-	 * asked, is not asked again.
+	 * render nothing. The source stands the unsaved-changes guard aside,
+	 * and the form's confirmation, which the POST already asked, is not
+	 * asked again.
 	 */
-	private function reload(Response $response, string $editor, string $source): Response
+	private function reload(Response $response, string $editor): Response
 	{
 		return $response->header('HX-Location', json_encode([
 			'path' => $editor,
 			'target' => '#main',
 			'swap' => 'innerHTML show:top',
-			'source' => $source,
+			'source' => '#editor-leave',
 			'confirm' => false,
 			'replace' => 'true',
 		], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
@@ -779,7 +779,7 @@ final class Editor extends Panel
 			'path' => $back,
 			'target' => '#frame',
 			'swap' => 'innerHTML show:top',
-			'source' => '#node-editor-delete',
+			'source' => '#editor-leave',
 			'confirm' => false,
 		], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
 	}

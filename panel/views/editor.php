@@ -303,6 +303,9 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 	</form>
 
 	<div id="editor-preview" hidden></div>
+	<?php // The source of the requests that leave the editor after a form
+	// dropped it: no form, whose fields would end up in the URL. ?>
+	<span id="editor-leave" hidden data-dirty-bypass></span>
 	<?php if ($edit && $embed === null): ?>
 		<?php // The head's menu and the status tab submit these; the editor form
 

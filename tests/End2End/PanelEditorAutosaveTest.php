@@ -250,7 +250,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		$this->assertSame(0, $this->rows('autosaves', 'autosave-reloaded'));
 		$location = json_decode($response->getHeaderLine('HX-Location'), true);
 		$this->assertSame('/panel/node/autosave-reloaded', $location['path']);
-		$this->assertSame('#editor-autosave-discard', $location['source']);
+		$this->assertSame('#editor-leave', $location['source']);
 	}
 
 	/** @param array<string, mixed> $settings */

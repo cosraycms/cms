@@ -46,6 +46,7 @@ test('discarding my changes returns to the stored state', async ({ page }) => {
 
 	await expect(page.getByLabel('Title')).not.toHaveValue('Not wanted');
 	await expect(page.locator('#cms-toasts')).toContainText('My changes discarded');
+	await expect(page).not.toHaveURL(/_token/);
 	await page.reload();
 	await expect(mine(page)).toHaveAttribute('data-state', 'none');
 });
