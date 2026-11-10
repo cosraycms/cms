@@ -143,7 +143,7 @@ return [
 		'common:type' => 'Tipo',
 		'common:upload' => 'Subir',
 		'common:yes' => 'Sí',
-		'dashboard:changes' => 'Cambios pendientes',
+		'dashboard:changes' => 'Borradores',
 		'dashboard:collection-count' => ['en :count colección', 'en :count colecciones'],
 		'dashboard:entries' => 'Entradas',
 		'dashboard:media' => 'Archivos multimedia',

@@ -143,7 +143,7 @@ return [
 		'common:type' => 'Tipo',
 		'common:upload' => 'Carregar',
 		'common:yes' => 'Sim',
-		'dashboard:changes' => 'Alterações pendentes',
+		'dashboard:changes' => 'Rascunhos',
 		'dashboard:collection-count' => ['em :count coleção', 'em :count coleções'],
 		'dashboard:entries' => 'Entradas',
 		'dashboard:media' => 'Ficheiros multimédia',

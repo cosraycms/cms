@@ -146,7 +146,7 @@ return [
 		'common:type' => 'Type',
 		'common:upload' => 'Uploaden',
 		'common:yes' => 'Ja',
-		'dashboard:changes' => 'Wijzigingen in afwachting',
+		'dashboard:changes' => 'Concepten',
 		'dashboard:collection-count' => ['in :count collectie', 'in :count collecties'],
 		'dashboard:entries' => 'Items',
 		'dashboard:media' => 'Mediabestanden',

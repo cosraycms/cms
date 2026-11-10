@@ -146,7 +146,7 @@ return [
 		'common:type' => 'Typ',
 		'common:upload' => 'Hochladen',
 		'common:yes' => 'Ja',
-		'dashboard:changes' => 'Ausstehende Änderungen',
+		'dashboard:changes' => 'Entwürfe',
 		'dashboard:collection-count' => ['über :count Sammlung', 'über :count Sammlungen'],
 		'dashboard:entries' => 'Einträge',
 		'dashboard:media' => 'Mediendateien',

@@ -96,7 +96,7 @@ final class PanelDashboardTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//*[contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Pending changes"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="'
+			'//*[contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Drafts"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="'
 				. $changesTotal
 				. '"]][span[contains(concat(" ", normalize-space(@class), " "), " note ") and normalize-space(.)="'
 				. $recentChanges

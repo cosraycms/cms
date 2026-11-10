@@ -153,7 +153,7 @@ return [
 		'common:type' => 'Typ',
 		'common:upload' => 'Prześlij',
 		'common:yes' => 'Tak',
-		'dashboard:changes' => 'Oczekujące zmiany',
+		'dashboard:changes' => 'Wersje robocze',
 		'dashboard:collection-count' => ['w :count kolekcji', 'w :count kolekcjach', 'w :count kolekcjach'],
 		'dashboard:entries' => 'Wpisy',
 		'dashboard:media' => 'Pliki multimedialne',

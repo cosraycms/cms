@@ -143,7 +143,7 @@ return [
 		'common:type' => 'Type',
 		'common:upload' => 'Upload',
 		'common:yes' => 'Yes',
-		'dashboard:changes' => 'Pending changes',
+		'dashboard:changes' => 'Drafts',
 		'dashboard:collection-count' => ['across :count collection', 'across :count collections'],
 		'dashboard:entries' => 'Entries',
 		'dashboard:media' => 'Media files',

@@ -143,7 +143,7 @@ return [
 		'common:type' => 'Type',
 		'common:upload' => 'Téléverser',
 		'common:yes' => 'Oui',
-		'dashboard:changes' => 'Modifications en attente',
+		'dashboard:changes' => 'Brouillons',
 		'dashboard:collection-count' => ['dans :count collection', 'dans :count collections'],
 		'dashboard:entries' => 'Entrées',
 		'dashboard:media' => 'Fichiers médias',

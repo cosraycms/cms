@@ -143,7 +143,7 @@ return [
 		'common:type' => 'Tipo',
 		'common:upload' => 'Carica',
 		'common:yes' => 'Sì',
-		'dashboard:changes' => 'Modifiche in sospeso',
+		'dashboard:changes' => 'Bozze',
 		'dashboard:collection-count' => ['in :count raccolta', 'in :count raccolte'],
 		'dashboard:entries' => 'Contenuti',
 		'dashboard:media' => 'File multimediali',
