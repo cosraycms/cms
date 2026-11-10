@@ -110,7 +110,7 @@ class Store
 			$this->lock($data['uid']);
 			$changed = $this->persist($node, $data, $actor->id, $locales);
 
-			if ($this->drafts->delete($nodeId, published: true)) {
+			if ($this->drafts->delete($nodeId, applied: true)) {
 				$this->sync->remove('draft', $data['uid']);
 				$changed = true;
 			}

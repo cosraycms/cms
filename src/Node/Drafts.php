@@ -7,8 +7,8 @@ namespace Cosray\Node;
 use Celema\Quma\Database;
 
 /**
- * The working copies of published nodes: one row per node, content in
- * the shape of `nodes.content`, plus the drafted handle and URL paths.
+ * The working copies of nodes: one row per node, content in the shape of
+ * `nodes.content`, plus the drafted handle and URL paths.
  */
 final class Drafts
 {
@@ -89,16 +89,17 @@ final class Drafts
 
 	/**
 	 * Deletes the working copy, if there is one, and says whether there was;
-	 * its history keeps the last state and, when the caller says the content
-	 * went live, records it as published rather than discarded. Must run
+	 * its history keeps the last state and, when the caller says it was
+	 * applied to the main version, records it as applied rather than
+	 * discarded. Must run
 	 * inside the caller's transaction: the reason travels as a
 	 * transaction-local setting the history trigger reads.
 	 */
-	public function delete(int $node, bool $published = false): bool
+	public function delete(int $node, bool $applied = false): bool
 	{
 		// Set either way: an earlier delete in the same transaction may have
-		// left `published` behind.
-		$this->db->drafts->outcome(['outcome' => $published ? 'published' : 'discarded'])->run();
+		// left `applied` behind.
+		$this->db->drafts->outcome(['outcome' => $applied ? 'applied' : 'discarded'])->run();
 
 		return $this->db->drafts->delete(['node' => $node])->first() !== null;
 	}

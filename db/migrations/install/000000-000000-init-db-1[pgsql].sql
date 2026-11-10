@@ -433,7 +433,7 @@ CREATE UNIQUE INDEX /*:cms.obj:*/ux_url_paths_locale ON /*:cms.prefix:*/url_path
 	USING btree (node, locale) WHERE (inactive IS NULL);
 
 
--- Working copies of published nodes. `content` keeps the exact shape of
+-- Working copies of nodes. `content` keeps the exact shape of
 -- nodes.content so content migrations rewrite both tables the same way;
 -- `settings` holds the drafted handle and URL paths
 -- ({"handle": ?text, "paths": {locale: path}}). `created` is when the
@@ -456,7 +456,7 @@ CREATE TRIGGER /*:cms.obj:*/drafts_trigger_02_change BEFORE UPDATE
 -- Records every superseded state of a working copy, and its last state
 -- when publishing or discarding deletes the row, so the history outlives
 -- the working copy. The row written on delete says why the draft went:
--- `published` when the store says so through the transaction-local
+-- `applied` when the store says so through the transaction-local
 -- setting `cosray.draft_outcome`, `discarded` otherwise.
 CREATE FUNCTION /*:cms.prefix:*/record_draft_history()
 	RETURNS TRIGGER AS $$
@@ -627,7 +627,7 @@ CREATE TABLE /*:cms.prefix:*/nodes_history (
 
 -- `created` is copied from the draft row and keys the rows of one working
 -- copy together; `outcome` is `saved` for a row superseded by the next
--- save and, on the row written when the draft is deleted, `published` or
+-- save and, on the row written when the draft is deleted, `applied` or
 -- `discarded`.
 CREATE TABLE /*:cms.prefix:*/drafts_history (
 	node bigint NOT NULL,
@@ -639,11 +639,11 @@ CREATE TABLE /*:cms.prefix:*/drafts_history (
 	outcome text NOT NULL DEFAULT 'saved',
 	CONSTRAINT /*:cms.obj:*/pk_drafts_history PRIMARY KEY (node, changed),
 	-- Keyed to the node, not the working copy: the history stays when
-	-- publishing or discarding deletes the drafts row.
+	-- applying or discarding deletes the drafts row.
 	CONSTRAINT /*:cms.obj:*/fk_drafts_history_nodes FOREIGN KEY (node)
 		REFERENCES /*:cms.prefix:*/nodes (node),
 	CONSTRAINT /*:cms.obj:*/ck_drafts_history_outcome
-		CHECK (outcome IN ('saved', 'published', 'discarded'))
+		CHECK (outcome IN ('saved', 'applied', 'discarded'))
 );
 
 

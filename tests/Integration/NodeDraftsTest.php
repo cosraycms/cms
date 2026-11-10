@@ -214,7 +214,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 		);
 		$this->assertSame('Pictures added', json_decode((string) $history[1]['content'], true)['title']['value']['en']);
 		$this->assertSame('timeline', json_decode((string) $history[1]['settings'], true)['handle']);
-		$this->assertSame(['saved', 'published'], array_column($history, 'outcome'));
+		$this->assertSame(['saved', 'applied'], array_column($history, 'outcome'));
 		$this->assertSame($history[0]['created'], $history[1]['created']);
 		$this->assertSame('Pictures added', $this->liveTitle('drafts-timeline'));
 	}
