@@ -577,9 +577,11 @@ final class Editor extends Panel
 			),
 		);
 
-		$editor = $draft === null
-			? $this->userLabel($data['editor'] ?? null)
-			: (is_string($draft['editorName'] ?? null) ? $draft['editorName'] : null);
+		$editor = match (true) {
+			$draft === null => $this->userLabel($data['editor'] ?? null),
+			is_string($draft['editorName'] ?? null) => $draft['editorName'],
+			default => null,
+		};
 
 		return [
 			'record' => $record,

@@ -78,17 +78,18 @@ final class Listing
 	/** The node a hierarchy listing is scoped to, in any state, with the user's autosave facts. */
 	public function parent(string $uid, ?int $user = null): ?Wrapper
 	{
-		$nodes = $this->cms->nodes()->published(null)->hidden(null)->only($uid);
+		$nodes = $this->cms
+			->nodes()
+			->published(null)
+			->hidden(null)
+			->only($uid)
+			->limit(1);
 
 		if ($user !== null) {
 			$nodes->mine($user);
 		}
 
-		foreach ($nodes as $node) {
-			return $node;
-		}
-
-		return null;
+		return iterator_to_array($nodes, false)[0] ?? null;
 	}
 
 	/**

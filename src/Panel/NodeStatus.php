@@ -67,14 +67,25 @@ final readonly class NodeStatus
 
 		$unreleased = $released === null;
 
+		// The draft is the working copy, or before the first publication the node itself.
+		[$saved, $savedBy] = match (true) {
+			$draft !== null => [$draft['changed'], $draft['editorName'] ?? null],
+			$unreleased => [$changed, $editor],
+			default => [null, null],
+		};
+
 		return new self(
 			record: false,
-			website: $unreleased ? 'none' : ($published ? 'online' : 'offline'),
+			website: match (true) {
+				$unreleased => 'none',
+				$published => 'online',
+				default => 'offline',
+			},
 			draft: $unreleased || $draft !== null,
 			mine: $mine,
 			released: $released,
-			saved: $draft['changed'] ?? ($unreleased ? $changed : null),
-			savedBy: $draft !== null ? $draft['editorName'] ?? null : ($unreleased ? $editor : null),
+			saved: $saved,
+			savedBy: $savedBy,
 			mineSaved: $autosave['changed'] ?? null,
 		);
 	}

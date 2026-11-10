@@ -9,6 +9,7 @@ use Cosray\Config;
 use Cosray\Field\Text;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestDraftPagesCollection;
+use Cosray\Tests\Fixtures\Collection\TestSubmissionsCollection;
 use Cosray\Tests\Fixtures\Node\TestDraftPage;
 
 /**
@@ -36,6 +37,7 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 		$plugin = parent::createBootstrap($config);
 		$plugin->node(TestDraftPage::class);
 		$plugin->section('Inhalt')->collection(TestDraftPagesCollection::class);
+		$plugin->section('Inhalt')->collection(TestSubmissionsCollection::class);
 
 		return $plugin;
 	}
@@ -137,6 +139,25 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 		$this->assertResponseStatus(400, $this->makeRequest('GET', '/panel/collection/test-draft-pages', [
 			'query' => ['stage' => 'nonsense'],
 		]));
+	}
+
+	public function testARecordListShowsTwoStagesAndOnlyTheOwnChangesFilter(): void
+	{
+		$this->createTestNode([
+			'uid' => 'listed-record',
+			'type' => $this->createTestType('test-submission'),
+			'content' => ['title' => ['type' => Text::class, 'value' => ['zxx' => 'Entry']]],
+		]);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/collection/test-submissions'));
+
+		$this->assertHtmlNodeExists($this->dot('listed-record', 'saved', 'saved'), $html);
+		$this->assertHtmlNodeMissing("//tr[@data-uid='listed-record']//*[@data-stage='website']", $html);
+		$this->assertHtmlNodeExists('//nav[contains(@class, "cms-stage-filters")]/a[contains(., "My changes")]', $html);
+		$this->assertHtmlNodeMissing(
+			'//nav[contains(@class, "cms-stage-filters")]/a[contains(., "With draft")]',
+			$html,
+		);
 	}
 
 	private function dot(string $uid, string $stage, string $state): string
