@@ -15,7 +15,7 @@ final class CollectionPage
 	/**
 	 * @param list<array{label: string, url: string, active: bool}> $viewLinks
 	 * @param list<array{slug: string, name: string, url: string}> $createLinks
-	 * @param array{publishUrl: string, deleteUrl: string, duplicateUrl: string, showPublished: bool} $bulk
+	 * @param array{publishUrl: string, deleteUrl: string, duplicateUrl: string, publishable: bool} $bulk
 	 * @param list<array{key: string, label: string, count: int, url: string, active: bool}> $stages
 	 */
 	private function __construct(
@@ -39,6 +39,7 @@ final class CollectionPage
 	 * @param iterable<mixed>|null $parentStatus
 	 * @param ?array{stages: list<array<string, string>>, sentence: string} $parentDots
 	 * @param array<string, int> $stages how many entries each status stage holds
+	 * @param bool $publishable whether the collection holds entries that are no records
 	 */
 	public static function from(
 		string $name,
@@ -58,6 +59,7 @@ final class CollectionPage
 		bool $arranged = false,
 		string $moved = '',
 		array $stages = [],
+		bool $publishable = true,
 	): self {
 		$query = $urls->query;
 		$nodes = self::items($nodes);
@@ -95,7 +97,7 @@ final class CollectionPage
 				'publishUrl' => $urls->bulk('publish'),
 				'deleteUrl' => $urls->bulk('delete'),
 				'duplicateUrl' => $urls->bulk('duplicate'),
-				'showPublished' => $meta->showPublished,
+				'publishable' => $publishable,
 			],
 			stages: self::stages($stages, $query, $urls),
 		);

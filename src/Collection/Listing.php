@@ -180,6 +180,12 @@ final class Listing
 		return $counts;
 	}
 
+	/** Whether the listing holds entries that are no records, which publication concerns. */
+	public function publishable(): bool
+	{
+		return $this->entries()->publishable()->count() > 0;
+	}
+
 	/** The entries a listing page draws from: one level of a hierarchy, matching a search. */
 	private function scoped(string $parent, string $q): Nodes
 	{

@@ -192,7 +192,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 					) ?></button>
 				</div>
 				<div class="actions">
-					<?php if ($page->bulk['showPublished']): ?>
+					<?php if ($page->bulk['publishable']): ?>
 						<button type="button" class="action" data-bulk-open="publish">
 							<?= escape(__('bulk:publish')) ?>
 						</button>
@@ -377,7 +377,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 			</footer>
 		<?php $this->end() ?>
 
-		<?php if ($page->bulk['showPublished']): ?>
+		<?php if ($page->bulk['publishable']): ?>
 			<?php $this->component('component/dialog', ['name' => 'bulk-publish', 'size' => 'compact', 'title' => __('bulk:publish')]) ?>
 				<div class="modal-body cms-confirm">
 				<p class="question" data-bulk-question></p>

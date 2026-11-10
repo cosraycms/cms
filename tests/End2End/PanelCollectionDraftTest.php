@@ -157,6 +157,25 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 			'//nav[contains(@class, "cms-stage-filters")]/a[contains(., "With draft")]',
 			$html,
 		);
+		$this->assertHtmlNodeMissing('//button[@data-bulk-open="publish"]', $html);
+	}
+
+	public function testBulkPublishingLeavesRecordsAlone(): void
+	{
+		$this->createTestNode([
+			'uid' => 'bulk-record',
+			'type' => $this->createTestType('test-submission'),
+			'published' => true,
+			'content' => ['title' => ['type' => Text::class, 'value' => ['zxx' => 'Entry']]],
+		]);
+
+		$response = $this->makeRequest('POST', '/panel/collection/test-submissions/bulk/publish', [
+			'body' => ['nodes' => ['bulk-record'], 'state' => 'unpublished'],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString('skipped%3A1', $response->getHeaderLine('Location'));
+		$this->assertTrue($this->published('bulk-record'));
 	}
 
 	private function dot(string $uid, string $stage, string $state): string

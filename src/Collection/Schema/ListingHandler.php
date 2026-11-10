@@ -17,7 +17,6 @@ class ListingHandler extends Handler
 
 		return [
 			'listing' => new CollectionListMeta(
-				showPublished: $meta->published,
 				showLocked: $meta->locked,
 				showHidden: $meta->hidden,
 				showChildren: $meta->children,

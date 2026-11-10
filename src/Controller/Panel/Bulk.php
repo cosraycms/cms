@@ -48,10 +48,13 @@ final class Bulk extends Panel
 		$changed = 0;
 		$changesPublished = 0;
 		$skippedLocked = 0;
+		$skipped = $missing;
+		$types = $this->types();
 
 		$context->db->transaction(static function () use (
 			$context,
 			$cms,
+			$types,
 			$store,
 			$locales,
 			$actor,
@@ -62,6 +65,7 @@ final class Bulk extends Panel
 			&$changed,
 			&$changesPublished,
 			&$skippedLocked,
+			&$skipped,
 		): void {
 			$processed = [];
 
@@ -85,15 +89,20 @@ final class Bulk extends Panel
 					} elseif (($current = $cms->node->byUid($entry['uid'], published: null)) !== null) {
 						$nodeObj = Wrapper::unwrap($current);
 
-						if (!$published) {
-							$store->published($nodeObj, false, $actor);
-						} elseif ($withChanges && $store->applyDraft($nodeObj, $locales, $actor, publish: true)) {
-							$changesPublished++;
-						} elseif (!$current->meta->published) {
-							$store->published($nodeObj, true, $actor);
-						}
+						if ((bool) $types->get($nodeObj::class, 'record', false)) {
+							// Records are not published; their flag stays as stored.
+							$skipped++;
+						} else {
+							if (!$published) {
+								$store->published($nodeObj, false, $actor);
+							} elseif ($withChanges && $store->applyDraft($nodeObj, $locales, $actor, publish: true)) {
+								$changesPublished++;
+							} elseif (!$current->meta->published) {
+								$store->published($nodeObj, true, $actor);
+							}
 
-						$changed++;
+							$changed++;
+						}
 					}
 
 					if (!$withChildren) {
@@ -114,7 +123,7 @@ final class Bulk extends Panel
 			$published ? 'published' : 'unpublished' => $changed,
 			'changes-published' => $changesPublished,
 			'skipped-locked' => $skippedLocked,
-			'skipped' => $missing,
+			'skipped' => $skipped,
 		]);
 	}
 
