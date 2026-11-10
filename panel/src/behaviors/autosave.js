@@ -12,6 +12,11 @@ import { button, frame, openModal } from '../lib/modal.js';
 
 const FORM = '#node-editor-form';
 const STATE = 'editor-autosave';
+// Dispatched on the document as the autosave moves: an edit waits for it,
+// it is sent, the server kept or dropped it, or it failed and is retried.
+export const EVENT = 'cosray-autosave';
+
+/** @typedef {'pending' | 'saving' | 'kept' | 'dropped' | 'failed'} Autosave */
 // A form that drops the autosave, so its pending edits must not outlive it.
 const DROP = '[data-autosave-drop]';
 const PAUSE = 2000;
@@ -30,6 +35,13 @@ let sending = false;
 let pause;
 /** @type {ReturnType<typeof setTimeout> | undefined} */
 let longest;
+
+/**
+ * @param {Autosave} autosave
+ */
+function report(autosave) {
+	document.dispatchEvent(new CustomEvent(EVENT, { detail: { state: autosave } }));
+}
 
 /** @returns {HTMLElement | null} */
 function state() {
@@ -85,6 +97,7 @@ function mark(event) {
 
 	edits++;
 	schedule();
+	report('pending');
 }
 
 /**
@@ -107,6 +120,7 @@ async function send(keepalive = false) {
 
 	const sent = edits;
 	sending = true;
+	report('saving');
 
 	try {
 		const entries = /** @type {[string, string][]} */ (
@@ -129,9 +143,20 @@ async function send(keepalive = false) {
 
 		if (response.ok && form === target) {
 			kept = Math.max(kept, sent);
+			/** @type {{ kept?: boolean }} */
+			const result = await response.json().catch(() => ({}));
+
+			if (edits === kept) {
+				report(result.kept === false ? 'dropped' : 'kept');
+			}
+		} else if (form === target) {
+			report('failed');
 		}
 	} catch {
 		// Offline or refused: the edits stay pending and are tried again.
+		if (form === target) {
+			report('failed');
+		}
 	} finally {
 		sending = false;
 	}

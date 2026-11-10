@@ -97,6 +97,11 @@
 		flex: 0 0 auto;
 	}
 
+	/* An icon-only action, as wide as it is high; name it with aria-label. */
+	&.square {
+		padding-inline: calc((var(--height) - var(--line-height) - 2px) / 2);
+	}
+
 	&:focus-visible {
 		outline: 2px solid var(--button-ring);
 		outline-offset: 2px;

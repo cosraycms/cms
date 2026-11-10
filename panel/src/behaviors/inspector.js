@@ -6,8 +6,8 @@ import { selectTab } from './tabs.js';
 // its state and never slides on load. Narrower, the inspector starts collapsed
 // and data-open lasts for the page; in the shell's middle band, whose query
 // matches cms-inspector.css, it opens over the fields as a layer that Escape
-// and a press outside close. The strip's published switch is an unnamed copy: the
-// form submits the real one, which a save replaces out of band.
+// and a press outside close. The strip's online switch is an unnamed copy that
+// flips the real one in the status tab.
 
 const ROOT = '[data-inspector]';
 const PUBLISHED = 'editor-published-switch';
@@ -71,10 +71,18 @@ export function revealInspector(control) {
  */
 function click(event) {
 	const target = event.target;
-	const inspector =
-		target instanceof Element ? /** @type {HTMLElement | null} */ (target.closest(ROOT)) : null;
 
-	if (!(target instanceof Element) || !inspector) {
+	if (!(target instanceof Element)) {
+		return;
+	}
+
+	// The head's status dots open the status tab from outside the inspector.
+	const inspector = /** @type {HTMLElement | null} */ (
+		target.closest(ROOT) ??
+			(target.closest('[data-inspector-open]') ? document.querySelector(ROOT) : null)
+	);
+
+	if (!inspector) {
 		return;
 	}
 

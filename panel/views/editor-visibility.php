@@ -1,11 +1,16 @@
 <?php
 
-// Out-of-band response of the visibility switches: the switches with the
-// node's state and a toast saying what changed.
+// Out-of-band response of the visibility switches: the status in the head
+// and the inspector, with the switches, and a toast saying what changed.
 
 $message = u($message ?? null);
 ?>
-<?php $this->include('node/visibility', ['visibility' => $visibility, 'oob' => true]) ?>
+<?php $this->include('component/status-dots', [
+	'status' => $status,
+	'id' => 'editor-status-dots',
+	'oob' => true,
+]) ?>
+<?php $this->include('node/status', ['status' => $status, 'oob' => true]) ?>
 <?php if (is_string($message) && $message !== ''): ?>
 	<?php $this->include('component/toast', ['kind' => $kind, 'message' => $message]) ?>
 <?php endif ?>

@@ -67,14 +67,13 @@ export async function save(page: Page): Promise<void> {
 }
 
 export async function publish(page: Page): Promise<void> {
-	await page.getByRole('button', { name: 'More save options' }).click();
 	const saved = page.waitForResponse(
 		(response) =>
 			response.request().method() === 'POST' &&
 			response.url().includes('/panel/node/') &&
 			!response.url().endsWith('/autosave'),
 	);
-	await page.locator('#editor-save-options button[name=publish]').click();
+	await page.getByRole('button', { name: 'Publish', exact: true }).click();
 	await saved;
 }
 

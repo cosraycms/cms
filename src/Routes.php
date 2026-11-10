@@ -480,6 +480,13 @@ class Routes
 					->middleware($panelAuth);
 				$panel
 					->post(
+						'/node/{node:[A-Za-z0-9-_.]{1,64}}/duplicate',
+						[Panel\Editor::class, 'duplicate'],
+						'editor.duplicate',
+					)
+					->middleware($panelAuth);
+				$panel
+					->post(
 						'/node/{node:[A-Za-z0-9-_.]{1,64}}/visibility',
 						[Panel\Editor::class, 'visibility'],
 						'editor.visibility',

@@ -7,6 +7,22 @@
 	flex: 1 1 auto;
 	min-height: 0;
 
+	/* The titles give way before the actions wrap; the title then truncates. */
+	& > .head {
+		& .titles {
+			flex: 1 1 16rem;
+		}
+
+		& .line {
+			flex-wrap: nowrap;
+		}
+
+		& .breadcrumb,
+		& .cms-status-dots {
+			flex: none;
+		}
+	}
+
 	& .status {
 		font-size: var(--cms-font-size-sm);
 		font-weight: 500;

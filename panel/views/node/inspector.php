@@ -17,9 +17,10 @@ $locales = (array) u($locales);
 $defaultLocale = (string) $defaultLocale;
 $routable = (bool) $routable;
 $renderable = (bool) $renderable;
-// The online and listing state of a stored, publishable node; null otherwise.
-$visibility = u($visibility ?? null);
-$visibility = is_array($visibility) ? $visibility : null;
+// The status view of a stored node outside an embed; null otherwise.
+$status = u($status ?? null);
+$status = is_array($status) ? $status : null;
+$visibility = is_array($status['visibility'] ?? null) ? $status['visibility'] : null;
 $contentLocales = (bool) (u($contentLocales ?? null) ?? false);
 $collapsed = (bool) $collapsed;
 $pathsUrl = u($pathsUrl);
@@ -39,7 +40,7 @@ $showMeta = $showType || $renderable || $showCreated || $showEditor;
 
 $tabs = [];
 
-if ($contentLocales || $visibility !== null) {
+if ($contentLocales || $status !== null) {
 	$tabs['status'] = __('editor:tab-status');
 }
 
@@ -157,10 +158,9 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 						</section>
 					<?php endif ?>
 
-					<?php if ($visibility !== null): ?>
+					<?php if ($status !== null): ?>
 						<section class="section">
-							<?php $this->include('node/visibility', ['visibility' => $visibility]) ?>
-							<?php $this->include('node/changes-note', ['draft' => $meta['draft'] ?? null]) ?>
+							<?php $this->include('node/status', ['status' => $status]) ?>
 						</section>
 					<?php endif ?>
 				</div>

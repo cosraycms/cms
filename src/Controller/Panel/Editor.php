@@ -17,6 +17,7 @@ use Cosray\Collection\Listing;
 use Cosray\Context;
 use Cosray\Exception\NoSuchField;
 use Cosray\Node\Autosaves;
+use Cosray\Node\Duplicator;
 use Cosray\Node\Essence;
 use Cosray\Node\Factory as NodeFactory;
 use Cosray\Node\PathManager;
@@ -29,6 +30,7 @@ use Cosray\Node\Wrapper;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
 use Cosray\Panel\FormPatch;
+use Cosray\Panel\NodeStatus;
 use Cosray\Panel\NodeUrls;
 use Cosray\Panel\System;
 use Cosray\Richtext\Normalizer;
@@ -72,10 +74,16 @@ final class Editor extends Panel
 			NodeFactory::fieldNamesFor($nodeObj),
 		);
 		$autosave = null;
+		$status = null;
 
 		// An embedding application has its own idea of unsaved edits.
-		if ($this->origin()['embed'] === null && !(bool) ($data['locked'] ?? false)) {
-			[$data, $autosave] = $this->autosaveState($context, $serializer, $nodeObj, $node, $data);
+		if ($this->origin()['embed'] === null) {
+			$saved = new Autosaves($context->db)->get($this->nodeId($nodeObj), $this->actor()->id);
+			$status = $this->statusView($context, $cms, $data, $saved, !(bool) ($data['locked'] ?? false));
+
+			if (!(bool) ($data['locked'] ?? false)) {
+				[$data, $autosave] = $this->autosaveState($context, $serializer, $nodeObj, $node, $data);
+			}
 		}
 
 		return $this->editorContext(
@@ -86,6 +94,7 @@ final class Editor extends Panel
 			pathSourceFields: $this->pathSourceFields($context, $nodeObj),
 			meta: $this->nodeMeta($data),
 			autosave: $autosave,
+			status: $status,
 		);
 	}
 
@@ -125,7 +134,9 @@ final class Editor extends Panel
 			&& Essence::same($settings, $this->autosaveSettings($data))
 		) {
 			$autosaves->delete($nodeId, $this->actor()->id);
+			$kept = false;
 		} else {
+			$kept = true;
 			$base = $form['_base'] ?? null;
 			$autosaves->save(
 				$nodeId,
@@ -136,7 +147,7 @@ final class Editor extends Panel
 			);
 		}
 
-		return $response->json(['ok' => true]);
+		return $response->json(['ok' => true, 'kept' => $kept]);
 	}
 
 	/** @return array<string, mixed> */
@@ -214,8 +225,7 @@ final class Editor extends Panel
 				'saved' => false,
 				'message' => (string) ($payload['message'] ?? __('node:invalid-data')),
 				'errors' => $this->issues($payload),
-				'published' => (bool) ($data['published'] ?? false),
-				'renderable' => (bool) ($data['type']['renderable'] ?? false),
+				'toast' => $this->origin()['embed'] === null,
 				'preview' => null,
 			];
 		}
@@ -227,16 +237,28 @@ final class Editor extends Panel
 		}
 
 		$saved = $cms->node->working($node);
-		$draft = $this->draftFacts($saved?->meta->get('draft'));
+		$savedData = $saved === null
+			? null
+			: $serializer->read(
+				Wrapper::unwrap($saved),
+				NodeFactory::dataFor(Wrapper::unwrap($saved)),
+				NodeFactory::fieldNamesFor(Wrapper::unwrap($saved)),
+			);
+		$publish = ($form['publish'] ?? null) === '1';
 
 		return [
 			'saved' => true,
-			'message' => $draft === null ? __('editor:saved') : __('editor:changes-saved'),
+			'message' => match (true) {
+				$publish => __('editor:published-done'),
+				(bool) ($data['type']['record'] ?? false) => __('editor:saved'),
+				default => __('editor:draft-saved'),
+			},
+			'status' =>
+				$savedData === null || $this->origin()['embed'] !== null
+					? null
+					: $this->statusView($context, $cms, $savedData, null, true),
 			'errors' => [],
-			'published' => (bool) ($data['published'] ?? false),
-			'renderable' => (bool) ($data['type']['renderable'] ?? false),
 			'preview' => ($form['preview'] ?? null) === '1' ? $this->previewPath($node) : null,
-			'draft' => $draft,
 			'autosave' =>
 				$saved === null || $this->origin()['embed'] !== null
 					? null
@@ -351,16 +373,125 @@ final class Editor extends Panel
 		}
 
 		$fresh = Wrapper::unwrap($cms->node->working($node) ?? $result);
+		$data = $this->serializer($context, $cms)->read(
+			$fresh,
+			NodeFactory::dataFor($fresh),
+			NodeFactory::fieldNamesFor($fresh),
+		);
+		$saved = new Autosaves($context->db)->get($this->nodeId($fresh), $actor->id);
 
 		return [
 			'kind' => $kind,
 			'message' => $message,
-			'visibility' => [
-				'published' => (bool) NodeFactory::meta($fresh, 'published'),
-				'hidden' => (bool) NodeFactory::meta($fresh, 'hidden'),
-				'released' => NodeFactory::meta($fresh, 'released') !== null,
-			],
+			'status' => $this->statusView($context, $cms, $data, $saved, !(bool) ($data['locked'] ?? false)),
 		];
+	}
+
+	/**
+	 * Copies the node, as a draft never published, and opens the copy.
+	 */
+	public function duplicate(Context $context, Cms $cms, Factory $factory, string $node): Response
+	{
+		$result = $cms->node->byUid($node, published: null);
+
+		if (!$result) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$copy = new Duplicator($context, $cms, $this->types())->duplicate($result, $this->actor());
+		$edit = $this->origin()['links']->edit($copy['created'][0]);
+		$response = Response::create($factory);
+
+		if (!$this->request->hasHeader('HX-Request')) {
+			return $response->redirect($edit, 303);
+		}
+
+		return $this->reload($response, $edit, '#node-editor-duplicate');
+	}
+
+	/**
+	 * The editor's view of the node's status: its stages, from NodeStatus,
+	 * and what the head and the inspector offer for them.
+	 *
+	 * @param array<string, mixed> $data the serialized working state
+	 * @param ?array{changed: string, base: string} $autosave the user's
+	 * @return array<string, mixed>
+	 */
+	private function statusView(Context $context, Cms $cms, array $data, ?array $autosave, bool $autosaves): array
+	{
+		$type = is_array($data['type'] ?? null) ? $data['type'] : [];
+		$record = (bool) ($type['record'] ?? false);
+		$draft = is_array($data['draft'] ?? null) ? $data['draft'] : null;
+		$released = is_string($data['released'] ?? null) ? $data['released'] : null;
+		$status = NodeStatus::of(
+			record: $record,
+			published: (bool) ($data['published'] ?? false),
+			released: $released,
+			changed: (string) ($data['changed'] ?? ''),
+			editor: $this->userLabel($data['editor'] ?? null),
+			draft: $draft === null
+				? null
+				: [
+					'changed' => (string) ($draft['changed'] ?? ''),
+					'editorName' => is_string($draft['editorName'] ?? null) ? $draft['editorName'] : null,
+				],
+			autosave: $autosave === null ? null : ['changed' => $autosave['changed'], 'base' => $autosave['base']],
+		);
+		$stages = $status->stages(
+			fn(string $value, bool $time): string => (
+				$this->displayDate(
+					$value,
+					$time ? IntlDateFormatter::SHORT : IntlDateFormatter::NONE,
+				) ?? ''
+			),
+		);
+
+		return [
+			'record' => $record,
+			'stages' => $stages,
+			'sentence' => NodeStatus::sentence($stages),
+			'draft' => $status->draft,
+			'mine' => $status->mine,
+			'discardDraft' => $draft !== null,
+			'autosave' => $autosaves,
+			'liveUrl' => $status->website === 'online' && (bool) ($type['routable'] ?? false)
+				? $this->liveUrl($context, $cms, $data)
+				: null,
+			'visibility' => $record
+				? null
+				: [
+					'published' => (bool) ($data['published'] ?? false),
+					'hidden' => (bool) ($data['hidden'] ?? false),
+					'released' => $released !== null,
+				],
+		];
+	}
+
+	/**
+	 * Where visitors find the node: its live path in the default locale, or
+	 * the first one it has. A working copy may hold other paths, so they are
+	 * read from the live node then.
+	 *
+	 * @param array<string, mixed> $data
+	 */
+	private function liveUrl(Context $context, Cms $cms, array $data): ?string
+	{
+		$paths = $data['paths'] ?? [];
+
+		if (($data['draft'] ?? null) !== null) {
+			$live = $cms->node->byUid((string) ($data['uid'] ?? ''), published: null);
+			$paths = $live === null ? [] : NodeFactory::meta(Wrapper::unwrap($live), 'paths');
+		}
+
+		$paths = array_filter(
+			is_array($paths) ? $paths : [],
+			static fn(mixed $path): bool => is_string($path) && $path !== '',
+		);
+		$default = $context->locales()->getDefault()->id;
+
+		$path = $paths[$default] ?? reset($paths);
+
+		return is_string($path) ? $path : null;
 	}
 
 	/**
@@ -380,26 +511,6 @@ final class Editor extends Panel
 			'confirm' => false,
 			'replace' => 'true',
 		], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
-	}
-
-	/**
-	 * The working copy's facts for the editor: when it diverged, and who
-	 * last saved it.
-	 *
-	 * @return ?array{since: ?string, editor: ?string}
-	 */
-	private function draftFacts(mixed $draft): ?array
-	{
-		if (!is_array($draft)) {
-			return null;
-		}
-
-		$editor = $draft['editorName'] ?? null;
-
-		return [
-			'since' => $this->displayDate($draft['created'] ?? null),
-			'editor' => is_string($editor) && trim($editor) !== '' ? $editor : null,
-		];
 	}
 
 	private function nodeStore(Context $context, Cms $cms): Store
@@ -462,8 +573,7 @@ final class Editor extends Panel
 				'saved' => false,
 				'message' => (string) ($payload['message'] ?? __('node:invalid-data')),
 				'errors' => $this->issues($payload),
-				'published' => (bool) ($data['published'] ?? false),
-				'renderable' => (bool) ($data['type']['renderable'] ?? false),
+				'toast' => $this->origin()['embed'] === null,
 				'preview' => null,
 			];
 		}
@@ -718,8 +828,7 @@ final class Editor extends Panel
 			'saved' => false,
 			'message' => __('editor:incomplete-form'),
 			'errors' => [],
-			'published' => (bool) ($data['published'] ?? false),
-			'renderable' => (bool) ($data['type']['renderable'] ?? false),
+			'toast' => $this->origin()['embed'] === null,
 			'preview' => null,
 		];
 	}
@@ -1120,6 +1229,7 @@ final class Editor extends Panel
 	 * @param list<string> $pathSourceFields
 	 * @param array<string, mixed> $meta
 	 * @param ?AutosaveState $autosave
+	 * @param ?array<string, mixed> $status
 	 * @return array<string, mixed>
 	 */
 	private function editorContext(
@@ -1130,6 +1240,7 @@ final class Editor extends Panel
 		array $pathSourceFields = [],
 		array $meta = [],
 		?array $autosave = null,
+		?array $status = null,
 	): array {
 		$locales = array_map(
 			static fn($locale) => [
@@ -1162,6 +1273,7 @@ final class Editor extends Panel
 			'pathSourceFields' => $pathSourceFields,
 			'meta' => $meta,
 			'autosave' => $autosave,
+			'status' => $status,
 		]);
 	}
 
@@ -1170,14 +1282,13 @@ final class Editor extends Panel
 	 * last editor's display name. Only an existing node has either.
 	 *
 	 * @param array<string, mixed> $data
-	 * @return array{created: ?string, editor: ?string, draft: ?array{since: ?string, editor: ?string}}
+	 * @return array{created: ?string, editor: ?string}
 	 */
 	private function nodeMeta(array $data): array
 	{
 		return [
 			'created' => $this->displayDate($data['created'] ?? null),
 			'editor' => $this->userLabel($data['editor'] ?? null),
-			'draft' => $this->draftFacts($data['draft'] ?? null),
 		];
 	}
 

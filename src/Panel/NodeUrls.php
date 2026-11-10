@@ -29,6 +29,11 @@ final class NodeUrls
 		return $this->url($this->path($uid) . '/discard', $this->origin());
 	}
 
+	public function duplicate(string $uid): string
+	{
+		return $this->url($this->path($uid) . '/duplicate', $this->origin());
+	}
+
 	public function visibility(string $uid): string
 	{
 		return $this->url($this->path($uid) . '/visibility', $this->origin());

@@ -52,24 +52,12 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->assertSame('Changed', $this->draftTitle('draft-plain'));
 
 		$html = $this->getHtmlResponse($response);
-		$this->assertHtmlNodeExists('//*[@id="editor-changes" and @hx-swap-oob="true" and not(@hidden)]', $html);
+		$this->assertHtmlNodeExists($this->stage('draft', 'present'), $html);
 		$this->assertHtmlNodeExists(
-			'//*[@id="editor-save-options" and @hx-swap-oob="true"]//button[@name="publish"][contains(., "Publish changes")]',
+			'//*[@id="editor-status-panel" and @hx-swap-oob="true"]//button[@form="node-editor-discard"]',
 			$html,
 		);
-		$this->assertHtmlNodeExists(
-			'//*[@id="editor-save-options"]//button[@form="node-editor-discard"]',
-			$html,
-		);
-		$this->assertHtmlNodeExists('//*[@id="editor-changes-note" and @hx-swap-oob="true" and not(@hidden)]', $html);
-		$this->assertHtmlNodeExists(
-			'//*[@id="editor-changes-note"]//button[@form="node-editor-discard"]',
-			$html,
-		);
-		$this->assertHtmlNodeExists(
-			'//*[@id="editor-changes-note"]//button[@form="node-editor-form"][@name="publish"][@data-editor-submit]',
-			$html,
-		);
+		$this->assertHtmlNodeExists('//*[@data-toast="success"][contains(., "Draft saved")]', $html);
 	}
 
 	public function testASaveWithoutChangesLeavesNoWorkingCopy(): void
@@ -82,10 +70,7 @@ final class PanelEditorDraftTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$this->assertNull($this->draftRow('draft-unchanged'));
-		$this->assertHtmlNodeExists(
-			'//*[@id="editor-save-options"]//button[@name="publish"][contains(., "Save and publish")]',
-			$this->getHtmlResponse($response),
-		);
+		$this->assertHtmlNodeExists($this->stage('draft', 'none'), $this->getHtmlResponse($response));
 	}
 
 	public function testSavingTheLiveStateAgainDropsTheWorkingCopy(): void
@@ -99,8 +84,8 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->assertNull($this->draftRow('draft-reverted'));
 		$this->assertSame('Live', $this->liveTitle('draft-reverted'));
 		$html = $this->getHtmlResponse($response);
-		$this->assertHtmlNodeExists('//*[@id="editor-changes" and @hidden]', $html);
-		$this->assertHtmlNodeMissing('//*[@id="editor-save-options"]//button[@form="node-editor-discard"]', $html);
+		$this->assertHtmlNodeExists($this->stage('draft', 'none'), $html);
+		$this->assertHtmlNodeMissing('//*[@id="editor-status-panel"]//button[@form="node-editor-discard"]', $html);
 	}
 
 	public function testTheEditorShowsTheWorkingCopy(): void
@@ -111,7 +96,7 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$html = (string) $this->makeRequest('GET', '/panel/node/draft-shown')->getBody();
 
 		$this->assertHtmlNodeExists('//input[@name="content[title][value][en]"][@value="Working"]', $html);
-		$this->assertHtmlNodeExists('//*[@id="editor-changes" and not(@hidden)]', $html);
+		$this->assertHtmlNodeExists($this->stage('draft', 'present'), $html);
 		$this->assertHtmlNodeExists('//form[@id="node-editor-discard"][@data-dirty-bypass]', $html);
 	}
 
@@ -139,12 +124,9 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->assertSame('Released', $this->liveTitle('draft-publish'));
 		$this->assertNull($this->draftRow('draft-publish'));
 		$html = $this->getHtmlResponse($response);
-		$this->assertHtmlNodeExists('//*[@id="editor-changes" and @hidden]', $html);
-		$this->assertHtmlNodeExists(
-			'//*[@id="editor-save-options"]//button[@name="publish"][contains(., "Save and publish")]',
-			$html,
-		);
-		$this->assertHtmlNodeMissing('//*[@id="editor-save-options"]//button[@form="node-editor-discard"]', $html);
+		$this->assertHtmlNodeExists($this->stage('draft', 'none'), $html);
+		$this->assertHtmlNodeExists($this->stage('website', 'online'), $html);
+		$this->assertHtmlNodeExists('//*[@data-toast="success"][contains(., "Published")]', $html);
 	}
 
 	public function testTheOnlineSwitchActsAtOnceAndKeepsTheWorkingCopy(): void
@@ -336,6 +318,44 @@ final class PanelEditorDraftTest extends End2EndTestCase
 			'headers' => ['HX-Request' => 'true'],
 			'body' => $body + ['_complete' => '1'],
 		]);
+	}
+
+	public function testARecordShowsTheStoredStateAndOnlySaves(): void
+	{
+		$this->createTestNode([
+			'uid' => 'draft-record-head',
+			'type' => $this->createTestType('test-submission'),
+			'content' => ['title' => ['type' => Text::class, 'value' => ['zxx' => 'Entry']]],
+		]);
+
+		$html = (string) $this->makeRequest('GET', '/panel/node/draft-record-head')->getBody();
+
+		$this->assertHtmlNodeExists($this->stage('saved', 'saved'), $html);
+		$this->assertHtmlNodeMissing("//*[@id='editor-status-dots']/*[@data-stage='website']", $html);
+		$this->assertHtmlNodeMissing('//button[@name="publish"]', $html);
+		$this->assertHtmlNodeMissing('//form[@id="node-editor-visibility"]', $html);
+	}
+
+	public function testDuplicatingOpensTheCopy(): void
+	{
+		$this->createPage('draft-original', 'Original', published: true);
+
+		$response = $this->makeRequest('POST', '/panel/node/draft-original/duplicate', [
+			'headers' => ['HX-Request' => 'true'],
+		]);
+
+		$location = json_decode($response->getHeaderLine('HX-Location'), true);
+		$this->assertIsArray($location);
+		$this->assertStringStartsWith('/panel/node/', $location['path']);
+		$this->assertNotSame('/panel/node/draft-original', $location['path']);
+		$copy = $this->nodeRow(substr($location['path'], strlen('/panel/node/')));
+		$this->assertNull($copy['released']);
+	}
+
+	/** The head's dot of a stage in a state. */
+	private function stage(string $stage, string $state): string
+	{
+		return "//*[@id='editor-status-dots']/*[@data-stage='{$stage}' and @data-state='{$state}']";
 	}
 
 	/** @param array<string, string> $states the switches' form, unchecked ones left out */

@@ -1,6 +1,7 @@
 <?php
 
 use Cosray\Panel\ContentLocales;
+use Cosray\Panel\Icon;
 
 use function Cosray\escape;
 
@@ -33,18 +34,10 @@ $routable = (bool) ($type['routable'] ?? false);
 $renderable = (bool) ($type['renderable'] ?? false);
 $published = (bool) ($node['published'] ?? false);
 $deletable = (bool) ($node['deletable'] ?? false);
-$draft = is_array($meta['draft'] ?? null) ? $meta['draft'] : null;
 $record = (bool) ($type['record'] ?? false);
 $contentLocales = ContentLocales::used($fields, count($locales));
 $edit = $mode === 'edit';
-$visibility = $edit && !$record && $embed === null
-	? [
-		'published' => $published,
-		'hidden' => (bool) ($node['hidden'] ?? false),
-		'released' => ($node['released'] ?? null) !== null,
-	]
-	: null;
-$showSettings = $routable || $renderable || $contentLocales || $visibility !== null;
+$showSettings = $routable || $renderable || $contentLocales || $edit;
 $panelCookie = u($panelCookie);
 $wideBlocks = $panelCookie->is('blocks', 'wide');
 $showSettings = $showSettings && $embed === null;
@@ -52,6 +45,8 @@ $action = $edit
 	? $links->edit($uid)
 	: $links->create((string) ($type['handle'] ?? ''), $parent);
 $autosave = u($autosave ?? null);
+$status = u($status ?? null);
+$status = is_array($status) ? $status : null;
 $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $autosave['restored'] : null;
 ?>
 
@@ -67,6 +62,12 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 	<header class="head">
 		<div class="titles">
 			<div class="line">
+				<?php if ($status !== null): ?>
+					<?php $this->include('component/status-dots', [
+						'status' => $status,
+						'id' => 'editor-status-dots',
+					]) ?>
+				<?php endif ?>
 				<?php if ($embed === null): ?>
 					<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
 						<a href="<?= escape($backUrl) ?>" hx-target="#frame"><?= escape($backLabel) ?></a>
@@ -74,24 +75,18 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 					</nav>
 				<?php endif ?>
 				<h1><?= $node['title'] ?? '' ?></h1>
-				<?php if ($renderable): ?>
-					<span
-						id="editor-published"
-						class="cms-status <?= $published ? 'is-published' : 'is-unpublished' ?>">
-						<?= escape($published ? __('editor:published') : __('editor:unpublished')) ?>
-					</span>
-					<span id="editor-changes" class="cms-status is-changes" <?= $draft ? '' : 'hidden' ?>>
-						<?= escape(__('editor:changes')) ?>
+				<?php if ($embed !== null): ?>
+					<?php // The embedding frame learns about unsaved edits from this pill. ?>
+					<span id="editor-dirty" class="cms-status is-unsaved" hidden>
+						<?= escape(__('editor:unsaved-changes')) ?>
 					</span>
 				<?php endif ?>
-				<span id="editor-dirty" class="cms-status is-unsaved" hidden>
-					<?= escape(__('editor:unsaved-changes')) ?>
-				</span>
 			</div>
 		</div>
 
 		<div class="actions">
-			<output id="editor-status" class="status" role="status"></output>
+			<?php // A save's outcome for the scripts; the node editor shows it as a toast. ?>
+			<output id="editor-status" class="status" role="status" <?= $embed === null ? 'hidden' : '' ?>></output>
 			<?php // Filled and shown by errors.js while a failed save has open issues. ?>
 			<div id="editor-problems" class="problems" hidden>
 				<button class="cms-problems" type="button" popovertarget="editor-problems-menu">
@@ -113,75 +108,112 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 					<?= escape(__('editor:cancel')) ?>
 				</button>
 				<button class="cms-button primary" type="submit" form="node-editor-form" data-editor-submit>
-					<?= \Cosray\Panel\Icon::render('floppy') ?>
+					<?= Icon::render('floppy') ?>
 					<?= escape(__('editor:save')) ?>
 				</button>
 			<?php else: ?>
-			<?php if ($edit && $deletable): ?>
-				<?php // Its own form: the editor form wraps the panes, and forms
-
-				// cannot nest. ?>
-				<form
-					id="node-editor-delete"
-					data-dirty-bypass
-					method="post"
-					action="<?= escape($links->delete($uid)) ?>"
-					hx-swap="none"
-					hx-confirm="<?= escape(__('editor:delete-confirm')) ?>"
-					data-confirm-action="<?= escape(__('editor:delete')) ?>"
-					data-confirm-tone="danger">
-					<?php $this->include('component/csrf') ?>
-					<button class="cms-button danger" type="submit">
-						<?= \Cosray\Panel\Icon::render('trash3') ?>
-						<?= escape(__('editor:delete')) ?>
+				<?php if ($edit): ?>
+					<button
+						class="cms-button secondary square"
+						type="button"
+						popovertarget="editor-more"
+						aria-haspopup="menu"
+						aria-label="<?= escape(__('editor:more')) ?>"
+						title="<?= escape(__('editor:more')) ?>">
+						<?= Icon::render('three-dots-vertical') ?>
 					</button>
-				</form>
-			<?php endif ?>
-			<?php if ($edit && $renderable): ?>
-				<?php // Discarding the working copy: its own form like delete, submitted
-
-				// from the save menu. Hidden so the empty element does not take a gap
-				// in the action row. The unsaved-changes guard stands aside; dropping
-				// the unsaved edits is the point, and hx-confirm asks once. ?>
-				<form
-					id="node-editor-discard"
-					method="post"
-					action="<?= escape($links->discard($uid)) ?>"
-					hx-swap="none"
-					hx-confirm="<?= escape(__('editor:discard-confirm')) ?>"
-					data-confirm-action="<?= escape(__('editor:discard-changes')) ?>"
-					data-confirm-tone="danger"
-					data-dirty-bypass
-					data-autosave-drop
-					hidden><?php $this->include('component/csrf') ?></form>
-			<?php endif ?>
-			<?php if ($edit && $routable && $renderable): ?>
+					<div id="editor-more" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
+						<button type="submit" form="node-editor-duplicate">
+							<?= Icon::render('copy') ?>
+							<?= escape(__('editor:duplicate')) ?>
+						</button>
+						<?php if ($deletable): ?>
+							<button type="submit" form="node-editor-delete" class="danger">
+								<?= Icon::render('trash3') ?>
+								<?= escape(__('editor:delete')) ?>
+							</button>
+						<?php endif ?>
+					</div>
+				<?php endif ?>
+				<?php if ($edit && $routable && $renderable): ?>
+					<div class="cms-split-button">
+						<button
+							class="cms-button secondary square"
+							type="submit"
+							form="node-editor-form"
+							name="preview"
+							value="1"
+							data-editor-submit
+							aria-label="<?= escape(__('editor:preview-current')) ?>"
+							title="<?= escape(__('editor:preview-current')) ?>">
+							<?= Icon::render('eye') ?>
+						</button>
+						<button
+							class="cms-button secondary toggle"
+							type="button"
+							popovertarget="editor-preview-options"
+							aria-haspopup="menu"
+							aria-label="<?= escape(__('editor:preview-options')) ?>">
+							<?= Icon::render('chevron-down') ?>
+						</button>
+						<div
+							id="editor-preview-options"
+							class="cms-action-menu"
+							popover="auto"
+							data-action-menu
+							data-align="end">
+							<button type="submit" form="node-editor-form" name="preview" value="1" data-editor-submit>
+								<?= Icon::render('eye') ?>
+								<?= escape(__('editor:preview-current')) ?>
+							</button>
+							<?php $liveUrl = $status['liveUrl'] ?? null; ?>
+							<?php if (is_string($liveUrl)): ?>
+								<a href="<?= escape($liveUrl) ?>" target="_blank" rel="noopener">
+									<?= Icon::render('box-arrow-up-right') ?>
+									<?= escape(__('status:website-open')) ?>
+								</a>
+							<?php else: ?>
+								<button type="button" disabled>
+									<?= Icon::render('box-arrow-up-right') ?>
+									<?= escape(__('status:website-open')) ?>
+								</button>
+							<?php endif ?>
+						</div>
+					</div>
+				<?php endif ?>
+				<?php
+				$mine = (string) ($status['mine'] ?? 'none');
+				$publishable = $edit && !$record;
+				?>
 				<button
-					class="cms-button secondary"
+					class="cms-button <?= $publishable ? 'secondary' : 'primary' ?>"
 					type="submit"
 					form="node-editor-form"
-					name="preview"
-					value="1"
-					data-editor-submit>
-					<?= \Cosray\Panel\Icon::render('eye') ?>
-					<?= escape(__('editor:preview')) ?>
+					data-editor-submit
+					<?= $edit ? 'data-needs="mine"' : '' ?>
+					<?= $edit && $mine === 'none' ? 'disabled' : '' ?>>
+					<?= Icon::render('floppy') ?>
+					<span
+						data-save-label
+						data-normal="<?= escape(__('editor:save')) ?>"
+						data-conflict="<?= escape(__('editor:save-anyway')) ?>"><?= escape(__(
+						$mine === 'conflict' ? 'editor:save-anyway' : 'editor:save',
+					)) ?></span>
 				</button>
-			<?php endif ?>
-			<div class="cms-split-button">
-				<button class="cms-button primary" type="submit" form="node-editor-form" data-editor-submit>
-					<?= \Cosray\Panel\Icon::render('floppy') ?>
-					<?= escape(__('editor:save')) ?>
-				</button>
-				<button
-					class="cms-button primary toggle"
-					type="button"
-					popovertarget="editor-save-options"
-					aria-haspopup="menu"
-					aria-label="<?= escape(__('editor:save-options')) ?>">
-					<?= \Cosray\Panel\Icon::render('chevron-down') ?>
-				</button>
-				<?php $this->include('node/save-options', ['draft' => $draft]) ?>
-			</div>
+				<?php if ($publishable): ?>
+					<button
+						class="cms-button primary"
+						type="submit"
+						form="node-editor-form"
+						name="publish"
+						value="1"
+						data-editor-submit
+						data-needs="mine draft"
+						<?= $mine === 'none' && !($status['draft'] ?? false) ? 'disabled' : '' ?>>
+						<?= Icon::render('cloud-upload') ?>
+						<?= escape(__('editor:publish')) ?>
+					</button>
+				<?php endif ?>
 			<?php endif ?>
 		</div>
 	</header>
@@ -254,7 +286,7 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 				'defaultLocale' => $defaultLocale,
 				'routable' => $routable,
 				'renderable' => $renderable,
-				'visibility' => $visibility,
+				'status' => $status,
 				'pathsUrl' => $edit
 					? $links->paths($uid)
 					: $links->createPaths((string) ($type['handle'] ?? ''), $parent),
@@ -274,7 +306,47 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 	</form>
 
 	<div id="editor-preview" hidden></div>
-	<?php if ($visibility !== null): ?>
+	<?php if ($edit && $embed === null): ?>
+		<?php // The head's menu and the status tab submit these; the editor form
+
+		// wraps the panes, and forms cannot nest. ?>
+		<form
+			id="node-editor-duplicate"
+			method="post"
+			action="<?= escape($links->duplicate($uid)) ?>"
+			hx-swap="none"
+			hidden><?php $this->include('component/csrf') ?></form>
+		<?php if ($deletable): ?>
+			<form
+				id="node-editor-delete"
+				data-dirty-bypass
+				method="post"
+				action="<?= escape($links->delete($uid)) ?>"
+				hx-swap="none"
+				hx-confirm="<?= escape(__('editor:delete-confirm')) ?>"
+				data-confirm-action="<?= escape(__('editor:delete')) ?>"
+				data-confirm-tone="danger"
+				hidden><?php $this->include('component/csrf') ?></form>
+		<?php endif ?>
+		<?php if (!$record): ?>
+			<?php // Discarding the working copy drops the unsaved edits too: the
+
+			// unsaved-changes guard stands aside, and hx-confirm asks once. ?>
+			<form
+				id="node-editor-discard"
+				method="post"
+				action="<?= escape($links->discard($uid)) ?>"
+				hx-swap="none"
+				hx-confirm="<?= escape(__('editor:discard-confirm')) ?>"
+				data-confirm-action="<?= escape(__('editor:discard-draft')) ?>"
+				data-confirm-tone="danger"
+				data-dirty-bypass
+				data-autosave-drop
+				data-done-toast="<?= escape(__('editor:draft-discarded')) ?>"
+				hidden><?php $this->include('component/csrf') ?></form>
+		<?php endif ?>
+	<?php endif ?>
+	<?php if (is_array($status['visibility'] ?? null)): ?>
 		<?php // The online and listing switches act at once, apart from the save:
 
 		// their own form, outside the editor form, which forms cannot nest in. ?>
@@ -289,21 +361,22 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 	<?php if (is_array($autosave)): ?>
 		<?php $this->include('node/autosave', ['autosave' => $autosave]) ?>
 	<?php endif ?>
-	<?php if ($restored !== null): ?>
-		<?php // Submitted from the restored note; outside the editor form, as
+	<?php if (is_array($autosave)): ?>
+		<?php // Drops the user's edits; outside the editor form, as forms cannot
 
-		// forms cannot nest. data-autosave-drop keeps the pending edits from
-		// being autosaved on the way out. ?>
+		// nest. data-autosave-drop keeps the pending edits from being autosaved
+		// on the way out. ?>
 		<form
 			id="editor-autosave-discard"
 			method="post"
-			action="<?= escape((string) $restored['discard']) ?>"
+			action="<?= escape($links->discardAutosave($uid)) ?>"
 			hx-swap="none"
-			hx-confirm="<?= escape(__('editor:restored-discard-confirm')) ?>"
-			data-confirm-action="<?= escape(__('editor:restored-discard')) ?>"
+			hx-confirm="<?= escape(__('editor:mine-discard-confirm')) ?>"
+			data-confirm-action="<?= escape(__('editor:mine-discard')) ?>"
 			data-confirm-tone="danger"
 			data-dirty-bypass
 			data-autosave-drop
+			data-done-toast="<?= escape(__('editor:mine-discarded')) ?>"
 			hidden><?php $this->include('component/csrf') ?></form>
 	<?php endif ?>
 	<?php if (array_any(

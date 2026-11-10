@@ -176,6 +176,16 @@ This avoids `max_input_vars` silently truncating a large urlencoded form. Becaus
 
 [FormPatch](../src/Panel/FormPatch.php) merges values into stored content. `#[Immutable]` fields are ignored on save; their editors should expose reading rather than offer changes that will be discarded. Preserve submission semantics when experimenting with form layout or state management.
 
+## Editor status
+
+One class, [Panel\NodeStatus](../src/Panel/NodeStatus.php), derives a node's stages for the editor and the lists: the website (online, offline, or never published), the draft, and the current user's own edits, kept as an autosave. A [record](content.md#working-copies) has two, the stored state and the user's edits. A conflict is an autosave that started from an older state than the working one. Before its first publication a node's working state lives in the node itself and counts as its draft.
+
+- The head shows the stages as dots, [component/status-dots](../panel/views/component/status-dots.php): a button whose tooltip and accessible name spell them out and which opens the inspector's status tab. Beside the breadcrumb and the title come the actions: a menu to duplicate or delete, the preview with a menu that also opens the website, Save, which needs edits of the user's, and Publish, which needs edits or a draft. A record has only the menu and Save.
+- The status tab, [node/status](../panel/views/node/status.php), lists the stages top to bottom with what each means and what can be done there: open the website and switch it online, discard the draft, discard the user's own edits. The listing switch follows below.
+- Between saves, [status.js](../panel/src/behaviors/status.js) moves the user's stage through states the server never sees, from the events [autosave.js](../panel/src/behaviors/autosave.js) dispatches: saving while an autosave is pending or in flight, kept, or failed and retried. It enables Save and Publish to match, and shows the toast a form marked `data-done-toast` names once its request succeeded, which outlives the editor the form reloads.
+
+A save, a publication and a switch report as a [toast](panel-styles.md#toasts); a save refused with issues keeps the [validation summary](#validation-errors).
+
 ## Save response
 
 The current save path leaves the form mounted and returns out-of-band updates for status, errors, publication, working-copy state, and preview. Replacing the form would lose unsaved client state. The coupled payload and targets live in [Editor](../src/Controller/Panel/Editor.php), [editor-save.php](../panel/views/editor-save.php), and the [save tests](../tests/End2End/PanelEditorSaveTest.php), not a second list of IDs here.

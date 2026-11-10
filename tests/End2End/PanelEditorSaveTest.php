@@ -1144,7 +1144,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertSame('panel-save-handle', $handle['handle'] ?? null);
 	}
 
-	public function testPublishingChecksThePublishedSwitch(): void
+	public function testPublishingChecksTheOnlineSwitch(): void
 	{
 		$this->createTestNode([
 			'uid' => 'panel-save-publish-switch',
@@ -1158,9 +1158,8 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		]);
 
 		$this->assertResponseOk($response);
-		// Left unchecked, the switch would unpublish the node on the next save.
 		$this->assertHtmlNodeExists(
-			'//input[@id="editor-published-switch" and @hx-swap-oob="true" and @checked]',
+			'//*[@id="editor-status-panel" and @hx-swap-oob="true"]//input[@id="editor-published-switch" and @checked]',
 			$this->getHtmlResponse($response),
 		);
 	}

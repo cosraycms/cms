@@ -11,11 +11,12 @@ use function Cosray\escape;
 $saved = (bool) $saved;
 $message = (string) $message;
 $errors = (array) u($errors);
-$published = (bool) (u($published ?? null) ?? false);
-$renderable = (bool) (u($renderable ?? null) ?? false);
 $preview = u($preview ?? null);
-$draft = u($draft ?? null);
-$draft = is_array($draft) ? $draft : null;
+// The node editor's status view; without it (users, embedded editors) the
+// head's status output says how the save went.
+$status = u($status ?? null);
+$status = is_array($status) ? $status : null;
+$toast = $status !== null || (bool) (u($toast ?? null) ?? false);
 
 // The controller reduces validation issues to message + path; anything
 // else is not renderable and must not be swallowed quietly by walking
@@ -32,7 +33,11 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	class="status <?= $saved ? 'is-success' : 'is-error' ?>"
 	role="status"
 	<?= $saved ? 'data-saved="true"' : '' ?>
-	hx-swap-oob="true"><?= $saved || $issues === [] ? escape($message) : '' ?></output>
+	<?= $toast ? 'hidden' : '' ?>
+	hx-swap-oob="true"><?= !$toast && ($saved || $issues === []) ? escape($message) : '' ?></output>
+<?php if ($toast && ($saved || $issues === []) && $message !== ''): ?>
+	<?php $this->include('component/toast', ['kind' => $saved ? 'success' : 'error', 'message' => $message]) ?>
+<?php endif ?>
 <?php // errors.js turns the issues into the jump chips, the field messages and
 
 // the header's problem count, and keeps them current while the user edits. ?>
@@ -69,31 +74,14 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		</div>
 	<?php endif ?>
 </div>
-<?php if ($saved && $renderable): ?>
-	<span
-		id="editor-published"
-		class="cms-status <?= $published ? 'is-published' : 'is-unpublished' ?>"
-		hx-swap-oob="true"><?= escape($published ? __('editor:published') : __('editor:unpublished')) ?></span>
-	<?php // Save and publish changes the flag behind the switch's back; left
-	// stale, the switch would unpublish the node again on the next save. ?>
-	<input
-		id="editor-published-switch"
-		type="checkbox"
-		class="cms-switch"
-		name="published"
-		value="1"
-		hx-swap-oob="true"
-		<?= $published ? 'checked' : '' ?> />
-	<?php // The working copy came or went with this save: the chip, the save
-
-	// menu's entries and the note under the switch follow it. ?>
-	<span
-		id="editor-changes"
-		class="cms-status is-changes"
-		hx-swap-oob="true"
-		<?= $draft ? '' : 'hidden' ?>><?= escape(__('editor:changes')) ?></span>
-	<?php $this->include('node/save-options', ['draft' => $draft, 'oob' => true]) ?>
-	<?php $this->include('node/changes-note', ['draft' => $draft, 'oob' => true]) ?>
+<?php if ($saved && $status !== null): ?>
+	<?php // The stages follow the save: the head's dots and the status tab. ?>
+	<?php $this->include('component/status-dots', [
+		'status' => $status,
+		'id' => 'editor-status-dots',
+		'oob' => true,
+	]) ?>
+	<?php $this->include('node/status', ['status' => $status, 'oob' => true]) ?>
 <?php endif ?>
 <?php if ($saved && is_array(u($autosave ?? null))): ?>
 	<?php $this->include('node/autosave', ['autosave' => $autosave, 'oob' => true]) ?>

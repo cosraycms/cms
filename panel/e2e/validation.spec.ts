@@ -48,5 +48,5 @@ test('a failed save names the open fields and follows the edits', async ({ page 
 
 	await save(page);
 	await expect(summary).toBeHidden();
-	await expect(page.locator('#editor-status')).toHaveText(/saved/i);
+	await expect(page.locator('#cms-toasts')).toContainText(/saved/i);
 });
