@@ -469,6 +469,7 @@ final class Menus extends Panel
 			'preview' => $cms->menu($menu)->html(),
 			'pane' => $pane,
 			'notice' => $this->notice($menu),
+			'noticeKind' => $this->request->param('notice', '') === 'move-rejected' ? 'warning' : 'success',
 			'undo' => $this->undoMove($menu),
 			'urls' => [
 				'tree' => $this->url($menu),

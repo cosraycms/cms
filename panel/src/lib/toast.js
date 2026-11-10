@@ -2,7 +2,9 @@
 // own on the page, like a finished upload or a refused action. They gather
 // in the document's #cms-toasts live region. A server response adds one out
 // of band as a plain `<div data-toast="error">message</div>` appended to the
-// region; install() turns those into toasts after every swap.
+// region; install() turns those into toasts after every swap. A full page
+// load leaves them in their out-of-band wrapper, which install() empties
+// into the region.
 
 import { __ } from './locale.js';
 
@@ -100,6 +102,11 @@ function settle() {
 
 /** @returns {() => void} */
 export function install() {
+	for (const wrapper of document.querySelectorAll(`[hx-swap-oob="beforeend:#${REGION}"]`)) {
+		region().append(...wrapper.children);
+		wrapper.remove();
+	}
+
 	settle();
 	document.addEventListener('htmx:after:swap', settle);
 

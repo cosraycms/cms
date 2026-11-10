@@ -12,6 +12,7 @@ $preview = (string) u($preview);
 $pane = u($pane);
 $notice = u($notice ?? null);
 $undo = u($undo ?? null);
+$noticeKind = (string) u($noticeKind ?? 'success');
 $urls = (array) u($urls);
 $props = (array) u($props);
 $locales = (array) $props['locales'];
@@ -46,21 +47,22 @@ $defaultLocale = (string) $props['defaultLocale'];
 	<div class="body">
 		<?php $this->include('menu/properties') ?>
 
-		<?php if (is_string($notice)): ?>
+		<?php // A notice that offers to undo stays; the rest is a toast. ?>
+		<?php if (is_string($notice) && !is_array($undo)): ?>
+			<?php $this->include('component/toast', ['kind' => $noticeKind, 'message' => $notice]) ?>
+		<?php elseif (is_string($notice)): ?>
 			<div class="cms-notice" role="status">
 				<p><?= escape($notice) ?></p>
-				<?php if (is_array($undo)): ?>
-					<form method="post" action="<?= escape((string) $undo['action']) ?>">
-						<?php $this->include('component/csrf') ?>
-						<input type="hidden" name="parent" value="<?= escape(
-							(string) $undo['parent'],
-						) ?>" />
-						<input type="hidden" name="index" value="<?= escape(
-							(string) $undo['index'],
-						) ?>" />
-						<button type="submit" class="undo"><?= escape(__('menu:undo')) ?></button>
-					</form>
-				<?php endif ?>
+				<form method="post" action="<?= escape((string) $undo['action']) ?>">
+					<?php $this->include('component/csrf') ?>
+					<input type="hidden" name="parent" value="<?= escape(
+						(string) $undo['parent'],
+					) ?>" />
+					<input type="hidden" name="index" value="<?= escape(
+						(string) $undo['index'],
+					) ?>" />
+					<button type="submit" class="undo"><?= escape(__('menu:undo')) ?></button>
+				</form>
 			</div>
 		<?php endif ?>
 

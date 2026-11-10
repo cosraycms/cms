@@ -201,11 +201,12 @@ final class Collection extends Panel
 	}
 
 	/**
-	 * The bulk-action result summary from the redirect's `notice` param
-	 * (`key:count` pairs), reduced to display strings. Display-only, so
-	 * unknown or malformed parts are dropped rather than rejected.
+	 * The result summary of a bulk action or a delete from the redirect's
+	 * `notice` param (`key:count` pairs), as toasts; skipped entries warn.
+	 * Display-only, so unknown or malformed parts are dropped rather than
+	 * rejected.
 	 *
-	 * @return list<string>
+	 * @return list<array{kind: string, message: string}>
 	 */
 	private function notice(): array
 	{
@@ -267,7 +268,10 @@ final class Collection extends Panel
 				continue;
 			}
 
-			$messages[] = $keys[$key]((int) $count);
+			$messages[] = [
+				'kind' => str_starts_with($key, 'skipped') ? 'warning' : 'success',
+				'message' => $keys[$key]((int) $count),
+			];
 		}
 
 		return $messages;

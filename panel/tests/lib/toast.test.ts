@@ -63,4 +63,18 @@ describe('toasts', () => {
 		expect(item.querySelector('button.close')?.getAttribute('aria-label')).toBe('Close');
 		expect(item.hasAttribute('data-toast')).toBe(false);
 	});
+
+	it('moves the toasts a full page rendered out of band into the region', () => {
+		uninstall?.();
+		document.body.insertAdjacentHTML(
+			'afterbegin',
+			'<div hx-swap-oob="beforeend:#cms-toasts" hidden><div data-toast="success">Deleted</div></div>',
+		);
+		uninstall = install();
+
+		expect(toasts().map((item) => item.querySelector('.message')?.textContent)).toEqual([
+			'Deleted',
+		]);
+		expect(document.querySelector('[hx-swap-oob]')).toBeNull();
+	});
 });

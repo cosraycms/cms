@@ -764,13 +764,19 @@ final class Editor extends Panel
 		}
 
 		$response = Response::create($factory);
+		$back = $origin['backUrl'];
+
+		// A collection says so in a toast; the redirect has to carry it.
+		if ($origin['activeCollection'] !== null) {
+			$back .= (str_contains($back, '?') ? '&' : '?') . 'notice=deleted%3A1';
+		}
 
 		if (!$this->request->hasHeader('HX-Request')) {
-			return $response->redirect($origin['backUrl'], 303);
+			return $response->redirect($back, 303);
 		}
 
 		return $response->header('HX-Location', json_encode([
-			'path' => $origin['backUrl'],
+			'path' => $back,
 			'target' => '#frame',
 			'swap' => 'innerHTML show:top',
 			'source' => '#node-editor-delete',

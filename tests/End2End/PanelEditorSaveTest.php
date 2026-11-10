@@ -1188,7 +1188,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		$this->assertResponseStatus(303, $response);
 		$this->assertSame(
-			'/panel/collection/test-articles?q=Doomed&offset=50',
+			'/panel/collection/test-articles?q=Doomed&offset=50&notice=deleted%3A1',
 			$response->getHeaderLine('Location'),
 		);
 

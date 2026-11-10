@@ -130,7 +130,8 @@ A footer puts Cancel (`secondary`) first and the action last: `primary`, or `dan
 A toast reports an event that has no place of its own on the page: a finished upload, a refused action, a background failure. State that belongs to a place stays there, such as the editor's save state in its head or validation errors at their fields. Toasts gather in the document's `#cms-toasts` live region; [toast.js](../panel/src/lib/toast.js) shows successes and notes for five seconds, paused under the pointer or focus, and keeps warnings and errors until closed.
 
 - From a script: `toast(kind, message)` of toast.js, with `success`, `info`, `warning` or `error`. Element controls reach it through the [bridge](controls.md#the-windowcosray-bridge).
-- From a response: include [component/toast](../panel/views/component/toast.php) with `kind` and `message`. It appends a plain `data-toast` element to the region out of band, which toast.js turns into a toast after the swap. A route whose response is only a toast renders the `toast` view.
+- From a response: include [component/toast](../panel/views/component/toast.php) with `kind` and `message`. It appends a plain `data-toast` element to the region out of band, which toast.js turns into a toast after the swap; on a full page load, toast.js moves it into the region first. A route whose response is only a toast renders the `toast` view.
+- Across a redirect: the action adds a `notice` query param, which the page it leads to turns into toasts and [bulk.js](../panel/src/behaviors/bulk.js) strips from the address. Collections read `key:count` pairs, such as the bulk results or `deleted:1` after a delete in the editor; users and menus read one key each. A notice that offers an action, such as undoing a menu move, stays a banner on the page.
 
 ## Shared shells and fields
 

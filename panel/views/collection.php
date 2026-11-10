@@ -98,13 +98,9 @@ $columns .= $hasRowActions ? ' max-content' : '';
 	</header>
 
 	<div class="body">
-		<?php if (count($notice) > 0): ?>
-			<div class="cms-notice" role="status">
-				<?php foreach ($notice as $message): ?>
-					<p><?= escape((string) $message) ?></p>
-				<?php endforeach ?>
-			</div>
-		<?php endif ?>
+		<?php foreach ($notice as $toast): ?>
+			<?php $this->include('component/toast', (array) u($toast)) ?>
+		<?php endforeach ?>
 
 		<div class="toolbar">
 			<form

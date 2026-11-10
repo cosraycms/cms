@@ -92,9 +92,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			<div class="pane-scroll">
 				<div class="inner">
 					<?php if (is_string($notice)): ?>
-						<div class="cms-notice" role="status">
-							<p><?= escape($notice) ?></p>
-						</div>
+						<?php $this->include('component/toast', ['kind' => 'success', 'message' => $notice]) ?>
 					<?php endif ?>
 					<div id="editor-errors" class="errors" hidden></div>
 

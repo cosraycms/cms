@@ -29,9 +29,7 @@ $createUrl = (string) $menuCreateUrl;
 
 	<div class="body">
 		<?php if (is_string($notice)): ?>
-			<div class="cms-notice" role="status">
-				<p><?= escape($notice) ?></p>
-			</div>
+			<?php $this->include('component/toast', ['kind' => 'success', 'message' => $notice]) ?>
 		<?php endif ?>
 
 		<div class="card">

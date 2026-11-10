@@ -776,7 +776,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		);
 	}
 
-	public function testNoticeParamRendersBannerAndIgnoresGarbage(): void
+	public function testNoticeParamRendersToastsAndIgnoresGarbage(): void
 	{
 		$this->createNode(uid: 'bulk-notice-a', title: 'Notice A');
 
@@ -786,9 +786,8 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('cms-notice', $html);
-		$this->assertStringContainsString('2 entries published', $html);
-		$this->assertStringContainsString('1 locked entry skipped', $html);
+		$this->assertHtmlNodeExists('//*[@data-toast="success"][.="2 entries published"]', $html);
+		$this->assertHtmlNodeExists('//*[@data-toast="warning"][.="1 locked entry skipped"]', $html);
 		$this->assertStringNotContainsString('hack', $html);
 	}
 
