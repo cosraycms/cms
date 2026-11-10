@@ -480,6 +480,14 @@ class Routes
 					->middleware($panelAuth);
 				$panel
 					->post(
+						'/node/{node:[A-Za-z0-9-_.]{1,64}}/preview',
+						[Panel\Editor::class, 'preview'],
+						'editor.preview',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('editor-preview'));
+				$panel
+					->post(
 						'/node/{node:[A-Za-z0-9-_.]{1,64}}/duplicate',
 						[Panel\Editor::class, 'duplicate'],
 						'editor.duplicate',

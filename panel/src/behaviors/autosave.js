@@ -1,14 +1,11 @@
 // Keeps the editor's unsaved edits on the server while they are made, so a
-// reload, a closed tab or a crash loses nothing, and offers to show or
-// discard them when the editor opens again. An autosave is not a save: it
-// never changes the node, and leaving the editor still asks. The editor
-// page's #editor-autosave element says where to send the edits and whether
-// there is one to restore; without it, as for a new node, nothing is kept.
+// reload, a closed tab or a crash loses nothing: the editor opens with them
+// again. An autosave is not a save: it never changes the node. The editor
+// page's #editor-autosave element says where to send the edits; without
+// it, as for a new node, nothing is kept.
 
 import { csrfToken, HEADER, noticeRefusal } from '../lib/csrf.js';
 import { nest } from '../lib/form-json.js';
-import { __ } from '../lib/locale.js';
-import { button, frame, openModal } from '../lib/modal.js';
 
 const FORM = '#node-editor-form';
 const STATE = 'editor-autosave';
@@ -31,6 +28,7 @@ let edits = 0;
 let kept = 0;
 let submitted = 0;
 let sending = false;
+let failed = false;
 /** @type {ReturnType<typeof setTimeout> | undefined} */
 let pause;
 /** @type {ReturnType<typeof setTimeout> | undefined} */
@@ -58,6 +56,17 @@ export function autosaved() {
 	const current = document.querySelector(FORM);
 
 	return state() !== null && current !== null && (current !== form || edits === kept);
+}
+
+/**
+ * Whether the editor keeps its edits as an autosave and the last attempt
+ * to send them did not fail, so leaving inside the panel loses nothing:
+ * the pending edits go out on the way.
+ *
+ * @returns {boolean}
+ */
+export function keeping() {
+	return state() !== null && !failed;
 }
 
 function clear() {
@@ -92,6 +101,7 @@ function mark(event) {
 	if (edited !== form) {
 		form = edited;
 		edits = kept = submitted = 0;
+		failed = false;
 		clear();
 	}
 
@@ -142,6 +152,7 @@ async function send(keepalive = false) {
 		noticeRefusal(response);
 
 		if (response.ok && form === target) {
+			failed = false;
 			kept = Math.max(kept, sent);
 			/** @type {{ kept?: boolean }} */
 			const result = await response.json().catch(() => ({}));
@@ -150,11 +161,13 @@ async function send(keepalive = false) {
 				report(result.kept === false ? 'dropped' : 'kept');
 			}
 		} else if (form === target) {
+			failed = true;
 			report('failed');
 		}
 	} catch {
 		// Offline or refused: the edits stay pending and are tried again.
 		if (form === target) {
+			failed = true;
 			report('failed');
 		}
 	} finally {
@@ -219,8 +232,6 @@ function settle() {
 	if (element?.hasAttribute('data-saved')) {
 		element.removeAttribute('data-saved');
 		kept = Math.max(kept, submitted);
-		document.getElementById('editor-restored')?.remove();
-		document.getElementById('editor-autosave-discard')?.remove();
 		document.querySelectorAll('[data-restored-mark]').forEach((mark) => mark.remove());
 
 		if (edits === kept) {
@@ -228,102 +239,6 @@ function settle() {
 		} else {
 			schedule();
 		}
-	}
-
-	void offer();
-}
-
-/**
- * Asks what becomes of the autosave. Discard drops it, Show loads it into
- * the editor; closing the dialog leaves it for the next time.
- *
- * @param {HTMLElement} owner
- * @param {string} message
- * @returns {Promise<'show' | 'discard' | null>}
- */
-function ask(owner, message) {
-	return new Promise((resolve) => {
-		/** @type {'show' | 'discard' | null} */
-		let answer = null;
-		/** @param {'show' | 'discard'} choice */
-		const choose = (choice) => () => {
-			answer = choice;
-			handle.close();
-		};
-		const handle = openModal(
-			(host) => {
-				const discard = button(__('editor:restore-discard'), 'danger', choose('discard'));
-				const show = button(__('editor:restore'), 'primary', choose('show'));
-				show.dataset.dialogFocus = '';
-				const text = document.createElement('p');
-				text.className = 'question';
-				text.textContent = message;
-				frame(host, __('editor:unsaved'), [text], [discard, show]).classList.add('cms-confirm');
-
-				return () => resolve(answer);
-			},
-			{ owner, size: 'compact' },
-		);
-	});
-}
-
-/**
- * @param {string} url
- */
-async function discard(url) {
-	if (!url) {
-		return;
-	}
-
-	try {
-		noticeRefusal(
-			await fetch(url, {
-				method: 'POST',
-				credentials: 'same-origin',
-				headers: {
-					Accept: 'application/json',
-					'X-Requested-With': 'xmlhttprequest',
-					[HEADER]: csrfToken(),
-				},
-			}),
-		);
-	} catch {
-		// Offline: the autosave stays and is offered again.
-	}
-}
-
-async function offer() {
-	const element = state();
-	const url = element?.dataset.restoreUrl;
-
-	if (!element || !url || element.hasAttribute('data-asked')) {
-		return;
-	}
-
-	element.setAttribute('data-asked', '');
-	const stale = element.hasAttribute('data-restore-stale');
-	const answer = await ask(
-		element,
-		[
-			__('editor:restore-confirm', { time: element.dataset.restoreTime ?? '' }),
-			stale ? __('editor:restore-stale') : '',
-		]
-			.filter(Boolean)
-			.join(' '),
-	);
-
-	if (!element.isConnected) {
-		return;
-	}
-
-	if (answer === 'discard') {
-		await discard(element.dataset.discardUrl ?? '');
-	} else if (answer === 'show') {
-		await htmx.ajax('GET', url, {
-			target: '#main',
-			swap: 'innerHTML show:top',
-			replace: location.pathname + location.search,
-		});
 	}
 }
 
@@ -337,12 +252,12 @@ export function install() {
 	document.addEventListener('htmx:after:swap', settle);
 	document.addEventListener('visibilitychange', hide);
 	window.addEventListener('pagehide', hide);
-	void offer();
 
 	return () => {
 		clear();
 		form = null;
 		edits = kept = submitted = 0;
+		failed = false;
 		document.removeEventListener('input', mark);
 		document.removeEventListener('change', mark);
 		document.removeEventListener('cosray-change', mark);

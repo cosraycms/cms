@@ -1,88 +1,89 @@
 import { expect, type Page, test } from '@playwright/test';
-import { openNode } from './support';
+import { discardMine, mine, openNode, save } from './support';
 
 async function leaveEdits(page: Page, name: string, title: string): Promise<void> {
 	await openNode(page, name);
+	await edit(page, title);
+	await page.reload();
+}
+
+async function edit(page: Page, title: string): Promise<void> {
 	const autosaved = page.waitForResponse(
 		(response) => response.url().endsWith('/autosave') && response.ok(),
 	);
 	await page.getByLabel('Title').fill(title);
 	await autosaved;
-	await page.reload();
+	await expect(mine(page)).toHaveAttribute('data-state', 'present');
 }
 
-function mine(page: Page) {
-	return page.locator('#editor-status-dots > [data-stage="mine"]');
-}
-
-function question(page: Page) {
-	return page.getByRole('dialog', { name: 'Unsaved changes' });
-}
-
-test('edits survive a reload and come back on request', async ({ page }) => {
+test('edits come back with the editor, marked, until they are saved', async ({ page }) => {
 	let prompted = false;
 	page.on('dialog', async (prompt) => {
 		prompted = true;
 		await prompt.accept();
 	});
 	await leaveEdits(page, 'restore', 'Kept for later');
-	const editor = page.url();
+
 	expect(prompted).toBe(false);
-
-	await expect(question(page).getByText(/were not saved\. Show loads them/)).toBeVisible();
-	await question(page).getByRole('button', { name: 'Show' }).click();
-
+	await expect(page.getByRole('dialog')).toHaveCount(0);
 	await expect(page.getByLabel('Title')).toHaveValue('Kept for later');
 	await expect(mine(page)).toHaveAttribute('data-state', 'present');
-	await expect(page.locator('#editor-restored')).toBeVisible();
 	await expect(page.locator('.cms-field[data-field="title"] [data-restored-mark]')).toBeVisible();
-	expect(page.url()).toBe(editor);
 
-	await page.getByRole('button', { name: 'Save', exact: true }).click();
+	await save(page);
 	await expect(page.locator('#cms-toasts')).toContainText(/saved/i);
-	await expect(page.locator('#editor-restored')).toHaveCount(0);
+	await expect(mine(page)).toHaveAttribute('data-state', 'none');
 	await expect(page.locator('[data-restored-mark]')).toHaveCount(0);
 	await page.reload();
 	await expect(page.getByLabel('Title')).toHaveValue('Kept for later');
-	await expect(question(page)).toHaveCount(0);
+	await expect(mine(page)).toHaveAttribute('data-state', 'none');
 });
 
-test('discarding the offer keeps the stored state and asks no more', async ({ page }) => {
+test('discarding my changes returns to the stored state', async ({ page }) => {
 	await leaveEdits(page, 'later', 'Not wanted');
-	const discarded = page.waitForResponse((response) =>
-		response.url().endsWith('/autosave/discard'),
-	);
-	await question(page).getByRole('button', { name: 'Discard' }).click();
-	await discarded;
+
+	await discardMine(page);
 
 	await expect(page.getByLabel('Title')).not.toHaveValue('Not wanted');
+	await expect(page.locator('#cms-toasts')).toContainText('My changes discarded');
 	await page.reload();
-	await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeVisible();
-	await expect(question(page)).toHaveCount(0);
-});
-
-test('closing the offer asks again next time', async ({ page }) => {
-	await leaveEdits(page, 'later', 'Maybe later');
-	await page.keyboard.press('Escape');
-
-	await expect(question(page)).toHaveCount(0);
-	await expect(page.getByLabel('Title')).not.toHaveValue('Maybe later');
-	await page.reload();
-	await expect(question(page)).toBeVisible();
-});
-
-test('discarding restored edits returns to the stored state', async ({ page }) => {
-	await leaveEdits(page, 'restore', 'Shown, then dropped');
-	await question(page).getByRole('button', { name: 'Show' }).click();
-	await expect(page.getByLabel('Title')).toHaveValue('Shown, then dropped');
-
-	await page.locator('#editor-restored').getByRole('button', { name: 'Discard' }).click();
-	await page.getByRole('dialog').getByRole('button', { name: 'Discard' }).click();
-
-	await expect(page.locator('#editor-restored')).toHaveCount(0);
-	await expect(page.getByLabel('Title')).not.toHaveValue('Shown, then dropped');
 	await expect(mine(page)).toHaveAttribute('data-state', 'none');
+});
+
+test('leaving inside the panel does not ask once the edits are kept', async ({ page }) => {
+	await openNode(page, 'later');
+	await edit(page, 'Left behind');
+
+	await page.locator('.breadcrumb a').click();
+
+	await expect(page.getByRole('dialog')).toHaveCount(0);
+	await expect(page).not.toHaveURL(/\/panel\/node\//);
+});
+
+test('edits on a state saved meanwhile are a conflict until saved anyway', async ({
+	page,
+	context,
+}) => {
+	await openNode(page, 'restore');
+	await edit(page, 'Mine, from an older state');
+
+	const other = await context.newPage();
+	await other.goto(page.url());
+	await other.getByLabel('Title').fill('Saved meanwhile');
+	await save(other);
+	await other.close();
+
+	await edit(page, 'Mine, still older');
 	await page.reload();
-	await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeVisible();
-	await expect(question(page)).toHaveCount(0);
+
+	const banner = page.locator('#editor-conflict');
+	await expect(banner).toBeVisible();
+	await expect(mine(page)).toHaveAttribute('data-state', 'conflict');
+	await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeDisabled();
+
+	await page.getByRole('button', { name: 'Save anyway' }).click();
+	await expect(page.locator('#cms-toasts')).toContainText(/saved/i);
+	await expect(banner).toBeHidden();
+	await expect(mine(page)).toHaveAttribute('data-state', 'none');
+	await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
 });

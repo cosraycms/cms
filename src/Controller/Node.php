@@ -67,11 +67,15 @@ class Node
 		return $this->dispatch($node, $context, $cms);
 	}
 
-	/** The working copy of a node, published or not, rendered as the public path would. */
+	/**
+	 * The working copy of a node, published or not, with the signed-in
+	 * user's own edits on top, rendered as the public path would.
+	 */
 	#[Permission('panel')]
 	public function preview(Context $context, Cms $cms, string $uid): Response
 	{
-		$node = $cms->node->working($uid);
+		$user = $context->httpRequest()->get('user', null);
+		$node = $cms->node->working($uid, $user instanceof User ? $user->id : null);
 
 		if (!$node || !(bool) $this->types->get(Wrapper::unwrap($node)::class, 'renderable', false)) {
 			throw new HttpNotFound($context->httpRequest());

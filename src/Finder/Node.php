@@ -59,15 +59,17 @@ class Node
 
 	/**
 	 * The node as the editor sees it: the working copy where one exists,
-	 * the live row otherwise. Published or not, never deleted.
+	 * the live row otherwise. Published or not, never deleted. Given a user,
+	 * that user's autosave goes on top, as a preview of their edits.
 	 */
-	public function working(string $uid): ?Wrapper
+	public function working(string $uid, ?int $autosave = null): ?Wrapper
 	{
 		return $this->get([
 			'uid' => $uid,
 			'published' => null,
 			'deleted' => false,
 			'working' => true,
+			...($autosave === null ? [] : ['autosave' => $autosave]),
 		]);
 	}
 

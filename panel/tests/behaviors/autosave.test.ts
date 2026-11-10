@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { activate } from '@celema/verba';
-import { install } from '../../src/behaviors/autosave';
+import { EVENT, install, keeping } from '../../src/behaviors/autosave';
 import { install as installDirty } from '../../src/behaviors/dirty';
 import { catalog } from '../catalog';
 
@@ -198,65 +198,7 @@ describe('autosave', () => {
 	});
 });
 
-describe('restoring', () => {
-	const pending =
-		'data-restore-url="/panel/node/page?restore=1" data-discard-url="/panel/node/page/autosave/discard" data-restore-time="6 Nov 2026, 14:32"';
-
-	async function answer(selector: string): Promise<void> {
-		document.querySelector<HTMLElement>(`dialog[open] ${selector}`)!.click();
-		await vi.advanceTimersByTimeAsync(0);
-	}
-
-	it('asks and shows the autosave in the editor', async () => {
-		start(pending);
-		const dialog = document.querySelector('dialog[open]')!;
-
-		expect(dialog.querySelector('.modal-title')!.textContent).toBe('Unsaved changes');
-		expect(dialog.querySelector('.question')!.textContent).toBe(
-			'Changes from 6 Nov 2026, 14:32 were not saved. Show loads them into the editor without saving them.',
-		);
-		expect(dialog.querySelector('.modal-footer .danger')!.textContent).toBe('Discard');
-		expect(dialog.querySelector('.modal-footer .primary')!.textContent).toBe('Show');
-		await answer('.modal-footer .primary');
-
-		expect(ajax).toHaveBeenCalledWith(
-			'GET',
-			'/panel/node/page?restore=1',
-			expect.objectContaining({ target: '#main' }),
-		);
-		expect(post).not.toHaveBeenCalled();
-	});
-
-	it('says when the entry was saved since', () => {
-		start(`${pending} data-restore-stale`);
-
-		expect(document.querySelector('dialog[open] .question')!.textContent).toContain(
-			'The entry was saved since then.',
-		);
-	});
-
-	it('discards the autosave on request', async () => {
-		start(pending);
-		await answer('.modal-footer .danger');
-
-		expect(post).toHaveBeenCalledOnce();
-		const [url, init] = post.mock.calls[0] as [string, RequestInit];
-		expect(url).toBe('/panel/node/page/autosave/discard');
-		expect(init.method).toBe('POST');
-		expect((init.headers as Record<string, string>)['X-CSRF-Token']).toBe('token-a');
-		expect(ajax).not.toHaveBeenCalled();
-	});
-
-	it('asks once and leaves the autosave alone when closed', async () => {
-		start(pending);
-		await answer('.modal-close');
-		document.dispatchEvent(new Event('htmx:after:swap'));
-
-		expect(post).not.toHaveBeenCalled();
-		expect(ajax).not.toHaveBeenCalled();
-		expect(document.querySelector('dialog[open]')).toBeNull();
-	});
-
+describe('restored edits', () => {
 	it('drops the pending edits for a form that discards the autosave', async () => {
 		start('data-restored');
 		document.body.insertAdjacentHTML('beforeend', '<form id="drop" data-autosave-drop></form>');
@@ -269,18 +211,51 @@ describe('restoring', () => {
 		expect(post).not.toHaveBeenCalled();
 	});
 
-	it('removes the restored note and marks once a save took the edits', () => {
+	it('removes the marks of changed fields once a save took the edits', () => {
 		start('data-restored');
 		document
 			.getElementById('main')!
-			.insertAdjacentHTML(
-				'afterbegin',
-				'<div id="editor-restored"></div><span data-restored-mark></span>',
-			);
+			.insertAdjacentHTML('afterbegin', '<span data-restored-mark></span>');
 		document.getElementById('editor-autosave')!.setAttribute('data-saved', '');
 		document.dispatchEvent(new Event('htmx:after:swap'));
 
-		expect(document.getElementById('editor-restored')).toBeNull();
 		expect(document.querySelector('[data-restored-mark]')).toBeNull();
+	});
+});
+
+describe('reports', () => {
+	function reports(): string[] {
+		const states: string[] = [];
+		const listener = (event: Event) =>
+			states.push((event as CustomEvent<{ state: string }>).detail.state);
+		document.addEventListener(EVENT, listener);
+		uninstall.push(() => document.removeEventListener(EVENT, listener));
+
+		return states;
+	}
+
+	it('says when edits wait, go out and are kept or dropped', async () => {
+		start();
+		const states = reports();
+		post.mockResolvedValueOnce(new Response('{"ok":true,"kept":true}', { status: 200 }));
+		edit();
+		await vi.advanceTimersByTimeAsync(2000);
+
+		post.mockResolvedValueOnce(new Response('{"ok":true,"kept":false}', { status: 200 }));
+		edit('Live');
+		await vi.advanceTimersByTimeAsync(2000);
+
+		expect(states).toEqual(['pending', 'saving', 'kept', 'pending', 'saving', 'dropped']);
+	});
+
+	it('says when sending failed, and leaving inside the panel asks then', async () => {
+		start();
+		const states = reports();
+		post.mockResolvedValueOnce(new Response('{"ok":false}', { status: 500 }));
+		edit();
+		await vi.advanceTimersByTimeAsync(2000);
+
+		expect(states).toEqual(['pending', 'saving', 'failed']);
+		expect(keeping()).toBe(false);
 	});
 });

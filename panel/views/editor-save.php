@@ -11,7 +11,6 @@ use function Cosray\escape;
 $saved = (bool) $saved;
 $message = (string) $message;
 $errors = (array) u($errors);
-$preview = u($preview ?? null);
 // The node editor's status view; without it (users, embedded editors) the
 // head's status output says how the save went.
 $status = u($status ?? null);
@@ -74,23 +73,19 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		</div>
 	<?php endif ?>
 </div>
-<?php if ($saved && $status !== null): ?>
-	<?php // The stages follow the save: the head's dots and the status tab. ?>
+<?php if ($status !== null): ?>
+	<?php // The stages follow the save, or a refusal: the head's dots, the status tab,
+
+	// and the banner of edits on an outdated state. ?>
 	<?php $this->include('component/status-dots', [
 		'status' => $status,
 		'id' => 'editor-status-dots',
 		'oob' => true,
 	]) ?>
 	<?php $this->include('node/status', ['status' => $status, 'oob' => true]) ?>
+	<?php $this->include('node/conflict', ['status' => $status, 'oob' => true]) ?>
 <?php endif ?>
 <?php if ($saved && is_array(u($autosave ?? null))): ?>
 	<?php $this->include('node/autosave', ['autosave' => $autosave, 'oob' => true]) ?>
 <?php endif ?>
-<?php if ($saved && is_string($preview) && $preview !== ''): ?>
-	<div id="editor-preview" class="preview" hx-swap-oob="true">
-		<button type="button" class="close" data-overlay-close>
-			<?= escape(__('editor:close')) ?>
-		</button>
-		<iframe src="<?= escape($preview) ?>" title="<?= escape(__('editor:preview')) ?>"></iframe>
-	</div>
-<?php endif ?>
+

@@ -110,15 +110,50 @@ function follow() {
 			(needs.includes('draft') && draft)
 		);
 
+		const conflict = head.dataset.mine === 'conflict' && state !== 'none';
 		const label = button.querySelector('[data-save-label]');
 
+		// Edits on an outdated state are saved only anyway, never published.
 		if (label instanceof HTMLElement) {
 			label.textContent =
-				(head.dataset.mine === 'conflict' && state !== 'none'
-					? label.dataset.conflict
-					: label.dataset.normal) ?? label.textContent;
+				(conflict ? label.dataset.conflict : label.dataset.normal) ?? label.textContent;
+			button.name = conflict ? 'force' : '';
+			button.value = conflict ? '1' : '';
+		} else if (button.name === 'publish' && conflict) {
+			button.disabled = true;
 		}
 	});
+}
+
+/**
+ * A switch moved the node's change time; an editor that was current
+ * follows, so its next save is no conflict with itself.
+ */
+function rebase() {
+	const rebased = document.getElementById('editor-rebase');
+	const state = document.getElementById('editor-autosave');
+	const { from, to } = rebased?.dataset ?? {};
+
+	if (!rebased || !state || !from || !to) {
+		return;
+	}
+
+	if (state.dataset.base === from) {
+		state.dataset.base = to;
+		const input = state.querySelector('input[name="_base"]');
+
+		if (input instanceof HTMLInputElement) {
+			input.value = to;
+		}
+	}
+
+	delete rebased.dataset.from;
+	delete rebased.dataset.to;
+}
+
+function settle() {
+	rebase();
+	follow();
 }
 
 /**
@@ -162,13 +197,13 @@ function done(event) {
 /** @returns {() => void} */
 export function install() {
 	document.addEventListener(EVENT, autosave);
-	document.addEventListener('htmx:after:swap', follow);
+	document.addEventListener('htmx:after:swap', settle);
 	document.addEventListener('htmx:after:request', done);
 	follow();
 
 	return () => {
 		document.removeEventListener(EVENT, autosave);
-		document.removeEventListener('htmx:after:swap', follow);
+		document.removeEventListener('htmx:after:swap', settle);
 		document.removeEventListener('htmx:after:request', done);
 	};
 }

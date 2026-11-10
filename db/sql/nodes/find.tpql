@@ -10,7 +10,10 @@ SELECT
 	n.changed,
 	n.deleted,
 	n.released,
-<?php if (isset($working) && $working) : ?>
+<?php if (isset($working) && $working && isset($autosave)) : ?>
+	coalesce(a.content, d.content, n.content) AS content,
+	coalesce(d.settings, '{}'::jsonb) AS draft_settings,
+<?php elseif (isset($working) && $working) : ?>
 	coalesce(d.content, n.content) AS content,
 	coalesce(d.settings, '{}'::jsonb) AS draft_settings,
 <?php else: ?>
@@ -76,6 +79,10 @@ FROM
 		np.node = n.parent
 	LEFT JOIN /*:cms.prefix:*/drafts d ON
 		d.node = n.node
+<?php if (isset($working) && $working && isset($autosave)) : ?>
+	LEFT JOIN /*:cms.prefix:*/autosaves a ON
+		a.node = n.node AND a.editor = :autosave
+<?php endif ?>
 	LEFT JOIN /*:cms.prefix:*/users ud ON
 		ud.usr = d.editor
 	INNER JOIN /*:cms.prefix:*/users uc ON
@@ -159,6 +166,10 @@ GROUP BY
 <?php endif ?>
 	n.node,
 	d.node,
+<?php if (isset($working) && $working && isset($autosave)) : ?>
+	a.node,
+	a.editor,
+<?php endif ?>
 	ud.data,
 	ud.username,
 	ud.email,

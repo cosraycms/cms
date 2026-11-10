@@ -27,16 +27,29 @@ export async function openNode(page: Page, name: string): Promise<void> {
 	await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeVisible();
 
 	// Tests share nodes, and edits a test leaves unsaved come back as an autosave.
-	if ((await page.locator('#editor-autosave[data-restore-url]').count()) > 0) {
-		const discarded = page.waitForResponse((response) =>
-			response.url().endsWith('/autosave/discard'),
-		);
-		await page
-			.getByRole('dialog', { name: 'Unsaved changes' })
-			.getByRole('button', { name: 'Discard' })
-			.click();
-		await discarded;
+	if ((await mine(page).getAttribute('data-state')) !== 'none') {
+		await discardMine(page);
 	}
+}
+
+/** The head's dot of the user's own edits. */
+export function mine(page: Page): Locator {
+	return page.locator('#editor-status-dots > [data-stage="mine"]');
+}
+
+/** Discards the user's own edits from the status tab and waits for the editor again. */
+export async function discardMine(page: Page): Promise<void> {
+	const reloaded = page.waitForResponse(
+		(response) => response.request().method() === 'GET' && response.url().includes('/panel/node/'),
+	);
+	await page
+		.locator('#editor-status-panel')
+		.getByRole('button', { name: 'Discard' })
+		.last()
+		.click();
+	await page.getByRole('dialog').getByRole('button', { name: 'Discard my changes' }).click();
+	await reloaded;
+	await expect(mine(page)).toHaveAttribute('data-state', 'none');
 }
 
 export function field(page: Page, index: number): Locator {

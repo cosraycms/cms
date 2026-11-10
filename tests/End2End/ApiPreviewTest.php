@@ -82,9 +82,9 @@ final class ApiPreviewTest extends End2EndTestCase
 
 	private function previewSource(string $uid, string $title): string
 	{
-		$response = $this->makeRequest('POST', '/panel/node/' . $uid, [
+		$response = $this->makeRequest('POST', '/panel/node/' . $uid . '/preview', [
 			'headers' => ['HX-Request' => 'true'],
-			'body' => ['preview' => '1', 'content' => ['title' => ['value' => ['en' => $title]]], '_complete' => '1'],
+			'body' => ['content' => ['title' => ['value' => ['en' => $title]]], '_complete' => '1'],
 		]);
 		$html = $this->getHtmlResponse($response);
 		$this->assertSame(1, preg_match('/<iframe src="([^"]+)"/', $html, $match), $html);

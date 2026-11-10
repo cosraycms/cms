@@ -73,7 +73,8 @@ final class Nodes
 
 	/**
 	 * `preview` takes a token the panel issued for this node and answers
-	 * with its working copy, published or not.
+	 * with its working copy, published or not, and the edits of the user
+	 * the token names on top.
 	 */
 	public function get(Request $request, Cms $cms, Config $config, string $uid): Response
 	{
@@ -89,7 +90,7 @@ final class Nodes
 				]);
 			}
 
-			$node = $cms->node->working($uid)
+			$node = $cms->node->working($uid, $tokens->user($preview))
 				?? throw new HttpNotFound($request, payload: ['message' => "There is no node '{$uid}'."]);
 		} else {
 			$deleted = NodeQuery::state($params['deleted'] ?? null, 'deleted', false);

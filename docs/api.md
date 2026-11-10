@@ -215,7 +215,7 @@ A headless frontend can show an editor's unpublished working copy. Name its prev
 'api.preview' => 'https://www.example.com/preview?uid={uid}&token={token}&locale={locale}',
 ```
 
-The panel fills in the node's `uid`, the content `locale`, and a `token` that is valid for an hour and for that node only. The frontend reads the working copy with `GET /api/nodes/{uid}?preview={token}`, published or not, without an API token; responses are never cached. A forged, expired or foreign token answers `401`. Tokens are signed with `app.secret` and stored nowhere; without the secret, the panel keeps the site's own preview. The frontend has to allow the panel to frame it.
+The panel fills in the node's `uid`, the content `locale`, and a `token` that is valid for an hour and for that node only. The frontend reads the working copy with `GET /api/nodes/{uid}?preview={token}`, published or not, without an API token, with the unsaved edits of the editor who opened the preview on top; responses are never cached. A forged, expired or foreign token answers `401`. Tokens are signed with `app.secret` and stored nowhere; without the secret, the panel keeps the site's own preview. The frontend has to allow the panel to frame it.
 
 ## Webhooks
 

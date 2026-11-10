@@ -137,12 +137,14 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 				<?php endif ?>
 				<?php if ($edit && $routable && $renderable): ?>
 					<div class="cms-split-button">
+						<?php // Keeps the edits as the user's autosave, without saving, and
+
+						// shows them on top of the working state. ?>
 						<button
 							class="cms-button secondary square"
 							type="submit"
 							form="node-editor-form"
-							name="preview"
-							value="1"
+							formaction="<?= escape($links->preview($uid)) ?>"
 							data-editor-submit
 							aria-label="<?= escape(__('editor:preview-current')) ?>"
 							title="<?= escape(__('editor:preview-current')) ?>">
@@ -162,7 +164,11 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 							popover="auto"
 							data-action-menu
 							data-align="end">
-							<button type="submit" form="node-editor-form" name="preview" value="1" data-editor-submit>
+							<button
+								type="submit"
+								form="node-editor-form"
+								formaction="<?= escape($links->preview($uid)) ?>"
+								data-editor-submit>
 								<?= Icon::render('eye') ?>
 								<?= escape(__('editor:preview-current')) ?>
 							</button>
@@ -241,8 +247,8 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 		<div class="pane">
 			<div class="pane-scroll">
 				<div class="inner">
-					<?php if ($restored !== null): ?>
-						<?php $this->include('node/restored', ['restored' => $restored]) ?>
+					<?php if ($status !== null): ?>
+						<?php $this->include('node/conflict', ['status' => $status]) ?>
 					<?php endif ?>
 					<div id="editor-errors" class="errors" hidden></div>
 					<?php if ($embed !== null): ?>
@@ -306,6 +312,8 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 	</form>
 
 	<div id="editor-preview" hidden></div>
+	<?php // A switch moves the node's change time; the editor follows if it was current. ?>
+	<span id="editor-rebase" hidden></span>
 	<?php if ($edit && $embed === null): ?>
 		<?php // The head's menu and the status tab submit these; the editor form
 

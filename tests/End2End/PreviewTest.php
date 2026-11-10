@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests\End2End;
 
 use Cosray\Field\Text;
+use Cosray\Node\Autosaves;
 use Cosray\Tests\End2EndTestCase;
 
 /**
@@ -69,6 +70,24 @@ final class PreviewTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$this->assertStringContainsString('<h1>Seen from the panel</h1>', $this->getHtmlResponse($response));
+	}
+
+	public function testPreviewShowsTheSignedInUsersEditsOnTop(): void
+	{
+		$node = $this->createPage('preview-mine', 'Stored', published: true);
+		$user = $this->createTestUser(['uid' => 'preview-mine-user', 'username' => 'preview-mine-user']);
+		$other = $this->createTestUser(['uid' => 'preview-other-user', 'username' => 'preview-other-user']);
+		$autosaves = new Autosaves($this->db());
+		$content = static fn(string $title): array => ['title' => ['type' => Text::class, 'value' => ['en' => $title]]];
+		$autosaves->save($node, $user, '2026-01-01T00:00:00Z', $content('Mine'), []);
+		$autosaves->save($node, $other, '2026-01-01T00:00:00Z', $content('Theirs'), []);
+		$this->assertResponseStatus(303, $this->makeRequest('POST', '/panel/login', [
+			'body' => ['login' => 'preview-mine-user', 'password' => 'password', 'next' => '/panel'],
+		]));
+
+		$response = $this->makeRequest('GET', '/preview/preview-mine');
+
+		$this->assertStringContainsString('<h1>Mine</h1>', $this->getHtmlResponse($response));
 	}
 
 	public function testPreviewIsNotFoundForNodesWithoutATemplate(): void

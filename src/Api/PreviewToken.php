@@ -33,10 +33,15 @@ final class PreviewToken
 		return is_string($secret) && $secret !== '' ? new self($secret) : null;
 	}
 
-	public function issue(string $uid, ?int $expires = null): string
+	/** Given a user, the token also shows that user's autosave on top. */
+	public function issue(string $uid, ?int $expires = null, ?int $user = null): string
 	{
 		$payload = self::encode(json_encode(
-			['uid' => $uid, 'exp' => $expires ?? (time() + self::LIFETIME)],
+			[
+				'uid' => $uid,
+				'exp' => $expires ?? (time() + self::LIFETIME),
+				...($user === null ? [] : ['usr' => $user]),
+			],
 			JSON_THROW_ON_ERROR,
 		));
 
@@ -49,6 +54,24 @@ final class PreviewToken
 		string $token,
 		?int $now = null,
 	): ?string {
+		return $this->claims($token, $now)['uid'] ?? null;
+	}
+
+	/** The user whose autosave the token shows, if it names one. */
+	public function user(
+		#[\SensitiveParameter]
+		string $token,
+		?int $now = null,
+	): ?int {
+		return $this->claims($token, $now)['usr'] ?? null;
+	}
+
+	/** @return ?array{uid: string, usr?: int} */
+	private function claims(
+		#[\SensitiveParameter]
+		string $token,
+		?int $now,
+	): ?array {
 		$parts = explode('.', $token);
 
 		if (count($parts) !== 2 || !hash_equals($this->sign($parts[0]), $parts[1])) {
@@ -61,7 +84,14 @@ final class PreviewToken
 			return null;
 		}
 
-		return $data['exp'] >= ($now ?? time()) ? $data['uid'] : null;
+		if ($data['exp'] < ($now ?? time())) {
+			return null;
+		}
+
+		return [
+			'uid' => $data['uid'],
+			...(is_int($data['usr'] ?? null) ? ['usr' => $data['usr']] : []),
+		];
 	}
 
 	private function sign(string $payload): string

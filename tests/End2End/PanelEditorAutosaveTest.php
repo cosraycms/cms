@@ -8,8 +8,8 @@ use Cosray\Field\Text;
 use Cosray\Tests\End2EndTestCase;
 
 /**
- * The editor's autosave: kept beside the node, offered back when the
- * editor opens again, and gone once the edits are saved or discarded.
+ * The editor's autosave: kept beside the node, back in the editor when it
+ * opens again, and gone once the edits are saved or discarded.
  *
  * @internal
  *
@@ -60,24 +60,20 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		$this->assertSame(0, $this->rows('autosaves', 'autosave-incomplete'));
 	}
 
-	public function testTheEditorOffersTheAutosaveAndRestoresItOnRequest(): void
+	public function testTheEditorOpensWithTheAutosave(): void
 	{
 		$this->createPage('autosave-restored', 'Live');
 		$this->autosave('autosave-restored', 'Edited');
 
-		$offered = $this->editor('autosave-restored');
+		$editor = $this->editor('autosave-restored');
 
-		$this->assertHtmlNodeExists('//input[@name="content[title][value][en]"][@value="Live"]', $offered);
+		$this->assertHtmlNodeExists('//input[@name="content[title][value][en]"][@value="Edited"]', $editor);
+		$this->assertHtmlNodeExists('//*[@id="editor-autosave"][@data-restored]', $editor);
 		$this->assertHtmlNodeExists(
-			'//*[@id="editor-autosave"][contains(@data-restore-url, "restore=1")][not(@data-restore-stale)]'
-				. '[contains(@data-discard-url, "/autosave/discard")]',
-			$offered,
+			"//*[@id='editor-status-dots']/*[@data-stage='mine' and @data-state='present']",
+			$editor,
 		);
-
-		$restored = $this->editor('autosave-restored', '?restore=1');
-
-		$this->assertHtmlNodeExists('//input[@name="content[title][value][en]"][@value="Edited"]', $restored);
-		$this->assertHtmlNodeExists('//*[@id="editor-autosave"][@data-restored][not(@data-restore-url)]', $restored);
+		$this->assertHtmlNodeExists('//*[@id="editor-conflict"][@hidden]', $editor);
 		$this->assertSame('Live', $this->liveTitle('autosave-restored'));
 	}
 
@@ -86,9 +82,8 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		$this->createPage('autosave-marked', 'Live');
 		$this->autosave('autosave-marked', 'Edited');
 
-		$restored = $this->editor('autosave-marked', '?restore=1');
+		$restored = $this->editor('autosave-marked');
 
-		$this->assertHtmlNodeExists('//*[@id="editor-restored"]', $restored);
 		$this->assertHtmlNodeExists(
 			'//form[@id="editor-autosave-discard"][contains(@action, "/autosave/discard")]',
 			$restored,
@@ -102,22 +97,66 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		$this->createPage('autosave-settings', 'Live');
 		$this->autosave('autosave-settings', 'Live', settings: ['handle' => 'renamed']);
 
-		$restored = $this->editor('autosave-settings', '?restore=1');
+		$restored = $this->editor('autosave-settings');
 
 		$this->assertHtmlNodeExists('//label[@for="cms-node-handle"]/*[@data-restored-mark]', $restored);
 		$this->assertHtmlNodeExists('//*[@id="cms-inspector-tab-advanced"]/*[@data-restored-mark]', $restored);
 		$this->assertSame(2, substr_count($restored, 'data-restored-mark'));
 	}
 
-	public function testAnAutosaveFromBeforeTheLastSaveIsMarkedStale(): void
+	public function testAnAutosaveFromBeforeTheLastSaveIsAConflict(): void
 	{
 		$this->createPage('autosave-stale', 'Live');
 		$this->autosave('autosave-stale', 'Edited', base: '2000-01-01T00:00:00Z');
 
+		$editor = $this->editor('autosave-stale');
+
 		$this->assertHtmlNodeExists(
-			'//*[@id="editor-autosave"][@data-restore-stale]',
-			$this->editor('autosave-stale'),
+			"//*[@id='editor-status-dots']/*[@data-stage='mine' and @data-state='conflict']",
+			$editor,
 		);
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-conflict"][not(@hidden)]//button[@form="editor-autosave-discard"]',
+			$editor,
+		);
+		$this->assertHtmlNodeExists('//*[@data-save-label][contains(., "Save anyway")]', $editor);
+		$this->assertHtmlNodeExists('//input[@name="_base"][starts-with(@value, "2000-01-01")]', $editor);
+	}
+
+	public function testASaveOnAnOutdatedStateIsRefusedUnlessForced(): void
+	{
+		$this->createPage('autosave-locked', 'Live');
+		$body = [
+			'content' => ['title' => ['value' => ['en' => 'Mine']]],
+			'_complete' => '1',
+			'_base' => '2000-01-01T00:00:00Z',
+		];
+
+		$refused = $this->makeRequest('POST', '/panel/node/autosave-locked', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => $body,
+		]);
+		$published = $this->makeRequest('POST', '/panel/node/autosave-locked', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [...$body, 'force' => '1', 'publish' => '1'],
+		]);
+
+		$this->assertHtmlNodeExists('//*[@data-toast="error"]', $this->getHtmlResponse($refused));
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-conflict" and @hx-swap-oob="true" and not(@hidden)]',
+			$this->getHtmlResponse($refused),
+		);
+		$this->assertSame('Mine', $this->autosavedTitle('autosave-locked'));
+		$this->assertHtmlNodeExists('//*[@data-toast="error"]', $this->getHtmlResponse($published));
+		$this->assertSame('Live', $this->liveTitle('autosave-locked'));
+
+		$forced = $this->makeRequest('POST', '/panel/node/autosave-locked', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [...$body, 'force' => '1'],
+		]);
+
+		$this->assertHtmlNodeExists('//*[@data-toast="success"]', $this->getHtmlResponse($forced));
+		$this->assertSame(0, $this->rows('autosaves', 'autosave-locked'));
 	}
 
 	public function testSavingDropsTheAutosaveAndRenewsTheBase(): void

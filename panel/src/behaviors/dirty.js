@@ -6,7 +6,7 @@
 /** @import { Context } from './dialogs.js' */
 
 import { __ } from '../lib/locale.js';
-import { autosaved } from './autosave.js';
+import { autosaved, keeping } from './autosave.js';
 import { ask } from './dialogs.js';
 
 const FORM = '#node-editor-form';
@@ -49,7 +49,9 @@ function mark(event) {
 function guard(event) {
 	const ctx = /** @type {CustomEvent<{ ctx?: Context }>} */ (event).detail?.ctx;
 
-	if (!ctx || !isDirty()) {
+	// Kept edits come back when the editor opens again; the pending ones go
+	// out on the way.
+	if (!ctx || !isDirty() || keeping()) {
 		return;
 	}
 
@@ -70,9 +72,7 @@ function guard(event) {
 
 	ask(ctx, {
 		title: __('editor:unsaved'),
-		message: __(
-			document.getElementById('editor-autosave') ? 'editor:leave-kept' : 'editor:leave-confirm',
-		),
+		message: __('editor:leave-confirm'),
 		action: __('editor:leave'),
 		tone: 'danger',
 	});

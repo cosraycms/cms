@@ -4,6 +4,7 @@ import {
 	COVER,
 	field,
 	GALLERY,
+	mine,
 	openDetails,
 	openNode,
 	publish,
@@ -102,10 +103,14 @@ test('the media library opens over unsaved edits without asking to leave', async
 	await page.locator('dialog[open]').last().getByRole('button', { name: 'Cancel' }).click();
 });
 
-test('leaving the editor with unsaved edits asks in a panel dialog', async ({ page }) => {
+test('leaving the editor with edits the autosave failed to keep asks in a panel dialog', async ({
+	page,
+}) => {
 	await openNode(page, 'texts');
 	const editor = page.url();
+	await page.route('**/autosave', (route) => route.abort());
 	await page.getByLabel('Title').fill('Changed');
+	await expect(mine(page)).toHaveAttribute('data-state', 'error');
 	await page.getByRole('link', { name: 'Media' }).first().click();
 
 	const question = page.getByRole('dialog', { name: 'Unsaved changes' });
@@ -118,6 +123,7 @@ test('leaving the editor with unsaved edits asks in a panel dialog', async ({ pa
 	await page.getByRole('link', { name: 'Media' }).first().click();
 	await question.getByRole('button', { name: 'Leave without saving' }).click();
 	await expect(page).toHaveURL(/\/panel\/media/);
+	await page.unroute('**/autosave');
 });
 
 test('a missing required text blocks saving and says where', async ({ page }) => {

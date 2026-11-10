@@ -43,8 +43,7 @@ use Throwable;
  * @phpstan-type AutosaveState array{
  *     url: string,
  *     base: string,
- *     restored: ?array{time: string, stale: bool, discard: string, fields: list<string>, settings: list<string>},
- *     pending: ?array{url: string, discard: string, time: string, stale: bool},
+ *     restored: ?array{fields: list<string>, settings: list<string>},
  * }
  */
 final class Editor extends Panel
@@ -82,7 +81,7 @@ final class Editor extends Panel
 			$status = $this->statusView($context, $cms, $data, $saved, !(bool) ($data['locked'] ?? false));
 
 			if (!(bool) ($data['locked'] ?? false)) {
-				[$data, $autosave] = $this->autosaveState($context, $serializer, $nodeObj, $node, $data);
+				[$data, $autosave] = $this->autosaveState($serializer, $node, $data, $saved);
 			}
 		}
 
@@ -116,17 +115,62 @@ final class Editor extends Panel
 			NodeFactory::dataFor($nodeObj),
 			NodeFactory::fieldNamesFor($nodeObj),
 		);
-		$form = $this->formData();
 		$response = Response::create($factory);
+		$kept = $this->keep($context, $nodeObj, $data, $this->formData());
 
-		// A truncated form would keep less than the editor shows.
-		if (!$this->complete($form) || (bool) ($data['locked'] ?? false)) {
+		if ($kept === null) {
 			return $response->json(['ok' => false])->status(422);
+		}
+
+		return $response->json(['ok' => true, 'kept' => $kept]);
+	}
+
+	/**
+	 * Keeps the editor's edits as the user's autosave, without saving them,
+	 * and shows the preview of the working state with them on top.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function preview(Context $context, Cms $cms, string $node): array
+	{
+		$result = $cms->node->working($node);
+
+		if (!$result) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$nodeObj = Wrapper::unwrap($result);
+		$data = $this->serializer($context, $cms)->read(
+			$nodeObj,
+			NodeFactory::dataFor($nodeObj),
+			NodeFactory::fieldNamesFor($nodeObj),
+		);
+		$this->keep($context, $nodeObj, $data, $this->formData());
+		$saved = new Autosaves($context->db)->get($this->nodeId($nodeObj), $this->actor()->id);
+
+		return [
+			'preview' => $this->previewPath($node, $this->actor()->id),
+			'status' => $this->statusView($context, $cms, $data, $saved, true),
+		];
+	}
+
+	/**
+	 * Keeps the editor's edits as the user's autosave, or drops it when the
+	 * edits leave the node as stored, and says which. Null when the edits
+	 * cannot be kept: a truncated form would keep less than the editor shows.
+	 *
+	 * @param array<string, mixed> $data the stored working state
+	 * @param array<array-key, mixed> $form
+	 */
+	private function keep(Context $context, object $node, array $data, array $form): ?bool
+	{
+		if (!$this->complete($form) || (bool) ($data['locked'] ?? false)) {
+			return null;
 		}
 
 		$edited = $this->applyForm($data, $form);
 		$autosaves = new Autosaves($context->db);
-		$nodeId = $this->nodeId($nodeObj);
+		$nodeId = $this->nodeId($node);
 		$settings = $this->autosaveSettings($edited);
 
 		if (
@@ -134,20 +178,20 @@ final class Editor extends Panel
 			&& Essence::same($settings, $this->autosaveSettings($data))
 		) {
 			$autosaves->delete($nodeId, $this->actor()->id);
-			$kept = false;
-		} else {
-			$kept = true;
-			$base = $form['_base'] ?? null;
-			$autosaves->save(
-				$nodeId,
-				$this->actor()->id,
-				is_string($base) && $this->timestamp($base) !== null ? $base : $this->workingChanged($data),
-				$edited['content'],
-				$settings,
-			);
+
+			return false;
 		}
 
-		return $response->json(['ok' => true, 'kept' => $kept]);
+		$base = $form['_base'] ?? null;
+		$autosaves->save(
+			$nodeId,
+			$this->actor()->id,
+			is_string($base) && $this->timestamp($base) !== null ? $base : $this->workingChanged($data),
+			$edited['content'],
+			$settings,
+		);
+
+		return true;
 	}
 
 	/** @return array<string, mixed> */
@@ -201,6 +245,10 @@ final class Editor extends Panel
 			return $this->refuseIncomplete($data);
 		}
 
+		if ($this->conflicts($data, $form)) {
+			return $this->refuseConflict($context, $cms, $nodeObj, $data, $form);
+		}
+
 		$data = $this->applyForm($data, $form);
 		$store = $this->nodeStore($context, $cms);
 		$links = $this->origin()['links'];
@@ -226,7 +274,6 @@ final class Editor extends Panel
 				'message' => (string) ($payload['message'] ?? __('node:invalid-data')),
 				'errors' => $this->issues($payload),
 				'toast' => $this->origin()['embed'] === null,
-				'preview' => null,
 			];
 		}
 
@@ -258,7 +305,6 @@ final class Editor extends Panel
 					? null
 					: $this->statusView($context, $cms, $savedData, null, true),
 			'errors' => [],
-			'preview' => ($form['preview'] ?? null) === '1' ? $this->previewPath($node) : null,
 			'autosave' =>
 				$saved === null || $this->origin()['embed'] !== null
 					? null
@@ -266,7 +312,6 @@ final class Editor extends Panel
 						'url' => $links->autosave($node),
 						'base' => $this->workingChanged(NodeFactory::dataFor(Wrapper::unwrap($saved))),
 						'restored' => null,
-						'pending' => null,
 					],
 		];
 	}
@@ -317,6 +362,50 @@ final class Editor extends Panel
 		}
 
 		return $this->reload($response, $this->origin()['links']->edit($node), '#editor-autosave-discard');
+	}
+
+	/**
+	 * Whether the edits started from an older state than the working one,
+	 * which someone saved meanwhile, and the user did not say to save anyway.
+	 * Publishing such edits is refused either way.
+	 *
+	 * @param array<string, mixed> $data the stored working state
+	 * @param array<array-key, mixed> $form
+	 */
+	private function conflicts(array $data, array $form): bool
+	{
+		$base = $this->timestamp(is_string($form['_base'] ?? null) ? $form['_base'] : '');
+		$working = $this->timestamp($this->workingChanged($data));
+
+		return (
+			$base !== null
+				&& $working !== null
+				&& $base < $working
+				&& (($form['force'] ?? null) !== '1' || ($form['publish'] ?? null) === '1')
+		);
+	}
+
+	/**
+	 * Refuses edits on an outdated state. They stay the user's autosave,
+	 * with the base they started from, so the conflict shows until the user
+	 * saves anyway or discards them.
+	 *
+	 * @param array<string, mixed> $data the stored working state
+	 * @param array<array-key, mixed> $form
+	 * @return array<string, mixed>
+	 */
+	private function refuseConflict(Context $context, Cms $cms, object $node, array $data, array $form): array
+	{
+		$this->keep($context, $node, $data, $form);
+		$saved = new Autosaves($context->db)->get($this->nodeId($node), $this->actor()->id);
+
+		return [
+			'saved' => false,
+			'message' => __('editor:conflict-refused'),
+			'errors' => [],
+			'toast' => true,
+			'status' => $this->statusView($context, $cms, $data, $saved, true),
+		];
 	}
 
 	/**
@@ -384,6 +473,10 @@ final class Editor extends Panel
 			'kind' => $kind,
 			'message' => $message,
 			'status' => $this->statusView($context, $cms, $data, $saved, !(bool) ($data['locked'] ?? false)),
+			'rebase' => [
+				'from' => $this->workingChanged(NodeFactory::dataFor($nodeObj)),
+				'to' => $this->workingChanged($data),
+			],
 		];
 	}
 
@@ -446,10 +539,22 @@ final class Editor extends Panel
 			),
 		);
 
+		$editor = $draft === null
+			? $this->userLabel($data['editor'] ?? null)
+			: (is_string($draft['editorName'] ?? null) ? $draft['editorName'] : null);
+
 		return [
 			'record' => $record,
 			'stages' => $stages,
 			'sentence' => NodeStatus::sentence($stages),
+			// Who saved the state the user's edits are older than, and when.
+			'conflict' => $status->mine === 'conflict'
+				? [
+					'draft' => $draft !== null,
+					'editor' => $editor ?? '',
+					'time' => $this->displayDate($this->workingChanged($data), IntlDateFormatter::SHORT) ?? '',
+				]
+				: null,
 			'draft' => $status->draft,
 			'mine' => $status->mine,
 			'discardDraft' => $draft !== null,
@@ -574,7 +679,6 @@ final class Editor extends Panel
 				'message' => (string) ($payload['message'] ?? __('node:invalid-data')),
 				'errors' => $this->issues($payload),
 				'toast' => $this->origin()['embed'] === null,
-				'preview' => null,
 			];
 		}
 
@@ -829,7 +933,6 @@ final class Editor extends Panel
 			'message' => __('editor:incomplete-form'),
 			'errors' => [],
 			'toast' => $this->origin()['embed'] === null,
-			'preview' => null,
 		];
 	}
 
@@ -911,12 +1014,12 @@ final class Editor extends Panel
 		return $data;
 	}
 
-	/** The path the preview overlay loads after a save: the node's working copy, by uid. */
 	/**
 	 * The site's own preview, or the headless frontend's when `api.preview`
-	 * names one, with a token that lets it read the working copy.
+	 * names one, with a token that lets it read the working copy and, given
+	 * a user, that user's edits on top.
 	 */
-	private function previewPath(string $uid): string
+	private function previewPath(string $uid, ?int $user = null): string
 	{
 		$template = $this->config->api->preview;
 		$tokens = PreviewToken::fromConfig($this->config);
@@ -927,7 +1030,7 @@ final class Editor extends Panel
 
 		return strtr($template, [
 			'{uid}' => rawurlencode($uid),
-			'{token}' => rawurlencode($tokens->issue($uid)),
+			'{token}' => rawurlencode($tokens->issue($uid, user: $user)),
 			'{locale}' => rawurlencode($this->localeId()),
 		]);
 	}
@@ -1293,53 +1396,31 @@ final class Editor extends Panel
 	}
 
 	/**
-	 * The editor's autosave state, and for `?restore=1` the data with the
-	 * user's autosave in place of the stored content and settings, and
-	 * which fields and settings it changes.
+	 * The editor's autosave state and, with an autosave of the user's, the
+	 * data with it in place of the stored content and settings, and which
+	 * fields and settings it changes. The editor keeps the base the
+	 * autosave started from, so edits on an older state stay a conflict
+	 * until a save.
 	 *
 	 * @param array<string, mixed> $data
+	 * @param ?array{changed: string, base: string, content: array<string, mixed>, settings: array<string, mixed>} $saved
 	 * @return array{array<string, mixed>, AutosaveState}
 	 */
-	private function autosaveState(
-		Context $context,
-		Serializer $serializer,
-		object $node,
-		string $uid,
-		array $data,
-	): array {
-		$links = $this->origin()['links'];
-		$base = $this->workingChanged($data);
-		$state = ['url' => $links->autosave($uid), 'base' => $base, 'restored' => null, 'pending' => null];
-		$saved = new Autosaves($context->db)->get($this->nodeId($node), $this->actor()->id);
+	private function autosaveState(Serializer $serializer, string $uid, array $data, ?array $saved): array
+	{
+		$state = [
+			'url' => $this->origin()['links']->autosave($uid),
+			'base' => $saved['base'] ?? $this->workingChanged($data),
+			'restored' => null,
+		];
 
 		if ($saved === null) {
-			return [$data, $state];
-		}
-
-		$current = $this->timestamp($base);
-		$started = $this->timestamp($saved['base']);
-		$time = $this->displayDate($saved['changed'], IntlDateFormatter::SHORT) ?? '';
-		$stale = $current !== null && $started !== null && $current > $started;
-		$discard = $links->discardAutosave($uid);
-
-		if ($this->request->param('restore', '') !== '1') {
-			$edit = $links->edit($uid);
-			$state['pending'] = [
-				'url' => $edit . (str_contains($edit, '?') ? '&' : '?') . 'restore=1',
-				'discard' => $discard,
-				'time' => $time,
-				'stale' => $stale,
-			];
-
 			return [$data, $state];
 		}
 
 		$stored = $this->autosaveSettings($data);
 		$content = is_array($data['content'] ?? null) ? $data['content'] : [];
 		$state['restored'] = [
-			'time' => $time,
-			'stale' => $stale,
-			'discard' => $discard,
 			'fields' => $this->changedKeys($content, $saved['content']),
 			'settings' => $this->changedKeys($stored, array_intersect_key($saved['settings'], $stored)),
 		];

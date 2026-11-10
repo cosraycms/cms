@@ -296,20 +296,20 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->assertStringEndsWith('/panel/node/draft-discard', $plain->getHeaderLine('Location'));
 	}
 
-	public function testPreviewPointsAtTheWorkingCopy(): void
+	public function testPreviewShowsTheEditsWithoutSavingThem(): void
 	{
 		$this->createPage('draft-preview', 'Live', published: true);
 
-		$response = $this->save('draft-preview', [
-			'preview' => '1',
-			'content' => ['title' => ['value' => ['en' => 'Pending']]],
+		$response = $this->makeRequest('POST', '/panel/node/draft-preview/preview', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => ['_complete' => '1', 'content' => ['title' => ['value' => ['en' => 'Pending']]]],
 		]);
 
-		$this->assertHtmlNodeExists(
-			'//*[@id="editor-preview"]//iframe[@src="/preview/draft-preview"]',
-			$this->getHtmlResponse($response),
-		);
-		$this->assertSame('Pending', $this->draftTitle('draft-preview'));
+		$html = $this->getHtmlResponse($response);
+		$this->assertHtmlNodeExists('//*[@id="editor-preview"]//iframe[@src="/preview/draft-preview"]', $html);
+		$this->assertHtmlNodeExists($this->stage('mine', 'present'), $html);
+		$this->assertNull($this->draftRow('draft-preview'));
+		$this->assertSame('Live', $this->liveTitle('draft-preview'));
 	}
 
 	private function save(string $uid, array $body): object
