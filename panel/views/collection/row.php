@@ -141,6 +141,8 @@ $grip = $group === null
 					<a
 						class="chip is-create"
 						href="<?= escape((string) $link['url']) ?>"
+						data-create-dialog
+						hx-boost="false"
 						aria-label="<?= escape(__('collection:create-under', [
 							'type' => $link['name'],
 							'name' => $name,

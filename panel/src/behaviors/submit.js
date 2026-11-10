@@ -48,7 +48,12 @@ function implicit(event) {
 		return;
 	}
 
-	if (field.form?.id === FORM && !ACTIVATED.has(field.type)) {
+	// The create dialog asks for a few fields, and Enter creates the entry.
+	if (
+		field.form?.id === FORM &&
+		!ACTIVATED.has(field.type) &&
+		!field.form.hasAttribute('data-create')
+	) {
 		event.preventDefault();
 	}
 }

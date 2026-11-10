@@ -213,6 +213,44 @@ final class Editor extends Panel
 		);
 	}
 
+	/**
+	 * The dialog that creates a node from its required fields alone; the
+	 * editor opens once it exists. Its form posts to store().
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function createDialog(Context $context, Cms $cms, string $type): array
+	{
+		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
+		$fields = array_values(array_filter(
+			is_array($data['fields'] ?? null) ? $data['fields'] : [],
+			static fn(mixed $field): bool => is_array($field) && (bool) ($field['required'] ?? false),
+		));
+		$required = array_column($fields, 'name');
+		$data['fields'] = $fields;
+		$data['fieldsets'] = array_values(array_filter(
+			array_map(
+				static fn(mixed $fieldset): ?array => (
+					is_array($fieldset)
+						? [
+							...$fieldset,
+							'fields' => array_values(array_intersect((array) ($fieldset['fields'] ?? []), $required)),
+						]
+						: null
+				),
+				is_array($data['fieldsets'] ?? null) ? $data['fieldsets'] : [],
+			),
+			static fn(?array $fieldset): bool => $fieldset !== null && $fieldset['fields'] !== [],
+		));
+
+		return $this->editorContext(
+			mode: 'create',
+			node: $data,
+			context: $context,
+			pathSourceFields: $this->pathSourceFields($context, $nodeObj),
+		);
+	}
+
 	/** @return Response|array<string, mixed> */
 	public function save(
 		Context $context,
@@ -683,6 +721,16 @@ final class Editor extends Panel
 		}
 
 		$edit = $links->edit((string) ($result['uid'] ?? $data['uid']));
+
+		// The create dialog opens the editor in the panel's main area, a new
+		// page in the history. The dialog is gone by then, so it is no source.
+		if ($this->request->hasHeader('HX-Request') && ($form['dialog'] ?? null) === '1') {
+			return Response::create($factory)->header('HX-Location', json_encode([
+				'path' => $edit,
+				'target' => '#main',
+				'swap' => 'innerHTML show:top',
+			], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
+		}
 
 		// The redirect swaps the fresh edit form in; htmx follows it. An
 		// embedded editor tells its frame that the node now exists.

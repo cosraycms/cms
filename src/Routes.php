@@ -412,6 +412,14 @@ class Routes
 					->middleware($panelAuth)
 					->after($renderers->get('editor'));
 				$panel
+					->get(
+						'/node/create/{type:[A-Za-z0-9-_.]{1,64}}/dialog',
+						[Panel\Editor::class, 'createDialog'],
+						'editor.create.dialog',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('editor-create'));
+				$panel
 					->post(
 						'/node/create/{type:[A-Za-z0-9-_.]{1,64}}',
 						[Panel\Editor::class, 'store'],

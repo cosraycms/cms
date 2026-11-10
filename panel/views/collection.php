@@ -80,7 +80,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 				) ?></a>
 			<?php endif ?>
 			<?php if (count($page->createLinks) === 1): ?>
-				<a class="cms-button primary" href="<?= escape($page->createLinks[0]['url']) ?>">
+				<a class="cms-button primary" href="<?= escape($page->createLinks[0]['url']) ?>" data-create-dialog hx-boost="false">
 					<?= escape(__('collection:new-entry')) ?>
 				</a>
 			<?php elseif (count($page->createLinks) > 1): ?>
@@ -90,7 +90,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 				</button>
 				<div id="collection-create" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
 					<?php foreach ($page->createLinks as $link): ?>
-						<a href="<?= escape($link['url']) ?>"><?= escape($link['name']) ?></a>
+						<a href="<?= escape($link['url']) ?>" data-create-dialog hx-boost="false"><?= escape($link['name']) ?></a>
 					<?php endforeach ?>
 				</div>
 			<?php endif ?>

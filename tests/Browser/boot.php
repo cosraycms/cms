@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Cosray\App;
 use Cosray\Locales;
+use Cosray\Tests\Browser\Collection\Articles;
 use Cosray\Tests\Browser\Node\Article;
 use Cosray\Tests\Browser\Node\MediaPage;
 
@@ -28,6 +29,7 @@ $locales = new Locales();
 $locales->add('en', title: 'English', pgDict: 'english');
 $app->node(MediaPage::class);
 $app->node(Article::class);
+$app->section('Content')->collection(Articles::class);
 $app->load($locales);
 $app->boot();
 

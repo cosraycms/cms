@@ -186,6 +186,8 @@ One class, [Panel\NodeStatus](../src/Panel/NodeStatus.php), derives a node's sta
 
 A save, a publication and a switch report as a [toast](panel-styles.md#toasts); a save refused with issues keeps the [validation summary](#validation-errors).
 
+A collection's create links open a dialog instead of the whole editor: [create.js](../panel/src/behaviors/create.js) loads `GET /node/create/{type}/dialog`, which asks only for the type's required fields and says what creating means, a draft for the editorial team or a saved record. The dialog's form takes the editor form's id, so the save transport, the submit guard and the validation display work as in the editor, and Enter creates the entry. A valid submission answers with `HX-Location` to the new node's editor; the links keep their address, so opening one in a new tab, or from an embedding application, shows the full create form.
+
 ## Save response
 
 The current save path leaves the form mounted and returns out-of-band updates for status, errors, publication, working-copy state, and preview. Replacing the form would lose unsaved client state. The coupled payload and targets live in [Editor](../src/Controller/Panel/Editor.php), [editor-save.php](../panel/views/editor-save.php), and the [save tests](../tests/End2End/PanelEditorSaveTest.php), not a second list of IDs here.
