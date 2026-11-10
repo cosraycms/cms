@@ -505,19 +505,12 @@ final class Editor extends Panel
 			NodeFactory::dataFor($fresh),
 			NodeFactory::fieldNamesFor($fresh),
 		);
-		$rebase = [
-			'from' => $this->workingChanged(NodeFactory::dataFor($nodeObj)),
-			'to' => $this->workingChanged($data),
-		];
-		$autosaves = new Autosaves($context->db);
-		$autosaves->rebase($this->nodeId($fresh), $actor->id, $rebase['from'], $rebase['to']);
-		$saved = $autosaves->get($this->nodeId($fresh), $actor->id);
+		$saved = new Autosaves($context->db)->get($this->nodeId($fresh), $actor->id);
 
 		return [
 			'kind' => $kind,
 			'message' => $message,
 			'status' => $this->statusView($context, $cms, $data, $saved, !(bool) ($data['locked'] ?? false)),
-			'rebase' => $rebase,
 		];
 	}
 
@@ -559,7 +552,7 @@ final class Editor extends Panel
 		$status = NodeStatus::of(
 			record: $record,
 			published: (bool) ($data['published'] ?? false),
-			changed: (string) ($data['changed'] ?? ''),
+			edited: (string) ($data['edited'] ?? ''),
 			editor: $this->userLabel($data['editor'] ?? null),
 			draft: $draft === null
 				? null
@@ -1528,15 +1521,15 @@ final class Editor extends Panel
 	}
 
 	/**
-	 * When the state the editor shows was stored: its working copy's
-	 * `changed`, or the node's without one.
+	 * When the content the editor shows was stored: its working copy's
+	 * `changed`, or the node's `edited` without one.
 	 *
 	 * @param array<array-key, mixed> $data
 	 */
 	private function workingChanged(array $data): string
 	{
 		$draft = $data['draft'] ?? null;
-		$changed = is_array($draft) ? $draft['changed'] ?? null : $data['changed'] ?? null;
+		$changed = is_array($draft) ? $draft['changed'] ?? null : $data['edited'] ?? null;
 
 		return is_string($changed) ? $changed : '';
 	}

@@ -4,4 +4,5 @@ SET
 	hidden = :hidden,
 	editor = :editor
 WHERE
-	node = :node;
+	node = :node
+	AND hidden IS DISTINCT FROM :hidden::boolean;

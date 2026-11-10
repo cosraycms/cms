@@ -319,7 +319,7 @@ final class CollectionTable
 		$stages = NodeStatus::of(
 			record: (bool) ($facts['record'] ?? false),
 			published: (bool) ($node['published'] ?? false),
-			changed: (string) ($facts['changed'] ?? ''),
+			edited: (string) ($facts['edited'] ?? ''),
 			editor: is_string($facts['editor'] ?? null) ? $facts['editor'] : null,
 			draft: $draft === null
 				? null

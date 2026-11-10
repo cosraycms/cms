@@ -31,7 +31,7 @@ final readonly class NodeStatus
 		public string $main,
 		public bool $draft,
 		public string $mine,
-		public string $changed = '',
+		public string $edited = '',
 		public ?string $saved = null,
 		public ?string $savedBy = null,
 		public ?string $mineSaved = null,
@@ -41,7 +41,7 @@ final readonly class NodeStatus
 	 * An autosave that started from an older state than the working one,
 	 * the draft or else the main version, is a conflict.
 	 *
-	 * @param string $changed when the main version changed last
+	 * @param string $edited when the main version's content changed last
 	 * @param ?string $editor who changed it
 	 * @param ?array{changed: string, editorName?: ?string} $draft the working copy
 	 * @param ?array{changed: string, base: string} $autosave the user's
@@ -49,19 +49,19 @@ final readonly class NodeStatus
 	public static function of(
 		bool $record,
 		bool $published,
-		string $changed,
+		string $edited,
 		?string $editor,
 		?array $draft,
 		?array $autosave,
 	): self {
 		$mine = match (true) {
 			$autosave === null => 'none',
-			self::before($autosave['base'], $draft['changed'] ?? $changed) => 'conflict',
+			self::before($autosave['base'], $draft['changed'] ?? $edited) => 'conflict',
 			default => 'present',
 		};
 
 		if ($record) {
-			return new self(true, 'published', false, $mine, $changed, $changed, $editor, $autosave['changed'] ?? null);
+			return new self(true, 'published', false, $mine, $edited, $edited, $editor, $autosave['changed'] ?? null);
 		}
 
 		return new self(
@@ -69,7 +69,7 @@ final readonly class NodeStatus
 			main: $published ? 'published' : 'unpublished',
 			draft: $draft !== null,
 			mine: $mine,
-			changed: $changed,
+			edited: $edited,
 			saved: $draft['changed'] ?? null,
 			savedBy: $draft['editorName'] ?? null,
 			mineSaved: $autosave['changed'] ?? null,
@@ -116,7 +116,7 @@ final readonly class NodeStatus
 		}
 
 		$published = $this->main === 'published';
-		$since = $date($this->changed, false);
+		$since = $date($this->edited, false);
 
 		return [
 			[

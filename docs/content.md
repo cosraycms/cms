@@ -137,7 +137,7 @@ The actor identifies the last editor and defaults to `Actor::system()`. The crea
 
 These overrides apply only to the node's initial insert. Paths and handles use the actor and current database timestamps. Creation does not manufacture historical revisions. Later saves keep the original creator and creation date, update the editor and change date normally, and record the preceding version in history. Import steps that subsequently edit a node therefore also update its last-editor metadata. A save that changes nothing writes nothing: the editor, the change date and the history stay as they are, and no webhook fires. A change of only the handle or a URL path still moves the change date, which API clients sync by.
 
-The lower-level `Node\Store::create()` accepts the same optional `creator`, `created`, and `changed` arguments after its required actor. Historical metadata is not accepted through the content payload or ordinary `save()`/`publish()` methods. No schema migration is required.
+The lower-level `Node\Store::create()` accepts the same optional `creator`, `created`, and `changed` arguments after its required actor. Historical metadata is not accepted through the content payload or ordinary `save()`/`apply()` methods. No schema migration is required.
 
 ## Route templates
 

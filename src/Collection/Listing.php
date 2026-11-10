@@ -339,7 +339,7 @@ final class Listing
 
 		return [
 			'record' => (bool) $this->types->get(Wrapper::unwrap($node)::class, 'record', false),
-			'changed' => (string) $node->meta->get('changed'),
+			'edited' => (string) $node->meta->get('edited'),
 			'editor' => self::userLabel(
 				$node->meta->get('editor_data'),
 				$node->meta->get('editor_username'),

@@ -1427,7 +1427,7 @@ final class Styleguide extends Panel
 			$stages = NodeStatus::of(
 				record: false,
 				published: $published,
-				changed: '2026-08-11 22:25:00+00',
+				edited: '2026-08-11 22:25:00+00',
 				editor: 'Ada',
 				draft: $draft === null ? null : ['changed' => $draft, 'editorName' => 'Ada'],
 				autosave: $mine === null ? null : ['changed' => $mine, 'base' => '2026-08-11 22:25:00+00'],

@@ -8,6 +8,7 @@ SELECT
 	n.locked,
 	n.created,
 	n.changed,
+	n.edited,
 	n.deleted,
 <?php if (isset($working) && $working && isset($autosave)) : ?>
 	coalesce(a.content, d.content, n.content) AS content,

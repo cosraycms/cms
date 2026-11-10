@@ -122,7 +122,7 @@ final class Index extends Panel
 						'published' => (bool) ($row['published'] ?? false),
 						'stages' => [
 							'record' => in_array($type, $records, true),
-							'changed' => (string) ($row['changed'] ?? ''),
+							'edited' => (string) ($row['edited'] ?? ''),
 							'editor' => $row['editor_name'] ?? null,
 							'draft' => $row['draft_changed'] === null
 								? null

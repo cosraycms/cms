@@ -140,6 +140,26 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		$this->assertHtmlNodeMissing("//*[@data-state='conflict']", $this->editor('autosave-switched'));
 	}
 
+	public function testOnlyAContentChangeOfSomeoneElseMakesCurrentEditsAConflict(): void
+	{
+		$this->createPage('autosave-foreign', 'Live');
+		$this->autosave('autosave-foreign', 'Edited');
+
+		$this->db()->execute(
+			"UPDATE cms.nodes SET published = false, hidden = true, locked = true WHERE uid = 'autosave-foreign'",
+		)->run();
+		$this->db()->execute("UPDATE cms.nodes SET locked = false WHERE uid = 'autosave-foreign'")->run();
+
+		$this->assertHtmlNodeMissing("//*[@data-state='conflict']", $this->editor('autosave-foreign'));
+
+		$this->db()->execute(
+			"UPDATE cms.nodes SET content = jsonb_set(content, '{title,value,en}', '\"Theirs\"') "
+				. "WHERE uid = 'autosave-foreign'",
+		)->run();
+
+		$this->assertHtmlNodeExists("//*[@data-state='conflict']", $this->editor('autosave-foreign'));
+	}
+
 	public function testASaveOnAnOutdatedStateIsRefusedUnlessForced(): void
 	{
 		$this->createPage('autosave-locked', 'Live');

@@ -136,37 +136,6 @@ function follow() {
 }
 
 /**
- * A switch moved the node's change time; an editor that was current
- * follows, so its next save is no conflict with itself.
- */
-function rebase() {
-	const rebased = document.getElementById('editor-rebase');
-	const state = document.getElementById('editor-autosave');
-	const { from, to } = rebased?.dataset ?? {};
-
-	if (!rebased || !state || !from || !to) {
-		return;
-	}
-
-	if (state.dataset.base === from) {
-		state.dataset.base = to;
-		const input = state.querySelector('input[name="_base"]');
-
-		if (input instanceof HTMLInputElement) {
-			input.value = to;
-		}
-	}
-
-	delete rebased.dataset.from;
-	delete rebased.dataset.to;
-}
-
-function settle() {
-	rebase();
-	follow();
-}
-
-/**
  * @param {Event} event
  */
 function autosave(event) {
@@ -207,13 +176,13 @@ function done(event) {
 /** @returns {() => void} */
 export function install() {
 	document.addEventListener(EVENT, autosave);
-	document.addEventListener('htmx:after:swap', settle);
+	document.addEventListener('htmx:after:swap', follow);
 	document.addEventListener('htmx:after:request', done);
 	follow();
 
 	return () => {
 		document.removeEventListener(EVENT, autosave);
-		document.removeEventListener('htmx:after:swap', settle);
+		document.removeEventListener('htmx:after:swap', follow);
 		document.removeEventListener('htmx:after:request', done);
 	};
 }

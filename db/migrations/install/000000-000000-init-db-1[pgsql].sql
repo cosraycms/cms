@@ -183,6 +183,9 @@ CREATE TABLE /*:cms.prefix:*/nodes (
 	editor bigint NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
 	changed timestamp with time zone NOT NULL DEFAULT now(),
+	-- When the content, title, parent or deletion changed last; publishing,
+	-- listing and locking leave it alone. Unsaved edits are based on it.
+	edited timestamp with time zone NOT NULL DEFAULT now(),
 	deleted timestamp with time zone,
 	content jsonb NOT NULL,
 	-- Materialized, query-only copy of the node's title as a locale map
@@ -289,6 +292,24 @@ CREATE TRIGGER /*:cms.obj:*/nodes_trigger_01_uid BEFORE UPDATE OF uid ON /*:cms.
 	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/prevent_node_uid_update();
 CREATE TRIGGER /*:cms.obj:*/nodes_trigger_02_change BEFORE UPDATE ON /*:cms.prefix:*/nodes
 	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_changed_column();
+CREATE FUNCTION /*:cms.prefix:*/update_node_edited()
+	RETURNS TRIGGER AS $$
+BEGIN
+	IF (NEW.parent, NEW.type, NEW.content, NEW.title, NEW.deleted)
+		IS NOT DISTINCT FROM (OLD.parent, OLD.type, OLD.content, OLD.title, OLD.deleted)
+		AND (NEW.published, NEW.hidden, NEW.locked) IS DISTINCT FROM (OLD.published, OLD.hidden, OLD.locked)
+	THEN
+		NEW.edited = OLD.edited;
+	ELSE
+		NEW.edited = NEW.changed;
+	END IF;
+
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+-- Runs after the change trigger, whose time it takes.
+CREATE TRIGGER /*:cms.obj:*/nodes_trigger_04_edited BEFORE UPDATE ON /*:cms.prefix:*/nodes
+	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_node_edited();
 CREATE TRIGGER /*:cms.obj:*/nodes_trigger_03_history AFTER UPDATE
 	ON /*:cms.prefix:*/nodes FOR EACH ROW EXECUTE FUNCTION
 	/*:cms.prefix:*/record_node_history();

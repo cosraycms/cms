@@ -5,4 +5,5 @@ SET
 	editor = :editor
 WHERE
 	uid = :uid
-	AND deleted IS NULL;
+	AND deleted IS NULL
+	AND published IS DISTINCT FROM :published::boolean;

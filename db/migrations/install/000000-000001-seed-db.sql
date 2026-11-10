@@ -65,4 +65,5 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000046-password-resets.sql', now()),
 	('000000-000047-rate-limits.sql', now()),
 	('000000-000050-autosaves.sql', now()),
-	('000000-000051-fulltext-partial[pgsql].sql', now());
+	('000000-000051-fulltext-partial[pgsql].sql', now()),
+	('000000-000052-node-edited.sql', now());

@@ -69,7 +69,7 @@ final class PanelNodeStatusTest extends TestCase
 
 		$this->assertSame(self::AFTER, $status->saved);
 		$this->assertSame('Grace', $status->savedBy);
-		$this->assertSame(self::CHANGED, $status->changed);
+		$this->assertSame(self::CHANGED, $status->edited);
 	}
 
 	public function testARecordHasTheStoredStateAndTheUsersEdits(): void
@@ -102,7 +102,7 @@ final class PanelNodeStatusTest extends TestCase
 		return NodeStatus::of(
 			record: (bool) ($facts['record'] ?? false),
 			published: (bool) ($facts['published'] ?? false),
-			changed: self::CHANGED,
+			edited: self::CHANGED,
 			editor: $facts['editor'] ?? null,
 			draft: $facts['draft'] ?? null,
 			autosave: $facts['autosave'] ?? null,

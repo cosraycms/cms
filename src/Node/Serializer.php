@@ -58,6 +58,7 @@ class Serializer
 			'locked' => $rawData['locked'],
 			'created' => $rawData['created'],
 			'changed' => $rawData['changed'],
+			'edited' => $rawData['edited'] ?? $rawData['changed'],
 			'deleted' => $rawData['deleted'],
 			'paths' => $rawData['paths'],
 			'parent' => $rawData['parent'] ?? null,

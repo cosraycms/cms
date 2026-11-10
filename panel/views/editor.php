@@ -303,8 +303,6 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 	</form>
 
 	<div id="editor-preview" hidden></div>
-	<?php // A switch moves the node's change time; the editor follows if it was current. ?>
-	<span id="editor-rebase" hidden></span>
 	<?php if ($edit && $embed === null): ?>
 		<?php // The head's menu and the status tab submit these; the editor form
 
