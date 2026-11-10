@@ -19,6 +19,7 @@ use Cosray\Field\Textarea;
 use Cosray\Field\Video;
 use Cosray\Field\Youtube;
 use Cosray\Locales;
+use Cosray\Panel\NodeStatus;
 use Cosray\Panel\System;
 use Cosray\Richtext\Envelope;
 use Cosray\Schema\Tool;
@@ -1421,6 +1422,22 @@ final class Styleguide extends Panel
 	 */
 	private function rows(): array
 	{
+		$dates = NodeStatus::dates($this->localeId(), $this->config->app->timezone);
+		$dots = static function (bool $published, ?string $released, ?string $draft, ?string $mine) use (
+			$dates,
+		): array {
+			$stages = NodeStatus::of(
+				record: false,
+				published: $published,
+				released: $released,
+				changed: '2026-08-11 22:25:00+00',
+				editor: 'Ada',
+				draft: $draft === null ? null : ['changed' => $draft, 'editorName' => 'Ada'],
+				autosave: $mine === null ? null : ['changed' => $mine, 'base' => '2026-08-11 22:25:00+00'],
+			)->stages($dates);
+
+			return ['stages' => $stages, 'sentence' => NodeStatus::sentence($stages)];
+		};
 		$row = static fn(array $overrides): array => array_merge([
 			'uid' => 'styleguide',
 			'depth' => 0,
@@ -1432,7 +1449,8 @@ final class Styleguide extends Panel
 			'childrenUrl' => null,
 			'focusedChildrenUrl' => null,
 			'childCreateLinks' => [],
-			'status' => [['kind' => 'published', 'label' => 'Published']],
+			'status' => [],
+			'dots' => $dots(true, '2026-08-01 10:00:00+00', null, null),
 			'cells' => [],
 			'group' => null,
 			'moveUp' => false,
@@ -1458,7 +1476,7 @@ final class Styleguide extends Panel
 			$row([
 				'depth' => 1,
 				'childrenUrl' => '#',
-				'status' => [['kind' => 'unpublished', 'label' => 'Unpublished']],
+				'dots' => $dots(false, null, null, null),
 				'published' => false,
 				'cells' => $cells('Sudhaus', 'Page', 'Aug 11, 2026, 10:25 PM'),
 				'group' => 'brauerei',
@@ -1469,6 +1487,7 @@ final class Styleguide extends Panel
 				'last' => true,
 				'guides' => [1],
 				'status' => [['kind' => 'hidden', 'label' => 'Hidden']],
+				'dots' => $dots(false, '2026-08-01 10:00:00+00', null, null),
 				'published' => false,
 				'cells' => $cells(
 					'A title long enough that it has to be cut off somewhere',
@@ -1479,11 +1498,13 @@ final class Styleguide extends Panel
 			$row([
 				'depth' => 1,
 				'last' => true,
-				'status' => [
-					['kind' => 'published', 'label' => 'Published'],
-					['kind' => 'changes', 'label' => 'Changes'],
-					['kind' => 'locked', 'label' => 'Locked'],
-				],
+				'status' => [['kind' => 'locked', 'label' => 'Locked']],
+				'dots' => $dots(
+					true,
+					'2026-08-01 10:00:00+00',
+					'2026-08-11 22:25:00+00',
+					'2026-08-11 22:30:00+00',
+				),
 				'cells' => $cells('Presse', 'Page', 'Aug 11, 2026, 10:25 PM'),
 				'group' => 'brauerei',
 				'moveUp' => true,

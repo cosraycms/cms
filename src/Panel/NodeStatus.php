@@ -6,6 +6,8 @@ namespace Cosray\Panel;
 
 use Closure;
 use DateTimeImmutable;
+use DateTimeZone;
+use IntlDateFormatter;
 use Throwable;
 
 /**
@@ -139,6 +141,31 @@ final readonly class NodeStatus
 			],
 			$mine,
 		];
+	}
+
+	/**
+	 * Formats stored times for stages(), in a locale and time zone.
+	 *
+	 * @return Closure(string, bool): string
+	 */
+	public static function dates(string $locale, DateTimeZone $timezone): Closure
+	{
+		return static function (string $value, bool $time) use ($locale, $timezone): string {
+			try {
+				$date = new DateTimeImmutable($value, $timezone);
+			} catch (Throwable) {
+				return '';
+			}
+
+			$formatted = new IntlDateFormatter(
+				$locale,
+				IntlDateFormatter::MEDIUM,
+				$time ? IntlDateFormatter::SHORT : IntlDateFormatter::NONE,
+				$timezone,
+			)->format($date->getTimestamp());
+
+			return $formatted === false ? '' : $formatted;
+		};
 	}
 
 	/**

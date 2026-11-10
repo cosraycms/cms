@@ -19,6 +19,7 @@ final class CollectionQuery
 		public readonly string $view = 'list',
 		public readonly array $open = [],
 		public readonly string $defaultView = 'list',
+		public readonly string $stage = '',
 	) {}
 
 	/**
@@ -35,6 +36,7 @@ final class CollectionQuery
 			'parent' => $this->parent,
 			'view' => $this->view,
 			'open' => $this->open,
+			'stage' => $this->stage,
 		], $overrides);
 	}
 
@@ -53,6 +55,7 @@ final class CollectionQuery
 			'parent' => $this->parent,
 			'view' => $this->view,
 			'open' => $this->open,
+			'stage' => $this->stage,
 		], $overrides);
 	}
 

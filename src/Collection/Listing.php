@@ -75,10 +75,20 @@ final class Listing
 		return $this->collection instanceof Entries ? $this->collection->entries($nodes) : $nodes;
 	}
 
-	/** The node a hierarchy listing is scoped to, in any state. */
-	public function parent(string $uid): ?Wrapper
+	/** The node a hierarchy listing is scoped to, in any state, with the user's autosave facts. */
+	public function parent(string $uid, ?int $user = null): ?Wrapper
 	{
-		return $this->cms->node->byUid($uid, published: null);
+		$nodes = $this->cms->nodes()->published(null)->hidden(null)->only($uid);
+
+		if ($user !== null) {
+			$nodes->mine($user);
+		}
+
+		foreach ($nodes as $node) {
+			return $node;
+		}
+
+		return null;
 	}
 
 	/**
@@ -100,16 +110,19 @@ final class Listing
 		string $sort = '',
 		string $dir = '',
 		?string $parent = null,
+		string $stage = '',
+		?int $user = null,
 	): array {
 		[$sort, $dir, $order] = $this->resolveOrder($sort, $dir);
-		$nodes = $this->entries();
 		$parent = $this->meta->showChildren ? trim((string) $parent) : '';
+		$nodes = $this->scoped($parent, trim($q));
 
-		if ($this->meta->showChildren) {
-			if ($parent === '') {
-				$nodes->roots();
-			} else {
-				$nodes->childrenOf($parent);
+		// The user's own autosaves belong to each row's status.
+		if ($user !== null) {
+			$nodes->mine($user);
+
+			if ($stage !== '') {
+				$nodes->stage($stage, $user);
 			}
 		}
 
@@ -123,11 +136,6 @@ final class Listing
 		}
 
 		$q = trim($q);
-
-		if ($q !== '') {
-			$nodes->search($q, $this->schema->search);
-		}
-
 		$nodes->order(...$order);
 
 		$total = $nodes->count();
@@ -146,6 +154,49 @@ final class Listing
 			// silently jump the rows in between.
 			'nodes' => $this->rows($pageNodes, $q === '' ? $scope : null, $offset, $total),
 		];
+	}
+
+	/**
+	 * How many entries of the listing's scope each status stage holds, for
+	 * the filters above the list, `all` included. Records know only the
+	 * user's own edits, so without publishable entries the other stages go.
+	 *
+	 * @return array<string, int>
+	 */
+	public function stageCounts(int $user, string $q = '', ?string $parent = null): array
+	{
+		$parent = $this->meta->showChildren ? trim((string) $parent) : '';
+		$q = trim($q);
+		$counts = ['all' => $this->scoped($parent, $q)->count()];
+		$stages = $this->scoped($parent, $q)->publishable()->count() > 0
+			? ['draft', 'mine', 'offline', 'unreleased']
+			: ['mine'];
+
+		foreach ($stages as $stage) {
+			$counts[$stage] = $this->scoped($parent, $q)->stage($stage, $user)->count();
+		}
+
+		return $counts;
+	}
+
+	/** The entries a listing page draws from: one level of a hierarchy, matching a search. */
+	private function scoped(string $parent, string $q): Nodes
+	{
+		$nodes = $this->entries();
+
+		if ($this->meta->showChildren) {
+			if ($parent === '') {
+				$nodes->roots();
+			} else {
+				$nodes->childrenOf($parent);
+			}
+		}
+
+		if ($q !== '') {
+			$nodes->search($q, $this->schema->search);
+		}
+
+		return $nodes;
 	}
 
 	/**
@@ -265,6 +316,7 @@ final class Listing
 			'uid' => $node->meta->uid,
 			'published' => $node->meta->published,
 			'hasDraft' => $node->meta->get('draft') !== null,
+			'stages' => $this->stages($node),
 			'locked' => $node->meta->locked,
 			'hidden' => $node->meta->hidden,
 			'parent' => $parent,
@@ -272,6 +324,49 @@ final class Listing
 			'childBlueprints' => $childBlueprints,
 			'columns' => $columns,
 		];
+	}
+
+	/**
+	 * The facts Panel\NodeStatus derives a node's stages from.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function stages(Wrapper $node): array
+	{
+		$draft = $node->meta->get('draft');
+		$mine = $node->meta->get('mine');
+		$released = $node->meta->get('released');
+
+		return [
+			'record' => (bool) $this->types->get(Wrapper::unwrap($node)::class, 'record', false),
+			'released' => is_string($released) ? $released : null,
+			'changed' => (string) $node->meta->get('changed'),
+			'editor' => self::userLabel(
+				$node->meta->get('editor_data'),
+				$node->meta->get('editor_username'),
+				$node->meta->get('editor_email'),
+			),
+			'draft' => is_array($draft)
+				? [
+					'changed' => (string) ($draft['changed'] ?? ''),
+					'editorName' => is_string($draft['editorName'] ?? null) ? $draft['editorName'] : null,
+				]
+				: null,
+			'mine' => is_array($mine) ? $mine : null,
+		];
+	}
+
+	private static function userLabel(mixed $data, mixed $username, mixed $email): ?string
+	{
+		$data = is_string($data) ? json_decode($data, true) : $data;
+
+		foreach ([is_array($data) ? $data['name'] ?? null : null, $username, $email] as $candidate) {
+			if (is_string($candidate) && trim($candidate) !== '') {
+				return $candidate;
+			}
+		}
+
+		return null;
 	}
 
 	/**

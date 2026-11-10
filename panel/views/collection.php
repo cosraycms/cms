@@ -24,7 +24,8 @@ foreach ($page->table->rows as $row) {
 $bulk = count($page->table->rows) > 0;
 $notice = (array) u($notice ?? []);
 
-$columns = ($bulk ? 'var(--cms-list-select-width) ' : '') . 'minmax(12rem, 2fr)';
+// The title, then the status, then the other columns.
+$columns = ($bulk ? 'var(--cms-list-select-width) ' : '') . 'minmax(12rem, 2fr) max-content';
 
 foreach (array_slice($page->table->headers, 1) as $header) {
 	$columns .= match ($header['kind'] ?? null) {
@@ -34,7 +35,7 @@ foreach (array_slice($page->table->headers, 1) as $header) {
 	};
 }
 
-$columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
+$columns .= $hasRowActions ? ' max-content' : '';
 ?>
 
 <div class="page cms-collection">
@@ -140,6 +141,9 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					<?php if ($page->parent->type !== null): ?>
 						<span class="type-pill"><?= escape($page->parent->type) ?></span>
 					<?php endif ?>
+					<?php if ($page->parent->dots !== null): ?>
+						<?php $this->include('component/status-dots', ['status' => $page->parent->dots, 'size' => 'sm']) ?>
+					<?php endif ?>
 					<?php foreach ($page->parent->status as $badge): ?>
 						<span class="cms-status is-<?= escape($badge['kind']) ?>"><?= escape(
 							$badge['label'],
@@ -148,6 +152,30 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				</div>
 			<?php endif ?>
 		</div>
+
+		<?php if ($page->stages !== []): ?>
+			<?php // The status filters, each with its count and the dot of its stage. ?>
+			<nav class="cms-stage-filters" aria-label="<?= escape(__('collection:stages')) ?>">
+				<?php foreach ($page->stages as $chip): ?>
+					<?php
+					[$stage, $state] = match ($chip['key']) {
+						'draft' => ['draft', 'present'],
+						'mine' => ['mine', 'present'],
+						'offline' => ['website', 'offline'],
+						'unreleased' => ['website', 'none'],
+						default => [null, null],
+					};
+					?>
+					<a class="chip" href="<?= escape($chip['url']) ?>" <?= $chip['active'] ? 'aria-current="true"' : '' ?>>
+						<?php if ($stage !== null): ?>
+							<span class="dot" data-stage="<?= $stage ?>" data-state="<?= $state ?>" aria-hidden="true"></span>
+						<?php endif ?>
+						<span class="label"><?= escape($chip['label']) ?></span>
+						<span class="count"><?= (int) $chip['count'] ?></span>
+					</a>
+				<?php endforeach ?>
+			</nav>
+		<?php endif ?>
 
 		<?php if ($bulk): ?>
 			<?php // The form element stays empty: checkboxes and action buttons
@@ -221,7 +249,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 											aria-label="<?= escape(__('bulk:select-all')) ?>" />
 									</th>
 								<?php endif ?>
-								<?php foreach ($page->table->headers as $header): ?>
+								<?php foreach ($page->table->headers as $index => $header): ?>
 									<th
 										class="<?= escape($header['class']) ?>"
 										role="columnheader"
@@ -239,8 +267,10 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 											</a>
 										<?php endif ?>
 									</th>
+									<?php if ($index === 0): ?>
+										<th class="col-status" role="columnheader"><?= escape(__('collection:status')) ?></th>
+									<?php endif ?>
 								<?php endforeach ?>
-								<th class="col-status" role="columnheader"><?= escape(__('collection:status')) ?></th>
 								<?php if ($hasRowActions): ?>
 									<th class="col-actions" role="columnheader"></th>
 								<?php endif ?>

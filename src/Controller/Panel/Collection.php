@@ -15,6 +15,7 @@ use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 use Cosray\Panel\CollectionPage;
 use Cosray\Panel\CollectionQuery;
+use Cosray\Panel\CollectionTable;
 use Cosray\Panel\CollectionTree;
 use Cosray\Panel\CollectionUrls;
 
@@ -37,6 +38,11 @@ final class Collection extends Panel
 		$parent = $this->stringParam('parent');
 		$view = $this->stringParam('view');
 		$open = $this->openParam('open');
+		$stage = $this->stringParam('stage');
+
+		if ($stage !== '' && !in_array($stage, ['draft', 'mine', 'offline', 'unreleased'], true)) {
+			throw new HttpBadRequest($this->request);
+		}
 
 		if ($dir !== '' && !in_array($dir, ['asc', 'desc'], true)) {
 			throw new HttpBadRequest($this->request);
@@ -63,6 +69,12 @@ final class Collection extends Panel
 			$open = [];
 		}
 
+		// A filtered tree would lose the branches between its rows.
+		if ($view === 'tree') {
+			$stage = '';
+		}
+
+		$user = $this->actor()->id;
 		$parentNode = $parentUid === null ? null : $this->parentNode($lister, $parentUid);
 		$parentTitle = $parentNode?->title();
 
@@ -77,6 +89,8 @@ final class Collection extends Panel
 			sort: $sort,
 			dir: $dir,
 			parent: $parentUid,
+			stage: $stage,
+			user: $user,
 		);
 
 		$query = new CollectionQuery(
@@ -89,6 +103,7 @@ final class Collection extends Panel
 			view: $view,
 			open: $open,
 			defaultView: $defaultView,
+			stage: $stage,
 		);
 		$nodes = $listing['nodes'];
 
@@ -102,6 +117,7 @@ final class Collection extends Panel
 					sort: $listing['sort'],
 					dir: $listing['dir'],
 					parent: $uid,
+					user: $user,
 				)['nodes'],
 			);
 		}
@@ -127,7 +143,15 @@ final class Collection extends Panel
 					? null
 					: __((string) $parentNode->meta->type->get('label', '')),
 				parentStatus: $parentNode === null ? null : $this->nodeStatus($lister, $parentNode),
+				parentDots: $parentNode === null
+					? null
+					: CollectionTable::dots(
+						['published' => $parentNode->meta->published, 'stages' => $lister->stages($parentNode)],
+						$this->localeId(),
+						$this->config->app->timezone,
+					),
 				createBlueprints: $parentNode === null ? null : $lister->childBlueprints($parentNode),
+				stages: $view === 'tree' ? [] : $lister->stageCounts($user, $listing['q'], $parentUid),
 			),
 		]);
 	}
@@ -250,7 +274,7 @@ final class Collection extends Panel
 
 	private function parentNode(Listing $lister, string $uid): Wrapper
 	{
-		$node = $lister->parent($uid);
+		$node = $lister->parent($uid, $this->actor()->id);
 
 		if (!$node) {
 			throw new HttpNotFound($this->request);
@@ -264,18 +288,6 @@ final class Collection extends Panel
 	{
 		$status = [];
 		$meta = $lister->meta;
-
-		if ($meta->showPublished) {
-			$published = (bool) $node->meta->get('published');
-			$status[] = [
-				'kind' => $published ? 'published' : 'unpublished',
-				'label' => $published ? __('status:published') : __('status:unpublished'),
-			];
-
-			if ($node->meta->get('draft') !== null) {
-				$status[] = ['kind' => 'changes', 'label' => __('status:changes')];
-			}
-		}
 
 		if ($meta->showHidden && (bool) $node->meta->get('hidden')) {
 			$status[] = [

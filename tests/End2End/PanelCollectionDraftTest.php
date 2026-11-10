@@ -40,7 +40,7 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 		return $plugin;
 	}
 
-	public function testListingBadgesNodesWithAWorkingCopy(): void
+	public function testListingShowsEachRowsStagesAsDots(): void
 	{
 		$this->createPage('listing-clean', 'Clean', published: true);
 		$this->createPage('listing-offline', 'Offline', published: false);
@@ -48,19 +48,12 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 
 		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/collection/test-draft-pages'));
 
-		$this->assertHtmlNodeExists(
-			'//tr[@data-uid="listing-changed"]//span[contains(@class, "cms-status") and contains(@class, "is-published")]',
-			$html,
-		);
-		$this->assertHtmlNodeExists(
-			'//tr[@data-uid="listing-changed"]//span[contains(@class, "cms-status") and contains(@class, "is-changes")][normalize-space(.)="Unpublished changes"]',
-			$html,
-		);
-		$this->assertHtmlNodeMissing('//tr[@data-uid="listing-clean"]//span[contains(@class, "is-changes")]', $html);
-		$this->assertHtmlNodeExists(
-			'//tr[@data-uid="listing-offline"]//span[contains(@class, "is-unpublished")][normalize-space(.)="Unpublished"]',
-			$html,
-		);
+		$this->assertHtmlNodeExists($this->dot('listing-changed', 'website', 'online'), $html);
+		$this->assertHtmlNodeExists($this->dot('listing-changed', 'draft', 'present'), $html);
+		$this->assertHtmlNodeExists($this->dot('listing-clean', 'draft', 'none'), $html);
+		// Never published: its content is the editorial team's draft.
+		$this->assertHtmlNodeExists($this->dot('listing-offline', 'website', 'none'), $html);
+		$this->assertHtmlNodeExists($this->dot('listing-offline', 'draft', 'present'), $html);
 		$this->assertHtmlNodeExists(
 			'//dialog[@data-dialog="bulk-publish"]//label[@data-bulk-option]/input[@name="changes"]',
 			$html,
@@ -120,6 +113,37 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 	}
 
 	/** @param list<string> $uids */
+	public function testStatusFiltersNarrowTheListAndCountEachStage(): void
+	{
+		$this->createPage('filter-clean', 'Clean', published: true);
+		$this->createPage('filter-new', 'New', published: false);
+		$this->createPage('filter-changed', 'Changed', published: true, draftTitle: 'Pending');
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/collection/test-draft-pages', [
+			'query' => ['stage' => 'draft'],
+		]));
+
+		$this->assertHtmlNodeExists('//tr[@data-uid="filter-changed"]', $html);
+		$this->assertHtmlNodeExists('//tr[@data-uid="filter-new"]', $html);
+		$this->assertHtmlNodeMissing('//tr[@data-uid="filter-clean"]', $html);
+		$this->assertHtmlNodeExists(
+			'//nav[contains(@class, "cms-stage-filters")]/a[@aria-current="true"][contains(., "With draft")]/*[@class="count"][.="2"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//nav[contains(@class, "cms-stage-filters")]/a[contains(., "Never published")]/*[@class="count"][.="1"]',
+			$html,
+		);
+		$this->assertResponseStatus(400, $this->makeRequest('GET', '/panel/collection/test-draft-pages', [
+			'query' => ['stage' => 'nonsense'],
+		]));
+	}
+
+	private function dot(string $uid, string $stage, string $state): string
+	{
+		return "//tr[@data-uid='{$uid}']//*[contains(@class, 'cms-status-dots')]/*[@data-stage='{$stage}' and @data-state='{$state}']";
+	}
+
 	private function bulk(array $uids, string $state, array $extra = []): object
 	{
 		$response = $this->makeRequest('POST', '/panel/collection/test-draft-pages/bulk/publish', [

@@ -135,6 +135,14 @@ class Node
 				'editorName' => $data['draft_editor_name'] ?? null,
 			]
 			: null;
+		// A user's autosave facts, when the finder was asked for them.
+		if (array_key_exists('mine_changed', $data)) {
+			$data['mine'] = $data['mine_changed'] === null
+				? null
+				: ['changed' => (string) $data['mine_changed'], 'base' => (string) $data['mine_base']];
+			unset($data['mine_changed'], $data['mine_base']);
+		}
+
 		$settings = json_decode((string) ($data['draft_settings'] ?? ''), true);
 		unset(
 			$data['has_draft'],

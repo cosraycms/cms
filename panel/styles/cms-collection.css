@@ -51,6 +51,11 @@
 		}
 	}
 
+	& .cms-stage-filters {
+		flex: 0 0 auto;
+		padding: 0 var(--cms-space-6) var(--cms-space-4);
+	}
+
 	& .bulk-bar {
 		display: flex;
 

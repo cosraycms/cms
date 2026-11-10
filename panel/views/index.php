@@ -52,16 +52,12 @@ $recent = (array) u($recent ?? []);
 					<?php foreach ($recent as $row): ?>
 						<?php $row = (array) u($row) ?>
 						<div class="row">
-							<span
-								class="dot <?= $row['published'] ?? false ? 'is-published' : 'is-unpublished' ?>"
-								aria-hidden="true"></span>
-							<span class="status sr-only"><?= escape((string) ($row['status'] ?? '')) ?></span>
+							<?php if (is_array($row['dots'] ?? null)): ?>
+								<?php $this->include('component/status-dots', ['status' => $row['dots'], 'size' => 'sm']) ?>
+							<?php endif ?>
 							<a class="title" href="<?= escape((string) $row['url']) ?>" hx-target="#frame"><?= escape(
 								(string) ($row['title'] ?? ''),
 							) ?></a>
-							<?php if ($row['hasDraft'] ?? false): ?>
-								<span class="cms-status is-changes"><?= escape(__('status:changes')) ?></span>
-							<?php endif ?>
 							<span class="type"><?= escape((string) ($row['type'] ?? '')) ?></span>
 							<time class="changed" datetime="<?= escape((string) ($row['datetime'] ?? '')) ?>"><?= escape(
 								(string) ($row['changed'] ?? ''),

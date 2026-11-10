@@ -11,6 +11,7 @@ use Cosray\Bootstrap;
 use Cosray\Context;
 use Cosray\Contract\DashboardCard;
 use Cosray\Node\Types;
+use Cosray\Panel\CollectionTable;
 use Cosray\Panel\Dashboard;
 use Cosray\Panel\NodeUrls;
 use Cosray\Title\Resolver as TitleResolver;
@@ -79,8 +80,7 @@ final class Index extends Panel
 	 *     type: string,
 	 *     changed: string,
 	 *     datetime: string,
-	 *     published: bool,
-	 *     status: string,
+	 *     dots: ?array{stages: list<array<string, string>>, sentence: string},
 	 * }>
 	 */
 	private function recent(Context $context, Database $db, Types $types): array
@@ -94,9 +94,11 @@ final class Index extends Panel
 			IntlDateFormatter::NONE,
 			$this->config->app->timezone->getName(),
 		);
+		$records = $this->recordTypes($types);
 		$recent = [];
+		$rows = $db->dashboard->recent(['limit' => self::RECENT_LIMIT, 'mine' => $this->actor()->id])->all();
 
-		foreach ($db->dashboard->recent(['limit' => self::RECENT_LIMIT])->all() as $row) {
+		foreach ($rows as $row) {
 			$uid = (string) ($row['uid'] ?? '');
 			$map = $row['title'] ?? [];
 
@@ -107,7 +109,6 @@ final class Index extends Panel
 			$title = is_array($map) ? $titles->stored($map, $context->locale()) : null;
 			$changed = new DateTimeImmutable((string) ($row['changed'] ?? 'now'));
 			$formatted = $date->format($changed->getTimestamp());
-			$published = (bool) ($row['published'] ?? false);
 			$type = (string) ($row['type'] ?? '');
 			$recent[] = [
 				'uid' => $uid,
@@ -116,13 +117,49 @@ final class Index extends Panel
 				'type' => $labels[$type] ?? $type,
 				'changed' => $formatted === false ? '' : $formatted,
 				'datetime' => $changed->format(DATE_ATOM),
-				'published' => $published,
-				'hasDraft' => (bool) ($row['has_draft'] ?? false),
-				'status' => $published ? __('status:published') : __('status:unpublished'),
+				'dots' => CollectionTable::dots(
+					[
+						'published' => (bool) ($row['published'] ?? false),
+						'stages' => [
+							'record' => in_array($type, $records, true),
+							'released' => $row['released'] ?? null,
+							'changed' => (string) ($row['changed'] ?? ''),
+							'editor' => $row['editor_name'] ?? null,
+							'draft' => $row['draft_changed'] === null
+								? null
+								: [
+									'changed' => (string) $row['draft_changed'],
+									'editorName' => $row['draft_editor_name'] ?? null,
+								],
+							'mine' => $row['mine_changed'] === null
+								? null
+								: ['changed' => (string) $row['mine_changed'], 'base' => (string) $row['mine_base']],
+						],
+					],
+					$this->localeId(),
+					$this->config->app->timezone,
+				),
 			];
 		}
 
 		return $recent;
+	}
+
+	/** @return list<string> the handles of the record types */
+	private function recordTypes(Types $types): array
+	{
+		$registered = $this->container->tag(Bootstrap::NODE_TAG);
+		$records = [];
+
+		foreach ($registered->entries() as $handle) {
+			$class = $registered->entry($handle)->definition();
+
+			if (is_string($class) && class_exists($class) && (bool) $types->get($class, 'record', false)) {
+				$records[] = $handle;
+			}
+		}
+
+		return $records;
 	}
 
 	/** @return array<string, string> */

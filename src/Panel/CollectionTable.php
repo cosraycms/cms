@@ -28,6 +28,7 @@ final class CollectionTable
 	 *     hasChildren: bool,
 	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string}>,
 	 *     status: list<array{kind: string, label: string}>,
+	 *     dots: ?array{stages: list<array<string, string>>, sentence: string},
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
@@ -124,6 +125,7 @@ final class CollectionTable
 	 *     hasChildren: bool,
 	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string}>,
 	 *     status: list<array{kind: string, label: string}>,
+	 *     dots: ?array{stages: list<array<string, string>>, sentence: string},
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
@@ -168,6 +170,7 @@ final class CollectionTable
 				'hasChildren' => $hasChildren,
 				'cells' => self::cells($node, $headers, $urls, $locale, $timezone),
 				'status' => self::status($node, $meta),
+				'dots' => self::dots($node, $locale, $timezone),
 				'childrenUrl' => $childrenUrl,
 				'focusedChildrenUrl' =>
 					$meta->showChildren && $uid !== '' && ($hasChildren || $childBlueprints !== [])
@@ -298,24 +301,50 @@ final class CollectionTable
 	}
 
 	/**
+	 * The row's stages as Panel\NodeStatus derives them, for its dots.
+	 *
+	 * @param array<string, mixed> $node
+	 * @return ?array{stages: list<array<string, string>>, sentence: string}
+	 */
+	public static function dots(array $node, string $locale, DateTimeZone $timezone): ?array
+	{
+		$facts = $node['stages'] ?? null;
+
+		if (!is_array($facts)) {
+			return null;
+		}
+
+		$draft = is_array($facts['draft'] ?? null) ? $facts['draft'] : null;
+		$mine = is_array($facts['mine'] ?? null) ? $facts['mine'] : null;
+		$stages = NodeStatus::of(
+			record: (bool) ($facts['record'] ?? false),
+			published: (bool) ($node['published'] ?? false),
+			released: is_string($facts['released'] ?? null) ? $facts['released'] : null,
+			changed: (string) ($facts['changed'] ?? ''),
+			editor: is_string($facts['editor'] ?? null) ? $facts['editor'] : null,
+			draft: $draft === null
+				? null
+				: [
+					'changed' => (string) ($draft['changed'] ?? ''),
+					'editorName' => is_string($draft['editorName'] ?? null) ? $draft['editorName'] : null,
+				],
+			autosave: $mine === null
+				? null
+				: ['changed' => (string) ($mine['changed'] ?? ''), 'base' => (string) ($mine['base'] ?? '')],
+		)->stages(NodeStatus::dates($locale, $timezone));
+
+		return ['stages' => $stages, 'sentence' => NodeStatus::sentence($stages)];
+	}
+
+	/**
+	 * Badges for states besides the stages: hidden and locked.
+	 *
 	 * @param array<string, mixed> $node
 	 * @return list<array{kind: string, label: string}>
 	 */
 	private static function status(array $node, CollectionListMeta $meta): array
 	{
 		$badges = [];
-
-		if ($meta->showPublished) {
-			$published = (bool) ($node['published'] ?? false);
-			$badges[] = [
-				'kind' => $published ? 'published' : 'unpublished',
-				'label' => $published ? __('status:published') : __('status:unpublished'),
-			];
-
-			if ((bool) ($node['hasDraft'] ?? false)) {
-				$badges[] = ['kind' => 'changes', 'label' => __('status:changes')];
-			}
-		}
 
 		if ($meta->showHidden && (bool) ($node['hidden'] ?? false)) {
 			$badges[] = [

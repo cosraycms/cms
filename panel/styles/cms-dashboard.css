@@ -91,7 +91,7 @@
 
 		& .row {
 			display: grid;
-			grid-template-columns: 0.5rem minmax(0, 1fr) minmax(8rem, max-content) 7rem;
+			grid-template-columns: max-content minmax(0, 1fr) minmax(8rem, max-content) 7rem;
 			gap: var(--cms-space-3);
 			align-items: center;
 			padding: var(--cms-space-3) var(--cms-space-4);
@@ -99,17 +99,6 @@
 
 			&:last-child {
 				border-bottom: 0;
-			}
-		}
-
-		& .dot {
-			width: 0.45rem;
-			height: 0.45rem;
-			border-radius: var(--cms-radius-full);
-			background: var(--cms-color-border-strong);
-
-			&.is-published {
-				background: var(--cms-color-text);
 			}
 		}
 
@@ -156,7 +145,7 @@
 		}
 
 		& .recent .row {
-			grid-template-columns: 0.5rem minmax(0, 1fr) auto;
+			grid-template-columns: max-content minmax(0, 1fr) auto;
 
 			& .type {
 				grid-column: 2;

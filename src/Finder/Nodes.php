@@ -38,6 +38,7 @@ final class Nodes implements Iterator
 	private ?bool $deleted = false; // defaults to false, if all nodes are needed set $deleted to null
 	private ?bool $published = true; // ditto
 	private ?bool $hidden = false; // ditto
+	private ?int $mine = null;
 	/** @var array<string, string> */
 	private array $whereParams = [];
 	/** @var array<string, string> */
@@ -332,6 +333,42 @@ final class Nodes implements Iterator
 		return $this;
 	}
 
+	/** Loads a user's autosave facts with every node, as `meta->mine`. */
+	public function mine(int $user): self
+	{
+		$this->mine = $user;
+
+		return $this;
+	}
+
+	/** Leaves out records, which have no publication. */
+	public function publishable(): self
+	{
+		$this->addWhere('NOT (' . $this->recordExpression() . ')');
+
+		return $this;
+	}
+
+	/**
+	 * Narrows to the nodes in one stage of the panel's status: `draft` for a
+	 * working copy or a publishable node never published, `mine` for the
+	 * user's own autosave, `offline` for a published node switched off, and
+	 * `unreleased` for one never published.
+	 */
+	public function stage(string $stage, int $user): self
+	{
+		$record = $this->recordExpression();
+		$this->addWhere(match ($stage) {
+			'draft' => "(d.node IS NOT NULL OR (n.released IS NULL AND NOT ({$record})))",
+			'mine' => "EXISTS (SELECT 1 FROM /*:cms.prefix:*/autosaves m WHERE m.node = n.node AND m.editor = {$user})",
+			'offline' => "(n.released IS NOT NULL AND NOT n.published AND NOT ({$record}))",
+			'unreleased' => "(n.released IS NULL AND NOT ({$record}))",
+			default => throw new RuntimeException("Unknown status stage '{$stage}'"),
+		});
+
+		return $this;
+	}
+
 	#[Override]
 	public function rewind(): void
 	{
@@ -444,6 +481,10 @@ final class Nodes implements Iterator
 
 		if (is_bool($this->hidden)) {
 			$params['hidden'] = $this->hidden;
+		}
+
+		if ($this->mine !== null) {
+			$params['mine'] = $this->mine;
 		}
 
 		if ($this->fulltext !== null) {
@@ -559,6 +600,14 @@ final class Nodes implements Iterator
 			1 => '    ' . $result[0],
 			default => "    (\n        " . implode("\n        OR ", $result) . "\n    )",
 		};
+	}
+
+	private function recordExpression(): string
+	{
+		return $this->typeFlagExpression(
+			/** @param class-string $class */
+			fn(string $class): bool => (bool) $this->types->get($class, 'record', false),
+		);
 	}
 
 	/** @param callable(class-string): bool $flag */

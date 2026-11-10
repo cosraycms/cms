@@ -49,6 +49,10 @@ SELECT
 <?php endif ?>
 		'StartSel=' || chr(1) || ', StopSel=' || chr(2) || ', MaxWords=35, MinWords=15, MaxFragments=2, FragmentDelimiter=" … "') AS search_headline,
 <?php endif ?>
+<?php if (isset($mine)) : ?>
+	(SELECT m.changed FROM /*:cms.prefix:*/autosaves m WHERE m.node = n.node AND m.editor = :mine) AS mine_changed,
+	(SELECT m.base FROM /*:cms.prefix:*/autosaves m WHERE m.node = n.node AND m.editor = :mine) AS mine_base,
+<?php endif ?>
 	d.node IS NOT NULL AS has_draft,
 	d.created AS draft_created,
 	d.changed AS draft_changed,

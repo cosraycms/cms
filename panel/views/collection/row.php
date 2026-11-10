@@ -76,7 +76,6 @@ $grip = $group === null
 						<?php endif ?>
 					<?php endif ?>
 					<?= $grip ?>
-					<span class="dot<?= $row['published'] ? ' is-published' : '' ?>" aria-hidden="true"></span>
 					<?php if ($cell['editUrl'] !== null): ?>
 						<a class="value link" href="<?= escape((string) $cell['editUrl']) ?>">
 							<?= escape((string) $cell['value']) ?>
@@ -94,16 +93,22 @@ $grip = $group === null
 				<span class="value"><?= escape((string) $cell['value']) ?></span>
 			<?php endif ?>
 		</td>
+		<?php if ($index === 0): ?>
+			<?php // The status follows the title: its stages as dots, then hidden or locked. ?>
+			<td class="cell col-status" role="cell" data-label="<?= escape(__('collection:status')) ?>">
+				<div class="status-list">
+					<?php if (is_array($row['dots'] ?? null)): ?>
+						<?php $this->include('component/status-dots', ['status' => $row['dots'], 'size' => 'sm']) ?>
+					<?php endif ?>
+					<?php foreach ((array) $row['status'] as $badge): ?>
+						<span class="cms-status is-<?= escape((string) $badge['kind']) ?>"><?= escape(
+							(string) $badge['label'],
+						) ?></span>
+					<?php endforeach ?>
+				</div>
+			</td>
+		<?php endif ?>
 	<?php endforeach ?>
-	<td class="cell col-status" role="cell" data-label="<?= escape(__('collection:status')) ?>">
-		<div class="status-list">
-			<?php foreach ((array) $row['status'] as $badge): ?>
-				<span class="cms-status is-<?= escape((string) $badge['kind']) ?>"><?= escape(
-					(string) $badge['label'],
-				) ?></span>
-			<?php endforeach ?>
-		</div>
-	</td>
 	<?php if ($hasRowActions): ?>
 		<td class="cell col-actions" role="cell">
 			<span class="row-actions">

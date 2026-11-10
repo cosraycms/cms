@@ -91,7 +91,7 @@
 /* A node's stages as dots, from Panel\NodeStatus: colour names the stage,
    shape a special state (a ring is offline, "!" a problem), motion a
    running autosave. status.js moves the mine dot between saves. */
-:is(.cms-status-dots, .cms-status-pipeline) .dot {
+:is(.cms-status-dots, .cms-status-pipeline, .cms-stage-filters) .dot {
 	--color: var(--cms-color-stage-empty);
 	display: inline-grid;
 	place-items: center;
@@ -154,7 +154,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	:is(.cms-status-dots, .cms-status-pipeline) .dot {
+	:is(.cms-status-dots, .cms-status-pipeline, .cms-stage-filters) .dot {
 		animation: none !important;
 	}
 }
@@ -344,5 +344,56 @@ button.cms-status-dots {
 		margin-top: 0;
 		padding-top: var(--cms-space-3);
 		border-top: 1px solid var(--cms-color-border);
+	}
+}
+
+/* The status filters above a list, each a chip with its stage's dot. */
+.cms-stage-filters {
+	--dot: 0.5625rem;
+	--problem: 0.875rem;
+	--halo: 2px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cms-space-2);
+
+	& .chip {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-height: 2rem;
+		padding: 0 var(--cms-space-3);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+		text-decoration: none;
+
+		&:hover {
+			background: var(--cms-color-hover);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&[aria-current='true'] {
+			border-color: var(--cms-color-text);
+			background: var(--cms-color-text);
+			color: var(--cms-color-surface);
+
+			& .count {
+				color: inherit;
+				opacity: 0.75;
+			}
+		}
+	}
+
+	& .count {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-variant-numeric: tabular-nums;
 	}
 }

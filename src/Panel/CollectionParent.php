@@ -8,7 +8,10 @@ final class CollectionParent
 {
 	use NormalizesInput;
 
-	/** @param list<array{kind: string, label: string}> $status */
+	/**
+	 * @param list<array{kind: string, label: string}> $status
+	 * @param ?array{stages: list<array<string, string>>, sentence: string} $dots
+	 */
 	private function __construct(
 		public readonly string $uid,
 		public readonly ?string $title,
@@ -17,14 +20,19 @@ final class CollectionParent
 		public readonly string $rootUrl,
 		public readonly string $editUrl,
 		public readonly string $treeUrl,
+		public readonly ?array $dots = null,
 	) {}
 
-	/** @param iterable<mixed> $status */
+	/**
+	 * @param iterable<mixed> $status
+	 * @param ?array{stages: list<array<string, string>>, sentence: string} $dots
+	 */
 	public static function from(
 		CollectionUrls $urls,
 		?string $title,
 		?string $type,
 		iterable $status,
+		?array $dots = null,
 	): ?self {
 		$uid = $urls->query->parent;
 
@@ -45,6 +53,7 @@ final class CollectionParent
 			]),
 			editUrl: $urls->edit($uid),
 			treeUrl: $urls->showInTree($uid),
+			dots: $dots,
 		);
 	}
 
