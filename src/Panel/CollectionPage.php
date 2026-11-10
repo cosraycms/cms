@@ -114,8 +114,7 @@ final class CollectionPage
 			'all' => __('collection:stage-all'),
 			'draft' => __('collection:stage-draft'),
 			'mine' => __('collection:stage-mine'),
-			'offline' => __('collection:stage-offline'),
-			'unreleased' => __('collection:stage-unreleased'),
+			'unpublished' => __('collection:stage-unpublished'),
 		];
 		$active = $query->stage === '' ? 'all' : $query->stage;
 		$chips = [];

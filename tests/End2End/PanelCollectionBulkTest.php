@@ -787,7 +787,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('cms-notice', $html);
-		$this->assertStringContainsString('2 entries switched online', $html);
+		$this->assertStringContainsString('2 entries published', $html);
 		$this->assertStringContainsString('1 locked entry skipped', $html);
 		$this->assertStringNotContainsString('hack', $html);
 	}

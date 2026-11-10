@@ -149,8 +149,8 @@
 	--cms-color-green-600: #007d37;
 	--cms-color-blue-400: #51a8fd;
 	--cms-color-blue-600: #006dbd;
-	/* The status dots' stages, after their audiences: green for visitors,
-	   yellow for the editorial team, orange for the user alone. */
+	/* The status dots' stages: green for the main version, yellow for the
+	   editorial team's draft, orange for the user's own edits. */
 	--cms-color-stage-green: #16a34a;
 	--cms-color-stage-yellow: #eab308;
 	--cms-color-stage-orange: #ea580c;
@@ -327,7 +327,7 @@
 	--cms-color-info-ring: color-mix(in oklch, var(--cms-color-info), transparent 72%);
 
 	/* Status dots: one colour per stage, red only for a problem. */
-	--cms-color-stage-website: light-dark(var(--cms-color-stage-green), var(--cms-color-green-400));
+	--cms-color-stage-main: light-dark(var(--cms-color-stage-green), var(--cms-color-green-400));
 	--cms-color-stage-draft: var(--cms-color-stage-yellow);
 	--cms-color-stage-mine: var(--cms-color-stage-orange);
 	--cms-color-stage-problem: var(--cms-color-danger);

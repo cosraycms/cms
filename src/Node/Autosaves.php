@@ -69,6 +69,15 @@ final class Autosaves
 		}
 	}
 
+	/**
+	 * Follows a switch that moved the working state's change time without
+	 * changing content, so edits that were current stay no conflict.
+	 */
+	public function rebase(int $node, int $editor, string $from, string $to): void
+	{
+		$this->db->autosaves->rebase(['node' => $node, 'editor' => $editor, 'from' => $from, 'to' => $to])->run();
+	}
+
 	public function delete(int $node, int $editor): void
 	{
 		$this->db->autosaves->delete(['node' => $node, 'editor' => $editor])->run();

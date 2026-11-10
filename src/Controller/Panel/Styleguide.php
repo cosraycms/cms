@@ -1423,13 +1423,10 @@ final class Styleguide extends Panel
 	private function rows(): array
 	{
 		$dates = NodeStatus::dates($this->localeId(), $this->config->app->timezone);
-		$dots = static function (bool $published, ?string $released, ?string $draft, ?string $mine) use (
-			$dates,
-		): array {
+		$dots = static function (bool $published, ?string $draft, ?string $mine) use ($dates): array {
 			$stages = NodeStatus::of(
 				record: false,
 				published: $published,
-				released: $released,
 				changed: '2026-08-11 22:25:00+00',
 				editor: 'Ada',
 				draft: $draft === null ? null : ['changed' => $draft, 'editorName' => 'Ada'],
@@ -1450,7 +1447,7 @@ final class Styleguide extends Panel
 			'focusedChildrenUrl' => null,
 			'childCreateLinks' => [],
 			'status' => [],
-			'dots' => $dots(true, '2026-08-01 10:00:00+00', null, null),
+			'dots' => $dots(true, null, null),
 			'cells' => [],
 			'group' => null,
 			'moveUp' => false,
@@ -1476,7 +1473,7 @@ final class Styleguide extends Panel
 			$row([
 				'depth' => 1,
 				'childrenUrl' => '#',
-				'dots' => $dots(false, null, null, null),
+				'dots' => $dots(false, null, null),
 				'published' => false,
 				'cells' => $cells('Sudhaus', 'Page', 'Aug 11, 2026, 10:25 PM'),
 				'group' => 'brauerei',
@@ -1487,7 +1484,7 @@ final class Styleguide extends Panel
 				'last' => true,
 				'guides' => [1],
 				'status' => [['kind' => 'hidden', 'label' => 'Hidden']],
-				'dots' => $dots(false, '2026-08-01 10:00:00+00', null, null),
+				'dots' => $dots(false, '2026-08-11 22:25:00+00', null),
 				'published' => false,
 				'cells' => $cells(
 					'A title long enough that it has to be cut off somewhere',
@@ -1499,12 +1496,7 @@ final class Styleguide extends Panel
 				'depth' => 1,
 				'last' => true,
 				'status' => [['kind' => 'locked', 'label' => 'Locked']],
-				'dots' => $dots(
-					true,
-					'2026-08-01 10:00:00+00',
-					'2026-08-11 22:25:00+00',
-					'2026-08-11 22:30:00+00',
-				),
+				'dots' => $dots(true, '2026-08-11 22:25:00+00', '2026-08-11 22:30:00+00'),
 				'cells' => $cells('Presse', 'Page', 'Aug 11, 2026, 10:25 PM'),
 				'group' => 'brauerei',
 				'moveUp' => true,

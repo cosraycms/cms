@@ -89,7 +89,7 @@
 }
 
 /* A node's stages as dots, from Panel\NodeStatus: colour names the stage,
-   shape a special state (a ring is offline, "!" a problem), motion a
+   shape a special state (a ring is unpublished, "!" a problem), motion a
    running autosave. status.js moves the mine dot between saves. */
 :is(.cms-status-dots, .cms-status-pipeline, .cms-stage-filters) .dot {
 	--color: var(--cms-color-stage-empty);
@@ -108,13 +108,13 @@
 		box-shadow: none;
 	}
 
-	&[data-stage='website'][data-state='online'],
+	&[data-stage='main'][data-state='published'],
 	&[data-stage='saved'] {
-		--color: var(--cms-color-stage-website);
+		--color: var(--cms-color-stage-main);
 	}
 
-	&[data-stage='website'][data-state='offline'] {
-		--color: var(--cms-color-stage-website);
+	&[data-stage='main'][data-state='unpublished'] {
+		--color: var(--cms-color-stage-main);
 		background: transparent;
 		box-shadow: none;
 	}
@@ -395,5 +395,30 @@ button.cms-status-dots {
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-xs);
 		font-variant-numeric: tabular-nums;
+	}
+}
+
+/* The head's apply menu: each entry says what applying does. */
+.cms-action-menu.cms-apply-menu {
+	--width: 19rem;
+
+	& button {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.125rem;
+	}
+
+	& .help {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 400;
+	}
+}
+
+.cms-node > .head .apply {
+	display: contents;
+
+	& [hidden] {
+		display: none;
 	}
 }

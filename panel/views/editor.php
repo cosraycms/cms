@@ -176,12 +176,12 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 							<?php if (is_string($liveUrl)): ?>
 								<a href="<?= escape($liveUrl) ?>" target="_blank" rel="noopener">
 									<?= Icon::render('box-arrow-up-right') ?>
-									<?= escape(__('status:website-open')) ?>
+									<?= escape(__('status:view')) ?>
 								</a>
 							<?php else: ?>
 								<button type="button" disabled>
 									<?= Icon::render('box-arrow-up-right') ?>
-									<?= escape(__('status:website-open')) ?>
+									<?= escape(__('status:view')) ?>
 								</button>
 							<?php endif ?>
 						</div>
@@ -190,7 +190,9 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 				<?php
 				$mine = (string) ($status['mine'] ?? 'none');
 				$publishable = $edit && !$record;
+				$saveLabel = $publishable ? 'editor:save-draft' : 'editor:save';
 				?>
+				<?php // A node's save keeps the edits as its draft; a record's saves them. ?>
 				<button
 					class="cms-button <?= $publishable ? 'secondary' : 'primary' ?>"
 					type="submit"
@@ -201,24 +203,13 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 					<?= Icon::render('floppy') ?>
 					<span
 						data-save-label
-						data-normal="<?= escape(__('editor:save')) ?>"
+						data-normal="<?= escape(__($saveLabel)) ?>"
 						data-conflict="<?= escape(__('editor:save-anyway')) ?>"><?= escape(__(
-						$mine === 'conflict' ? 'editor:save-anyway' : 'editor:save',
+						$mine === 'conflict' ? 'editor:save-anyway' : $saveLabel,
 					)) ?></span>
 				</button>
-				<?php if ($publishable): ?>
-					<button
-						class="cms-button primary"
-						type="submit"
-						form="node-editor-form"
-						name="publish"
-						value="1"
-						data-editor-submit
-						data-needs="mine draft"
-						<?= $mine === 'none' && !($status['draft'] ?? false) ? 'disabled' : '' ?>>
-						<?= Icon::render('cloud-upload') ?>
-						<?= escape(__('editor:publish')) ?>
-					</button>
+				<?php if ($publishable && $status !== null): ?>
+					<?php $this->include('node/apply', ['status' => $status]) ?>
 				<?php endif ?>
 			<?php endif ?>
 		</div>
@@ -252,8 +243,8 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 					<?php endif ?>
 					<div id="editor-errors" class="errors" hidden></div>
 					<?php if ($embed !== null): ?>
-						<?php // The embedding application reads live content: its saves publish. ?>
-						<input type="hidden" name="publish" value="1" />
+						<?php // The embedding application reads the main version: its saves apply and publish. ?>
+						<input type="hidden" name="apply" value="publish" />
 						<?php if ($contentLocales): ?>
 							<div class="cms-embed-locales">
 								<?php $this->include('component/content-locales', [
@@ -355,7 +346,7 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 		<?php endif ?>
 	<?php endif ?>
 	<?php if (is_array($status['visibility'] ?? null)): ?>
-		<?php // The online and listing switches act at once, apart from the save:
+		<?php // The publication and listing switches act at once, apart from the save:
 
 		// their own form, outside the editor form, which forms cannot nest in. ?>
 		<form

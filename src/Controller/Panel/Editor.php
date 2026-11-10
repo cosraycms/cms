@@ -292,11 +292,14 @@ final class Editor extends Panel
 		$links = $this->origin()['links'];
 		$htmx = $this->request->hasHeader('HX-Request');
 
+		// Applying takes the edits into the main version; a record has nothing else.
+		$applies = in_array($form['apply'] ?? null, ['1', 'publish'], true);
+
 		try {
-			if (($form['publish'] ?? null) !== '1' && $store->holdsDrafts($nodeObj)) {
+			if (!$applies && $store->holdsDrafts($nodeObj)) {
 				$store->draft($nodeObj, $data, $context->locales(), $this->actor());
 			} else {
-				$store->publish($nodeObj, $data, $context->locales(), $this->actor());
+				$store->apply($nodeObj, $data, $context->locales(), $this->actor());
 			}
 		} catch (HttpBadRequest $e) {
 			if (!$htmx) {
@@ -329,13 +332,13 @@ final class Editor extends Panel
 				NodeFactory::dataFor(Wrapper::unwrap($saved)),
 				NodeFactory::fieldNamesFor(Wrapper::unwrap($saved)),
 			);
-		$publish = ($form['publish'] ?? null) === '1';
-
 		return [
 			'saved' => true,
 			'message' => match (true) {
-				$publish => __('editor:published-done'),
 				(bool) ($data['type']['record'] ?? false) => __('editor:saved'),
+				($form['apply'] ?? null) === 'publish' => __('editor:applied-published'),
+				$applies && (bool) ($data['published'] ?? false) => __('editor:applied-public'),
+				$applies => __('editor:applied-private'),
 				default => __('editor:draft-saved'),
 			},
 			'status' =>
@@ -405,7 +408,7 @@ final class Editor extends Panel
 	/**
 	 * Whether the edits started from an older state than the working one,
 	 * which someone saved meanwhile, and the user did not say to save anyway.
-	 * Publishing such edits is refused either way.
+	 * Applying such edits is refused either way.
 	 *
 	 * @param array<string, mixed> $data the stored working state
 	 * @param array<array-key, mixed> $form
@@ -419,7 +422,7 @@ final class Editor extends Panel
 			$base !== null
 				&& $working !== null
 				&& $base < $working
-				&& (($form['force'] ?? null) !== '1' || ($form['publish'] ?? null) === '1')
+				&& (($form['force'] ?? null) !== '1' || ($form['apply'] ?? null) !== null)
 		);
 	}
 
@@ -447,10 +450,10 @@ final class Editor extends Panel
 	}
 
 	/**
-	 * Switches the node online or offline and shows or hides it in
-	 * listings, at once and apart from the editor's save. The switches
-	 * submit their own form with both states; only a changed one applies.
-	 * A node goes online through the switch only once it was published.
+	 * Publishes or withdraws the node and shows or hides it in listings, at
+	 * once and apart from the editor's save. The switches submit their own
+	 * form with both states, the head's publish button too; only a changed
+	 * state applies.
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -471,26 +474,23 @@ final class Editor extends Panel
 		$form = $this->formData();
 		$store = $this->nodeStore($context, $cms);
 		$actor = $this->actor();
-		$online = ($form['online'] ?? null) === '1';
+		// The switch sends its state, the head's publish button says so outright.
+		$published = ($form['published'] ?? null) === '1' || ($form['publish'] ?? null) === '1';
 		$hidden = ($form['listed'] ?? null) !== '1';
-		$released = NodeFactory::meta($nodeObj, 'released');
 		$kind = 'success';
 		$message = null;
 
-		if ($online !== (bool) NodeFactory::meta($nodeObj, 'published')) {
-			if ($online && $released === null) {
-				$kind = 'error';
-				$message = __('editor:online-unreleased');
-			} else {
-				$store->online($nodeObj, $online, $actor);
+		if ($published !== (bool) NodeFactory::meta($nodeObj, 'published')) {
+			$store->published($nodeObj, $published, $actor);
 
-				// Visitors get the released content, not the pending working copy.
-				if ($online && NodeFactory::meta($nodeObj, 'draft') !== null) {
-					$kind = 'info';
-					$message = __('editor:online-draft', ['date' => $this->displayDate($released) ?? '']);
-				} else {
-					$message = __($online ? 'editor:online-done' : 'editor:offline-done');
-				}
+			// Visitors get the main version, not the pending working copy.
+			if ($published && NodeFactory::meta($nodeObj, 'draft') !== null) {
+				$kind = 'info';
+				$message = __('editor:published-draft', [
+					'date' => $this->displayDate(NodeFactory::meta($nodeObj, 'changed')) ?? '',
+				]);
+			} else {
+				$message = __($published ? 'editor:published-done' : 'editor:withdrawn-done');
 			}
 		}
 
@@ -505,21 +505,24 @@ final class Editor extends Panel
 			NodeFactory::dataFor($fresh),
 			NodeFactory::fieldNamesFor($fresh),
 		);
-		$saved = new Autosaves($context->db)->get($this->nodeId($fresh), $actor->id);
+		$rebase = [
+			'from' => $this->workingChanged(NodeFactory::dataFor($nodeObj)),
+			'to' => $this->workingChanged($data),
+		];
+		$autosaves = new Autosaves($context->db);
+		$autosaves->rebase($this->nodeId($fresh), $actor->id, $rebase['from'], $rebase['to']);
+		$saved = $autosaves->get($this->nodeId($fresh), $actor->id);
 
 		return [
 			'kind' => $kind,
 			'message' => $message,
 			'status' => $this->statusView($context, $cms, $data, $saved, !(bool) ($data['locked'] ?? false)),
-			'rebase' => [
-				'from' => $this->workingChanged(NodeFactory::dataFor($nodeObj)),
-				'to' => $this->workingChanged($data),
-			],
+			'rebase' => $rebase,
 		];
 	}
 
 	/**
-	 * Copies the node, as a draft never published, and opens the copy.
+	 * Copies the node, unpublished, and opens the copy.
 	 */
 	public function duplicate(Context $context, Cms $cms, Factory $factory, string $node): Response
 	{
@@ -553,11 +556,9 @@ final class Editor extends Panel
 		$type = is_array($data['type'] ?? null) ? $data['type'] : [];
 		$record = (bool) ($type['record'] ?? false);
 		$draft = is_array($data['draft'] ?? null) ? $data['draft'] : null;
-		$released = is_string($data['released'] ?? null) ? $data['released'] : null;
 		$status = NodeStatus::of(
 			record: $record,
 			published: (bool) ($data['published'] ?? false),
-			released: $released,
 			changed: (string) ($data['changed'] ?? ''),
 			editor: $this->userLabel($data['editor'] ?? null),
 			draft: $draft === null
@@ -599,7 +600,7 @@ final class Editor extends Panel
 			'mine' => $status->mine,
 			'discardDraft' => $draft !== null,
 			'autosave' => $autosaves,
-			'liveUrl' => $status->website === 'online' && (bool) ($type['routable'] ?? false)
+			'liveUrl' => $status->main === 'published' && (bool) ($type['routable'] ?? false)
 				? $this->liveUrl($context, $cms, $data)
 				: null,
 			'visibility' => $record
@@ -607,7 +608,6 @@ final class Editor extends Panel
 				: [
 					'published' => (bool) ($data['published'] ?? false),
 					'hidden' => (bool) ($data['hidden'] ?? false),
-					'released' => $released !== null,
 				],
 		];
 	}
@@ -1055,9 +1055,9 @@ final class Editor extends Panel
 			$data['paths'] = $paths;
 		}
 
-		// Online and listing switches act on their own; only publishing
-		// switches the node online with a save.
-		if (($form['publish'] ?? null) === '1') {
+		// Publication and listing are switches of their own; only applying
+		// with `publish` publishes the node with the save.
+		if (($form['apply'] ?? null) === 'publish') {
 			$data['published'] = true;
 		}
 

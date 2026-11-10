@@ -803,7 +803,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		$this->makeRequest('POST', '/panel/node/panel-save-editor', [
 			'headers' => ['HX-Request' => 'true'],
-			'body' => ['_complete' => '1', 'content' => ['title' => ['value' => ['en' => 'Saved']]]],
+			'body' => ['_complete' => '1', 'apply' => '1', 'content' => ['title' => ['value' => ['en' => 'Saved']]]],
 		]);
 
 		// The signed-in user, not the system fallback a session-only lookup
@@ -1107,7 +1107,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		);
 	}
 
-	public function testPublishButtonAndSettingsFlagsAreApplied(): void
+	public function testApplyingAndPublishingWritesFlagsAndSettings(): void
 	{
 		$this->createTestNode([
 			'uid' => 'panel-save-publish',
@@ -1122,7 +1122,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
-				'publish' => '1',
+				'apply' => 'publish',
 				'handle' => 'panel-save-handle',
 				'content' => ['title' => ['value' => ['en' => 'Unpublished']]],
 			],
@@ -1144,7 +1144,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertSame('panel-save-handle', $handle['handle'] ?? null);
 	}
 
-	public function testPublishingChecksTheOnlineSwitch(): void
+	public function testApplyingAndPublishingChecksThePublicationSwitch(): void
 	{
 		$this->createTestNode([
 			'uid' => 'panel-save-publish-switch',
@@ -1154,7 +1154,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		$response = $this->makeRequest('POST', '/panel/node/panel-save-publish-switch', [
 			'headers' => ['HX-Request' => 'true'],
-			'body' => ['_complete' => '1', 'publish' => '1'],
+			'body' => ['_complete' => '1', 'apply' => 'publish'],
 		]);
 
 		$this->assertResponseOk($response);

@@ -170,7 +170,7 @@ final class Listing
 		$q = trim($q);
 		$counts = ['all' => $this->scoped($parent, $q)->count()];
 		$stages = $this->scoped($parent, $q)->publishable()->count() > 0
-			? ['draft', 'mine', 'offline', 'unreleased']
+			? ['draft', 'mine', 'unpublished']
 			: ['mine'];
 
 		foreach ($stages as $stage) {
@@ -336,11 +336,9 @@ final class Listing
 	{
 		$draft = $node->meta->get('draft');
 		$mine = $node->meta->get('mine');
-		$released = $node->meta->get('released');
 
 		return [
 			'record' => (bool) $this->types->get(Wrapper::unwrap($node)::class, 'record', false),
-			'released' => is_string($released) ? $released : null,
 			'changed' => (string) $node->meta->get('changed'),
 			'editor' => self::userLabel(
 				$node->meta->get('editor_data'),

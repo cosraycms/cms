@@ -22,6 +22,9 @@ $rebase = (array) u($rebase);
 	'oob' => true,
 ]) ?>
 <?php $this->include('node/status', ['status' => $status, 'oob' => true]) ?>
+<?php if (!($status['record'] ?? false)): ?>
+	<?php $this->include('node/apply', ['status' => $status, 'oob' => true]) ?>
+<?php endif ?>
 <?php if (is_string($message) && $message !== ''): ?>
 	<?php $this->include('component/toast', ['kind' => $kind, 'message' => $message]) ?>
 <?php endif ?>

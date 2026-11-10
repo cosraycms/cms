@@ -1,4 +1,4 @@
-// The editor's online and listing switches act at once: a change submits
+// The editor's publication and listing switches act at once: a change submits
 // their own form, outside the editor form, so the save does not wait for it.
 
 const FORM = 'node-editor-visibility';

@@ -26,35 +26,25 @@ final class PanelNodeStatusTest extends TestCase
 		$mine = ['changed' => self::AFTER, 'base' => self::CHANGED];
 		$stale = ['changed' => self::AFTER, 'base' => self::BEFORE];
 
-		yield 'online, nothing pending' => [['published' => true, 'released' => self::BEFORE], 'online', false, 'none'];
-		yield 'online with draft and mine' => [
-			['published' => true, 'released' => self::BEFORE, 'draft' => $draft, 'autosave' => $mine],
-			'online',
+		yield 'published, nothing pending' => [['published' => true], 'published', false, 'none'];
+		yield 'published with draft and mine' => [
+			['published' => true, 'draft' => $draft, 'autosave' => $mine],
+			'published',
 			true,
 			'present',
 		];
-		yield 'offline with draft' => [
-			['published' => false, 'released' => self::BEFORE, 'draft' => $draft],
-			'offline',
-			true,
-			'none',
-		];
-		yield 'never published' => [['published' => false, 'released' => null], 'none', true, 'none'];
-		yield 'never published with mine' => [
-			['published' => false, 'released' => null, 'autosave' => $mine],
-			'none',
-			true,
-			'present',
-		];
+		yield 'unpublished, just created' => [['published' => false], 'unpublished', false, 'none'];
+		yield 'unpublished with draft' => [['published' => false, 'draft' => $draft], 'unpublished', true, 'none'];
+		yield 'unpublished with mine' => [['published' => false, 'autosave' => $mine], 'unpublished', false, 'present'];
 		yield 'mine older than the draft' => [
-			['published' => true, 'released' => self::BEFORE, 'draft' => $draft, 'autosave' => $stale],
-			'online',
+			['published' => true, 'draft' => $draft, 'autosave' => $stale],
+			'published',
 			true,
 			'conflict',
 		];
-		yield 'mine older than the node' => [
-			['published' => true, 'released' => self::BEFORE, 'autosave' => $stale],
-			'online',
+		yield 'mine older than the main version' => [
+			['published' => true, 'autosave' => $stale],
+			'published',
 			false,
 			'conflict',
 		];
@@ -62,23 +52,24 @@ final class PanelNodeStatusTest extends TestCase
 
 	/** @param array<string, mixed> $facts */
 	#[DataProvider('combinations')]
-	public function testDerivesTheStages(array $facts, string $website, bool $draft, string $mine): void
+	public function testDerivesTheStages(array $facts, string $main, bool $draft, string $mine): void
 	{
 		$status = $this->derive($facts);
 
 		$this->assertFalse($status->record);
-		$this->assertSame($website, $status->website);
+		$this->assertSame($main, $status->main);
 		$this->assertSame($draft, $status->draft);
 		$this->assertSame($mine, $status->mine);
-		$this->assertSame(['website', 'draft', 'mine'], array_column($status->stages($this->date(...)), 'key'));
+		$this->assertSame(['main', 'draft', 'mine'], array_column($status->stages($this->date(...)), 'key'));
 	}
 
-	public function testANeverPublishedNodeShowsItsOwnSaveAsTheDraft(): void
+	public function testTheDraftStageNamesWhoSavedItAndWhen(): void
 	{
-		$status = $this->derive(['published' => false, 'released' => null, 'editor' => 'Grace']);
+		$status = $this->derive(['published' => true, 'draft' => ['changed' => self::AFTER, 'editorName' => 'Grace']]);
 
-		$this->assertSame(self::CHANGED, $status->saved);
+		$this->assertSame(self::AFTER, $status->saved);
 		$this->assertSame('Grace', $status->savedBy);
+		$this->assertSame(self::CHANGED, $status->changed);
 	}
 
 	public function testARecordHasTheStoredStateAndTheUsersEdits(): void
@@ -98,11 +89,11 @@ final class PanelNodeStatusTest extends TestCase
 	public function testTheSentenceNamesEveryStage(): void
 	{
 		$sentence = NodeStatus::sentence([
-			['name' => 'Website', 'text' => 'online'],
+			['name' => 'Main version', 'text' => 'published'],
 			['name' => 'Draft', 'text' => 'none'],
 		]);
 
-		$this->assertSame('Website – online; Draft – none', $sentence);
+		$this->assertSame('Main version – published; Draft – none', $sentence);
 	}
 
 	/** @param array<string, mixed> $facts */
@@ -111,7 +102,6 @@ final class PanelNodeStatusTest extends TestCase
 		return NodeStatus::of(
 			record: (bool) ($facts['record'] ?? false),
 			published: (bool) ($facts['published'] ?? false),
-			released: $facts['released'] ?? null,
 			changed: self::CHANGED,
 			editor: $facts['editor'] ?? null,
 			draft: $facts['draft'] ?? null,

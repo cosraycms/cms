@@ -6,8 +6,8 @@ use function Cosray\escape;
 
 // The inspector's status tab: the node's stages top to bottom, from
 // Panel\NodeStatus, each with what it means and what can be done there. The
-// online switch sits in the website stage and the listing switch below the
-// stages; both belong to the editor's visibility form, outside the editor
+// publication switch sits in the main version's stage and the listing switch
+// below the stages; both belong to the editor's visibility form, outside the editor
 // form, and act at once. data-editor-state keeps them from marking the
 // editor as edited. Rendered with the editor and again, out of band, after
 // every save and switch.
@@ -33,10 +33,10 @@ $liveUrl = $status['liveUrl'] ?? null;
 					<p class="name"><?= escape((string) $stage['name']) ?></p>
 					<p class="help"><?= escape((string) $stage['help']) ?></p>
 					<p class="text" data-stage-text><?= escape((string) $stage['text']) ?></p>
-					<?php if ($key === 'website' && is_string($liveUrl) && $state === 'online'): ?>
+					<?php if ($key === 'main' && is_string($liveUrl) && $state === 'published'): ?>
 						<div class="actions">
 							<a class="cms-button secondary small" href="<?= escape($liveUrl) ?>" target="_blank" rel="noopener">
-								<?= escape(__('status:website-open')) ?>
+								<?= escape(__('status:view')) ?>
 								<?= Icon::render('box-arrow-up-right') ?>
 							</a>
 						</div>
@@ -53,24 +53,21 @@ $liveUrl = $status['liveUrl'] ?? null;
 							</button>
 						</div>
 					<?php endif ?>
-					<?php if ($key === 'website' && $visibility !== null): ?>
+					<?php if ($key === 'main' && $visibility !== null): ?>
 						<label class="toggle">
 							<span class="copy">
-								<span class="title"><?= escape(__('editor:online-label')) ?></span>
-								<span class="help"><?= escape(__(
-									$visibility['released'] ? 'editor:online-help' : 'editor:online-unreleased',
-								)) ?></span>
+								<span class="title"><?= escape(__('editor:published-label')) ?></span>
+								<span class="help"><?= escape(__('editor:published-help')) ?></span>
 							</span>
 							<input
 								id="editor-published-switch"
 								type="checkbox"
 								class="cms-switch"
 								form="node-editor-visibility"
-								name="online"
+								name="published"
 								value="1"
 								data-editor-state
-								<?= $visibility['published'] ? 'checked' : '' ?>
-								<?= $visibility['released'] ? '' : 'disabled' ?> />
+								<?= $visibility['published'] ? 'checked' : '' ?> />
 						</label>
 					<?php endif ?>
 				</div>

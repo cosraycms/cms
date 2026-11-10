@@ -93,12 +93,14 @@ class Store
 	}
 
 	/**
-	 * Writes the live row and drops the working copy it supersedes.
+	 * Writes the given state as the node's main version and drops the
+	 * working copy it supersedes. Whether visitors see it is the node's
+	 * `published` flag, which the state carries.
 	 *
 	 * @param array<string, mixed> $data
 	 * @return array{success: true, uid: string}
 	 */
-	public function publish(object $node, array $data, Locales $locales, Actor $actor): array
+	public function apply(object $node, array $data, Locales $locales, Actor $actor): array
 	{
 		$this->fulltext->validate($locales);
 		$data = $this->prepare($node, $data, $locales);
@@ -116,14 +118,14 @@ class Store
 			if ($changed) {
 				$this->event('node.updated', $node, $data['uid']);
 			}
-		}, 'Error while publishing: ');
+		}, 'Error while applying: ');
 
 		return ['success' => true, 'uid' => $data['uid']];
 	}
 
 	/**
-	 * Saves the working copy of a released node. Content, handle and paths
-	 * wait for publish(). A working copy that equals the live node is
+	 * Saves the working copy of a node: changes to its main version that
+	 * wait for apply(). A working copy that equals the main version is
 	 * dropped, not saved.
 	 *
 	 * @param array<string, mixed> $data
@@ -132,7 +134,7 @@ class Store
 	public function draft(object $node, array $data, Locales $locales, Actor $actor): array
 	{
 		if (!$this->holdsDrafts($node)) {
-			throw new RuntimeException('Only a released, publishable node can hold a working copy');
+			throw new RuntimeException('Only a stored node that is no record can hold a working copy');
 		}
 
 		$data = $this->prepare($node, $data, $locales);
@@ -188,20 +190,16 @@ class Store
 		}, 'Error while discarding: ');
 	}
 
-	/**
-	 * Switches the node online or offline without touching its content or
-	 * working copy. Going online for the first time releases the content
-	 * the node holds.
-	 */
-	public function online(object $node, bool $online, Actor $actor): void
+	/** Publishes the node or withdraws it, leaving its content and working copy alone. */
+	public function published(object $node, bool $published, Actor $actor): void
 	{
 		$uid = (string) Factory::meta($node, 'uid');
 
-		$this->transaction(function () use ($node, $uid, $online, $actor): void {
+		$this->transaction(function () use ($node, $uid, $published, $actor): void {
 			$this->lock($uid);
-			$this->db->nodes->setPublished(['uid' => $uid, 'published' => $online, 'editor' => $actor->id])->run();
+			$this->db->nodes->setPublished(['uid' => $uid, 'published' => $published, 'editor' => $actor->id])->run();
 			$this->event('node.updated', $node, $uid);
-		}, 'Error while switching the node online: ');
+		}, 'Error while publishing: ');
 	}
 
 	/** Hides the node from listings or shows it again, applied immediately. */
@@ -220,8 +218,11 @@ class Store
 		}, 'Error while hiding the node: ');
 	}
 
-	/** Publishes the working copy, if there is one, and switches the node online. */
-	public function publishDraft(object $node, Locales $locales, Actor $actor): bool
+	/**
+	 * Applies the working copy, if there is one, to the main version and,
+	 * asked to, publishes the node with it.
+	 */
+	public function applyDraft(object $node, Locales $locales, Actor $actor, bool $publish = false): bool
 	{
 		$draft = $this->drafts->get($this->nodeId($node));
 
@@ -229,7 +230,8 @@ class Store
 			return false;
 		}
 
-		$this->publish($node, $this->workingData($node, $draft, published: true), $locales, $actor);
+		$published = $publish || (bool) Factory::meta($node, 'published');
+		$this->apply($node, $this->workingData($node, $draft, published: $published), $locales, $actor);
 
 		return true;
 	}
@@ -246,14 +248,13 @@ class Store
 	}
 
 	/**
-	 * A publishable node holds a working copy once its content went live;
-	 * before, nothing is live to protect and saves write the node itself.
+	 * Every stored node keeps its changes in a working copy until they are
+	 * applied, except a record, which is saved directly.
 	 */
 	public function holdsDrafts(object $node): bool
 	{
 		return (
 			!(bool) $this->types->get($node::class, 'record', false)
-				&& Factory::meta($node, 'released') !== null
 				&& Factory::meta($node, 'deleted') === null
 		);
 	}

@@ -72,7 +72,11 @@ final class PanelSaveTitleTest extends End2EndTestCase
 		$response = $this->makeRequest('POST', "/panel/node/{$uid}", [
 			'headers' => ['HX-Request' => 'true'],
 			// Published: the materialized title follows the live content.
-			'body' => ['_complete' => '1', 'publish' => '1', 'content' => ['title' => ['value' => ['en' => $title]]]],
+			'body' => [
+				'_complete' => '1',
+				'apply' => 'publish',
+				'content' => ['title' => ['value' => ['en' => $title]]],
+			],
 		]);
 
 		$this->assertResponseOk($response);

@@ -6,7 +6,7 @@ import { selectTab } from './tabs.js';
 // its state and never slides on load. Narrower, the inspector starts collapsed
 // and data-open lasts for the page; in the shell's middle band, whose query
 // matches cms-inspector.css, it opens over the fields as a layer that Escape
-// and a press outside close. The strip's online switch is an unnamed copy that
+// and a press outside close. The strip's publication switch is an unnamed copy that
 // flips the real one in the status tab.
 
 const ROOT = '[data-inspector]';

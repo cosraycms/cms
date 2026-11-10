@@ -184,8 +184,6 @@ CREATE TABLE /*:cms.prefix:*/nodes (
 	created timestamp with time zone NOT NULL DEFAULT now(),
 	changed timestamp with time zone NOT NULL DEFAULT now(),
 	deleted timestamp with time zone,
-	-- When the content last went live; NULL until the first publication.
-	released timestamp with time zone,
 	content jsonb NOT NULL,
 	-- Materialized, query-only copy of the node's title as a locale map
 	-- ({locale: text}, or {zxx: text} when not language-specific). Written

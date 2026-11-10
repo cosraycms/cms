@@ -37,10 +37,10 @@ final class PanelEditorCreateDialogTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeMissing('//form[@data-create]//*[contains(@name, "content[intro]")]', $html);
 		$this->assertHtmlNodeExists('//form[@data-create]//input[@name="dialog"][@value="1"]', $html);
-		$this->assertHtmlNodeExists('//form[@data-create]//*[@data-stage="draft" and @data-state="present"]', $html);
+		$this->assertHtmlNodeExists('//form[@data-create]//*[@data-stage="main" and @data-state="unpublished"]', $html);
 	}
 
-	public function testCreatingFromTheDialogOpensTheEditorOfANeverPublishedNode(): void
+	public function testCreatingFromTheDialogOpensTheEditorOfAnUnpublishedNode(): void
 	{
 		$response = $this->makeRequest('POST', '/panel/node/create/test-document', [
 			'headers' => ['HX-Request' => 'true'],
@@ -56,9 +56,12 @@ final class PanelEditorCreateDialogTest extends End2EndTestCase
 		$this->assertIsArray($location);
 		$this->assertSame('#main', $location['target']);
 		$this->assertStringStartsWith('/panel/node/dialog-created', $location['path']);
-		$row = $this->db()->execute("SELECT published, released FROM cms.nodes WHERE uid = 'dialog-created'")->one();
+		$row = $this->db()->execute(
+			"SELECT n.published, d.node AS draft FROM cms.nodes n LEFT JOIN cms.drafts d ON d.node = n.node
+				WHERE n.uid = 'dialog-created'",
+		)->one();
 		$this->assertFalse((bool) $row['published']);
-		$this->assertNull($row['released']);
+		$this->assertNull($row['draft']);
 	}
 
 	public function testAMissingRequiredFieldIsReportedInTheDialog(): void

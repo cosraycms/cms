@@ -123,6 +123,23 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//input[@name="_base"][starts-with(@value, "2000-01-01")]', $editor);
 	}
 
+	public function testTheUsersOwnSwitchLeavesCurrentEditsNoConflict(): void
+	{
+		$this->createPage('autosave-switched', 'Live');
+		$this->autosave('autosave-switched', 'Edited');
+
+		$response = $this->makeRequest('POST', '/panel/node/autosave-switched/visibility', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => ['listed' => '1'],
+		]);
+
+		$this->assertHtmlNodeExists(
+			"//*[@id='editor-status-dots']/*[@data-stage='mine' and @data-state='present']",
+			$this->getHtmlResponse($response),
+		);
+		$this->assertHtmlNodeMissing("//*[@data-state='conflict']", $this->editor('autosave-switched'));
+	}
+
 	public function testASaveOnAnOutdatedStateIsRefusedUnlessForced(): void
 	{
 		$this->createPage('autosave-locked', 'Live');
@@ -138,7 +155,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		]);
 		$published = $this->makeRequest('POST', '/panel/node/autosave-locked', [
 			'headers' => ['HX-Request' => 'true'],
-			'body' => [...$body, 'force' => '1', 'publish' => '1'],
+			'body' => [...$body, 'force' => '1', 'apply' => '1'],
 		]);
 
 		$this->assertHtmlNodeExists('//*[@data-toast="error"]', $this->getHtmlResponse($refused));

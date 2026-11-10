@@ -24,7 +24,7 @@ export async function signIn(page: Page): Promise<void> {
 export async function openNode(page: Page, name: string): Promise<void> {
 	await signIn(page);
 	await page.goto(`/panel/node/browser${name}`);
-	await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeVisible();
+	await expect(page.getByRole('button', { name: /^Save( draft)?$/ })).toBeVisible();
 
 	// Tests share nodes, and edits a test leaves unsaved come back as an autosave.
 	if ((await mine(page).getAttribute('data-state')) !== 'none') {
@@ -75,10 +75,11 @@ export async function save(page: Page): Promise<void> {
 			response.url().includes('/panel/node/') &&
 			!response.url().endsWith('/autosave'),
 	);
-	await page.getByRole('button', { name: 'Save', exact: true }).click();
+	await page.getByRole('button', { name: /^Save( draft)?$/ }).click();
 	await saved;
 }
 
+/** Applies the edits to the main version, which the shared nodes already publish. */
 export async function publish(page: Page): Promise<void> {
 	const saved = page.waitForResponse(
 		(response) =>
@@ -86,7 +87,12 @@ export async function publish(page: Page): Promise<void> {
 			response.url().includes('/panel/node/') &&
 			!response.url().endsWith('/autosave'),
 	);
-	await page.getByRole('button', { name: 'Publish', exact: true }).click();
+	await page.getByRole('button', { name: 'Apply', exact: true }).click();
+	await page
+		.getByRole('menu')
+		.getByRole('menuitem', { name: /^Apply draft/ })
+		.first()
+		.click();
 	await saved;
 }
 

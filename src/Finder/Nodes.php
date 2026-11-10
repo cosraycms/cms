@@ -351,18 +351,16 @@ final class Nodes implements Iterator
 
 	/**
 	 * Narrows to the nodes in one stage of the panel's status: `draft` for a
-	 * working copy or a publishable node never published, `mine` for the
-	 * user's own autosave, `offline` for a published node switched off, and
-	 * `unreleased` for one never published.
+	 * working copy, `mine` for the user's own autosave, and `unpublished`
+	 * for a node visitors do not see. Records have no publication.
 	 */
 	public function stage(string $stage, int $user): self
 	{
 		$record = $this->recordExpression();
 		$this->addWhere(match ($stage) {
-			'draft' => "(d.node IS NOT NULL OR (n.released IS NULL AND NOT ({$record})))",
+			'draft' => 'd.node IS NOT NULL',
 			'mine' => "EXISTS (SELECT 1 FROM /*:cms.prefix:*/autosaves m WHERE m.node = n.node AND m.editor = {$user})",
-			'offline' => "(n.released IS NOT NULL AND NOT n.published AND NOT ({$record}))",
-			'unreleased' => "(n.released IS NULL AND NOT ({$record}))",
+			'unpublished' => "(NOT n.published AND NOT ({$record}))",
 			default => throw new RuntimeException("Unknown status stage '{$stage}'"),
 		});
 

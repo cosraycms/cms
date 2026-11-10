@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { signIn } from './support';
 
-test('a new entry starts in a dialog with its required fields and opens as a draft', async ({
+test('a new entry starts in a dialog with its required fields and opens unpublished', async ({
 	page,
 }) => {
 	await signIn(page);
@@ -26,8 +26,27 @@ test('a new entry starts in a dialog with its required fields and opens as a dra
 	const states = await page
 		.locator('#editor-status-dots > .dot')
 		.evaluateAll((dots) => dots.map((dot) => (dot as HTMLElement).dataset.state));
-	expect(states).toEqual(['none', 'present', 'none']);
+	expect(states).toEqual(['unpublished', 'none', 'none']);
 	await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeEnabled();
+	await expect(page.getByRole('button', { name: 'Apply', exact: true })).toBeHidden();
+
+	// Edits offer to apply them, kept unpublished or published with them.
+	await page.getByLabel('Title').fill('Made in a dialog, written on');
+	const apply = page.getByRole('button', { name: 'Apply', exact: true });
+	await expect(apply).toBeEnabled();
+	await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeHidden();
+	await apply.click();
+	const menu = page.getByRole('menu');
+	await expect(menu.getByRole('menuitem')).toHaveCount(2);
+	await expect(menu.getByRole('menuitem', { name: /Stays unpublished/ })).toBeVisible();
+	await menu.getByRole('menuitem', { name: /^Apply draft and publish/ }).click();
+
+	await expect(page.locator('#cms-toasts')).toContainText('Applied and published');
+	await expect(page.locator('#editor-status-dots > [data-stage="main"]')).toHaveAttribute(
+		'data-state',
+		'published',
+	);
+	await expect(page.locator('h1')).toHaveText('Made in a dialog');
 });
 
 test('cancelling the dialog creates nothing', async ({ page }) => {

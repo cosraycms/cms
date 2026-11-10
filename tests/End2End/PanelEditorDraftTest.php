@@ -113,52 +113,77 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->assertSame('Live', $this->liveTitle('draft-merge'));
 	}
 
-	public function testPublishingWritesTheWorkingCopyLive(): void
+	public function testApplyingWritesTheWorkingCopyIntoThePublishedMainVersion(): void
 	{
-		$this->createPage('draft-publish', 'Live', published: true);
-		$this->save('draft-publish', ['content' => ['title' => ['value' => ['en' => 'Released']]]]);
+		$this->createPage('draft-apply', 'Main', published: true);
+		$this->save('draft-apply', ['content' => ['title' => ['value' => ['en' => 'Applied']]]]);
 
-		$response = $this->save('draft-publish', ['publish' => '1']);
+		$response = $this->save('draft-apply', ['apply' => '1']);
 
 		$this->assertResponseOk($response);
-		$this->assertSame('Released', $this->liveTitle('draft-publish'));
-		$this->assertNull($this->draftRow('draft-publish'));
+		$this->assertSame('Applied', $this->liveTitle('draft-apply'));
+		$this->assertNull($this->draftRow('draft-apply'));
 		$html = $this->getHtmlResponse($response);
 		$this->assertHtmlNodeExists($this->stage('draft', 'none'), $html);
-		$this->assertHtmlNodeExists($this->stage('website', 'online'), $html);
-		$this->assertHtmlNodeExists('//*[@data-toast="success"][contains(., "Published")]', $html);
+		$this->assertHtmlNodeExists($this->stage('main', 'published'), $html);
+		$this->assertHtmlNodeExists('//*[@data-toast="success"][contains(., "visitors now see")]', $html);
+		$this->assertHtmlNodeExists('//*[@id="editor-apply" and @hx-swap-oob="true"]', $html);
 	}
 
-	public function testTheOnlineSwitchActsAtOnceAndKeepsTheWorkingCopy(): void
+	public function testApplyingKeepsAnUnpublishedNodeUnpublishedUnlessAsked(): void
 	{
-		$this->createPage('draft-offline', 'Live', published: true);
-		$this->save('draft-offline', ['content' => ['title' => ['value' => ['en' => 'Pending']]]]);
+		$this->createPage('draft-private', 'Created', published: false);
 
-		$response = $this->visibility('draft-offline', ['listed' => '1']);
+		$this->save('draft-private', ['apply' => '1', 'content' => ['title' => ['value' => ['en' => 'Applied']]]]);
+
+		$this->assertSame('Applied', $this->liveTitle('draft-private'));
+		$this->assertFalse((bool) $this->nodeRow('draft-private')['published']);
+
+		$response = $this->save('draft-private', [
+			'apply' => 'publish',
+			'content' => ['title' => ['value' => ['en' => 'Out']]],
+		]);
+
+		$this->assertSame('Out', $this->liveTitle('draft-private'));
+		$this->assertTrue((bool) $this->nodeRow('draft-private')['published']);
+		$this->assertHtmlNodeExists(
+			'//*[@data-toast="success"][contains(., "Applied and published")]',
+			$this->getHtmlResponse($response),
+		);
+	}
+
+	public function testThePublicationSwitchActsAtOnceAndKeepsTheWorkingCopy(): void
+	{
+		$this->createPage('draft-withdrawn', 'Main', published: true);
+		$this->save('draft-withdrawn', ['content' => ['title' => ['value' => ['en' => 'Pending']]]]);
+
+		$response = $this->visibility('draft-withdrawn', ['listed' => '1']);
 
 		$this->assertResponseOk($response);
 		$this->assertStringContainsString('data-toast="success"', $this->getHtmlResponse($response));
-		$this->assertFalse((bool) $this->nodeRow('draft-offline')['published']);
-		$this->assertSame('Live', $this->liveTitle('draft-offline'));
-		$this->assertSame('Pending', $this->draftTitle('draft-offline'));
+		$this->assertFalse((bool) $this->nodeRow('draft-withdrawn')['published']);
+		$this->assertSame('Main', $this->liveTitle('draft-withdrawn'));
+		$this->assertSame('Pending', $this->draftTitle('draft-withdrawn'));
 
-		// Back online, visitors get the released version while the draft waits.
-		$response = $this->visibility('draft-offline', ['online' => '1', 'listed' => '1']);
+		// Published again, visitors get the main version while the draft waits.
+		$response = $this->visibility('draft-withdrawn', ['published' => '1', 'listed' => '1']);
 
 		$this->assertStringContainsString('data-toast="info"', $this->getHtmlResponse($response));
-		$this->assertTrue((bool) $this->nodeRow('draft-offline')['published']);
-		$this->assertSame('Pending', $this->draftTitle('draft-offline'));
+		$this->assertTrue((bool) $this->nodeRow('draft-withdrawn')['published']);
+		$this->assertSame('Pending', $this->draftTitle('draft-withdrawn'));
 	}
 
-	public function testANeverPublishedNodeCannotBeSwitchedOnline(): void
+	public function testTheHeadsPublishButtonPublishesTheMainVersion(): void
 	{
 		$this->createPage('draft-new', 'New', published: false);
 
-		$response = $this->visibility('draft-new', ['online' => '1', 'listed' => '1']);
+		$response = $this->visibility('draft-new', ['publish' => '1', 'listed' => '1']);
 
-		$this->assertStringContainsString('data-toast="error"', $this->getHtmlResponse($response));
-		$this->assertFalse((bool) $this->nodeRow('draft-new')['published']);
-		$this->assertNull($this->nodeRow('draft-new')['released']);
+		$this->assertTrue((bool) $this->nodeRow('draft-new')['published']);
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-apply" and @data-published="true"]',
+			$this->getHtmlResponse($response),
+		);
 	}
 
 	public function testAReservedPathNeverReachesTheWorkingCopy(): void
@@ -179,7 +204,7 @@ final class PanelEditorDraftTest extends End2EndTestCase
 	{
 		$this->createPage('draft-reserved-live', 'Offline', published: false);
 
-		$response = $this->save('draft-reserved-live', ['published' => '', 'paths' => ['en' => '/assets']]);
+		$response = $this->save('draft-reserved-live', ['apply' => '1', 'paths' => ['en' => '/assets']]);
 
 		$this->assertStringContainsString(
 			'The URL path /assets is reserved by the system; choose another one',
@@ -192,14 +217,14 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		);
 	}
 
-	public function testAnUnpublishedNodeIsEditedInPlace(): void
+	public function testAnUnpublishedNodeKeepsItsChangesInAWorkingCopy(): void
 	{
-		$this->createPage('draft-unpublished', 'Live', published: false);
+		$this->createPage('draft-unpublished', 'Created', published: false);
 
-		$this->save('draft-unpublished', ['content' => ['title' => ['value' => ['en' => 'Direct']]]]);
+		$this->save('draft-unpublished', ['content' => ['title' => ['value' => ['en' => 'Written']]]]);
 
-		$this->assertSame('Direct', $this->liveTitle('draft-unpublished'));
-		$this->assertNull($this->draftRow('draft-unpublished'));
+		$this->assertSame('Created', $this->liveTitle('draft-unpublished'));
+		$this->assertSame('Written', $this->draftTitle('draft-unpublished'));
 	}
 
 	public function testANodeWithoutATemplateHoldsAWorkingCopyToo(): void
@@ -215,29 +240,6 @@ final class PanelEditorDraftTest extends End2EndTestCase
 
 		$this->assertSame('Live', $this->liveTitle('draft-article'));
 		$this->assertSame('Pending', $this->draftTitle('draft-article'));
-	}
-
-	public function testANeverPublishedNodeIsEditedInPlace(): void
-	{
-		$this->createPage('draft-unreleased', 'First', published: false);
-
-		$this->save('draft-unreleased', ['content' => ['title' => ['value' => ['en' => 'Second']]]]);
-
-		$this->assertSame('Second', $this->liveTitle('draft-unreleased'));
-		$this->assertNull($this->draftRow('draft-unreleased'));
-		$this->assertFalse((bool) $this->nodeRow('draft-unreleased')['published']);
-	}
-
-	public function testPublishingSwitchesOnlineAndReleases(): void
-	{
-		$this->createPage('draft-release', 'First', published: false);
-
-		$this->save('draft-release', ['publish' => '1', 'content' => ['title' => ['value' => ['en' => 'Out']]]]);
-
-		$row = $this->nodeRow('draft-release');
-		$this->assertTrue((bool) $row['published']);
-		$this->assertNotNull($row['released']);
-		$this->assertSame('Out', $this->liveTitle('draft-release'));
 	}
 
 	public function testARecordIsSavedInPlaceAndHasNoVisibility(): void
@@ -261,7 +263,7 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->createPage('draft-hidden', 'Live', published: true);
 		$this->save('draft-hidden', ['content' => ['title' => ['value' => ['en' => 'Pending']]]]);
 
-		$this->visibility('draft-hidden', ['online' => '1']);
+		$this->visibility('draft-hidden', ['published' => '1']);
 
 		$row = $this->nodeRow('draft-hidden');
 		$this->assertTrue((bool) $row['hidden']);
@@ -349,7 +351,7 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->assertStringStartsWith('/panel/node/', $location['path']);
 		$this->assertNotSame('/panel/node/draft-original', $location['path']);
 		$copy = $this->nodeRow(substr($location['path'], strlen('/panel/node/')));
-		$this->assertNull($copy['released']);
+		$this->assertFalse((bool) $copy['published']);
 	}
 
 	/** The head's dot of a stage in a state. */

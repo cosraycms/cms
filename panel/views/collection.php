@@ -161,8 +161,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 					[$stage, $state] = match ($chip['key']) {
 						'draft' => ['draft', 'present'],
 						'mine' => ['mine', 'present'],
-						'offline' => ['website', 'offline'],
-						'unreleased' => ['website', 'none'],
+						'unpublished' => ['main', 'unpublished'],
 						default => [null, null],
 					};
 					?>

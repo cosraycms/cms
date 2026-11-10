@@ -50,12 +50,11 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 
 		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/collection/test-draft-pages'));
 
-		$this->assertHtmlNodeExists($this->dot('listing-changed', 'website', 'online'), $html);
+		$this->assertHtmlNodeExists($this->dot('listing-changed', 'main', 'published'), $html);
 		$this->assertHtmlNodeExists($this->dot('listing-changed', 'draft', 'present'), $html);
 		$this->assertHtmlNodeExists($this->dot('listing-clean', 'draft', 'none'), $html);
-		// Never published: its content is the editorial team's draft.
-		$this->assertHtmlNodeExists($this->dot('listing-offline', 'website', 'none'), $html);
-		$this->assertHtmlNodeExists($this->dot('listing-offline', 'draft', 'present'), $html);
+		$this->assertHtmlNodeExists($this->dot('listing-offline', 'main', 'unpublished'), $html);
+		$this->assertHtmlNodeExists($this->dot('listing-offline', 'draft', 'none'), $html);
 		$this->assertHtmlNodeExists(
 			'//dialog[@data-dialog="bulk-publish"]//label[@data-bulk-option]/input[@name="changes"]',
 			$html,
@@ -126,14 +125,14 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 		]));
 
 		$this->assertHtmlNodeExists('//tr[@data-uid="filter-changed"]', $html);
-		$this->assertHtmlNodeExists('//tr[@data-uid="filter-new"]', $html);
+		$this->assertHtmlNodeMissing('//tr[@data-uid="filter-new"]', $html);
 		$this->assertHtmlNodeMissing('//tr[@data-uid="filter-clean"]', $html);
 		$this->assertHtmlNodeExists(
-			'//nav[contains(@class, "cms-stage-filters")]/a[@aria-current="true"][contains(., "With draft")]/*[@class="count"][.="2"]',
+			'//nav[contains(@class, "cms-stage-filters")]/a[@aria-current="true"][contains(., "With draft")]/*[@class="count"][.="1"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//nav[contains(@class, "cms-stage-filters")]/a[contains(., "Never published")]/*[@class="count"][.="1"]',
+			'//nav[contains(@class, "cms-stage-filters")]/a[contains(., "Unpublished")]/*[@class="count"][.="1"]',
 			$html,
 		);
 		$this->assertResponseStatus(400, $this->makeRequest('GET', '/panel/collection/test-draft-pages', [

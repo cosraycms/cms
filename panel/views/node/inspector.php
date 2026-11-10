@@ -9,7 +9,7 @@ use function Cosray\escape;
 // control sits inside the editor form and submits with the content fields
 // through the same merge patch, the hidden tabs included. The markup arrives
 // with the first tab selected so nothing flashes before the tabs behavior runs.
-// Collapsed, a strip of quick controls replaces the drawer. Its online
+// Collapsed, a strip of quick controls replaces the drawer. Its publication
 // switch is an unnamed copy that flips the drawer's switch.
 
 $node = (array) u($node);
@@ -53,7 +53,7 @@ $first = array_key_first($tabs);
 $icons = ['status' => 'toggles', 'paths' => 'link-45deg', 'advanced' => 'sliders'];
 $show = __('editor:settings-show');
 $hide = __('editor:settings-hide');
-$onlineLabel = __('editor:online-label');
+$publishedLabel = __('editor:published-label');
 // Settings an editor restored from an autosave changes, by the tab they are in.
 $changedIn = [
 	'status' => false,
@@ -91,12 +91,11 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 			<input
 				type="checkbox"
 				class="cms-switch"
-				title="<?= escape($onlineLabel) ?>"
-				aria-label="<?= escape($onlineLabel) ?>"
+				title="<?= escape($publishedLabel) ?>"
+				aria-label="<?= escape($publishedLabel) ?>"
 				data-inspector-published
 				data-editor-state
-				<?= $visibility['published'] ? 'checked' : '' ?>
-				<?= $visibility['released'] ? '' : 'disabled' ?> />
+				<?= $visibility['published'] ? 'checked' : '' ?> />
 		<?php endif ?>
 		<div class="shortcuts">
 			<?php foreach ($tabs as $key => $label): ?>

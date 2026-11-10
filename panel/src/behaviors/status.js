@@ -2,10 +2,10 @@
 // (dots in the head, the pipeline in the inspector) with every page and
 // save; in between, the user's own edits move through client states the
 // server never sees: saving while an autosave is pending or in flight,
-// kept once the server holds it, error when it failed. The head's save
-// and publish buttons follow: saving needs edits of the user's, publishing
-// edits or a draft. Forms marked data-done-toast say they succeeded in a
-// toast, which outlives the editor they reload.
+// kept once the server holds it, error when it failed. The head's buttons
+// follow: saving the draft needs edits of the user's, applying edits or a
+// draft. Forms marked data-done-toast say they succeeded in a toast, which
+// outlives the editor they reload.
 
 /** @import { Context } from './dialogs.js' */
 
@@ -87,7 +87,12 @@ function show(state) {
 	follow();
 }
 
-/** Enables the head's save and publish buttons for what there is to save. */
+/**
+ * Enables saving for edits of the user's, and offers to apply them, with a
+ * draft, to the main version. An unpublished node with nothing to apply
+ * offers to publish instead. Edits on an outdated state are saved only
+ * anyway, never applied.
+ */
 function follow() {
 	const head = dots();
 
@@ -97,30 +102,35 @@ function follow() {
 
 	const mine = head.querySelector('[data-stage="mine"]');
 	const state = mine instanceof HTMLElement ? (mine.dataset.state ?? 'none') : 'none';
-	const draft = head.dataset.draft === 'true';
+	const pending = state !== 'none' || head.dataset.draft === 'true';
+	const conflict = head.dataset.mine === 'conflict' && state !== 'none';
+	const save = document.querySelector('[data-needs="mine"]');
+	const label = save?.querySelector('[data-save-label]');
 
-	document.querySelectorAll('[data-needs]').forEach((button) => {
+	if (save instanceof HTMLButtonElement) {
+		save.disabled = state === 'none';
+		save.name = conflict ? 'force' : '';
+		save.value = conflict ? '1' : '';
+	}
+
+	if (label instanceof HTMLElement) {
+		label.textContent =
+			(conflict ? label.dataset.conflict : label.dataset.normal) ?? label.textContent;
+	}
+
+	const apply = document.getElementById('editor-apply');
+	const published = apply?.dataset.published === 'true';
+
+	apply?.querySelectorAll('[data-apply-when]').forEach((button) => {
 		if (!(button instanceof HTMLButtonElement)) {
 			return;
 		}
 
-		const needs = (button.dataset.needs ?? '').split(' ');
-		button.disabled = !(
-			(needs.includes('mine') && state !== 'none') ||
-			(needs.includes('draft') && draft)
-		);
-
-		const conflict = head.dataset.mine === 'conflict' && state !== 'none';
-		const label = button.querySelector('[data-save-label]');
-
-		// Edits on an outdated state are saved only anyway, never published.
-		if (label instanceof HTMLElement) {
-			label.textContent =
-				(conflict ? label.dataset.conflict : label.dataset.normal) ?? label.textContent;
-			button.name = conflict ? 'force' : '';
-			button.value = conflict ? '1' : '';
-		} else if (button.name === 'publish' && conflict) {
-			button.disabled = true;
+		if (button.dataset.applyWhen === 'idle') {
+			button.hidden = pending;
+		} else {
+			button.hidden = !pending && !published;
+			button.disabled = !pending || conflict;
 		}
 	});
 }

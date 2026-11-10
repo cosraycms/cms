@@ -86,11 +86,11 @@ final class Bulk extends Panel
 						$nodeObj = Wrapper::unwrap($current);
 
 						if (!$published) {
-							$store->online($nodeObj, false, $actor);
-						} elseif ($withChanges && $store->publishDraft($nodeObj, $locales, $actor)) {
+							$store->published($nodeObj, false, $actor);
+						} elseif ($withChanges && $store->applyDraft($nodeObj, $locales, $actor, publish: true)) {
 							$changesPublished++;
 						} elseif (!$current->meta->published) {
-							$store->online($nodeObj, true, $actor);
+							$store->published($nodeObj, true, $actor);
 						}
 
 						$changed++;

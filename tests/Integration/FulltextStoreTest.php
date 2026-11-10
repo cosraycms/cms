@@ -74,7 +74,7 @@ final class FulltextStoreTest extends FulltextTestCase
 			$this->languages,
 			Actor::system(),
 		);
-		self::assertTrue($this->store->publishDraft($this->node('fts-publish'), $this->languages, Actor::system()));
+		self::assertTrue($this->store->applyDraft($this->node('fts-publish'), $this->languages, Actor::system()));
 		self::assertSame("Released\n\nNew prose", $this->source('fts-publish'));
 	}
 
@@ -87,7 +87,7 @@ final class FulltextStoreTest extends FulltextTestCase
 			$this->languages,
 			Actor::system(),
 		);
-		$this->store->online($this->node('fts-unpublish'), false, Actor::system());
+		$this->store->published($this->node('fts-unpublish'), false, Actor::system());
 		self::assertSame('Live', $this->source('fts-unpublish'));
 		self::assertFalse($this->sql('node', ['uid' => 'fts-unpublish'])->one()['published']);
 	}

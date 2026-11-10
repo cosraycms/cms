@@ -107,7 +107,7 @@ final class Writer
 
 		if ($this->store->holdsDrafts($inner) && Factory::meta($inner, 'draft') !== null) {
 			throw new HttpConflict(payload: [
-				'message' => 'The node has unpublished changes from an editor; PATCH it, or have them published or discarded first.',
+				'message' => 'The node has a draft from an editor; PATCH it, or have the draft applied or discarded first.',
 			]);
 		}
 

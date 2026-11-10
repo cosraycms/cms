@@ -129,12 +129,12 @@ final class PanelDashboardTest extends End2EndTestCase
 		}
 		$this->assertStringContainsString('<span class="type">Test Page</span>', $html);
 		$this->assertHtmlNodeExists(
-			"//*[contains(@class, 'cms-status-dots')]/*[@data-stage='website' and @data-state='online']",
+			"//*[contains(@class, 'cms-status-dots')]/*[@data-stage='main' and @data-state='published']",
 			$html,
 		);
 		$this->assertSame(
 			2,
-			substr_count($html, 'data-stage="draft" data-state="present"') - $this->neverPublished($html),
+			substr_count($html, 'data-stage="draft" data-state="present"'),
 		);
 		$this->assertHtmlNodeExists(
 			'//time[contains(concat(" ", normalize-space(@class), " "), " changed ") and string-length(@datetime) > 0 and string-length(normalize-space(.)) > 0]',
@@ -231,10 +231,9 @@ final class PanelDashboardTest extends End2EndTestCase
 	): void {
 		$this->db()->execute(
 			'INSERT INTO cms.nodes
-				(uid, published, hidden, locked, type, creator, editor, created, changed, released, deleted, content, title)
+				(uid, published, hidden, locked, type, creator, editor, created, changed, deleted, content, title)
 			 VALUES
-				(:uid, :published, false, false, :type, 1, 1, :changed, :changed,
-					CASE WHEN :published::boolean THEN CAST(:changed AS timestamptz) END, :deleted, :content::jsonb, :title::jsonb)',
+				(:uid, :published, false, false, :type, 1, 1, :changed, :changed, :deleted, :content::jsonb, :title::jsonb)',
 			[
 				'uid' => $uid,
 				'published' => $published,
@@ -245,12 +244,6 @@ final class PanelDashboardTest extends End2EndTestCase
 				'title' => json_encode(['en' => $title]),
 			],
 		)->run();
-	}
-
-	/** Rows never published, whose content counts as their draft. */
-	private function neverPublished(string $html): int
-	{
-		return substr_count($html, 'data-stage="website" data-state="none"');
 	}
 
 	private function createDraft(string $uid, DateTimeImmutable $changed): void

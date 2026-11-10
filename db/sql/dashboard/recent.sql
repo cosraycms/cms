@@ -1,7 +1,6 @@
 SELECT
 	n.uid,
 	n.published,
-	n.released,
 	n.changed,
 	coalesce(ue.data->>'name', ue.username, ue.email) AS editor_name,
 	d.changed AS draft_changed,

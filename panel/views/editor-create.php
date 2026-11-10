@@ -46,16 +46,16 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			'assets' => [],
 			'pathSourceFields' => $pathSourceFields,
 		]) ?>
-		<?php // What creating means: a draft for the editorial team, or a record saved directly. ?>
+		<?php // What creating means: an unpublished main version, or a record saved directly. ?>
 		<div class="hint">
 			<?php if (!$record): ?>
 				<span class="cms-status-dots is-sm" aria-hidden="true">
-					<span class="dot" data-stage="website" data-state="none"></span>
-					<span class="dot" data-stage="draft" data-state="present"></span>
+					<span class="dot" data-stage="main" data-state="unpublished"></span>
+					<span class="dot" data-stage="draft" data-state="none"></span>
 					<span class="dot" data-stage="mine" data-state="none"></span>
 				</span>
 			<?php endif ?>
-			<p><?= escape(__($record ? 'editor:create-record' : 'editor:create-draft')) ?></p>
+			<p><?= escape(__($record ? 'editor:create-record' : 'editor:create-entry')) ?></p>
 		</div>
 	</div>
 	<footer class="modal-footer">

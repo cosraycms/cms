@@ -40,7 +40,7 @@ final class Collection extends Panel
 		$open = $this->openParam('open');
 		$stage = $this->stringParam('stage');
 
-		if ($stage !== '' && !in_array($stage, ['draft', 'mine', 'offline', 'unreleased'], true)) {
+		if ($stage !== '' && !in_array($stage, ['draft', 'mine', 'unpublished'], true)) {
 			throw new HttpBadRequest($this->request);
 		}
 

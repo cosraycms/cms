@@ -83,6 +83,9 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		'oob' => true,
 	]) ?>
 	<?php $this->include('node/status', ['status' => $status, 'oob' => true]) ?>
+<?php if (!($status['record'] ?? false)): ?>
+	<?php $this->include('node/apply', ['status' => $status, 'oob' => true]) ?>
+<?php endif ?>
 	<?php $this->include('node/conflict', ['status' => $status, 'oob' => true]) ?>
 <?php endif ?>
 <?php if ($saved && is_array(u($autosave ?? null))): ?>

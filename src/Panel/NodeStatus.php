@@ -14,78 +14,64 @@ use Throwable;
  * A node's state in the stages the panel shows as dots, the one place
  * that derives it for the editor head, the inspector and the lists.
  *
- * A publishable node has three stages: the website (the content visitors
- * get, online or offline, or none before the first publication), the draft
- * (the editorial team's working state) and the current user's unsaved
- * edits. A record has two: the stored state and the user's edits. Saving
- * and failing autosaves are client states; the server knows none of them.
+ * A node has three stages: its main version (the stored node, published
+ * or not), the draft (changes to the main version the editorial team
+ * saved) and the current user's unsaved edits. A record has two: the
+ * stored state and the user's edits. Saving and failing autosaves are
+ * client states; the server knows none of them.
  */
 final readonly class NodeStatus
 {
 	/**
-	 * @param 'none'|'online'|'offline' $website
+	 * @param 'published'|'unpublished' $main
 	 * @param 'none'|'present'|'conflict' $mine
 	 */
 	public function __construct(
 		public bool $record,
-		public string $website,
+		public string $main,
 		public bool $draft,
 		public string $mine,
-		public ?string $released = null,
+		public string $changed = '',
 		public ?string $saved = null,
 		public ?string $savedBy = null,
 		public ?string $mineSaved = null,
 	) {}
 
 	/**
-	 * Before its first publication a node keeps its working state in the
-	 * node itself, which therefore counts as its draft. An autosave that
-	 * started from an older state than the working one is a conflict.
+	 * An autosave that started from an older state than the working one,
+	 * the draft or else the main version, is a conflict.
 	 *
+	 * @param string $changed when the main version changed last
+	 * @param ?string $editor who changed it
 	 * @param ?array{changed: string, editorName?: ?string} $draft the working copy
 	 * @param ?array{changed: string, base: string} $autosave the user's
 	 */
 	public static function of(
 		bool $record,
 		bool $published,
-		?string $released,
 		string $changed,
 		?string $editor,
 		?array $draft,
 		?array $autosave,
 	): self {
-		$working = $draft['changed'] ?? $changed;
 		$mine = match (true) {
 			$autosave === null => 'none',
-			self::before($autosave['base'], $working) => 'conflict',
+			self::before($autosave['base'], $draft['changed'] ?? $changed) => 'conflict',
 			default => 'present',
 		};
 
 		if ($record) {
-			return new self(true, 'none', false, $mine, null, $changed, $editor, $autosave['changed'] ?? null);
+			return new self(true, 'published', false, $mine, $changed, $changed, $editor, $autosave['changed'] ?? null);
 		}
-
-		$unreleased = $released === null;
-
-		// The draft is the working copy, or before the first publication the node itself.
-		[$saved, $savedBy] = match (true) {
-			$draft !== null => [$draft['changed'], $draft['editorName'] ?? null],
-			$unreleased => [$changed, $editor],
-			default => [null, null],
-		};
 
 		return new self(
 			record: false,
-			website: match (true) {
-				$unreleased => 'none',
-				$published => 'online',
-				default => 'offline',
-			},
-			draft: $unreleased || $draft !== null,
+			main: $published ? 'published' : 'unpublished',
+			draft: $draft !== null,
 			mine: $mine,
-			released: $released,
-			saved: $saved,
-			savedBy: $savedBy,
+			changed: $changed,
+			saved: $draft['changed'] ?? null,
+			savedBy: $draft['editorName'] ?? null,
 			mineSaved: $autosave['changed'] ?? null,
 		);
 	}
@@ -129,19 +115,18 @@ final readonly class NodeStatus
 			];
 		}
 
-		$released = $date($this->released ?? '', false);
+		$published = $this->main === 'published';
+		$since = $date($this->changed, false);
 
 		return [
 			[
-				'key' => 'website',
-				'state' => $this->website,
-				'name' => __('status:website'),
-				'text' => match ($this->website) {
-					'online' => __('status:website-online', ['date' => $released]),
-					'offline' => __('status:website-offline', ['date' => $released]),
-					default => __('status:website-none'),
-				},
-				'help' => __($this->website === 'online' ? 'status:website-help' : 'status:website-unreachable'),
+				'key' => 'main',
+				'state' => $this->main,
+				'name' => __('status:main'),
+				'text' => $published
+					? __('status:main-published', ['date' => $since])
+					: __('status:main-unpublished', ['date' => $since]),
+				'help' => __($published ? 'status:main-visible' : 'status:main-invisible'),
 			],
 			[
 				'key' => 'draft',
