@@ -13,6 +13,7 @@ use Cosray\Node\Schema\HandleHandler;
 use Cosray\Node\Schema\IconHandler;
 use Cosray\Node\Schema\LabelHandler;
 use Cosray\Node\Schema\PermissionHandler;
+use Cosray\Node\Schema\RecordHandler;
 use Cosray\Node\Schema\Registry;
 use Cosray\Node\Schema\RenderHandler;
 use Cosray\Node\Schema\RouteHandler;
@@ -25,6 +26,7 @@ use Cosray\Schema\Handle;
 use Cosray\Schema\Icon;
 use Cosray\Schema\Label;
 use Cosray\Schema\Permission;
+use Cosray\Schema\Record;
 use Cosray\Schema\Render;
 use Cosray\Schema\Route;
 use Cosray\Schema\Title;
@@ -48,6 +50,8 @@ use Cosray\Tests\Fixtures\Node\NodeWithTitleAndAmbiguousEmbeds;
 use Cosray\Tests\Fixtures\Node\NodeWithUnknownFieldOrder;
 use Cosray\Tests\Fixtures\Node\PlainBlock;
 use Cosray\Tests\Fixtures\Node\PlainPage;
+use Cosray\Tests\Fixtures\Node\RecordNode;
+use Cosray\Tests\Fixtures\Node\RoutedRecord;
 use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
 use Cosray\Tests\TestCase;
 use ValueError;
@@ -75,6 +79,7 @@ final class NodeSchemaRegistryTest extends TestCase
 			$registry->getHandler(new FieldOrder('a', 'b')),
 		);
 		$this->assertInstanceOf(DeletableHandler::class, $registry->getHandler(new Deletable()));
+		$this->assertInstanceOf(RecordHandler::class, $registry->getHandler(new Record()));
 		$this->assertInstanceOf(
 			ChildrenHandler::class,
 			$registry->getHandler(new Children([PlainPage::class, PlainBlock::class])),
@@ -307,9 +312,27 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertNull($schema->icon);
 		// No #[Deletable] => true
 		$this->assertTrue($schema->deletable);
+		// No #[Record] => publishable
+		$this->assertFalse($schema->record);
 		// No #[Children] => []
 		$this->assertSame([], $schema->children);
 		$this->assertFalse($schema->sortableChildren);
+	}
+
+	public function testSchemaResolvesRecordAttribute(): void
+	{
+		$schema = new Schema(RecordNode::class, Registry::withDefaults());
+
+		$this->assertTrue($schema->record);
+		$this->assertFalse($schema->renderable);
+	}
+
+	public function testSchemaRefusesARecordWithARoute(): void
+	{
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('cannot also declare #[Route] or #[Render]');
+
+		new Schema(RoutedRecord::class, Registry::withDefaults());
 	}
 
 	public function testSchemaResolvesChildrenAttributeFromClass(): void

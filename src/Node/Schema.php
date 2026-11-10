@@ -98,6 +98,16 @@ class Schema
 			}
 		}
 
+		// A record is never online, so a URL or renderer would serve nothing.
+		if (
+			($resolved['record'] ?? false)
+			&& (($resolved['routable'] ?? false) || ($resolved['renderable'] ?? false))
+		) {
+			throw new RuntimeException(
+				"Node '{$this->nodeClass}' is a #[Record] and cannot also declare #[Route] or #[Render].",
+			);
+		}
+
 		$definitions = Definitions::for($this->nodeClass);
 		$this->validateFieldOrder($resolved, $definitions);
 		$selections = [];

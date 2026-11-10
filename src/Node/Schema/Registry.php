@@ -13,6 +13,7 @@ use Cosray\Schema\Icon;
 use Cosray\Schema\Label;
 use Cosray\Schema\Labels;
 use Cosray\Schema\Permission;
+use Cosray\Schema\Record;
 use Cosray\Schema\Render;
 use Cosray\Schema\Route;
 use Cosray\Schema\Title;
@@ -91,6 +92,7 @@ class Registry
 		$registry->register(Labels::class, new LabelsHandler());
 		$registry->register(Children::class, new ChildrenHandler());
 		$registry->register(Editor::class, new EditorHandler());
+		$registry->register(Record::class, new RecordHandler());
 
 		return $registry;
 	}
@@ -123,6 +125,7 @@ class Registry
 		$this->default('titleEmbedded', static fn(string $nodeClass, array $properties): ?string => null);
 		$this->default('fieldOrder', static fn(string $nodeClass, array $properties): ?array => null);
 		$this->default('deletable', static fn(string $nodeClass, array $properties): bool => true);
+		$this->default('record', static fn(string $nodeClass, array $properties): bool => false);
 		$this->default('children', static fn(string $nodeClass, array $properties): array => []);
 		$this->default('sortableChildren', static fn(string $nodeClass, array $properties): bool => false);
 	}

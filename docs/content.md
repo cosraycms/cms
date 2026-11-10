@@ -27,7 +27,7 @@ final class Article
 $app->node(Article::class);
 ```
 
-`#[Route]` makes a type routable. Its handle derives from the class name unless `#[Handle]` supplies it; the renderer defaults to that handle unless `#[Render]` overrides it. `#[Children(...)]` declares allowed direct child types, one class or a list, defaulting to none; `sortable: true` lets editors arrange them (see [manual order](#manual-order)). [Schema attributes](../src/Schema/) and [node schema construction](../src/Node/Schema.php) define the supported metadata.
+`#[Route]` makes a type routable. Its handle derives from the class name unless `#[Handle]` supplies it; the renderer defaults to that handle unless `#[Render]` overrides it. `#[Children(...)]` declares allowed direct child types, one class or a list, defaulting to none; `sortable: true` lets editors arrange them (see [manual order](#manual-order)). `#[Record]` marks a type whose nodes are data rather than published content, like form submissions: the panel saves them directly, without a working copy or publication (see [working copies](#working-copies)), and a record cannot also be routable or renderable. [Schema attributes](../src/Schema/) and [node schema construction](../src/Node/Schema.php) define the supported metadata.
 
 Inside a node class, fields expose their value through `value()`. Templates receive a `Cosray\Node\Wrapper`, whose field properties are already `Value` objects. String conversion uses the field's escaped or rendered output, which templates print as is; `raw()` returns the raw value. See [views and errors](application.md#views-and-errors) for how templates escape. [Blocks](blocks.md), [richtext](richtext-format.md), and [media](media.md) have their own rendering behavior.
 
