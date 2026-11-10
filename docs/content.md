@@ -339,13 +339,13 @@ An injected [Node\View](../src/Node/View.php) renders the node's own view: `rend
 
 ## Working copies
 
-The panel saves edits to a published, renderable node into a working copy while it remains published. Visitors, listings, menus, and search keep reading live content. Unpublished and non-renderable nodes are edited directly. Content, handle, and URL paths are drafted; visibility is live.
+Every node type goes through publication unless it is a `#[Record]`, whether or not it has a URL. Once a node's content went live, which `nodes.released` records, the panel saves edits into a working copy, online or offline. Visitors, listings, menus, and search keep reading live content. Before its first publication a node is edited directly, as nothing is live to protect; records are always edited directly. Content, handle, and URL paths are drafted.
 
-Publishing writes the working copy live and removes it. Discarding removes it without changing live content. Unpublishing folds pending changes into the live row. A working copy exists only while it differs from a published, renderable, undeleted node.
+Publishing writes the working copy live, switches the node online, and removes the copy. Discarding removes it without changing live content. Online and listing state are switches of their own: they apply at once and leave content and working copy alone. Going online for the first time releases the content the node holds. A working copy exists only while it differs from a released, undeleted node.
 
 - `$cms->node->working($uid)` reads the working copy; `/preview/{uid}` renders it with panel access checks and the same GET dispatch.
 - `Node\Store::save()` is a direct API write and does not update an existing working copy. Publishing that copy later can supersede it.
-- `draft()`, `publish()`, `discard()`, `unpublish()`, and `publishDraft()` select explicit working-copy transitions.
+- `draft()`, `publish()`, `discard()`, and `publishDraft()` select explicit working-copy transitions; `online()` and `hide()` switch the node's state.
 - `meta->draft` describes pending changes; Finder's `changes` filter selects them.
 - Duplication copies the live version. Draft references are indexed separately; draft history survives publishing or discarding.
 

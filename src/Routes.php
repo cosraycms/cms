@@ -480,6 +480,14 @@ class Routes
 					->middleware($panelAuth);
 				$panel
 					->post(
+						'/node/{node:[A-Za-z0-9-_.]{1,64}}/visibility',
+						[Panel\Editor::class, 'visibility'],
+						'editor.visibility',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('editor-visibility'));
+				$panel
+					->post(
 						'/node/{node:[A-Za-z0-9-_.]{1,64}}/autosave',
 						[Panel\Editor::class, 'autosave'],
 						'editor.autosave',

@@ -164,8 +164,7 @@ Normal writes through `Node\Store` replace all locale documents inside the conte
 | Create or save live content, published or not | Replace selected documents atomically |
 | Save or discard a working copy | Keep live documents unchanged |
 | Publish a working copy | Index newly live content |
-| Unpublish without a working copy | Keep documents; public queries exclude the node |
-| Unpublish and fold in a working copy | Index folded live content; public queries exclude the node |
+| Switch offline | Keep documents and working copy; public queries exclude the node |
 | Change visibility or active paths | Query current flags/paths immediately |
 | Delete a node | Remove its full-text rows in the deletion transaction |
 

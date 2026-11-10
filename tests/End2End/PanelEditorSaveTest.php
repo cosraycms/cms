@@ -797,6 +797,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->createTestNode([
 			'uid' => 'panel-save-editor',
 			'type' => $this->articleTypeId(),
+			'published' => false,
 			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Draft']]],
 		]);
 
@@ -1302,10 +1303,12 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		]);
 	}
 
+	/** The working state the editor saved: a released node's save lands in its working copy. */
 	private function nodeContent(string $uid): array
 	{
 		$row = $this->db()->execute(
-			'SELECT content FROM cms.nodes WHERE uid = :uid',
+			'SELECT coalesce(d.content, n.content) AS content
+				FROM cms.nodes n LEFT JOIN cms.drafts d ON d.node = n.node WHERE n.uid = :uid',
 			['uid' => $uid],
 		)->one();
 		$this->assertNotEmpty($row);

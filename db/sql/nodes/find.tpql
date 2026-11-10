@@ -9,6 +9,7 @@ SELECT
 	n.created,
 	n.changed,
 	n.deleted,
+	n.released,
 <?php if (isset($working) && $working) : ?>
 	coalesce(d.content, n.content) AS content,
 	coalesce(d.settings, '{}'::jsonb) AS draft_settings,

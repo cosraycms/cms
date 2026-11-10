@@ -34,9 +34,17 @@ $renderable = (bool) ($type['renderable'] ?? false);
 $published = (bool) ($node['published'] ?? false);
 $deletable = (bool) ($node['deletable'] ?? false);
 $draft = is_array($meta['draft'] ?? null) ? $meta['draft'] : null;
+$record = (bool) ($type['record'] ?? false);
 $contentLocales = ContentLocales::used($fields, count($locales));
-$showSettings = $routable || $renderable || $contentLocales;
 $edit = $mode === 'edit';
+$visibility = $edit && !$record && $embed === null
+	? [
+		'published' => $published,
+		'hidden' => (bool) ($node['hidden'] ?? false),
+		'released' => ($node['released'] ?? null) !== null,
+	]
+	: null;
+$showSettings = $routable || $renderable || $contentLocales || $visibility !== null;
 $panelCookie = u($panelCookie);
 $wideBlocks = $panelCookie->is('blocks', 'wide');
 $showSettings = $showSettings && $embed === null;
@@ -246,6 +254,7 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 				'defaultLocale' => $defaultLocale,
 				'routable' => $routable,
 				'renderable' => $renderable,
+				'visibility' => $visibility,
 				'pathsUrl' => $edit
 					? $links->paths($uid)
 					: $links->createPaths((string) ($type['handle'] ?? ''), $parent),
@@ -265,6 +274,18 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 	</form>
 
 	<div id="editor-preview" hidden></div>
+	<?php if ($visibility !== null): ?>
+		<?php // The online and listing switches act at once, apart from the save:
+
+		// their own form, outside the editor form, which forms cannot nest in. ?>
+		<form
+			id="node-editor-visibility"
+			method="post"
+			action="<?= escape($links->visibility($uid)) ?>"
+			hx-swap="none"
+			data-dirty-bypass
+			hidden><?php $this->include('component/csrf') ?></form>
+	<?php endif ?>
 	<?php if (is_array($autosave)): ?>
 		<?php $this->include('node/autosave', ['autosave' => $autosave]) ?>
 	<?php endif ?>

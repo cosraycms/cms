@@ -125,6 +125,13 @@ Every panel dialog is a `.cms-modal`, a native dialog with `.modal-header`, `.mo
 
 A footer puts Cancel (`secondary`) first and the action last: `primary`, or `danger solid` when it destroys something. Label the action with what it does, such as Delete or Discard changes, never OK or Yes. A destructive question starts on Cancel, any other on its action; Escape, the backdrop and the close button always cancel.
 
+## Toasts
+
+A toast reports an event that has no place of its own on the page: a finished upload, a refused action, a background failure. State that belongs to a place stays there, such as the editor's save state in its head or validation errors at their fields. Toasts gather in the document's `#cms-toasts` live region; [toast.js](../panel/src/lib/toast.js) shows successes and notes for five seconds, paused under the pointer or focus, and keeps warnings and errors until closed.
+
+- From a script: `toast(kind, message)` of toast.js, with `success`, `info`, `warning` or `error`. Element controls reach it through the [bridge](controls.md#the-windowcosray-bridge).
+- From a response: include [component/toast](../panel/views/component/toast.php) with `kind` and `message`. It appends a plain `data-toast` element to the region out of band, which toast.js turns into a toast after the swap. A route whose response is only a toast renders the `toast` view.
+
 ## Shared shells and fields
 
 `.cms-tabs` and [tabs.js](../panel/src/behaviors/tabs.js) provide tab selection with labelled panels and roving focus. Built-in icons come from [panel/icons/](../panel/icons/README.md) through PHP and JavaScript adapters; put an accessible name on the action rather than its decorative SVG.

@@ -196,7 +196,7 @@ final class Editor extends Panel
 		$htmx = $this->request->hasHeader('HX-Request');
 
 		try {
-			if ($this->savesAsDraft($nodeObj, $data, $form)) {
+			if (($form['publish'] ?? null) !== '1' && $store->holdsDrafts($nodeObj)) {
 				$store->draft($nodeObj, $data, $context->locales(), $this->actor());
 			} else {
 				$store->publish($nodeObj, $data, $context->locales(), $this->actor());
@@ -298,6 +298,72 @@ final class Editor extends Panel
 	}
 
 	/**
+	 * Switches the node online or offline and shows or hides it in
+	 * listings, at once and apart from the editor's save. The switches
+	 * submit their own form with both states; only a changed one applies.
+	 * A node goes online through the switch only once it was published.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function visibility(Context $context, Cms $cms, string $node): array
+	{
+		$result = $cms->node->working($node);
+
+		if (!$result) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$nodeObj = Wrapper::unwrap($result);
+
+		if ((bool) $this->types()->get($nodeObj::class, 'record', false)) {
+			throw new HttpBadRequest($this->request);
+		}
+
+		$form = $this->formData();
+		$store = $this->nodeStore($context, $cms);
+		$actor = $this->actor();
+		$online = ($form['online'] ?? null) === '1';
+		$hidden = ($form['listed'] ?? null) !== '1';
+		$released = NodeFactory::meta($nodeObj, 'released');
+		$kind = 'success';
+		$message = null;
+
+		if ($online !== (bool) NodeFactory::meta($nodeObj, 'published')) {
+			if ($online && $released === null) {
+				$kind = 'error';
+				$message = __('editor:online-unreleased');
+			} else {
+				$store->online($nodeObj, $online, $actor);
+
+				// Visitors get the released content, not the pending working copy.
+				if ($online && NodeFactory::meta($nodeObj, 'draft') !== null) {
+					$kind = 'info';
+					$message = __('editor:online-draft', ['date' => $this->displayDate($released) ?? '']);
+				} else {
+					$message = __($online ? 'editor:online-done' : 'editor:offline-done');
+				}
+			}
+		}
+
+		if ($hidden !== (bool) NodeFactory::meta($nodeObj, 'hidden')) {
+			$store->hide($nodeObj, $hidden, $actor);
+			$message ??= __($hidden ? 'editor:unlisted-done' : 'editor:listed-done');
+		}
+
+		$fresh = Wrapper::unwrap($cms->node->working($node) ?? $result);
+
+		return [
+			'kind' => $kind,
+			'message' => $message,
+			'visibility' => [
+				'published' => (bool) NodeFactory::meta($fresh, 'published'),
+				'hidden' => (bool) NodeFactory::meta($fresh, 'hidden'),
+				'released' => NodeFactory::meta($fresh, 'released') !== null,
+			],
+		];
+	}
+
+	/**
 	 * Has htmx load the editor again after a form dropped what it showed.
 	 * A followed redirect would land on the form's hx-swap="none" and
 	 * render nothing; sourced from the form, the unsaved-changes guard
@@ -314,24 +380,6 @@ final class Editor extends Panel
 			'confirm' => false,
 			'replace' => 'true',
 		], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
-	}
-
-	/**
-	 * A published node that stays published takes a plain save as its
-	 * working copy. Everything else — an unpublished node, the switch
-	 * turned off, or an explicit publish — writes the live row.
-	 *
-	 * @param array<string, mixed> $data
-	 * @param array<array-key, mixed> $form
-	 */
-	private function savesAsDraft(object $node, array $data, array $form): bool
-	{
-		return (
-			(bool) ($data['type']['renderable'] ?? false)
-				&& (bool) NodeFactory::meta($node, 'published')
-				&& (bool) ($data['published'] ?? false)
-				&& ($form['publish'] ?? null) !== '1'
-		);
 	}
 
 	/**
@@ -745,12 +793,8 @@ final class Editor extends Panel
 			$data['paths'] = $paths;
 		}
 
-		foreach (['published', 'hidden'] as $flag) {
-			if (array_key_exists($flag, $form)) {
-				$data[$flag] = in_array($form[$flag], ['1', 'on', true], true);
-			}
-		}
-
+		// Online and listing switches act on their own; only publishing
+		// switches the node online with a save.
 		if (($form['publish'] ?? null) === '1') {
 			$data['published'] = true;
 		}
@@ -1186,7 +1230,7 @@ final class Editor extends Panel
 			'stale' => $stale,
 			'discard' => $discard,
 			'fields' => $this->changedKeys($content, $saved['content']),
-			'settings' => $this->changedKeys($stored, $saved['settings']),
+			'settings' => $this->changedKeys($stored, array_intersect_key($saved['settings'], $stored)),
 		];
 		$data['content'] = $saved['content'];
 		$settings = $saved['settings'];
@@ -1197,12 +1241,6 @@ final class Editor extends Panel
 
 		if (is_array($settings['paths'] ?? null)) {
 			$data['paths'] = $settings['paths'];
-		}
-
-		foreach (['published', 'hidden'] as $flag) {
-			if (array_key_exists($flag, $settings)) {
-				$data[$flag] = (bool) $settings[$flag];
-			}
 		}
 
 		$data['assets'] = $serializer->assetMap($data['content']);
@@ -1232,7 +1270,7 @@ final class Editor extends Panel
 	 * What an autosave keeps besides the content.
 	 *
 	 * @param array<string, mixed> $data
-	 * @return array{handle: ?string, paths: array<array-key, mixed>, published: bool, hidden: bool}
+	 * @return array{handle: ?string, paths: array<array-key, mixed>}
 	 */
 	private function autosaveSettings(array $data): array
 	{
@@ -1244,8 +1282,6 @@ final class Editor extends Panel
 				static fn(mixed $path): mixed => is_string($path) ? trim($path) : $path,
 				is_array($data['paths'] ?? null) ? $data['paths'] : [],
 			),
-			'published' => (bool) ($data['published'] ?? false),
-			'hidden' => (bool) ($data['hidden'] ?? false),
 		];
 	}
 

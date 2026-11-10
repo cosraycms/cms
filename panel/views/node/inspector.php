@@ -9,14 +9,17 @@ use function Cosray\escape;
 // control sits inside the editor form and submits with the content fields
 // through the same merge patch, the hidden tabs included. The markup arrives
 // with the first tab selected so nothing flashes before the tabs behavior runs.
-// Collapsed, a strip of quick controls replaces the drawer. Its published
-// switch is an unnamed copy: only the drawer's switch submits.
+// Collapsed, a strip of quick controls replaces the drawer. Its online
+// switch is an unnamed copy that flips the drawer's switch.
 
 $node = (array) u($node);
 $locales = (array) u($locales);
 $defaultLocale = (string) $defaultLocale;
 $routable = (bool) $routable;
 $renderable = (bool) $renderable;
+// The online and listing state of a stored, publishable node; null otherwise.
+$visibility = u($visibility ?? null);
+$visibility = is_array($visibility) ? $visibility : null;
 $contentLocales = (bool) (u($contentLocales ?? null) ?? false);
 $collapsed = (bool) $collapsed;
 $pathsUrl = u($pathsUrl);
@@ -36,7 +39,7 @@ $showMeta = $showType || $renderable || $showCreated || $showEditor;
 
 $tabs = [];
 
-if ($contentLocales || $renderable) {
+if ($contentLocales || $visibility !== null) {
 	$tabs['status'] = __('editor:tab-status');
 }
 
@@ -49,10 +52,10 @@ $first = array_key_first($tabs);
 $icons = ['status' => 'toggles', 'paths' => 'link-45deg', 'advanced' => 'sliders'];
 $show = __('editor:settings-show');
 $hide = __('editor:settings-hide');
-$publishedLabel = __('editor:published-label');
+$onlineLabel = __('editor:online-label');
 // Settings an editor restored from an autosave changes, by the tab they are in.
 $changedIn = [
-	'status' => array_intersect(['published', 'hidden'], $changed) !== [],
+	'status' => false,
 	'paths' => in_array('paths', $changed, true),
 	'advanced' => in_array('handle', $changed, true),
 ];
@@ -83,15 +86,16 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 				'strip' => true,
 			]) ?>
 		<?php endif ?>
-		<?php if ($renderable): ?>
+		<?php if ($visibility !== null): ?>
 			<input
 				type="checkbox"
 				class="cms-switch"
-				title="<?= escape($publishedLabel) ?>"
-				aria-label="<?= escape($publishedLabel) ?>"
+				title="<?= escape($onlineLabel) ?>"
+				aria-label="<?= escape($onlineLabel) ?>"
 				data-inspector-published
 				data-editor-state
-				<?= $node['published'] ?? false ? 'checked' : '' ?> />
+				<?= $visibility['published'] ? 'checked' : '' ?>
+				<?= $visibility['released'] ? '' : 'disabled' ?> />
 		<?php endif ?>
 		<div class="shortcuts">
 			<?php foreach ($tabs as $key => $label): ?>
@@ -153,37 +157,10 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 						</section>
 					<?php endif ?>
 
-					<?php if ($renderable): ?>
+					<?php if ($visibility !== null): ?>
 						<section class="section">
-							<label class="toggle">
-								<span class="copy">
-									<span class="title"><?= escape(__('editor:published-label')) ?><?= $mark('published') ?></span>
-									<span class="help"><?= escape(__('editor:published-help')) ?></span>
-								</span>
-								<input type="hidden" name="published" value="" />
-								<input
-									id="editor-published-switch"
-									type="checkbox"
-									class="cms-switch"
-									name="published"
-									value="1"
-									<?= $node['published'] ?? false ? 'checked' : '' ?> />
-							</label>
+							<?php $this->include('node/visibility', ['visibility' => $visibility]) ?>
 							<?php $this->include('node/changes-note', ['draft' => $meta['draft'] ?? null]) ?>
-
-							<label class="toggle">
-								<span class="copy">
-									<span class="title"><?= escape(__('editor:hidden-label')) ?><?= $mark('hidden') ?></span>
-									<span class="help"><?= escape(__('editor:hidden-help')) ?></span>
-								</span>
-								<input type="hidden" name="hidden" value="" />
-								<input
-									type="checkbox"
-									class="cms-switch"
-									name="hidden"
-									value="1"
-									<?= $node['hidden'] ?? false ? 'checked' : '' ?> />
-							</label>
 						</section>
 					<?php endif ?>
 				</div>

@@ -183,7 +183,7 @@ Replacing and patching need the type's `change` permission, deleting its `delete
 
 Every node response carries an `ETag` that changes with each change to the node, an editor's working copy included; a write that changes nothing keeps it. Send it as `If-Match` to have a write fail with `412` when the node changed since it was read; `If-None-Match: *` makes a `PUT` create only. Writes to one node take turns, and each checks its precondition once it is its turn, so of two writes sent with the same tag only the first succeeds. A `PATCH` merges into the node as the earlier write left it. Lists carry no tags.
 
-An editor may hold a working copy of a published node in the panel. A `PATCH` applies to the live node and to that copy alike, so publishing it later does not undo the API's change; unpublishing folds the copy into the node, as the panel does. A `PUT` answers `409` while a working copy exists, because replacing the content would leave the copy behind.
+An editor may hold a working copy of a published node in the panel. A `PATCH` applies to the live node and to that copy alike, so publishing it later does not undo the API's change; unpublishing leaves the copy as it is. A `PUT` answers `409` while a working copy exists, because replacing the content would leave the copy behind.
 
 ## Search
 

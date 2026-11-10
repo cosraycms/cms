@@ -104,19 +104,19 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 		$this->assertFalse($this->hasDraft('bulk-release-pending'));
 	}
 
-	public function testBulkUnpublishFoldsTheWorkingCopyIn(): void
+	public function testBulkUnpublishKeepsTheWorkingCopy(): void
 	{
-		$this->createPage('bulk-fold', 'Live', published: true, draftTitle: 'Folded');
+		$this->createPage('bulk-offline', 'Live', published: true, draftTitle: 'Pending');
 
-		$response = $this->bulk(['bulk-fold'], 'unpublished');
+		$response = $this->bulk(['bulk-offline'], 'unpublished');
 
 		$this->assertStringContainsString(
 			'notice=' . rawurlencode('unpublished:1'),
 			$response->getHeaderLine('Location'),
 		);
-		$this->assertFalse($this->published('bulk-fold'));
-		$this->assertSame('Folded', $this->liveTitle('bulk-fold'));
-		$this->assertFalse($this->hasDraft('bulk-fold'));
+		$this->assertFalse($this->published('bulk-offline'));
+		$this->assertSame('Live', $this->liveTitle('bulk-offline'));
+		$this->assertTrue($this->hasDraft('bulk-offline'));
 	}
 
 	/** @param list<string> $uids */

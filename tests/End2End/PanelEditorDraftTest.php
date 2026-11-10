@@ -147,19 +147,36 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->assertHtmlNodeMissing('//*[@id="editor-save-options"]//button[@form="node-editor-discard"]', $html);
 	}
 
-	public function testTurningTheSwitchOffFoldsTheWorkingCopyIn(): void
+	public function testTheOnlineSwitchActsAtOnceAndKeepsTheWorkingCopy(): void
 	{
-		$this->createPage('draft-fold', 'Live', published: true);
-		$this->save('draft-fold', ['content' => ['title' => ['value' => ['en' => 'Pending']]]]);
+		$this->createPage('draft-offline', 'Live', published: true);
+		$this->save('draft-offline', ['content' => ['title' => ['value' => ['en' => 'Pending']]]]);
 
-		$this->save('draft-fold', ['published' => '', 'content' => ['title' => ['value' => ['de' => 'Offline']]]]);
+		$response = $this->visibility('draft-offline', ['listed' => '1']);
 
-		$row = $this->nodeRow('draft-fold');
-		$this->assertFalse((bool) $row['published']);
-		$content = json_decode((string) $row['content'], true);
-		$this->assertSame('Pending', $content['title']['value']['en']);
-		$this->assertSame('Offline', $content['title']['value']['de']);
-		$this->assertNull($this->draftRow('draft-fold'));
+		$this->assertResponseOk($response);
+		$this->assertStringContainsString('data-toast="success"', $this->getHtmlResponse($response));
+		$this->assertFalse((bool) $this->nodeRow('draft-offline')['published']);
+		$this->assertSame('Live', $this->liveTitle('draft-offline'));
+		$this->assertSame('Pending', $this->draftTitle('draft-offline'));
+
+		// Back online, visitors get the released version while the draft waits.
+		$response = $this->visibility('draft-offline', ['online' => '1', 'listed' => '1']);
+
+		$this->assertStringContainsString('data-toast="info"', $this->getHtmlResponse($response));
+		$this->assertTrue((bool) $this->nodeRow('draft-offline')['published']);
+		$this->assertSame('Pending', $this->draftTitle('draft-offline'));
+	}
+
+	public function testANeverPublishedNodeCannotBeSwitchedOnline(): void
+	{
+		$this->createPage('draft-new', 'New', published: false);
+
+		$response = $this->visibility('draft-new', ['online' => '1', 'listed' => '1']);
+
+		$this->assertStringContainsString('data-toast="error"', $this->getHtmlResponse($response));
+		$this->assertFalse((bool) $this->nodeRow('draft-new')['published']);
+		$this->assertNull($this->nodeRow('draft-new')['released']);
 	}
 
 	public function testAReservedPathNeverReachesTheWorkingCopy(): void
@@ -203,7 +220,7 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->assertNull($this->draftRow('draft-unpublished'));
 	}
 
-	public function testANodeWithoutATemplateIsEditedInPlace(): void
+	public function testANodeWithoutATemplateHoldsAWorkingCopyToo(): void
 	{
 		$this->createTestNode([
 			'uid' => 'draft-article',
@@ -212,20 +229,61 @@ final class PanelEditorDraftTest extends End2EndTestCase
 			'content' => ['title' => ['type' => Text::class, 'value' => ['en' => 'Live']]],
 		]);
 
-		$this->save('draft-article', ['content' => ['title' => ['value' => ['en' => 'Direct']]]]);
+		$this->save('draft-article', ['content' => ['title' => ['value' => ['en' => 'Pending']]]]);
 
-		$this->assertSame('Direct', $this->liveTitle('draft-article'));
-		$this->assertNull($this->draftRow('draft-article'));
+		$this->assertSame('Live', $this->liveTitle('draft-article'));
+		$this->assertSame('Pending', $this->draftTitle('draft-article'));
 	}
 
-	public function testHiddenAppliesLiveWhileTheContentWaits(): void
+	public function testANeverPublishedNodeIsEditedInPlace(): void
+	{
+		$this->createPage('draft-unreleased', 'First', published: false);
+
+		$this->save('draft-unreleased', ['content' => ['title' => ['value' => ['en' => 'Second']]]]);
+
+		$this->assertSame('Second', $this->liveTitle('draft-unreleased'));
+		$this->assertNull($this->draftRow('draft-unreleased'));
+		$this->assertFalse((bool) $this->nodeRow('draft-unreleased')['published']);
+	}
+
+	public function testPublishingSwitchesOnlineAndReleases(): void
+	{
+		$this->createPage('draft-release', 'First', published: false);
+
+		$this->save('draft-release', ['publish' => '1', 'content' => ['title' => ['value' => ['en' => 'Out']]]]);
+
+		$row = $this->nodeRow('draft-release');
+		$this->assertTrue((bool) $row['published']);
+		$this->assertNotNull($row['released']);
+		$this->assertSame('Out', $this->liveTitle('draft-release'));
+	}
+
+	public function testARecordIsSavedInPlaceAndHasNoVisibility(): void
+	{
+		$this->createTestNode([
+			'uid' => 'draft-record',
+			'type' => $this->createTestType('test-submission'),
+			'published' => true,
+			'content' => ['title' => ['type' => Text::class, 'value' => ['zxx' => 'Entry']]],
+		]);
+
+		$this->save('draft-record', ['content' => ['title' => ['value' => ['zxx' => 'Edited']]]]);
+
+		$this->assertNull($this->draftRow('draft-record'));
+		$this->assertStringContainsString('Edited', (string) $this->nodeRow('draft-record')['content']);
+		$this->assertResponseStatus(400, $this->visibility('draft-record', ['listed' => '1']));
+	}
+
+	public function testTheListingSwitchActsAtOnceWhileTheContentWaits(): void
 	{
 		$this->createPage('draft-hidden', 'Live', published: true);
+		$this->save('draft-hidden', ['content' => ['title' => ['value' => ['en' => 'Pending']]]]);
 
-		$this->save('draft-hidden', ['hidden' => '1', 'content' => ['title' => ['value' => ['en' => 'Pending']]]]);
+		$this->visibility('draft-hidden', ['online' => '1']);
 
 		$row = $this->nodeRow('draft-hidden');
 		$this->assertTrue((bool) $row['hidden']);
+		$this->assertTrue((bool) $row['published']);
 		$this->assertSame('Live', $this->liveTitle('draft-hidden'));
 		$this->assertSame('Pending', $this->draftTitle('draft-hidden'));
 	}
@@ -277,6 +335,15 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		return $this->makeRequest('POST', '/panel/node/' . $uid, [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => $body + ['_complete' => '1'],
+		]);
+	}
+
+	/** @param array<string, string> $states the switches' form, unchecked ones left out */
+	private function visibility(string $uid, array $states): object
+	{
+		return $this->makeRequest('POST', '/panel/node/' . $uid . '/visibility', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => $states,
 		]);
 	}
 

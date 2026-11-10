@@ -78,25 +78,17 @@ final class FulltextStoreTest extends FulltextTestCase
 		self::assertSame("Released\n\nNew prose", $this->source('fts-publish'));
 	}
 
-	public function testUnpublishingKeepsTheDocumentAndFoldsPendingContent(): void
+	public function testGoingOfflineKeepsTheLiveDocument(): void
 	{
 		$this->page('fts-unpublish', 'Live');
-		$this->store->unpublish($this->node('fts-unpublish'), $this->languages, Actor::system());
-		self::assertSame('Live', $this->source('fts-unpublish'));
-		$this->store->save(
-			$this->node('fts-unpublish'),
-			$this->payload('fts-unpublish', 'Live again'),
-			$this->languages,
-			Actor::system(),
-		);
 		$this->store->draft(
 			$this->node('fts-unpublish'),
-			$this->payload('fts-unpublish', 'Folded'),
+			$this->payload('fts-unpublish', 'Pending'),
 			$this->languages,
 			Actor::system(),
 		);
-		$this->store->unpublish($this->node('fts-unpublish'), $this->languages, Actor::system());
-		self::assertSame('Folded', $this->source('fts-unpublish'));
+		$this->store->online($this->node('fts-unpublish'), false, Actor::system());
+		self::assertSame('Live', $this->source('fts-unpublish'));
 		self::assertFalse($this->sql('node', ['uid' => 'fts-unpublish'])->one()['published']);
 	}
 

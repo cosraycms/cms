@@ -184,7 +184,7 @@ This is an internal boundary, not a plugin action-slot API. Changes to it need c
 
 ## Working copies
 
-See [working copies](content.md#working-copies) for live/draft semantics and the Store API. The editor saves, previews, publishes, and discards through those transitions; publication and visibility are not interchangeable with ordinary content fields.
+See [working copies](content.md#working-copies) for live/draft semantics and the Store API. The editor saves, previews, publishes, and discards through those transitions. The online and listing switches are not part of the editor form: they belong to a form of their own, `#node-editor-visibility`, which [visibility.js](../panel/src/behaviors/visibility.js) submits to `POST /node/{uid}/visibility` on every change. The response renders the switches again out of band with the node's state and adds a [toast](panel-styles.md#toasts) saying what changed; the online switch stays disabled until the node was published once.
 
 ## Autosave
 
@@ -302,7 +302,7 @@ The [bridge](../panel/src/lib/bridge.js) exposes versioned services to element c
 - `system()`: panel locale, content locales, paths, upload settings, the session's `csrfToken`, and related runtime metadata. Send the token as `X-CSRF-Token` with requests other than `GET` (see [CSRF protection](application.md#csrf-protection)).
 - `upload(type, file)`: uploads to the asset pool with the session CSRF token.
 - `modal.open(render, options?)`: mounts content and returns a `close()` handle.
-- `toast.success(message)` and `toast.error(message)`.
+- `toast.success(message)` and `toast.error(message)`: the panel's [toasts](panel-styles.md#toasts).
 
 Upload results include catalog identity and preview information; persist `{uid}` in the value, not the whole response. The bridge is installed from system payloads, so elements mounted outside a configured panel screen need to handle its absence.
 

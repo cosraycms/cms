@@ -122,9 +122,9 @@ class Store
 	}
 
 	/**
-	 * Saves the working copy of a published node. Content, handle and
-	 * paths wait for publish(); `hidden` is a live switch and applies now.
-	 * A working copy that equals the live node is dropped, not saved.
+	 * Saves the working copy of a released node. Content, handle and paths
+	 * wait for publish(). A working copy that equals the live node is
+	 * dropped, not saved.
 	 *
 	 * @param array<string, mixed> $data
 	 * @return array{success: true, uid: string}
@@ -132,7 +132,7 @@ class Store
 	public function draft(object $node, array $data, Locales $locales, Actor $actor): array
 	{
 		if (!$this->holdsDrafts($node)) {
-			throw new RuntimeException('Only a published, renderable node can hold a working copy');
+			throw new RuntimeException('Only a released, publishable node can hold a working copy');
 		}
 
 		$data = $this->prepare($node, $data, $locales);
@@ -165,15 +165,6 @@ class Store
 				}
 			}
 
-			if ($data['hidden'] !== (bool) Factory::meta($node, 'hidden')) {
-				$this->db->nodes->setHidden([
-					'node' => $nodeId,
-					'hidden' => $data['hidden'],
-					'editor' => $actor->id,
-				])->run();
-				$changed = true;
-			}
-
 			if ($changed) {
 				$this->event('node.draft', $node, $data['uid']);
 			}
@@ -198,28 +189,38 @@ class Store
 	}
 
 	/**
-	 * Takes the node offline. A working copy becomes the node content:
-	 * with nothing live left to protect, the node is edited directly again.
+	 * Switches the node online or offline without touching its content or
+	 * working copy. Going online for the first time releases the content
+	 * the node holds.
 	 */
-	public function unpublish(object $node, Locales $locales, Actor $actor): void
+	public function online(object $node, bool $online, Actor $actor): void
 	{
-		$draft = $this->drafts->get($this->nodeId($node));
+		$uid = (string) Factory::meta($node, 'uid');
 
-		if ($draft === null) {
-			$uid = (string) Factory::meta($node, 'uid');
-			$this->transaction(function () use ($node, $uid, $actor): void {
-				$this->lock($uid);
-				$this->db->nodes->setPublished(['uid' => $uid, 'published' => false, 'editor' => $actor->id])->run();
-				$this->event('node.updated', $node, $uid);
-			}, 'Error while unpublishing: ');
-
-			return;
-		}
-
-		$this->publish($node, $this->workingData($node, $draft, published: false), $locales, $actor);
+		$this->transaction(function () use ($node, $uid, $online, $actor): void {
+			$this->lock($uid);
+			$this->db->nodes->setPublished(['uid' => $uid, 'published' => $online, 'editor' => $actor->id])->run();
+			$this->event('node.updated', $node, $uid);
+		}, 'Error while switching the node online: ');
 	}
 
-	/** Publishes the working copy, if there is one. */
+	/** Hides the node from listings or shows it again, applied immediately. */
+	public function hide(object $node, bool $hidden, Actor $actor): void
+	{
+		$uid = (string) Factory::meta($node, 'uid');
+
+		$this->transaction(function () use ($node, $uid, $hidden, $actor): void {
+			$this->lock($uid);
+			$this->db->nodes->setHidden([
+				'node' => $this->nodeId($node),
+				'hidden' => $hidden,
+				'editor' => $actor->id,
+			])->run();
+			$this->event('node.updated', $node, $uid);
+		}, 'Error while hiding the node: ');
+	}
+
+	/** Publishes the working copy, if there is one, and switches the node online. */
 	public function publishDraft(object $node, Locales $locales, Actor $actor): bool
 	{
 		$draft = $this->drafts->get($this->nodeId($node));
@@ -244,11 +245,15 @@ class Store
 		$this->db->nodes->lockRow(['uid' => $uid])->run();
 	}
 
+	/**
+	 * A publishable node holds a working copy once its content went live;
+	 * before, nothing is live to protect and saves write the node itself.
+	 */
 	public function holdsDrafts(object $node): bool
 	{
 		return (
-			(bool) $this->types->get($node::class, 'renderable', false)
-				&& (bool) Factory::meta($node, 'published')
+			!(bool) $this->types->get($node::class, 'record', false)
+				&& Factory::meta($node, 'released') !== null
 				&& Factory::meta($node, 'deleted') === null
 		);
 	}

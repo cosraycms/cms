@@ -182,17 +182,17 @@ final class ApiWriteTest extends End2EndTestCase
 		$this->problem($this->send('PUT', '/api/nodes/drafted', ['content' => []]), 409);
 	}
 
-	public function testUnpublishingFoldsTheWorkingCopyIntoTheNode(): void
+	public function testUnpublishingKeepsTheWorkingCopy(): void
 	{
 		$this->authenticateAs('editor');
-		$nodeId = $this->page('folded', ['en' => 'Live']);
+		$nodeId = $this->page('offline', ['en' => 'Live']);
 		$this->draft($nodeId, ['en' => 'Draft']);
 
-		$node = $this->json($this->send('PATCH', '/api/nodes/folded', ['published' => false]));
+		$node = $this->json($this->send('PATCH', '/api/nodes/offline', ['published' => false]));
 
 		$this->assertFalse($node['published']);
-		$this->assertSame('Draft', $node['fields']['title']);
-		$this->assertNull($this->draftTitle($nodeId));
+		$this->assertSame('Live', $node['fields']['title']);
+		$this->assertSame(['en' => 'Draft'], $this->draftTitle($nodeId));
 	}
 
 	public function testDeletingSoftDeletesTheNodeAndOptionallyItsChildren(): void

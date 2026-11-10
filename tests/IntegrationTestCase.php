@@ -277,6 +277,7 @@ class IntegrationTestCase extends TestCase
 			'editor' => 1,
 			'created' => 'now()',
 			'changed' => 'now()',
+			'released' => null,
 			'content' => '{}',
 			'title' => '{}',
 		];
@@ -295,8 +296,11 @@ class IntegrationTestCase extends TestCase
 			$data['title'] = json_encode((object) $data['title']);
 		}
 
-		$sql = 'INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, created, changed, content, title)
-				VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor, :created, :changed, :content::jsonb, :title::jsonb)
+		// A published node went live when it was stored, unless the test says otherwise.
+		$sql = 'INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, created, changed, released, content, title)
+				VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor, :created, :changed,
+					COALESCE(:released::timestamptz, CASE WHEN :published::boolean THEN :changed::timestamptz END),
+					:content::jsonb, :title::jsonb)
 				RETURNING node';
 
 		$nodeId = $this->db()->execute($sql, $data)->one()['node'];

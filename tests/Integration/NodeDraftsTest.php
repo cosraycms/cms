@@ -258,44 +258,70 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$this->assertSame('Live', $this->liveTitle('drafts-discard'));
 	}
 
-	public function testHiddenIsALiveSwitchOnADraftSave(): void
+	public function testHidingAppliesAtOnceAndLeavesTheWorkingCopy(): void
 	{
 		$this->createPage('drafts-hidden', 'Live');
-		$payload = $this->payload('drafts-hidden', 'Changed');
-		$payload['hidden'] = true;
-
-		$this->store->draft($this->node('drafts-hidden'), $payload, $this->locales(), Actor::system());
-
-		$this->assertTrue((bool) $this->row('nodes', 'drafts-hidden')['hidden']);
-		$this->assertSame('Live', $this->liveTitle('drafts-hidden'));
-	}
-
-	public function testUnpublishFoldsTheWorkingCopyIntoTheNode(): void
-	{
-		$this->createPage('drafts-fold', 'Live');
 		$this->store->draft(
-			$this->node('drafts-fold'),
-			$this->payload('drafts-fold', 'Folded'),
+			$this->node('drafts-hidden'),
+			$this->payload('drafts-hidden', 'Changed'),
 			$this->locales(),
 			Actor::system(),
 		);
 
-		$this->store->unpublish($this->node('drafts-fold'), $this->locales(), Actor::system());
+		$this->store->hide($this->node('drafts-hidden'), true, Actor::system());
 
-		$row = $this->row('nodes', 'drafts-fold');
-		$this->assertFalse((bool) $row['published']);
-		$this->assertSame('Folded', $this->liveTitle('drafts-fold'));
-		$this->assertSame(0, $this->rows('drafts', 'drafts-fold'));
+		$this->assertTrue((bool) $this->row('nodes', 'drafts-hidden')['hidden']);
+		$this->assertSame('Live', $this->liveTitle('drafts-hidden'));
+		$this->assertSame('Changed', $this->draftTitle('drafts-hidden'));
 	}
 
-	public function testUnpublishWithoutAWorkingCopyOnlyFlipsTheFlag(): void
+	public function testGoingOfflineKeepsTheWorkingCopy(): void
 	{
-		$this->createPage('drafts-flip', 'Live');
+		$this->createPage('drafts-offline', 'Live');
+		$this->store->draft(
+			$this->node('drafts-offline'),
+			$this->payload('drafts-offline', 'Pending'),
+			$this->locales(),
+			Actor::system(),
+		);
 
-		$this->store->unpublish($this->node('drafts-flip'), $this->locales(), Actor::system());
+		$this->store->online($this->node('drafts-offline'), false, Actor::system());
 
-		$this->assertFalse((bool) $this->row('nodes', 'drafts-flip')['published']);
-		$this->assertSame('Live', $this->liveTitle('drafts-flip'));
+		$this->assertFalse((bool) $this->row('nodes', 'drafts-offline')['published']);
+		$this->assertSame('Live', $this->liveTitle('drafts-offline'));
+		$this->assertSame('Pending', $this->draftTitle('drafts-offline'));
+		$this->assertTrue($this->store->holdsDrafts($this->node('drafts-offline')));
+	}
+
+	public function testGoingOnlineForTheFirstTimeReleasesTheNode(): void
+	{
+		$this->createPage('drafts-first', 'Live', published: false);
+		$this->assertNull($this->row('nodes', 'drafts-first')['released']);
+		$this->assertFalse($this->store->holdsDrafts($this->node('drafts-first')));
+
+		$this->store->online($this->node('drafts-first'), true, Actor::system());
+
+		$this->assertTrue((bool) $this->row('nodes', 'drafts-first')['published']);
+		$this->assertNotNull($this->row('nodes', 'drafts-first')['released']);
+		$this->assertTrue($this->store->holdsDrafts($this->node('drafts-first')));
+	}
+
+	public function testPublishingReleasesTheContentAgain(): void
+	{
+		$this->createPage('drafts-again', 'Live');
+		$this->db()->execute(
+			"UPDATE cms.nodes SET released = '2020-01-01T00:00:00Z' WHERE uid = 'drafts-again'",
+		)->run();
+		$this->store->draft(
+			$this->node('drafts-again'),
+			$this->payload('drafts-again', 'Next'),
+			$this->locales(),
+			Actor::system(),
+		);
+
+		$this->store->publishDraft($this->node('drafts-again'), $this->locales(), Actor::system());
+
+		$this->assertGreaterThan('2020-01-02', (string) $this->row('nodes', 'drafts-again')['released']);
 	}
 
 	public function testPublishDraftReportsWhetherThereWasOne(): void
@@ -320,7 +346,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$this->assertTrue((bool) $this->row('nodes', 'drafts-release')['published']);
 	}
 
-	public function testOnlyPublishedRenderableNodesHoldAWorkingCopy(): void
+	public function testANeverPublishedNodeHoldsNoWorkingCopy(): void
 	{
 		$this->createPage('drafts-unpublished', 'Live', published: false);
 

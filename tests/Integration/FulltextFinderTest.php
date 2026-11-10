@@ -89,7 +89,7 @@ final class FulltextFinderTest extends FulltextTestCase
 			'hidden' => true,
 			'editor' => 1,
 		])->run();
-		$this->store->unpublish($this->node('fts-unpublished'), $this->languages, Actor::system());
+		$this->store->online($this->node('fts-unpublished'), false, Actor::system());
 		// Leave a stale derived row to test the query boundary independently of synchronization.
 		$this->sql('deleted', ['uid' => 'fts-deleted'])->run();
 		$this->writer->create(
@@ -215,8 +215,8 @@ final class FulltextFinderTest extends FulltextTestCase
 	{
 		$this->page('fts-hidden-draft', 'Liveword');
 		$payload = $this->payload('fts-hidden-draft', 'Pendingword');
-		$payload['hidden'] = true;
 		$this->store->draft($this->node('fts-hidden-draft'), $payload, $this->languages, Actor::system());
+		$this->store->hide($this->node('fts-hidden-draft'), true, Actor::system());
 		self::assertSame('Liveword', $this->source('fts-hidden-draft'));
 		self::assertSame(0, $this->cms->nodes()->fulltext('liveword')->count());
 		self::assertSame(0, $this->cms->nodes()->fulltext('pendingword')->hidden(null)->count());

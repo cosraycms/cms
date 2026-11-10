@@ -119,8 +119,6 @@ final class Writer
 	/**
 	 * Applies a JSON Merge Patch to the live node and to an editor's working
 	 * copy alike, so publishing that copy later does not undo the patch.
-	 * Unpublishing folds the patched working copy into the node, as the
-	 * panel does.
 	 *
 	 * @param array<array-key, mixed> $patch
 	 */
@@ -132,7 +130,7 @@ final class Writer
 		$working = Factory::meta($inner, 'draft') !== null ? $this->cms->node->working($uid) : null;
 		$locales = $this->context->locales();
 
-		$this->context->db->transaction(function () use ($inner, $patch, $actor, $working, $uid, $locales): void {
+		$this->context->db->transaction(function () use ($inner, $patch, $actor, $working, $locales): void {
 			$live = $this->patched($inner, $patch);
 
 			if ($working === null) {
@@ -143,18 +141,7 @@ final class Writer
 
 			$draft = Wrapper::unwrap($working);
 			$this->store->draft($draft, $this->patched($draft, $patch), $locales, $actor);
-
-			if ($live['published']) {
-				$this->store->save($inner, $live, $locales, $actor);
-
-				return;
-			}
-
-			$fresh = $this->cms->node->get(['uid' => $uid, 'published' => null]);
-
-			if ($fresh !== null) {
-				$this->store->unpublish(Wrapper::unwrap($fresh), $locales, $actor);
-			}
+			$this->store->save($inner, $live, $locales, $actor);
 		});
 	}
 

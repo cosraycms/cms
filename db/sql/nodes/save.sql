@@ -9,6 +9,13 @@ SET
 	locked = :locked,
 	hidden = :hidden,
 	editor = :editor,
+	-- Content goes live when the node is online after the write and was
+	-- offline, never released or held other content before it.
+	released = CASE
+		WHEN :published::boolean AND (NOT published OR released IS NULL OR content IS DISTINCT FROM :content::jsonb)
+			THEN now()
+		ELSE released
+	END,
 	content = :content::jsonb,
 	title = :title::jsonb
 WHERE

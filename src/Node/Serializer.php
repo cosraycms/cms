@@ -59,6 +59,7 @@ class Serializer
 			'created' => $rawData['created'],
 			'changed' => $rawData['changed'],
 			'deleted' => $rawData['deleted'],
+			'released' => $rawData['released'] ?? null,
 			'paths' => $rawData['paths'],
 			'parent' => $rawData['parent'] ?? null,
 			'type' => $this->resolveType($class, $rawData['type_handle'] ?? null),

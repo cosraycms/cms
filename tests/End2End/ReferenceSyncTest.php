@@ -102,6 +102,7 @@ final class ReferenceSyncTest extends End2EndTestCase
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
+				'publish' => '1',
 				'content' => [
 					'category' => ['value' => ['zxx' => 'news']],
 				],
