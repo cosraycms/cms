@@ -40,11 +40,9 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				<?php if ($exists && !$user->active): ?>
 					<span class="cms-status is-unpublished"><?= escape(__('user:inactive')) ?></span>
 				<?php endif ?>
-				<span
-					id="editor-dirty"
-					class="dirty"
-					title="<?= escape(__('editor:unsaved-changes')) ?>"
-					hidden>●</span>
+				<span id="editor-dirty" class="cms-status is-unsaved" hidden>
+					<?= escape(__('editor:unsaved-changes')) ?>
+				</span>
 			</div>
 		</div>
 
