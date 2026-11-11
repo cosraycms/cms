@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { signIn } from './support';
+import { head, signIn } from './support';
 
 test('a new entry starts in a dialog with its required fields and opens unpublished', async ({
 	page,
@@ -27,18 +27,25 @@ test('a new entry starts in a dialog with its required fields and opens unpublis
 		.locator('#editor-status-dots > .dot')
 		.evaluateAll((dots) => dots.map((dot) => (dot as HTMLElement).dataset.state));
 	expect(states).toEqual(['unpublished', 'none', 'none']);
-	await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeEnabled();
-	await expect(page.getByRole('button', { name: 'Apply', exact: true })).toBeHidden();
+	await expect(head(page).getByRole('button', { name: 'Publish', exact: true })).toBeEnabled();
+	await expect(head(page).getByRole('button', { name: 'Apply', exact: true })).toBeHidden();
 
 	// Edits offer to apply them, kept unpublished or published with them.
 	await page.getByLabel('Title').fill('Made in a dialog, written on');
-	const apply = page.getByRole('button', { name: 'Apply', exact: true });
+	const apply = head(page).getByRole('button', { name: 'Apply', exact: true });
 	await expect(apply).toBeEnabled();
-	await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeHidden();
+	await expect(head(page).getByRole('button', { name: 'Publish', exact: true })).toBeHidden();
 	await apply.click();
+	const question = page.getByRole('dialog', { name: 'Apply to the main version?' });
+	await expect(question).toContainText('The page is offline.');
+	await expect(question.getByRole('button', { name: 'Apply', exact: true })).toBeFocused();
+	await page.keyboard.press('Escape');
+	await expect(question).toBeHidden();
+	await expect(apply).toBeFocused();
+
+	await head(page).getByRole('button', { name: 'More ways to apply' }).click();
 	const menu = page.getByRole('menu');
-	await expect(menu.getByRole('menuitem')).toHaveCount(2);
-	await expect(menu.getByRole('menuitem', { name: /Stays unpublished/ })).toBeVisible();
+	await expect(menu.getByRole('menuitem')).toHaveCount(1);
 	await menu.getByRole('menuitem', { name: /^Apply draft and publish/ }).click();
 
 	await expect(page.locator('#cms-toasts')).toContainText('Applied and published');

@@ -70,7 +70,7 @@ $db->prepare(
 )->execute(['password' => password_hash('browser-tests-password', PASSWORD_ARGON2ID)]);
 $type = (int) $db->query("INSERT INTO cms.types (handle) VALUES ('media-page') RETURNING type")->fetchColumn();
 
-foreach (['focal', 'crop', 'texts', 'strict', 'gallery', 'video', 'restore', 'later'] as $name) {
+foreach (['focal', 'crop', 'texts', 'strict', 'gallery', 'video', 'restore', 'later', 'stages'] as $name) {
 	$node = $db->prepare(
 		'INSERT INTO cms.nodes (uid, published, hidden, locked, type, creator, editor, content, title)
 		VALUES (:uid, true, false, false, :type, 1, 1, :content, :title) RETURNING node',

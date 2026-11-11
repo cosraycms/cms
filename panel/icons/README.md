@@ -19,7 +19,7 @@ Masthead areas use `grid-1x2` for the dashboard, `file-earmark-text` for content
 
 A full-row grid blocks field toggles its width with `arrows-expand-vertical` and `arrows-collapse-vertical`.
 
-The node inspector uses `layout-sidebar-inset-reverse` to collapse and expand, and its strip uses `toggles`, `link-45deg`, and `sliders` for the status, paths, and advanced tabs.
+The node inspector uses `layout-sidebar-inset-reverse` to collapse and expand, and its strip uses `toggles`, `link-45deg`, and `sliders` for the status, paths, and advanced tabs. Its status tab marks the main version with `globe`, the draft and a record's saved state with `people`, and the user's own edits with `person`; its steps use `arrow-up` on the line and `arrow-bar-up` for applying, which the head's Apply shares, and `lightning` says the visibility switches act at once.
 
 The layout preview's width presets use `display`, `tablet-landscape`, `tablet`, and `phone`; its reload uses `arrow-clockwise`.
 

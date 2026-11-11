@@ -21,10 +21,15 @@ export async function signIn(page: Page): Promise<void> {
 	await expect(page).toHaveURL(/\/panel\/?$/);
 }
 
+/** The editor's head, whose buttons the status tab repeats as its steps. */
+export function head(page: Page): Locator {
+	return page.locator('.cms-node > .head');
+}
+
 export async function openNode(page: Page, name: string): Promise<void> {
 	await signIn(page);
 	await page.goto(`/panel/node/browser${name}`);
-	await expect(page.getByRole('button', { name: /^Save( draft)?$/ })).toBeVisible();
+	await expect(head(page).getByRole('button', { name: /^Save( draft)?$/ })).toBeVisible();
 
 	// Tests share nodes, and edits a test leaves unsaved come back as an autosave.
 	if ((await mine(page).getAttribute('data-state')) !== 'none') {
@@ -44,10 +49,12 @@ export async function discardMine(page: Page): Promise<void> {
 	);
 	await page
 		.locator('#editor-status-panel')
-		.getByRole('button', { name: 'Discard' })
-		.last()
+		.getByRole('button', { name: 'Discard my changes…' })
 		.click();
-	await page.getByRole('dialog').getByRole('button', { name: 'Discard my changes' }).click();
+	await page
+		.getByRole('dialog', { name: 'Discard my changes?' })
+		.getByRole('button', { name: 'Discard my changes' })
+		.click();
 	await reloaded;
 	await expect(mine(page)).toHaveAttribute('data-state', 'none');
 }
@@ -75,7 +82,9 @@ export async function save(page: Page): Promise<void> {
 			response.url().includes('/panel/node/') &&
 			!response.url().endsWith('/autosave'),
 	);
-	await page.getByRole('button', { name: /^Save( draft)?$/ }).click();
+	await head(page)
+		.getByRole('button', { name: /^Save( draft)?$/ })
+		.click();
 	await saved;
 }
 
@@ -87,11 +96,10 @@ export async function publish(page: Page): Promise<void> {
 			response.url().includes('/panel/node/') &&
 			!response.url().endsWith('/autosave'),
 	);
-	await page.getByRole('button', { name: 'Apply', exact: true }).click();
+	await head(page).getByRole('button', { name: 'Apply', exact: true }).click();
 	await page
-		.getByRole('menu')
-		.getByRole('menuitem', { name: /^Apply draft/ })
-		.first()
+		.getByRole('dialog', { name: 'Apply to the main version?' })
+		.getByRole('button', { name: 'Apply', exact: true })
 		.click();
 	await saved;
 }

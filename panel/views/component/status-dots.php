@@ -41,7 +41,7 @@ $dots = static function (array $stages): string {
 			<?php foreach ($stages as $stage): ?>
 				<span class="row" data-stage="<?= escape((string) $stage['key']) ?>">
 					<span class="dot" data-stage="<?= escape((string) $stage['key']) ?>" data-state="<?= escape((string) $stage['state']) ?>"></span>
-					<span><strong><?= escape((string) $stage['name']) ?></strong> · <span class="text"><?= escape((string) $stage['text']) ?></span></span>
+					<span><strong><?= escape((string) $stage['name']) ?><?= ($stage['badge'] ?? '') !== '' ? ' (' . escape((string) $stage['badge']) . ')' : '' ?></strong> · <span class="text"><?= escape((string) $stage['text']) ?></span></span>
 				</span>
 			<?php endforeach ?>
 			<span class="hint"><?= escape(__('status:details')) ?></span>

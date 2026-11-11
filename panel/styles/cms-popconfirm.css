@@ -1,0 +1,120 @@
+/* A question asked at the button that asks it, placed by confirm.js. */
+.cms-popconfirm {
+	--size: 1.5rem;
+	position: fixed;
+	inset: auto;
+	width: 21rem;
+	max-width: calc(100vw - 2 * var(--cms-space-4));
+	margin: 0;
+	padding: var(--cms-space-4);
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-lg);
+	background: var(--cms-color-surface);
+	color: var(--cms-color-text);
+	box-shadow: var(--cms-shadow-lg);
+	font-size: var(--cms-font-size-sm);
+	overflow: auto;
+	overscroll-behavior: contain;
+
+	&:popover-open {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-3);
+	}
+
+	& .title {
+		margin: 0;
+		font-size: var(--cms-font-size-base);
+		font-weight: 600;
+	}
+
+	& p {
+		margin: 0;
+		line-height: 1.45;
+	}
+
+	& .stages {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-2-5);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+
+		& li {
+			display: flex;
+			align-items: flex-start;
+			gap: var(--cms-space-2-5);
+
+			&[hidden] {
+				display: none;
+			}
+		}
+	}
+
+	& .copy {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+
+	& .name {
+		font-weight: 500;
+	}
+
+	& .help {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.4;
+	}
+
+	& .note {
+		--cms-icon-size: 1rem;
+		display: flex;
+		gap: var(--cms-space-2);
+		padding: var(--cms-space-2-5) var(--cms-space-3);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-selected);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-xs);
+
+		& .icon {
+			flex: none;
+			margin-top: 0.0625rem;
+		}
+
+		&.is-online {
+			border-color: color-mix(in oklch, var(--cms-color-success), transparent 65%);
+			background: var(--cms-color-success-surface);
+			color: var(--cms-color-success-text);
+		}
+	}
+
+	& .option {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--cms-space-2-5);
+		padding: var(--cms-space-3);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		cursor: pointer;
+
+		&[hidden] {
+			display: none;
+		}
+
+		& input {
+			flex: none;
+			margin: 0.1875rem 0 0;
+		}
+	}
+
+	& .buttons {
+		display: flex;
+		justify-content: flex-end;
+		flex-wrap: wrap;
+		gap: var(--cms-space-2);
+		margin-top: var(--cms-space-1);
+	}
+}

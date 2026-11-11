@@ -35,6 +35,7 @@ final readonly class NodeStatus
 		public ?string $saved = null,
 		public ?string $savedBy = null,
 		public ?string $mineSaved = null,
+		public ?string $editor = null,
 	) {}
 
 	/**
@@ -61,7 +62,17 @@ final readonly class NodeStatus
 		};
 
 		if ($record) {
-			return new self(true, 'published', false, $mine, $edited, $edited, $editor, $autosave['changed'] ?? null);
+			return new self(
+				true,
+				'published',
+				false,
+				$mine,
+				$edited,
+				$edited,
+				$editor,
+				$autosave['changed'] ?? null,
+				$editor,
+			);
 		}
 
 		return new self(
@@ -73,15 +84,16 @@ final readonly class NodeStatus
 			saved: $draft['changed'] ?? null,
 			savedBy: $draft['editorName'] ?? null,
 			mineSaved: $autosave['changed'] ?? null,
+			editor: $editor,
 		);
 	}
 
 	/**
-	 * The stages in their order, each with its state, name and text, and a
-	 * help line for the inspector.
+	 * The stages in their order, each with its state, name and text, a
+	 * help line for the inspector, and a badge where the stage has one.
 	 *
 	 * @param Closure(string, bool): string $date formats a stored time, with the time of day or not
-	 * @return list<array{key: string, state: string, name: string, text: string, help: string}>
+	 * @return list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>
 	 */
 	public function stages(Closure $date): array
 	{
@@ -100,6 +112,7 @@ final readonly class NodeStatus
 				default => __('status:mine-none'),
 			},
 			'help' => __('status:mine-help'),
+			'badge' => '',
 		];
 
 		if ($this->record) {
@@ -110,23 +123,26 @@ final readonly class NodeStatus
 					'name' => __('status:saved'),
 					'text' => $stored(),
 					'help' => __('status:saved-help'),
+					'badge' => '',
 				],
 				$mine,
 			];
 		}
 
 		$published = $this->main === 'published';
-		$since = $date($this->edited, false);
+		$applied = $date($this->edited, true);
 
 		return [
 			[
 				'key' => 'main',
 				'state' => $this->main,
 				'name' => __('status:main'),
-				'text' => $published
-					? __('status:main-published', ['date' => $since])
-					: __('status:main-unpublished', ['date' => $since]),
+				'text' =>
+					$this->editor !== null && $this->editor !== ''
+						? __('status:main-applied-by', ['date' => $applied, 'editor' => $this->editor])
+						: __('status:main-applied', ['date' => $applied]),
 				'help' => __($published ? 'status:main-visible' : 'status:main-invisible'),
+				'badge' => __($published ? 'status:online' : 'status:offline'),
 			],
 			[
 				'key' => 'draft',
@@ -134,6 +150,7 @@ final readonly class NodeStatus
 				'name' => __('status:draft'),
 				'text' => $this->draft ? $stored() : __('status:draft-none'),
 				'help' => __('status:draft-help'),
+				'badge' => '',
 			],
 			$mine,
 		];
@@ -167,12 +184,17 @@ final readonly class NodeStatus
 	/**
 	 * The stages in one sentence, for an accessible name.
 	 *
-	 * @param list<array{name: string, text: string}> $stages
+	 * @param list<array{name: string, text: string, badge?: string}> $stages
 	 */
 	public static function sentence(array $stages): string
 	{
 		return implode('; ', array_map(
-			static fn(array $stage): string => $stage['name'] . ' – ' . $stage['text'],
+			static fn(array $stage): string => (
+				$stage['name']
+				. (($stage['badge'] ?? '') !== '' ? ' (' . $stage['badge'] . ')' : '')
+				. ' – '
+				. $stage['text']
+			),
 			$stages,
 		));
 	}

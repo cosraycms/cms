@@ -329,17 +329,14 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 				hidden><?php $this->include('component/csrf') ?></form>
 		<?php endif ?>
 		<?php if (!$record): ?>
-			<?php // Discarding the working copy drops the unsaved edits too: the
+			<?php // Discarding the working copy drops the unsaved edits too, unless the
 
-			// unsaved-changes guard stands aside, and hx-confirm asks once. ?>
+			// question says to keep them: the unsaved-changes guard stands aside. ?>
 			<form
 				id="node-editor-discard"
 				method="post"
 				action="<?= escape($links->discard($uid)) ?>"
 				hx-swap="none"
-				hx-confirm="<?= escape(__('editor:discard-confirm')) ?>"
-				data-confirm-action="<?= escape(__('editor:discard-draft')) ?>"
-				data-confirm-tone="danger"
 				data-dirty-bypass
 				data-autosave-drop
 				data-done-toast="<?= escape(__('editor:draft-discarded')) ?>"
@@ -371,13 +368,13 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 			method="post"
 			action="<?= escape($links->discardAutosave($uid)) ?>"
 			hx-swap="none"
-			hx-confirm="<?= escape(__('editor:mine-discard-confirm')) ?>"
-			data-confirm-action="<?= escape(__('editor:mine-discard')) ?>"
-			data-confirm-tone="danger"
 			data-dirty-bypass
 			data-autosave-drop
 			data-done-toast="<?= escape(__('editor:mine-discarded')) ?>"
 			hidden><?php $this->include('component/csrf') ?></form>
+	<?php endif ?>
+	<?php if ($status !== null): ?>
+		<?php $this->include('node/discard', ['status' => $status]) ?>
 	<?php endif ?>
 	<?php if (array_any(
 		$fields,

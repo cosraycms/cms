@@ -54,7 +54,11 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertHtmlNodeExists($this->stage('draft', 'present'), $html);
 		$this->assertHtmlNodeExists(
-			'//*[@id="editor-status-panel" and @hx-swap-oob="true"]//button[@form="node-editor-discard"]',
+			'//*[@id="editor-status-panel" and @hx-swap-oob="true"]//button[@popovertarget="editor-discard-draft"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-discard" and @hx-swap-oob="true"]//button[@form="node-editor-discard"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists('//*[@data-toast="success"][contains(., "Draft saved")]', $html);
@@ -85,7 +89,10 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->assertSame('Live', $this->liveTitle('draft-reverted'));
 		$html = $this->getHtmlResponse($response);
 		$this->assertHtmlNodeExists($this->stage('draft', 'none'), $html);
-		$this->assertHtmlNodeMissing('//*[@id="editor-status-panel"]//button[@form="node-editor-discard"]', $html);
+		$this->assertHtmlNodeMissing(
+			'//*[@id="editor-status-panel"]//button[@popovertarget="editor-discard-draft"]',
+			$html,
+		);
 	}
 
 	public function testTheEditorShowsTheWorkingCopy(): void

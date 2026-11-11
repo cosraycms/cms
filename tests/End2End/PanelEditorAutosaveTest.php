@@ -116,9 +116,10 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 			$editor,
 		);
 		$this->assertHtmlNodeExists(
-			'//*[@id="editor-conflict"][not(@hidden)]//button[@form="editor-autosave-discard"]',
+			'//*[@id="editor-conflict"][not(@hidden)]//button[@popovertarget="editor-discard-mine"]',
 			$editor,
 		);
+		$this->assertHtmlNodeExists('//*[@id="editor-discard-mine"]//button[@form="editor-autosave-discard"]', $editor);
 		$this->assertHtmlNodeExists('//*[@data-save-label][contains(., "Save anyway")]', $editor);
 		$this->assertHtmlNodeExists('//input[@name="_base"][starts-with(@value, "2000-01-01")]', $editor);
 	}
@@ -214,16 +215,6 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		);
 	}
 
-	public function testDiscardingDropsTheAutosave(): void
-	{
-		$this->createPage('autosave-discarded', 'Live');
-		$this->autosave('autosave-discarded', 'Edited');
-
-		$this->makeRequest('POST', '/panel/node/autosave-discarded/discard', ['headers' => ['HX-Request' => 'true']]);
-
-		$this->assertSame(0, $this->rows('autosaves', 'autosave-discarded'));
-	}
-
 	public function testDiscardingTheAutosaveKeepsTheNode(): void
 	{
 		$this->createPage('autosave-dropped', 'Live');
@@ -254,6 +245,33 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 	}
 
 	/** @param array<string, mixed> $settings */
+	public function testDiscardingTheDraftDropsMyChangesOnlyWhenAsked(): void
+	{
+		$this->createPage('autosave-discard-kept', 'Live');
+		$this->createPage('autosave-discard-dropped', 'Live');
+
+		foreach (['autosave-discard-kept', 'autosave-discard-dropped'] as $uid) {
+			$this->assertResponseOk($this->makeRequest('POST', '/panel/node/' . $uid, [
+				'headers' => ['HX-Request' => 'true'],
+				'body' => ['content' => ['title' => ['value' => ['en' => 'Draft']]], '_complete' => '1'],
+			]));
+			$this->autosave($uid, 'Mine');
+		}
+
+		$this->makeRequest('POST', '/panel/node/autosave-discard-kept/discard', ['headers' => [
+			'HX-Request' => 'true',
+		]]);
+		$this->makeRequest('POST', '/panel/node/autosave-discard-dropped/discard', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => ['mine' => 'discard'],
+		]);
+
+		$this->assertSame(0, $this->rows('drafts', 'autosave-discard-kept'));
+		$this->assertSame('Mine', $this->autosavedTitle('autosave-discard-kept'));
+		$this->assertSame(0, $this->rows('drafts', 'autosave-discard-dropped'));
+		$this->assertSame(0, $this->rows('autosaves', 'autosave-discard-dropped'));
+	}
+
 	private function autosave(string $uid, string $title, string $base = '', array $settings = []): object
 	{
 		return $this->makeRequest('POST', '/panel/node/' . $uid . '/autosave', [

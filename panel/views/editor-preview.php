@@ -20,6 +20,7 @@ $preview = (string) u($preview);
 	'oob' => true,
 ]) ?>
 <?php $this->include('node/status', ['status' => $status, 'oob' => true]) ?>
+<?php $this->include('node/discard', ['status' => $status, 'oob' => true]) ?>
 <?php if (!($status['record'] ?? false)): ?>
 	<?php $this->include('node/apply', ['status' => $status, 'oob' => true]) ?>
 <?php endif ?>

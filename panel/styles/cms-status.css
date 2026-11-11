@@ -91,7 +91,7 @@
 /* A node's stages as dots, from Panel\NodeStatus: colour names the stage,
    shape a special state (a ring is unpublished, "!" a problem), motion a
    running autosave. status.js moves the mine dot between saves. */
-:is(.cms-status-dots, .cms-status-pipeline, .cms-stage-filters) .dot {
+:is(.cms-status-dots, .cms-stage-filters) .dot {
 	--color: var(--cms-color-stage-empty);
 	display: inline-grid;
 	place-items: center;
@@ -154,7 +154,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	:is(.cms-status-dots, .cms-status-pipeline, .cms-stage-filters) .dot {
+	:is(.cms-status-dots, .cms-stage-filters) .dot {
 		animation: none !important;
 	}
 }
@@ -247,14 +247,61 @@ button.cms-status-dots {
 	}
 }
 
-/* The inspector's status tab: the stages top to bottom on a line. */
+/* A stage's mark in the status tab and the apply question: its icon on a
+   tint of the stage's colour, grey while the stage is empty. */
+:is(.cms-status-pipeline, .cms-popconfirm) .mark {
+	--tone: var(--cms-color-text-subtle);
+	--cms-icon-size: calc(var(--size) / 2);
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	width: var(--size);
+	height: var(--size);
+	border-radius: var(--cms-radius-full);
+	background: color-mix(in oklch, var(--tone), transparent 86%);
+	color: color-mix(in oklch, var(--tone), var(--cms-color-shade) 18%);
+
+	&[data-state='none'],
+	&[data-stage='main'][data-state='unpublished'] {
+		--tone: var(--cms-color-text-subtle);
+	}
+
+	&[data-stage='main'][data-state='published'],
+	&[data-stage='saved'] {
+		--tone: var(--cms-color-stage-main);
+	}
+
+	&[data-stage='draft'][data-state='present'] {
+		--tone: var(--cms-color-stage-draft);
+		color: color-mix(in oklch, var(--tone), var(--cms-color-shade) 35%);
+	}
+
+	&[data-stage='mine']:is([data-state='present'], [data-state='saving']) {
+		--tone: var(--cms-color-stage-mine);
+	}
+
+	&[data-stage='mine'][data-state='saving'] {
+		animation: cms-mark-pulse 0.9s ease-in-out infinite;
+	}
+
+	&[data-stage='mine']:is([data-state='conflict'], [data-state='error']) {
+		--tone: var(--cms-color-stage-problem);
+	}
+}
+
+@keyframes cms-mark-pulse {
+	50% {
+		opacity: 0.5;
+	}
+}
+
+/* The inspector's status tab: the stages top to bottom on a line, and
+   between two of them the step that takes the lower one into the upper. */
 .cms-status-pipeline {
-	--dot: 0.75rem;
-	--problem: 1rem;
-	--halo: 3px;
+	--size: 1.75rem;
 	display: flex;
 	flex-direction: column;
-	gap: var(--cms-space-3);
+	gap: var(--cms-space-4);
 
 	& .heading {
 		margin: 0;
@@ -276,23 +323,22 @@ button.cms-status-dots {
 	& .stage {
 		position: relative;
 		display: grid;
-		grid-template-columns: 1rem minmax(0, 1fr);
-		column-gap: var(--cms-space-2-5);
-		padding-bottom: var(--cms-space-4);
+		grid-template-columns: var(--size) minmax(0, 1fr);
+		column-gap: var(--cms-space-3);
+		padding-bottom: var(--cms-space-5);
+
+		&:last-child {
+			padding-bottom: 0;
+		}
 
 		&:not(:last-child)::before {
 			position: absolute;
-			top: 1.25rem;
-			bottom: 0.125rem;
-			left: calc(0.5rem - 1px);
-			width: 2px;
+			top: calc(var(--size) + var(--cms-space-1));
+			bottom: var(--cms-space-1);
+			left: calc(var(--size) / 2 - 0.5px);
+			width: 1px;
 			background: var(--cms-color-border);
 			content: '';
-		}
-
-		& > .dot {
-			justify-self: center;
-			margin-top: 0.1875rem;
 		}
 
 		&[data-state='none'] :is(.name, .text) {
@@ -304,9 +350,16 @@ button.cms-status-dots {
 		}
 	}
 
-	& .name,
-	& .help,
-	& .text {
+	& .body {
+		min-width: 0;
+	}
+
+	& .title {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--cms-space-1-5);
+		min-height: var(--size);
 		margin: 0;
 	}
 
@@ -315,35 +368,171 @@ button.cms-status-dots {
 		font-weight: 600;
 	}
 
+	& .help,
+	& .text {
+		margin: 0;
+	}
+
 	& .help {
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-xs);
+		line-height: 1.4;
 	}
 
 	& .text {
-		margin-top: var(--cms-space-1);
-		font-size: var(--cms-font-size-sm);
+		margin-top: var(--cms-space-0-5);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.4;
+	}
+
+	/* The editor shows the user's edits, else the draft, else the main version. */
+	& .badge {
+		--tone: var(--cms-color-text-subtle);
+		padding: 0 var(--cms-space-1-5);
+		border-radius: var(--cms-radius-sm);
+		background: color-mix(in oklch, var(--tone), transparent 86%);
+		color: color-mix(in oklch, var(--tone), var(--cms-color-shade) 25%);
+		font-size: 0.6875rem;
+		font-weight: 500;
+		line-height: 1.125rem;
+		white-space: nowrap;
+
+		&.is-published {
+			--tone: var(--cms-color-stage-main);
+		}
+
+		&.is-shown {
+			display: none;
+		}
+	}
+
+	& .stage[data-stage='main'] .badge.is-shown,
+	& .stage[data-stage='saved'] .badge.is-shown {
+		--tone: var(--cms-color-stage-main);
+	}
+
+	& .stage[data-stage='draft'] .badge.is-shown {
+		--tone: var(--cms-color-stage-draft);
+		color: color-mix(in oklch, var(--tone), var(--cms-color-shade) 45%);
+	}
+
+	& .stage[data-stage='mine'] .badge.is-shown {
+		--tone: var(--cms-color-stage-mine);
+	}
+
+	& .stage[data-stage='mine']:not([data-state='none']) .badge.is-shown,
+	&:has([data-stage='mine'][data-state='none'])
+		.stage[data-stage='draft'][data-state='present']
+		.badge.is-shown,
+	&:has(.stage[data-stage='mine'][data-state='none']):not(
+			:has(.stage[data-stage='draft'][data-state='present'])
+		)
+		.stage:is([data-stage='main'], [data-stage='saved'])
+		.badge.is-shown {
+		display: inline-block;
+	}
+
+	& .notice {
+		--cms-icon-size: 1rem;
+		display: flex;
+		gap: var(--cms-space-2);
+		margin-top: var(--cms-space-2);
+		padding: var(--cms-space-2-5) var(--cms-space-3);
+		border: 1px solid color-mix(in oklch, var(--cms-color-warning), transparent 65%);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-warning-surface);
+		color: var(--cms-color-warning-text);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.4;
+
+		& .icon {
+			flex: none;
+			margin-top: 0.0625rem;
+		}
+
+		& p {
+			margin: 0;
+		}
+	}
+
+	& .stage[data-state='none'] .notice {
+		display: none;
 	}
 
 	& .actions {
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--cms-space-2);
-		margin-top: var(--cms-space-2);
+		margin-top: var(--cms-space-2-5);
 
 		&[hidden] {
 			display: none;
 		}
+
+		& .cms-button.danger {
+			--button-text: var(--cms-color-danger-text);
+			--button-border: var(--cms-color-danger-border-soft);
+		}
 	}
 
-	& .toggle {
-		margin-top: var(--cms-space-3);
+	& .step {
+		display: grid;
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
+		align-items: start;
+		margin-top: var(--cms-space-5);
+
+		&[hidden] {
+			display: none;
+		}
+
+		& > .arrow {
+			--cms-icon-size: 0.75rem;
+			position: relative;
+			display: inline-grid;
+			place-items: center;
+			justify-self: center;
+			width: 1.25rem;
+			height: 1.25rem;
+			margin-top: var(--cms-space-1);
+			border: 1px solid var(--cms-color-border);
+			border-radius: var(--cms-radius-full);
+			background: var(--cms-inspector-bg);
+			color: var(--cms-color-text-subtle);
+		}
+
+		& .help {
+			margin-top: var(--cms-space-1);
+		}
 	}
 
-	& .listed {
-		margin-top: 0;
-		padding-top: var(--cms-space-3);
+	& .visibility {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-4);
+		padding-top: var(--cms-space-5);
 		border-top: 1px solid var(--cms-color-border);
+
+		& .bar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: var(--cms-space-2);
+		}
+	}
+
+	& .instant {
+		--cms-icon-size: 0.75rem;
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-1);
+		padding: 0 var(--cms-space-2);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-full);
+		color: var(--cms-color-text-muted);
+		font-size: 0.6875rem;
+		line-height: 1.25rem;
+		white-space: nowrap;
 	}
 }
 
@@ -400,7 +589,7 @@ button.cms-status-dots {
 
 /* The head's apply menu: each entry says what applying does. */
 .cms-action-menu.cms-apply-menu {
-	--width: 19rem;
+	--width: 17rem;
 
 	& button {
 		flex-direction: column;
@@ -421,4 +610,8 @@ button.cms-status-dots {
 	& [hidden] {
 		display: none;
 	}
+}
+
+.cms-node > .discard {
+	display: contents;
 }

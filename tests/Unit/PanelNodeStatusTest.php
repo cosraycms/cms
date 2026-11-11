@@ -86,6 +86,26 @@ final class PanelNodeStatusTest extends TestCase
 		$this->assertSame(['saved', 'mine'], array_column($status->stages($this->date(...)), 'key'));
 	}
 
+	public function testOnlyTheMainVersionHasABadgeSayingWhetherVisitorsSeeIt(): void
+	{
+		$online = $this->derive(['published' => true])->stages($this->date(...));
+		$offline = $this->derive(['published' => false])->stages($this->date(...));
+
+		$this->assertNotSame('', $online[0]['badge']);
+		$this->assertNotSame($online[0]['badge'], $offline[0]['badge']);
+		$this->assertSame(['', ''], [$online[1]['badge'], $online[2]['badge']]);
+	}
+
+	public function testTheSentenceNamesEveryStageWithItsBadge(): void
+	{
+		$sentence = NodeStatus::sentence([
+			['name' => 'Main version', 'text' => 'applied', 'badge' => 'Online'],
+			['name' => 'Draft', 'text' => 'none', 'badge' => ''],
+		]);
+
+		$this->assertSame('Main version (Online) – applied; Draft – none', $sentence);
+	}
+
 	public function testTheSentenceNamesEveryStage(): void
 	{
 		$sentence = NodeStatus::sentence([

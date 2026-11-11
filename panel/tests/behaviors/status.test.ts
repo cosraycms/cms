@@ -21,8 +21,21 @@ function head(mine: string, draft = false, published = true): string {
 		<button id="save" data-needs="mine"><span data-save-label data-normal="Save draft" data-conflict="Save anyway">Save draft</span></button>
 		<div id="editor-apply" data-published="${published}">
 			${published ? '' : '<button id="publish" data-apply-when="idle">Publish</button>'}
-			<button id="apply" data-apply-when="pending">Apply</button>
+			<div id="applying" data-apply-when="pending"><button id="apply" data-apply-button>Apply</button></div>
 		</div>`;
+}
+
+function pipeline(): string {
+	return `
+		<div id="editor-status-panel">
+			<div data-step="apply">
+				<button id="apply-step">Apply</button>
+				<p id="apply-help" data-step-help data-both="both" data-draft="draft" data-mine="mine"></p>
+			</div>
+			<div id="save-step" data-step="save"></div>
+		</div>
+		<form id="node-editor-discard" data-autosave-drop></form>
+		<label id="mine-too" data-discard-mine><input type="checkbox" checked /></label>`;
 }
 
 function autosave(state: string): void {
@@ -82,11 +95,41 @@ describe('status', () => {
 		uninstall.push(install());
 
 		expect(hidden('publish')).toBe(false);
-		expect(hidden('apply')).toBe(true);
+		expect(hidden('applying')).toBe(true);
 
 		autosave('pending');
 		expect(hidden('publish')).toBe(true);
-		expect(hidden('apply')).toBe(false);
+		expect(hidden('applying')).toBe(false);
+	});
+
+	it('moves the status tab’s steps with the user’s edits', () => {
+		document.body.insertAdjacentHTML('beforeend', head('none', true) + pipeline());
+		uninstall.push(install());
+		const help = () => document.getElementById('apply-help')?.textContent;
+
+		expect(hidden('save-step')).toBe(true);
+		expect(help()).toBe('draft');
+		expect(hidden('mine-too')).toBe(true);
+
+		autosave('pending');
+		expect(hidden('save-step')).toBe(false);
+		expect(help()).toBe('both');
+		expect(hidden('mine-too')).toBe(false);
+	});
+
+	it('keeps the user’s edits with the discarded draft when asked to', () => {
+		document.body.insertAdjacentHTML('beforeend', head('present', true) + pipeline());
+		uninstall.push(install());
+		const form = document.getElementById('node-editor-discard')!;
+		const box = document.querySelector<HTMLInputElement>('#mine-too input')!;
+
+		expect(form.hasAttribute('data-autosave-drop')).toBe(true);
+
+		box.click();
+		expect(form.hasAttribute('data-autosave-drop')).toBe(false);
+
+		box.click();
+		expect(form.hasAttribute('data-autosave-drop')).toBe(true);
 	});
 
 	it('keeps a conflict, saves only anyway and never applies', () => {

@@ -1,5 +1,5 @@
 import { expect, type Page, test } from '@playwright/test';
-import { discardMine, mine, openNode, save } from './support';
+import { discardMine, head, mine, openNode, save } from './support';
 
 async function leaveEdits(page: Page, name: string, title: string): Promise<void> {
 	await openNode(page, name);
@@ -80,11 +80,11 @@ test('edits on a state saved meanwhile are a conflict until saved anyway', async
 	const banner = page.locator('#editor-conflict');
 	await expect(banner).toBeVisible();
 	await expect(mine(page)).toHaveAttribute('data-state', 'conflict');
-	await expect(page.getByRole('button', { name: 'Apply', exact: true })).toBeDisabled();
+	await expect(head(page).getByRole('button', { name: 'Apply', exact: true })).toBeDisabled();
 
-	await page.getByRole('button', { name: 'Save anyway' }).click();
+	await head(page).getByRole('button', { name: 'Save anyway' }).click();
 	await expect(page.locator('#cms-toasts')).toContainText(/saved/i);
 	await expect(banner).toBeHidden();
 	await expect(mine(page)).toHaveAttribute('data-state', 'none');
-	await expect(page.getByRole('button', { name: 'Save draft', exact: true })).toBeDisabled();
+	await expect(head(page).getByRole('button', { name: 'Save draft', exact: true })).toBeDisabled();
 });

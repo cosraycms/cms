@@ -357,6 +357,10 @@ final class Editor extends Panel
 		];
 	}
 
+	/**
+	 * Drops the node's draft. The user's autosave goes with it when the
+	 * form says so; kept, it still holds the draft's changes.
+	 */
 	public function discard(
 		Context $context,
 		Cms $cms,
@@ -372,7 +376,10 @@ final class Editor extends Panel
 		$links = $this->origin()['links'];
 		$nodeObj = Wrapper::unwrap($result);
 		$this->nodeStore($context, $cms)->discard($nodeObj);
-		new Autosaves($context->db)->delete($this->nodeId($nodeObj), $this->actor()->id);
+
+		if (($this->formData()['mine'] ?? null) === 'discard') {
+			new Autosaves($context->db)->delete($this->nodeId($nodeObj), $this->actor()->id);
+		}
 		$response = Response::create($factory);
 
 		if (!$this->request->hasHeader('HX-Request')) {
