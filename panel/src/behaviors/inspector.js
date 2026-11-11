@@ -11,8 +11,8 @@ import { selectTab } from './tabs.js';
 
 const ROOT = '[data-inspector]';
 const PUBLISHED = 'editor-published-switch';
-const BESIDE = '(width >= 75rem)';
-const OVER = '(width >= 40rem) and (height >= 30rem) and (width < 75rem)';
+const BESIDE = '(width >= 88rem)';
+const OVER = '(width >= 40rem) and (height >= 30rem) and (width < 88rem)';
 
 /** @type {HTMLElement | null} */
 let opener = null;

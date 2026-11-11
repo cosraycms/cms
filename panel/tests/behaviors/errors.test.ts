@@ -478,7 +478,7 @@ describe('errors behavior', () => {
 		const unmatched = window.matchMedia;
 		vi.stubGlobal('matchMedia', (media: string) => ({
 			...unmatched(media),
-			matches: media === '(width >= 75rem)',
+			matches: media === '(width >= 88rem)',
 		}));
 		const inspector = document.querySelector<HTMLElement>('[data-inspector]')!;
 		inspector.setAttribute('data-collapsed', '');

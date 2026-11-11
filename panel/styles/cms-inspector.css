@@ -322,7 +322,7 @@
  * the panes clip it rather than widen the page. Below the shell's own band the
  * rules further down take over and stack it above the fields.
  */
-@media (width < 75rem) {
+@media (width < 88rem) {
 	.cms-inspector,
 	.cms-inspector[data-collapsed] {
 		z-index: 25;
