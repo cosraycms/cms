@@ -1,11 +1,13 @@
 <?php
 
+use Cosray\Panel\Icon;
+
 use function Cosray\escape;
 
-// A node's stages as dots, from Panel\NodeStatus: in the editor head a
-// button with a tooltip that opens the inspector's status tab, in lists an
-// image with a short text. The editor's status.js moves the mine dot through
-// the client states (saving, error) between saves.
+// A node's stages, from Panel\NodeStatus: in the editor head a button of
+// stage icons with a tooltip that opens the inspector's status tab, in lists
+// an image of dots with a short text. The editor's status.js moves the mine
+// stage through the client states (saving, error) between saves.
 // Receives: status (the editor's status view or a list row's), size (md, sm),
 // id and oob for the editor head.
 
@@ -25,22 +27,34 @@ $dots = static function (array $stages): string {
 
 	return $html;
 };
+$icons = ['main' => 'globe', 'saved' => 'people', 'draft' => 'people', 'mine' => 'person'];
+$marks = static function (array $stages) use ($icons): string {
+	$html = '';
+
+	foreach ($stages as $stage) {
+		$key = (string) $stage['key'];
+		$html .= '<span class="mark" data-stage="' . escape($key) . '" data-state="'
+		. escape((string) $stage['state']) . '">' . Icon::render($icons[$key] ?? 'person') . '</span>';
+	}
+
+	return $html;
+};
 ?>
 <?php if (is_string($id)): ?>
 	<button
 		type="button"
 		id="<?= escape($id) ?>"
-		class="cms-status-dots is-<?= escape($size) ?>"
+		class="cms-status-dots cms-status-marks"
 		data-inspector-open="cms-inspector-tab-status"
 		data-draft="<?= ($status['draft'] ?? false) ? 'true' : 'false' ?>"
 		data-mine="<?= escape((string) ($status['mine'] ?? 'none')) ?>"
 		aria-label="<?= escape(__('status:label', ['status' => $sentence])) ?>"
 		<?= $oob ? 'hx-swap-oob="true"' : '' ?>>
-		<?= $dots($stages) ?>
+		<?= $marks($stages) ?>
 		<span class="tooltip" aria-hidden="true">
 			<?php foreach ($stages as $stage): ?>
 				<span class="row" data-stage="<?= escape((string) $stage['key']) ?>">
-					<span class="dot" data-stage="<?= escape((string) $stage['key']) ?>" data-state="<?= escape((string) $stage['state']) ?>"></span>
+					<?= $marks([$stage]) ?>
 					<span><strong><?= escape((string) $stage['name']) ?><?= ($stage['badge'] ?? '') !== '' ? ' (' . escape((string) $stage['badge']) . ')' : '' ?></strong> · <span class="text"><?= escape((string) $stage['text']) ?></span></span>
 				</span>
 			<?php endforeach ?>

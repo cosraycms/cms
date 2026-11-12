@@ -24,7 +24,7 @@ test('a new entry starts in a dialog with its required fields and opens unpublis
 	await expect(page.getByRole('dialog')).toHaveCount(0);
 	await expect(page.locator('h1')).toHaveText('Made in a dialog');
 	const states = await page
-		.locator('#editor-status-dots > .dot')
+		.locator('#editor-status-dots > [data-stage]')
 		.evaluateAll((dots) => dots.map((dot) => (dot as HTMLElement).dataset.state));
 	expect(states).toEqual(['unpublished', 'none', 'none']);
 	await expect(head(page).getByRole('button', { name: 'Publish', exact: true })).toBeEnabled();

@@ -197,9 +197,6 @@ button.cms-status-dots {
 	}
 
 	& > .tooltip {
-		--dot: 0.625rem;
-		--problem: 0.875rem;
-		--halo: 2px;
 		position: absolute;
 		top: calc(100% + var(--cms-space-2));
 		left: 0;
@@ -232,10 +229,6 @@ button.cms-status-dots {
 		align-items: center;
 		gap: var(--cms-space-2);
 
-		& > .dot {
-			width: max(var(--dot), 0.625rem);
-		}
-
 		& strong {
 			font-weight: 600;
 		}
@@ -247,9 +240,25 @@ button.cms-status-dots {
 	}
 }
 
-/* A stage's mark in the status tab and the apply question: its icon on a
-   tint of the stage's colour, grey while the stage is empty. */
-:is(.cms-status-pipeline, .cms-popconfirm) .mark {
+/* The editor head's stages as icons, marked like the status tab's. */
+.cms-status-marks {
+	--size: 1.375rem;
+	gap: 0.25rem;
+
+	& > .tooltip {
+		--size: 1rem;
+	}
+}
+
+/* The tooltip is dark in both themes, where the shaded tint would vanish. */
+.cms-status-marks > .tooltip .mark.mark {
+	background: color-mix(in oklch, var(--tone), transparent 70%);
+	color: color-mix(in oklch, var(--tone), var(--cms-color-white) 35%);
+}
+
+/* A stage's mark in the editor head, the status tab and the apply question:
+   its icon on a tint of the stage's colour, grey while the stage is empty. */
+:is(.cms-status-marks, .cms-status-pipeline, .cms-popconfirm) .mark {
 	--tone: var(--cms-color-text-subtle);
 	--cms-icon-size: calc(var(--size) / 2);
 	display: inline-grid;
