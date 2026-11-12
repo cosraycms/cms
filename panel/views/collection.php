@@ -26,16 +26,17 @@ foreach ($page->table->rows as $row) {
 $bulk = count($page->table->rows) > 0;
 $notice = (array) u($notice ?? []);
 
-// The title, then the status, then the other columns.
-$columns = ($bulk ? 'var(--cms-list-select-width) ' : '') . 'minmax(12rem, 2fr) max-content';
+$columns = $bulk ? 'var(--cms-list-select-width)' : '';
 
-foreach (array_slice($page->table->headers, 1) as $header) {
-	$columns .= match ($header['kind'] ?? null) {
+foreach ($page->table->headers as $header) {
+	$columns .= $header['lead'] ? ' minmax(12rem, 2fr)' : match ($header['kind']) {
 		'date' => ' minmax(9rem, auto)',
-		'badge' => ' max-content',
+		'badge', 'status' => ' max-content',
 		default => ' minmax(7rem, auto)',
 	};
 }
+
+$columns = ltrim($columns);
 
 $columns .= $hasRowActions ? ' max-content' : '';
 ?>
@@ -248,14 +249,16 @@ $columns .= $hasRowActions ? ' max-content' : '';
 											aria-label="<?= escape(__('bulk:select-all')) ?>" />
 									</th>
 								<?php endif ?>
-								<?php foreach ($page->table->headers as $index => $header): ?>
+								<?php foreach ($page->table->headers as $header): ?>
 									<th
-										class="<?= escape($header['class']) ?>"
+										class="<?= escape(trim($header['class'] . ($header['lead'] ? ' is-lead' : ''))) ?>"
 										role="columnheader"
 										<?php if ($header['ariaSort'] !== null): ?>
 											aria-sort="<?= escape($header['ariaSort']) ?>"
 										<?php endif ?>>
-										<?php if ($header['url'] === null): ?>
+										<?php if ($header['label'] === ''): ?>
+											<span class="sr-only"><?= escape($header['name']) ?></span>
+										<?php elseif ($header['url'] === null): ?>
 											<span class="inner"><?= escape($header['label']) ?></span>
 										<?php else: ?>
 											<a
@@ -266,9 +269,6 @@ $columns .= $hasRowActions ? ' max-content' : '';
 											</a>
 										<?php endif ?>
 									</th>
-									<?php if ($index === 0): ?>
-										<th class="col-status" role="columnheader"><?= escape(__('collection:status')) ?></th>
-									<?php endif ?>
 								<?php endforeach ?>
 								<?php if ($hasRowActions): ?>
 									<th class="col-actions" role="columnheader"></th>

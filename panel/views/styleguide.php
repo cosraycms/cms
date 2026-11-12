@@ -256,6 +256,15 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 						<span class="cms-status is-<?= escape($status) ?>"><?= escape(ucfirst($status)) ?></span>
 					<?php endforeach ?>
 				</div>
+				<?php // A status column's looks, row by row: icons, dots, compact. ?>
+				<?php foreach (['icons', 'dots', 'compact'] as $look): ?>
+					<div class="sample">
+						<code><?= escape($look) ?></code>
+						<?php foreach ($stageSamples as $sample): ?>
+							<?php $this->include('component/status-dots', ['status' => $sample, 'size' => 'sm', 'look' => $look]) ?>
+						<?php endforeach ?>
+					</div>
+				<?php endforeach ?>
 			</section>
 
 			<section class="section" data-section="controls">
@@ -696,7 +705,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 										<th class="col-select" role="columnheader">
 											<input type="checkbox" data-bulk-all aria-label="Select all" />
 										</th>
-										<th role="columnheader"><span class="inner">Title</span></th>
+										<th class="is-lead" role="columnheader"><span class="inner">Title</span></th>
 										<th class="col-status" role="columnheader">Status</th>
 										<th role="columnheader"><span class="inner">Type</span></th>
 										<th role="columnheader"><span class="inner">Modified</span></th>

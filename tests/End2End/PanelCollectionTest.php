@@ -12,6 +12,7 @@ use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Collection\TestMixedCollection;
 use Cosray\Tests\Fixtures\Collection\TestServiceCollection;
 use Cosray\Tests\Fixtures\Collection\TestSortedCollection;
+use Cosray\Tests\Fixtures\Collection\TestStatusColumnsCollection;
 use Cosray\Tests\Fixtures\Node\TestSortableEntry;
 
 final class PanelCollectionTest extends End2EndTestCase
@@ -37,6 +38,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		$plugin = parent::createBootstrap($config);
 		$plugin->section('Inhalt')->collection(TestArticlesCollection::class);
 		$plugin->section('Inhalt')->collection(TestMixedCollection::class);
+		$plugin->section('Inhalt')->collection(TestStatusColumnsCollection::class);
 		$plugin->node(TestSortableEntry::class);
 		$plugin->collection(TestSortedCollection::class);
 		$plugin->collection(TestServiceCollection::class);
@@ -58,11 +60,47 @@ final class PanelCollectionTest extends End2EndTestCase
 		$this->assertStringContainsString('Panel Grid A', $html);
 		$this->assertStringContainsString('Panel Grid B', $html);
 		$this->assertStringContainsString('class="cms-list" role="table"', $html);
-		$this->assertStringContainsString(
-			'<th class="col-status" role="columnheader">Status</th>',
+		$this->assertHtmlNodeExists(
+			"//th[contains(@class, 'is-lead')]/following-sibling::th[1][@class='col-status' and normalize-space()='Status']",
 			$html,
 		);
 		$this->assertStringNotContainsString('class="collection-grid"', $html);
+	}
+
+	public function testStatusColumnsGoWhereTheCollectionPlacesThem(): void
+	{
+		$this->createTestNode([
+			'uid' => 'status-a',
+			'type' => $this->articleTypeId(),
+			'hidden' => true,
+			'title' => ['en' => 'Status A'],
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Status A']]],
+		]);
+		$response = $this->makeRequest('GET', '/panel/collection/test-status-columns');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertHtmlNodeCount(2, "//th[contains(@class, 'col-status')]", $html);
+		$this->assertHtmlNodeExists(
+			"//thead//th[not(contains(@class, 'col-select'))][1][contains(@class, 'col-status')]/span[@class='sr-only' and .='Status']",
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			"//thead//th[not(contains(@class, 'col-select'))][3][contains(@class, 'col-status') and normalize-space()='Changes']",
+			$html,
+		);
+
+		$row = "//tr[@data-uid='status-a']";
+		$this->assertHtmlNodeExists(
+			"{$row}/td[not(contains(@class, 'col-select'))][1]//*[@data-stage='main' and @data-state='published']/following::span[contains(@class, 'is-hidden')]",
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			"{$row}/td[not(contains(@class, 'col-select'))][2][contains(@class, 'is-lead')]/a[contains(., 'Status A')]",
+			$html,
+		);
+		// Only stages that hold something: the fresh article has none here.
+		$this->assertHtmlNodeMissing("{$row}/td[not(contains(@class, 'col-select'))][3]//*[@data-stage]", $html);
 	}
 
 	public function testCollectionConstructorIsAutowired(): void

@@ -57,6 +57,7 @@ final class Styleguide extends Panel
 			'fieldset' => $this->fieldset(),
 			'content' => $this->content(),
 			'rows' => $this->rows(),
+			'stageSamples' => $this->stageSamples(),
 			'inspector' => $this->inspector(),
 			'richtextFields' => $this->richtextFields($controls),
 			'richtextContent' => $this->richtextContent(),
@@ -1413,6 +1414,37 @@ final class Styleguide extends Panel
 	}
 
 	/**
+	 * A node's stages in the states the looks of a status column must tell
+	 * apart: online alone, offline with a draft, both further stages, and a
+	 * conflict.
+	 *
+	 * @return list<array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string}>
+	 */
+	private function stageSamples(): array
+	{
+		$dates = NodeStatus::dates($this->localeId(), $this->config->app->timezone);
+		$sample = static function (bool $published, ?string $draft, ?string $base) use ($dates): array {
+			$stages = NodeStatus::of(
+				record: false,
+				published: $published,
+				edited: '2026-08-11 22:25:00+00',
+				editor: 'Ada',
+				draft: $draft === null ? null : ['changed' => $draft, 'editorName' => 'Ada'],
+				autosave: $base === null ? null : ['changed' => '2026-08-11 22:45:00+00', 'base' => $base],
+			)->stages($dates);
+
+			return ['stages' => $stages, 'sentence' => NodeStatus::sentence($stages)];
+		};
+
+		return [
+			$sample(true, null, null),
+			$sample(false, '2026-08-11 22:30:00+00', null),
+			$sample(true, '2026-08-11 22:30:00+00', '2026-08-11 22:30:00+00'),
+			$sample(true, '2026-08-11 22:40:00+00', '2026-08-11 22:30:00+00'),
+		];
+	}
+
+	/**
 	 * Listing rows in the shape `collection/row` expects, covering the states a
 	 * real collection rarely shows all at once: tree depth, a collapsed branch,
 	 * the last child of a branch, each status, and a manually ordered group
@@ -1446,8 +1478,6 @@ final class Styleguide extends Panel
 			'childrenUrl' => null,
 			'focusedChildrenUrl' => null,
 			'childCreateLinks' => [],
-			'status' => [],
-			'dots' => $dots(true, null, null),
 			'cells' => [],
 			'group' => null,
 			'moveUp' => false,
@@ -1455,10 +1485,32 @@ final class Styleguide extends Panel
 			'moved' => false,
 		], $overrides);
 
-		$cells = static fn(string $title, string $type, string $changed): array => [
-			['class' => 'is-bold', 'label' => 'Title', 'value' => $title, 'editUrl' => '#'],
-			['class' => '', 'label' => 'Type', 'value' => $type, 'editUrl' => null],
-			['class' => '', 'label' => 'Modified', 'value' => $changed, 'editUrl' => null],
+		$cells = static fn(string $title, array $dots, array $badges = []): array => [
+			[
+				'class' => 'is-bold',
+				'label' => 'Title',
+				'value' => $title,
+				'editUrl' => '#',
+				'lead' => true,
+				'status' => null,
+			],
+			[
+				'class' => 'col-status',
+				'label' => 'Status',
+				'value' => '',
+				'editUrl' => null,
+				'lead' => false,
+				'status' => [...$dots, 'look' => 'icons', 'badges' => $badges],
+			],
+			['class' => '', 'label' => 'Type', 'value' => 'Page', 'editUrl' => null, 'lead' => false, 'status' => null],
+			[
+				'class' => '',
+				'label' => 'Modified',
+				'value' => 'Aug 11, 2026, 10:25 PM',
+				'editUrl' => null,
+				'lead' => false,
+				'status' => null,
+			],
 		];
 
 		return [
@@ -1468,14 +1520,13 @@ final class Styleguide extends Panel
 				'childrenUrl' => '#',
 				'focusedChildrenUrl' => '#',
 				'childCreateLinks' => [['url' => '#', 'name' => 'Page']],
-				'cells' => $cells('Brauerei', 'Page', 'Aug 11, 2026, 10:25 PM'),
+				'cells' => $cells('Brauerei', $dots(true, null, null)),
 			]),
 			$row([
 				'depth' => 1,
 				'childrenUrl' => '#',
-				'dots' => $dots(false, null, null),
 				'published' => false,
-				'cells' => $cells('Sudhaus', 'Page', 'Aug 11, 2026, 10:25 PM'),
+				'cells' => $cells('Sudhaus', $dots(false, null, null)),
 				'group' => 'brauerei',
 				'moveDown' => true,
 			]),
@@ -1483,21 +1534,21 @@ final class Styleguide extends Panel
 				'depth' => 2,
 				'last' => true,
 				'guides' => [1],
-				'status' => [['kind' => 'hidden', 'label' => 'Hidden']],
-				'dots' => $dots(false, '2026-08-11 22:25:00+00', null),
 				'published' => false,
 				'cells' => $cells(
 					'A title long enough that it has to be cut off somewhere',
-					'Page',
-					'Aug 11, 2026, 10:25 PM',
+					$dots(false, '2026-08-11 22:25:00+00', null),
+					[['kind' => 'hidden', 'label' => 'Hidden']],
 				),
 			]),
 			$row([
 				'depth' => 1,
 				'last' => true,
-				'status' => [['kind' => 'locked', 'label' => 'Locked']],
-				'dots' => $dots(true, '2026-08-11 22:25:00+00', '2026-08-11 22:30:00+00'),
-				'cells' => $cells('Presse', 'Page', 'Aug 11, 2026, 10:25 PM'),
+				'cells' => $cells(
+					'Presse',
+					$dots(true, '2026-08-11 22:25:00+00', '2026-08-11 22:30:00+00'),
+					[['kind' => 'locked', 'label' => 'Locked']],
+				),
 				'group' => 'brauerei',
 				'moveUp' => true,
 				'moved' => true,

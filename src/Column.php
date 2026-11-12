@@ -32,6 +32,15 @@ final class Column
 	}
 
 	/**
+	 * A column of a node's stages, all of them unless named. Placed
+	 * anywhere, it replaces the one a listing adds after its first column.
+	 */
+	public static function status(Stage ...$stages): StatusColumn
+	{
+		return new StatusColumn(...$stages);
+	}
+
+	/**
 	 * The listing columns of a collection without its own: the title, which
 	 * is also the initial order, and the last change.
 	 *

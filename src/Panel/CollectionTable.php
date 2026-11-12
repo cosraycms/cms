@@ -6,6 +6,8 @@ namespace Cosray\Panel;
 
 use Cosray\CollectionListMeta;
 use Cosray\Column;
+use Cosray\Stage;
+use Cosray\StatusColumn;
 use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
@@ -18,7 +20,7 @@ final class CollectionTable
 	use NormalizesInput;
 
 	/**
-	 * @param list<array{label: string, url: ?string, class: string, kind: string}> $headers
+	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, present: bool, badges: bool}> $headers
 	 * @param list<array{
 	 *     uid: string,
 	 *     depth: int,
@@ -26,9 +28,7 @@ final class CollectionTable
 	 *     last: bool,
 	 *     published: bool,
 	 *     hasChildren: bool,
-	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string}>,
-	 *     status: list<array{kind: string, label: string}>,
-	 *     dots: ?array{stages: list<array<string, string>>, sentence: string},
+	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
@@ -47,7 +47,7 @@ final class CollectionTable
 	) {}
 
 	/**
-	 * @param iterable<Column> $columns
+	 * @param iterable<Column|StatusColumn> $columns
 	 * @param iterable<mixed> $nodes
 	 */
 	public static function from(
@@ -73,8 +73,12 @@ final class CollectionTable
 	}
 
 	/**
-	 * @param iterable<Column> $columns
-	 * @return list<array{label: string, url: ?string, class: string, kind: string, ariaSort: ?string}>
+	 * The column heads. The first field column leads: it links the entry
+	 * and carries the tree. Hidden and locked badges join the stages of
+	 * the main version, or else the first stages shown.
+	 *
+	 * @param iterable<Column|StatusColumn> $columns
+	 * @return list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, present: bool, badges: bool}>
 	 */
 	private static function headers(
 		iterable $columns,
@@ -82,8 +86,28 @@ final class CollectionTable
 		bool $arranged,
 	): array {
 		$headers = [];
+		$lead = false;
 
 		foreach ($columns as $column) {
+			if ($column instanceof StatusColumn) {
+				$label = $column->label();
+				$headers[] = [
+					'label' => $label,
+					'name' => $label !== '' ? $label : __('collection:status'),
+					'url' => null,
+					'class' => 'col-status',
+					'kind' => 'status',
+					'ariaSort' => null,
+					'lead' => false,
+					'stages' => array_map(static fn(Stage $stage): string => $stage->value, $column->stages),
+					'look' => $column->look,
+					'present' => $column->present,
+					'badges' => false,
+				];
+
+				continue;
+			}
+
 			$label = $column->title;
 			// A manually ordered top level has no column order to offer.
 			$sort = $arranged ? null : $column->sort;
@@ -101,20 +125,38 @@ final class CollectionTable
 
 			$headers[] = [
 				'label' => $label,
+				'name' => $label,
 				'url' => $sort === null
 					? null
 					: $urls->collection(['sort' => $sort->key, 'dir' => $nextDir, 'offset' => '']),
 				'class' => $class,
 				'kind' => $column->kind(),
 				'ariaSort' => $ariaSort,
+				'lead' => !$lead,
+				'stages' => [],
+				'look' => '',
+				'present' => false,
+				'badges' => false,
 			];
+			$lead = true;
 		}
 
-		return $headers;
+		$status = array_keys(array_filter($headers, static fn(array $header): bool => $header['kind'] === 'status'));
+		$main = array_values(array_filter(
+			$status,
+			static fn(int $index): bool => in_array(Stage::Main->value, $headers[$index]['stages'], true),
+		));
+		$badges = $main[0] ?? $status[0] ?? null;
+
+		return array_map(
+			static fn(int $index, array $header): array => ['badges' => $index === $badges] + $header,
+			array_keys($headers),
+			$headers,
+		);
 	}
 
 	/**
-	 * @param list<array{label: string, url: ?string, class: string, kind: string}> $headers
+	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, present: bool, badges: bool}> $headers
 	 * @param list<mixed> $nodes
 	 * @return list<array{
 	 *     uid: string,
@@ -123,9 +165,7 @@ final class CollectionTable
 	 *     last: bool,
 	 *     published: bool,
 	 *     hasChildren: bool,
-	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string}>,
-	 *     status: list<array{kind: string, label: string}>,
-	 *     dots: ?array{stages: list<array<string, string>>, sentence: string},
+	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
@@ -168,9 +208,7 @@ final class CollectionTable
 				'guides' => $tree['guides'],
 				'published' => (bool) ($node['published'] ?? false),
 				'hasChildren' => $hasChildren,
-				'cells' => self::cells($node, $headers, $urls, $locale, $timezone),
-				'status' => self::status($node, $meta),
-				'dots' => self::dots($node, $locale, $timezone),
+				'cells' => self::cells($node, $headers, $urls, $meta, $locale, $timezone),
 				'childrenUrl' => $childrenUrl,
 				'focusedChildrenUrl' =>
 					$meta->showChildren && $uid !== '' && ($hasChildren || $childBlueprints !== [])
@@ -226,24 +264,43 @@ final class CollectionTable
 
 	/**
 	 * @param array<string, mixed> $node
-	 * @param list<array{label: string, url: ?string, class: string, kind: string}> $headers
-	 * @return list<array{label: string, value: string, class: string, editUrl: ?string}>
+	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, present: bool, badges: bool}> $headers
+	 * @return list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, badges: list<array{kind: string, label: string}>}}>
 	 */
 	private static function cells(
 		array $node,
 		array $headers,
 		CollectionUrls $urls,
+		CollectionListMeta $meta,
 		string $locale,
 		DateTimeZone $timezone,
 	): array {
 		$cells = [];
 		$uid = (string) ($node['uid'] ?? '');
+		$stages = null;
 
 		foreach (self::items(self::arrayFrom($node['columns'] ?? [])) as $index => $column) {
 			$column = self::arrayFrom($column);
-			$label = $headers[$index]['label'] ?? __('collection:column', [
+			$header = $headers[$index] ?? null;
+			$label = $header['name'] ?? __('collection:column', [
 				'number' => (int) $index + 1,
 			]);
+
+			if ($header !== null && $header['kind'] === 'status') {
+				$stages ??= self::dots($node, $locale, $timezone)['stages'] ?? [];
+				$cells[] = [
+					'label' => $label,
+					'value' => '',
+					'class' => 'col-status',
+					'editUrl' => null,
+					'lead' => false,
+					'status' => self::stagesOf($header, $stages, $header['badges'] ? self::status($node, $meta) : []),
+				];
+
+				continue;
+			}
+
+			$lead = $header === null ? $index === 0 : $header['lead'];
 			$classes = ['collection-cell'];
 
 			if ((bool) ($column['bold'] ?? false)) {
@@ -267,11 +324,44 @@ final class CollectionTable
 					$timezone,
 				),
 				'class' => implode(' ', $classes),
-				'editUrl' => $index === 0 && $uid !== '' ? $urls->edit($uid) : null,
+				'editUrl' => $lead && $uid !== '' ? $urls->edit($uid) : null,
+				'lead' => $lead,
+				'status' => null,
 			];
 		}
 
 		return $cells;
+	}
+
+	/**
+	 * A status column's share of a row's stages. A record's saved state
+	 * counts as its main version. Compact names every stage it stands for,
+	 * the others only those they show.
+	 *
+	 * @param array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, present: bool, badges: bool} $header
+	 * @param list<array{key: string, state: string, name: string, text: string, help: string, badge: string}> $stages
+	 * @param list<array{kind: string, label: string}> $badges
+	 * @return array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, badges: list<array{kind: string, label: string}>}
+	 */
+	private static function stagesOf(array $header, array $stages, array $badges): array
+	{
+		$chosen = array_values(array_filter(
+			$stages,
+			static fn(array $stage): bool => in_array(
+				$stage['key'] === 'saved' ? Stage::Main->value : $stage['key'],
+				$header['stages'],
+				true,
+			),
+		));
+		$shown = $header['present']
+			? array_values(array_filter($chosen, static fn(array $stage): bool => $stage['state'] !== 'none'))
+			: $chosen;
+		return [
+			'stages' => $shown,
+			'sentence' => NodeStatus::sentence($header['look'] === 'compact' ? $chosen : $shown),
+			'look' => $header['look'],
+			'badges' => $badges,
+		];
 	}
 
 	/**
@@ -304,7 +394,7 @@ final class CollectionTable
 	 * The row's stages as Panel\NodeStatus derives them, for its dots.
 	 *
 	 * @param array<string, mixed> $node
-	 * @return ?array{stages: list<array<string, string>>, sentence: string}
+	 * @return ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string}
 	 */
 	public static function dots(array $node, string $locale, DateTimeZone $timezone): ?array
 	{

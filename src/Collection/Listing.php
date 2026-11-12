@@ -16,6 +16,7 @@ use Cosray\Finder\SortField;
 use Cosray\Node\Positions;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
+use Cosray\StatusColumn;
 
 /**
  * A registered collection as the panel lists it: its entries, columns,
@@ -27,7 +28,7 @@ use Cosray\Node\Wrapper;
  */
 final class Listing
 {
-	/** @var list<Column> */
+	/** @var list<Column|StatusColumn> */
 	public readonly array $columns;
 	/** @var array<string, Sort> */
 	public readonly array $sorts;
@@ -44,11 +45,13 @@ final class Listing
 	) {
 		$this->meta = $schema->listing;
 		$this->blueprints = $schema->blueprints;
-		$this->columns = array_values($collection instanceof Columns ? $collection->columns() : Column::defaults());
+		$this->columns = self::withStatus(array_values(
+			$collection instanceof Columns ? $collection->columns() : Column::defaults(),
+		));
 		$sorts = [];
 		foreach ($this->columns as $column) {
-			if (!$column instanceof Column) {
-				throw new RuntimeException('Collection columns must be Column objects');
+			if ($column instanceof StatusColumn) {
+				continue;
 			}
 			$sort = $column->sort;
 			if ($sort === null) {
@@ -61,6 +64,34 @@ final class Listing
 		}
 		$this->sorts = $sorts;
 		$this->defaultSort = self::defaultSort($sorts);
+	}
+
+	/**
+	 * The columns with the stages after the first one, unless the
+	 * collection placed them itself.
+	 *
+	 * @param list<mixed> $columns
+	 * @return list<Column|StatusColumn>
+	 */
+	private static function withStatus(array $columns): array
+	{
+		$checked = [];
+		$placed = false;
+
+		foreach ($columns as $column) {
+			if (!$column instanceof Column && !$column instanceof StatusColumn) {
+				throw new RuntimeException('Collection columns must be Column or StatusColumn objects');
+			}
+
+			$checked[] = $column;
+			$placed = $placed || $column instanceof StatusColumn;
+		}
+
+		if (!$placed) {
+			array_splice($checked, min(1, count($checked)), 0, [Column::status()]);
+		}
+
+		return $checked;
 	}
 
 	/** A fresh finder over the collection's entries per call; callers narrow it. */
@@ -316,7 +347,7 @@ final class Listing
 			: [];
 
 		foreach ($this->columns as $column) {
-			$columns[] = $column->get($node);
+			$columns[] = $column instanceof Column ? $column->get($node) : [];
 		}
 
 		return [

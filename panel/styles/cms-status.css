@@ -102,6 +102,86 @@
 	}
 }
 
+/* Dots instead of icons: colour names the stage, shape a special state (a
+   ring is an unpublished main version, "!" a problem). */
+.cms-status-dots .dot {
+	--color: var(--cms-color-stage-empty);
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	box-sizing: border-box;
+	width: var(--dot);
+	height: var(--dot);
+	border: 2px solid var(--color);
+	border-radius: var(--cms-radius-full);
+	background: var(--color);
+	box-shadow: 0 0 0 var(--halo) color-mix(in oklch, var(--color), transparent 72%);
+
+	&[data-state='none'] {
+		box-shadow: none;
+	}
+
+	&[data-stage='main'][data-state='published'],
+	&[data-stage='saved'] {
+		--color: var(--cms-color-stage-main);
+	}
+
+	&[data-stage='main'][data-state='unpublished'] {
+		--color: var(--cms-color-stage-main);
+		background: transparent;
+		box-shadow: none;
+	}
+
+	&[data-stage='draft'][data-state='present'] {
+		--color: var(--cms-color-stage-draft);
+	}
+
+	&[data-stage='mine'][data-state='present'] {
+		--color: var(--cms-color-stage-mine);
+	}
+
+	&[data-stage='mine'][data-state='conflict'] {
+		--color: var(--cms-color-stage-problem);
+	}
+}
+
+.cms-status-dots.is-dots {
+	--dot: 0.625rem;
+	--halo: 2px;
+	gap: 0.4375rem;
+
+	& .dot[data-stage='mine'][data-state='conflict'] {
+		width: 0.9375rem;
+		height: 0.9375rem;
+
+		&::after {
+			color: var(--cms-color-white);
+			font-size: 0.625rem;
+			font-weight: 700;
+			line-height: 1;
+			content: '!';
+		}
+	}
+}
+
+/* The main version's icon, with a small dot beside it for each further
+   stage that holds something. */
+.cms-status-dots.is-compact {
+	gap: 0.1875rem;
+
+	& .pips {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	& .dot {
+		--dot: 0.375rem;
+		--halo: 0;
+		border: 0;
+	}
+}
+
 /* In the editor head: opens the inspector's status tab, and says what the
    dots mean on hover and focus. */
 button.cms-status-dots {

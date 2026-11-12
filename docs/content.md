@@ -176,7 +176,7 @@ use Cosray\Schema\Types;
 final class Articles {}
 ```
 
-`#[Types]` names the node types a collection lists, as classes or handles. The panel lists them in any state, unpublished and hidden entries included. `#[Blueprints]` names the types editors can create at the top of the listing. Hierarchy listings show roots and expand direct children, and `#[Children]` on a node supplies its child creation choices, so blueprints are often a subset of the listed types. The panel search matches the fields named by `#[Listing(search: [...])]`, UID and title by default. A status column after the title shows each entry's [stages](controls.md#editor-status) as icons, with badges for hidden and locked entries where `#[Listing(hidden: true, locked: true)]` asks for them. Filters above a flat list narrow it to entries with a draft, the user's own changes, or unpublished entries, each with its count; a collection of records offers only the user's own changes. Bulk actions publish and unpublish entries, and publishing can also apply their drafts; a collection without entries other than records leaves these actions out, and they skip records. Further [collection schema attributes](../src/Schema/) set the label, handle, icon, badge, permission, visibility, and navigation order.
+`#[Types]` names the node types a collection lists, as classes or handles. The panel lists them in any state, unpublished and hidden entries included. `#[Blueprints]` names the types editors can create at the top of the listing. Hierarchy listings show roots and expand direct children, and `#[Children]` on a node supplies its child creation choices, so blueprints are often a subset of the listed types. The panel search matches the fields named by `#[Listing(search: [...])]`, UID and title by default. A [status column](#status-columns), after the title unless placed elsewhere, shows each entry's [stages](controls.md#editor-status) as icons, with badges for hidden and locked entries where `#[Listing(hidden: true, locked: true)]` asks for them. Filters above a flat list narrow it to entries with a draft, the user's own changes, or unpublished entries, each with its count; a collection of records offers only the user's own changes. Bulk actions publish and unpublish entries, and publishing can also apply their drafts; a collection without entries other than records leaves these actions out, and they skip records. Further [collection schema attributes](../src/Schema/) set the label, handle, icon, badge, permission, visibility, and navigation order.
 
 Behavior is opt-in through [contracts](../src/Contract/). `Entries` narrows the finder the panel prepares, which covers nodes in any state and is already limited to the collection's `#[Types]`. A collection implementing `Entries` may omit `#[Types]` to narrow all nodes; registering a collection that declares neither fails at boot. `Columns` replaces the default listing columns. Only collections implementing a contract are instantiated, through the container, so their constructors can take autowired services such as `Cms` or `Config`:
 
@@ -197,7 +197,7 @@ final class Alerts implements Entries
 
 ### Columns and panel ordering
 
-The default listing shows title, last changed, and the configured status indicators. Its initial order is title ascending. Type, editor, and created are opt-in columns; type and editor have no built-in display-name sort. Finder's `type` and `editor` fields mean type handle and editor UID, not the labels displayed in those columns.
+The default listing shows title, the [status column](#status-columns), and last changed. Its initial order is title ascending. Type, editor, and created are opt-in columns; type and editor have no built-in display-name sort. Finder's `type` and `editor` fields mean type handle and editor UID, not the labels displayed in those columns.
 
 `#[Types]` and `entries()` define collection membership. The panel replaces any Finder `order()` set in `entries()` with the selected column order, before applying pagination. Declare the panel's initial order on a column, not in `entries()`.
 
@@ -237,6 +237,28 @@ Column::new(__('Start'), 'start')->date(true)
 Column::new(__('Created'), 'meta.created')->date(true)
     ->sort('created', direction: 'desc');
 ```
+
+#### Status columns
+
+The status column shows each entry's [stages](controls.md#editor-status): the main version, online or offline, the draft, and the user's own changes. Without one among a collection's columns, the listing adds it after the first column. `Column::status()` places it anywhere, and naming stages splits them across columns. The first column that is not a status column links the entry and carries the hierarchy, wherever the status columns sit. Hidden and locked badges join the column that shows the main version, or else the first status column. A record's saved state counts as its main version; records have no draft.
+
+```php
+use Cosray\Column;
+use Cosray\Stage;
+
+public function columns(): array
+{
+    return [
+        Column::status(Stage::Main)->title(''),
+        Column::new(__('Title'), 'title')->bold(true)->sort('title'),
+        Column::new(__('Last changed'), 'meta.changed')
+            ->date(true)->sort('changed', direction: 'desc'),
+        Column::status(Stage::Draft, Stage::Mine)->title(__('Changes'))->present(),
+    ];
+}
+```
+
+A status column shows its stages as icons. `dots()` shows dots instead, and `compact()` shows the main version's icon with a small dot beside it for each further stage that holds something. `present()` leaves out the stages that hold nothing. `title()` replaces the "Status" heading; an empty title hides it from view but keeps it for screen readers.
 
 For dated collections, flag the `date` or `start` sort as the default as appropriate. A callback-rendered column uses the same declarations: sorting still operates on stored fields, never on a fetched page or the callback's result. `SortField::number()` supports both Number and Decimal values without PHP float conversion. Dates require `YYYY-MM-DD`; datetimes require RFC 3339 values with seconds and an offset or `Z` and sort by instant. Missing and whitespace-only custom values sort last in either direction. Arrays, objects, malformed typed values, relative dates, and non-finite numbers cause query errors rather than silently receiving a misleading order.
 

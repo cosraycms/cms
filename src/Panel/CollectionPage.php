@@ -6,6 +6,7 @@ namespace Cosray\Panel;
 
 use Cosray\CollectionListMeta;
 use Cosray\Column;
+use Cosray\StatusColumn;
 use DateTimeZone;
 
 final class CollectionPage
@@ -32,7 +33,7 @@ final class CollectionPage
 	) {}
 
 	/**
-	 * @param iterable<Column> $columns
+	 * @param iterable<Column|StatusColumn> $columns
 	 * @param iterable<mixed> $blueprints
 	 * @param iterable<mixed> $nodes
 	 * @param iterable<mixed>|null $createBlueprints

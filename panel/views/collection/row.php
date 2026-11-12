@@ -15,7 +15,8 @@ $hasRowActions = (bool) ($hasRowActions ?? false);
 $bulk = (bool) ($bulk ?? false);
 $group = $row['group'] ?? null;
 $positionUrl = (string) ($positionUrl ?? '');
-$name = (string) ($row['cells'][0]['value'] ?? $row['uid']);
+$lead = array_values(array_filter((array) $row['cells'], static fn(array $cell): bool => $cell['lead'] ?? false))[0] ?? null;
+$name = (string) ($lead['value'] ?? $row['uid']);
 $grip = $group === null
 	? ''
 	: '<span class="grip" data-order-grip aria-hidden="true">' . \Cosray\Panel\Icon::render('grip-vertical') . '</span>';
@@ -42,17 +43,32 @@ $grip = $group === null
 				form="collection-bulk"
 				data-bulk-check
 				<?= $row['hasChildren'] ?? false ? 'data-has-children' : '' ?>
-				aria-label="<?= escape(__('bulk:select-row', [
-					'name' => (string) ($row['cells'][0]['value'] ?? $row['uid']),
-				])) ?>" />
+				aria-label="<?= escape(__('bulk:select-row', ['name' => $name])) ?>" />
 		</td>
 	<?php endif ?>
-	<?php foreach ((array) $row['cells'] as $index => $cell): ?>
+	<?php foreach ((array) $row['cells'] as $cell): ?>
+		<?php $isLead = (bool) ($cell['lead'] ?? false); ?>
 		<td
-			class="cell <?= escape((string) $cell['class']) ?>"
+			class="cell <?= escape((string) $cell['class']) ?><?= $isLead ? ' is-lead' : '' ?>"
 			role="cell"
 			data-label="<?= escape((string) $cell['label']) ?>">
-			<?php if ($index === 0 && $showChildren): ?>
+			<?php if (is_array($cell['status'] ?? null)): ?>
+				<?php // A status column: its stages, then hidden or locked. ?>
+				<div class="status-list">
+					<?php if ($cell['status']['stages'] !== []): ?>
+						<?php $this->include('component/status-dots', [
+							'status' => $cell['status'],
+							'size' => 'sm',
+							'look' => $cell['status']['look'],
+						]) ?>
+					<?php endif ?>
+					<?php foreach ($cell['status']['badges'] as $badge): ?>
+						<span class="cms-status is-<?= escape((string) $badge['kind']) ?>"><?= escape(
+							(string) $badge['label'],
+						) ?></span>
+					<?php endforeach ?>
+				</div>
+			<?php elseif ($isLead && $showChildren): ?>
 				<div class="title<?= $treeMode ? '' : ' is-flat' ?>">
 					<?php if ($treeMode): ?>
 						<?php foreach ((array) ($row['guides'] ?? []) as $guide): ?>
@@ -85,7 +101,7 @@ $grip = $group === null
 					<?php endif ?>
 				</div>
 			<?php elseif ($cell['editUrl'] !== null): ?>
-				<?= $index === 0 ? $grip : '' ?>
+				<?= $isLead ? $grip : '' ?>
 				<a class="value link" href="<?= escape((string) $cell['editUrl']) ?>">
 					<?= escape((string) $cell['value']) ?>
 				</a>
@@ -93,21 +109,6 @@ $grip = $group === null
 				<span class="value"><?= escape((string) $cell['value']) ?></span>
 			<?php endif ?>
 		</td>
-		<?php if ($index === 0): ?>
-			<?php // The status follows the title: its stages as dots, then hidden or locked. ?>
-			<td class="cell col-status" role="cell" data-label="<?= escape(__('collection:status')) ?>">
-				<div class="status-list">
-					<?php if (is_array($row['dots'] ?? null)): ?>
-						<?php $this->include('component/status-dots', ['status' => $row['dots'], 'size' => 'sm']) ?>
-					<?php endif ?>
-					<?php foreach ((array) $row['status'] as $badge): ?>
-						<span class="cms-status is-<?= escape((string) $badge['kind']) ?>"><?= escape(
-							(string) $badge['label'],
-						) ?></span>
-					<?php endforeach ?>
-				</div>
-			</td>
-		<?php endif ?>
 	<?php endforeach ?>
 	<?php if ($hasRowActions): ?>
 		<td class="cell col-actions" role="cell">

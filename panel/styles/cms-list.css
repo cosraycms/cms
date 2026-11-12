@@ -98,14 +98,14 @@
 	 * name that identifies it. Harmless when nothing overflows — the cell sits
 	 * at its natural position.
 	 */
-	& .cell:first-child {
+	& .cell:is(.col-select, .is-lead) {
 		position: sticky;
 		left: 0;
 		z-index: 1;
 		background: var(--row-bg);
 	}
 
-	& th:first-child {
+	& th:is(.col-select, .is-lead) {
 		position: sticky;
 		left: 0;
 		z-index: 3;
@@ -136,8 +136,8 @@
 
 	/*
 	 * The selection column joins the pinned title: the checkbox pins at the
-	 * left edge (as first child) and the title cell moves its pin right by
-	 * the fixed column width, so a sideways scroll hides neither.
+	 * left edge and the title cell moves its pin right by the fixed column
+	 * width, so a sideways scroll hides neither.
 	 */
 	& .col-select {
 		justify-content: flex-start;
@@ -149,17 +149,8 @@
 		margin: 0;
 	}
 
-	& .cell.col-select + .cell {
-		position: sticky;
+	& :is(.cell, th).col-select ~ .is-lead {
 		left: var(--cms-list-select-width);
-		z-index: 1;
-		background: var(--row-bg);
-	}
-
-	& th.col-select + th {
-		position: sticky;
-		left: var(--cms-list-select-width);
-		z-index: 3;
 	}
 
 	& th:last-child,
@@ -425,10 +416,7 @@
 }
 
 @supports (animation-timeline: scroll(inline nearest)) {
-	.cms-list .cell:first-child,
-	.cms-list th:first-child,
-	.cms-list .cell.col-select + .cell,
-	.cms-list th.col-select + th {
+	.cms-list :is(.cell, th):is(.col-select, .is-lead) {
 		animation: cms-list-pinned linear both;
 		animation-timeline: scroll(inline nearest);
 		animation-range: 0 2rem;
@@ -468,12 +456,7 @@
 			border-bottom: 1px solid var(--cms-color-border);
 		}
 
-		& .cell:first-child {
-			position: static;
-			box-shadow: none;
-		}
-
-		& .cell.col-select + .cell {
+		& .cell:is(.col-select, .is-lead) {
 			position: static;
 			box-shadow: none;
 		}
