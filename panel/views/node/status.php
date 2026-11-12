@@ -19,7 +19,6 @@ $oob = (bool) (u($oob ?? null) ?? false);
 $stages = (array) ($status['stages'] ?? []);
 $record = (bool) ($status['record'] ?? false);
 $visibility = is_array($status['visibility'] ?? null) ? $status['visibility'] : null;
-$liveUrl = $status['liveUrl'] ?? null;
 $conflict = is_array($status['conflict'] ?? null) ? $status['conflict'] : null;
 $mine = (string) ($status['mine'] ?? 'none');
 $draft = (bool) ($status['draft'] ?? false);
@@ -58,14 +57,7 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 							])) ?></p>
 						</div>
 					<?php endif ?>
-					<?php if ($key === 'main' && is_string($liveUrl) && $state === 'published'): ?>
-						<div class="actions">
-							<a class="cms-button secondary small" href="<?= escape($liveUrl) ?>" target="_blank" rel="noopener">
-								<?= escape(__('status:view')) ?>
-								<?= Icon::render('box-arrow-up-right') ?>
-							</a>
-						</div>
-					<?php elseif ($key === 'draft' && ($status['discardDraft'] ?? false)): ?>
+					<?php if ($key === 'draft' && ($status['discardDraft'] ?? false)): ?>
 						<div class="actions">
 							<button type="button" class="cms-button danger small" popovertarget="editor-discard-draft">
 								<?= escape(__('status:discard-draft')) ?>
