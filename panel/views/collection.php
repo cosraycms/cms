@@ -1,5 +1,7 @@
 <?php
 
+use Cosray\Panel\Icon;
+
 use function Cosray\escape;
 
 $this->layout('layer/main');
@@ -150,20 +152,22 @@ $columns .= $hasRowActions ? ' max-content' : '';
 		</div>
 
 		<?php if ($page->stages !== []): ?>
-			<?php // The status filters, each with its count and the dot of its stage. ?>
+			<?php // The status filters, each with its count and the icon of its stage. ?>
 			<nav class="cms-stage-filters" aria-label="<?= escape(__('collection:stages')) ?>">
 				<?php foreach ($page->stages as $chip): ?>
 					<?php
-					[$stage, $state] = match ($chip['key']) {
-						'draft' => ['draft', 'present'],
-						'mine' => ['mine', 'present'],
-						'unpublished' => ['main', 'unpublished'],
-						default => [null, null],
+					[$stage, $state, $icon] = match ($chip['key']) {
+						'draft' => ['draft', 'present', 'people'],
+						'mine' => ['mine', 'present', 'person'],
+						'unpublished' => ['main', 'unpublished', 'globe'],
+						default => [null, null, null],
 					};
 					?>
 					<a class="chip" href="<?= escape($chip['url']) ?>" <?= $chip['active'] ? 'aria-current="true"' : '' ?>>
 						<?php if ($stage !== null): ?>
-							<span class="dot" data-stage="<?= $stage ?>" data-state="<?= $state ?>" aria-hidden="true"></span>
+							<span class="mark" data-stage="<?= $stage ?>" data-state="<?= $state ?>" aria-hidden="true">
+								<?= Icon::render($icon) ?>
+							</span>
 						<?php endif ?>
 						<span class="label"><?= escape($chip['label']) ?></span>
 						<span class="count"><?= (int) $chip['count'] ?></span>

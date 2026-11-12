@@ -4,10 +4,10 @@ use Cosray\Panel\Icon;
 
 use function Cosray\escape;
 
-// A node's stages, from Panel\NodeStatus: in the editor head a button of
-// stage icons with a tooltip that opens the inspector's status tab, in lists
-// an image of dots with a short text. The editor's status.js moves the mine
-// stage through the client states (saving, error) between saves.
+// A node's stages as icons, from Panel\NodeStatus: in the editor head a
+// button with a tooltip that opens the inspector's status tab, in lists an
+// image with a short text. The editor's status.js moves the mine stage
+// through the client states (saving, error) between saves.
 // Receives: status (the editor's status view or a list row's), size (md, sm),
 // id and oob for the editor head.
 
@@ -17,16 +17,6 @@ $size = (string) u($size ?? 'md');
 $id = u($id ?? null);
 $oob = (bool) (u($oob ?? null) ?? false);
 $sentence = (string) ($status['sentence'] ?? '');
-$dots = static function (array $stages): string {
-	$html = '';
-
-	foreach ($stages as $stage) {
-		$html .= '<span class="dot" data-stage="' . escape((string) $stage['key']) . '" data-state="'
-		. escape((string) $stage['state']) . '"></span>';
-	}
-
-	return $html;
-};
 $icons = ['main' => 'globe', 'saved' => 'people', 'draft' => 'people', 'mine' => 'person'];
 $marks = static function (array $stages) use ($icons): string {
 	$html = '';
@@ -44,7 +34,7 @@ $marks = static function (array $stages) use ($icons): string {
 	<button
 		type="button"
 		id="<?= escape($id) ?>"
-		class="cms-status-dots cms-status-marks"
+		class="cms-status-dots"
 		data-inspector-open="cms-inspector-tab-status"
 		data-draft="<?= ($status['draft'] ?? false) ? 'true' : 'false' ?>"
 		data-mine="<?= escape((string) ($status['mine'] ?? 'none')) ?>"
@@ -66,5 +56,5 @@ $marks = static function (array $stages) use ($icons): string {
 		class="cms-status-dots is-<?= escape($size) ?>"
 		role="img"
 		aria-label="<?= escape($sentence) ?>"
-		title="<?= escape($sentence) ?>"><?= $dots($stages) ?></span>
+		title="<?= escape($sentence) ?>"><?= $marks($stages) ?></span>
 <?php endif ?>

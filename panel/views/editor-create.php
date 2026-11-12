@@ -1,5 +1,7 @@
 <?php
 
+use Cosray\Panel\Icon;
+
 use function Cosray\escape;
 
 // The dialog that creates a node from its required fields, loaded into a
@@ -50,9 +52,9 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		<div class="hint">
 			<?php if (!$record): ?>
 				<span class="cms-status-dots is-sm" aria-hidden="true">
-					<span class="dot" data-stage="main" data-state="unpublished"></span>
-					<span class="dot" data-stage="draft" data-state="none"></span>
-					<span class="dot" data-stage="mine" data-state="none"></span>
+					<span class="mark" data-stage="main" data-state="unpublished"><?= Icon::render('globe') ?></span>
+					<span class="mark" data-stage="draft" data-state="none"><?= Icon::render('people') ?></span>
+					<span class="mark" data-stage="mine" data-state="none"><?= Icon::render('person') ?></span>
 				</span>
 			<?php endif ?>
 			<p><?= escape(__($record ? 'editor:create-record' : 'editor:create-entry')) ?></p>

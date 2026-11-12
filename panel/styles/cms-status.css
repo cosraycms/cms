@@ -88,90 +88,17 @@
 	vertical-align: 0.125rem;
 }
 
-/* A node's stages as dots, from Panel\NodeStatus: colour names the stage,
-   shape a special state (a ring is unpublished, "!" a problem), motion a
-   running autosave. status.js moves the mine dot between saves. */
-:is(.cms-status-dots, .cms-stage-filters) .dot {
-	--color: var(--cms-color-stage-empty);
-	display: inline-grid;
-	place-items: center;
-	flex: none;
-	box-sizing: border-box;
-	width: var(--dot);
-	height: var(--dot);
-	border: 2px solid var(--color);
-	border-radius: var(--cms-radius-full);
-	background: var(--color);
-	box-shadow: 0 0 0 var(--halo) color-mix(in oklch, var(--color), transparent 72%);
-
-	&[data-state='none'] {
-		box-shadow: none;
-	}
-
-	&[data-stage='main'][data-state='published'],
-	&[data-stage='saved'] {
-		--color: var(--cms-color-stage-main);
-	}
-
-	&[data-stage='main'][data-state='unpublished'] {
-		--color: var(--cms-color-stage-main);
-		background: transparent;
-		box-shadow: none;
-	}
-
-	&[data-stage='draft'][data-state='present'] {
-		--color: var(--cms-color-stage-draft);
-	}
-
-	&[data-stage='mine']:is([data-state='present'], [data-state='saving']) {
-		--color: var(--cms-color-stage-mine);
-	}
-
-	&[data-stage='mine'][data-state='saving'] {
-		animation: cms-dot-pulse 0.9s ease-in-out infinite;
-	}
-
-	&[data-stage='mine']:is([data-state='conflict'], [data-state='error']) {
-		--color: var(--cms-color-stage-problem);
-		width: var(--problem);
-		height: var(--problem);
-
-		&::after {
-			color: var(--cms-color-white);
-			font-size: 0.625rem;
-			font-weight: 700;
-			line-height: 1;
-			content: '!';
-		}
-	}
-}
-
-@keyframes cms-dot-pulse {
-	50% {
-		opacity: 0.55;
-		transform: scale(1.4);
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	:is(.cms-status-dots, .cms-stage-filters) .dot {
-		animation: none !important;
-	}
-}
-
+/* A node's stages as icons, from Panel\NodeStatus, marked like the status
+   tab's. status.js moves the mine stage between saves. */
 .cms-status-dots {
-	--dot: 0.6875rem;
-	--problem: 1rem;
-	--halo: 3px;
+	--size: 1.375rem;
 	display: inline-flex;
 	align-items: center;
-	gap: 0.5rem;
+	gap: 0.25rem;
 
 	&.is-sm {
-		--dot: 0.625rem;
-		--problem: 0.9375rem;
-		--halo: 2px;
-		gap: 0.4375rem;
+		--size: 1.25rem;
+		gap: 0.1875rem;
 	}
 }
 
@@ -197,6 +124,7 @@ button.cms-status-dots {
 	}
 
 	& > .tooltip {
+		--size: 1rem;
 		position: absolute;
 		top: calc(100% + var(--cms-space-2));
 		left: 0;
@@ -240,25 +168,15 @@ button.cms-status-dots {
 	}
 }
 
-/* The editor head's stages as icons, marked like the status tab's. */
-.cms-status-marks {
-	--size: 1.375rem;
-	gap: 0.25rem;
-
-	& > .tooltip {
-		--size: 1rem;
-	}
-}
-
 /* The tooltip is dark in both themes, where the shaded tint would vanish. */
-.cms-status-marks > .tooltip .mark.mark {
+button.cms-status-dots > .tooltip .mark.mark {
 	background: color-mix(in oklch, var(--tone), transparent 70%);
 	color: color-mix(in oklch, var(--tone), var(--cms-color-white) 35%);
 }
 
-/* A stage's mark in the editor head, the status tab and the apply question:
-   its icon on a tint of the stage's colour, grey while the stage is empty. */
-:is(.cms-status-marks, .cms-status-pipeline, .cms-popconfirm) .mark {
+/* A stage's mark: its icon on a tint of the stage's colour, grey while the
+   stage is empty. */
+:is(.cms-status-dots, .cms-stage-filters, .cms-status-pipeline, .cms-popconfirm) .mark {
 	--tone: var(--cms-color-text-subtle);
 	--cms-icon-size: calc(var(--size) / 2);
 	display: inline-grid;
@@ -301,6 +219,12 @@ button.cms-status-dots {
 @keyframes cms-mark-pulse {
 	50% {
 		opacity: 0.5;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.mark[data-state='saving'] {
+		animation: none !important;
 	}
 }
 
@@ -525,11 +449,9 @@ button.cms-status-dots {
 	}
 }
 
-/* The status filters above a list, each a chip with its stage's dot. */
+/* The status filters above a list, each a chip with its stage's icon. */
 .cms-stage-filters {
-	--dot: 0.5625rem;
-	--problem: 0.875rem;
-	--halo: 2px;
+	--size: 1.25rem;
 	display: flex;
 	flex-wrap: wrap;
 	gap: var(--cms-space-2);
@@ -561,6 +483,12 @@ button.cms-status-dots {
 			border-color: var(--cms-color-text);
 			background: var(--cms-color-text);
 			color: var(--cms-color-surface);
+
+			/* The chip inverts the theme, where the shaded tint would vanish. */
+			& .mark.mark {
+				background: color-mix(in oklch, var(--tone), transparent 65%);
+				color: var(--tone);
+			}
 
 			& .count {
 				color: inherit;
