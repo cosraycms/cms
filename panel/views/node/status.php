@@ -44,7 +44,25 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 						<?php if ($badge !== ''): ?>
 							<span class="badge is-<?= escape($state) ?>"><?= escape($badge) ?></span>
 						<?php endif ?>
-						<span class="badge is-shown"><?= escape(__('status:in-editor')) ?></span>
+						<?php if ($key === 'draft' && ($status['discardDraft'] ?? false)): ?>
+							<button
+								type="button"
+								class="discard"
+								popovertarget="editor-discard-draft"
+								aria-label="<?= escape(__('status:discard-draft')) ?>">
+								<?= escape(__('status:discard')) ?>
+							</button>
+						<?php elseif ($key === 'mine' && ($status['autosave'] ?? false)): ?>
+							<button
+								type="button"
+								class="discard"
+								popovertarget="editor-discard-mine"
+								aria-label="<?= escape(__('status:discard-mine')) ?>"
+								data-mine-discard
+								<?= $state === 'none' ? 'hidden' : '' ?>>
+								<?= escape(__('status:discard')) ?>
+							</button>
+						<?php endif ?>
 					</p>
 					<p class="help"><?= escape((string) $stage['help']) ?></p>
 					<p class="text" data-stage-text><?= escape((string) $stage['text']) ?></p>
@@ -55,19 +73,6 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 								'editor' => $conflict['editor'] !== '' ? $conflict['editor'] : __('editor:conflict-someone'),
 								'time' => $conflict['time'],
 							])) ?></p>
-						</div>
-					<?php endif ?>
-					<?php if ($key === 'draft' && ($status['discardDraft'] ?? false)): ?>
-						<div class="actions">
-							<button type="button" class="cms-button danger small" popovertarget="editor-discard-draft">
-								<?= escape(__('status:discard-draft')) ?>
-							</button>
-						</div>
-					<?php elseif ($key === 'mine' && ($status['autosave'] ?? false)): ?>
-						<div class="actions" data-mine-actions <?= $state === 'none' ? 'hidden' : '' ?>>
-							<button type="button" class="cms-button danger small" popovertarget="editor-discard-mine">
-								<?= escape(__('status:discard-mine')) ?>
-							</button>
 						</div>
 					<?php endif ?>
 				</div>

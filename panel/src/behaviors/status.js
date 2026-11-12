@@ -75,7 +75,7 @@ function show(state) {
 			element.textContent = label;
 		});
 	document
-		.querySelector(`#${PANEL} [data-mine-actions]`)
+		.querySelector(`#${PANEL} [data-mine-discard]`)
 		?.toggleAttribute('hidden', state === 'none');
 
 	if (head) {
