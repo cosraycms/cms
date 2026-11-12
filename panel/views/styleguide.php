@@ -265,6 +265,17 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 						<?php endforeach ?>
 					</div>
 				<?php endforeach ?>
+				<?php // The halo tokens as a theme would set them. ?>
+				<?php foreach (['icons', 'dots'] as $look): ?>
+					<div
+						class="sample"
+						style="--cms-stage-halo: 1.5px; --cms-stage-halo-gap: 1.5px; --cms-stage-dot-halo-gap: 1.5px; --cms-stage-dot-halo: 1.5px; --cms-stage-halo-strength: 45%">
+						<code><?= escape($look) ?> with halo</code>
+						<?php foreach ($stageSamples as $sample): ?>
+							<?php $this->include('component/status-dots', ['status' => $sample, 'size' => 'sm', 'look' => $look]) ?>
+						<?php endforeach ?>
+					</div>
+				<?php endforeach ?>
 			</section>
 
 			<section class="section" data-section="controls">

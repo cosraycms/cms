@@ -63,6 +63,28 @@ In forced-color modes, shadows and gradients can disappear. Focus and state must
 
 Depth uses the `--cms-shadow-*`, `--cms-gradient-raised`, and `--cms-pane-shadow` tokens. A flat theme can remove them. Gradients live in `background-image` so a hover can change the background color underneath; removing a control's border and fill may also require removing its shadow.
 
+### Stage marks
+
+A node's stages (the main version, the editorial draft, the user's own changes) appear as icons, dots, or the compact main icon with small dots beside it, in the editor head, lists, filters, and the status tab. The `--cms-color-stage-*` tokens colour them everywhere:
+
+- `main`, `draft`, `mine`, and `problem` colour a stage that holds something; each has an `-ink` variant for the icon drawn on its tint.
+- `idle` is the icon of an empty stage, `offline` the icon of a main version that is not published. Dots show the latter as a ring in the main colour.
+- `empty` fills the dot of an empty stage.
+
+The `--cms-stage-*` tokens shape them: `mark-size` and `mark-size-sm` for icons (head and lists), `dot-size` and `pip-size` for the dots, and `tint` for the strength of an icon's background. A halo rings every stage that holds something. Icons have none by default and dots a soft 2px band; `halo` and `dot-halo` set the ring width, `halo-gap` and `dot-halo-gap` its distance from the mark, and `halo-strength` how much of the stage colour it shows. Neighbouring marks move apart by the halo's reach.
+
+```css
+@layer theme {
+	:root {
+		--cms-stage-halo: 1.5px;
+		--cms-stage-halo-gap: 1.5px;
+		--cms-stage-halo-strength: 45%;
+	}
+}
+```
+
+Sizes and halo widths need units, also when zero, because they are used in `calc()`. The styleguide's status section shows each look with and without a halo.
+
 ## Class names
 
 The usual pattern is a `cms-` component root with nested part names and `is-`/`has-` state classes:
