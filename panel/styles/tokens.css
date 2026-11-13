@@ -358,6 +358,16 @@
 	   dots show the latter as a ring in the main colour instead. */
 	--cms-color-stage-idle: var(--cms-color-text-subtle);
 	--cms-color-stage-offline: var(--cms-color-stage-idle);
+	--cms-color-stage-idle-ink: color-mix(
+		in oklch,
+		var(--cms-color-stage-idle),
+		var(--cms-color-shade) 18%
+	);
+	--cms-color-stage-offline-ink: color-mix(
+		in oklch,
+		var(--cms-color-stage-offline),
+		var(--cms-color-shade) 18%
+	);
 	--cms-color-success: light-dark(var(--cms-color-green-600), var(--cms-color-green-400));
 	--cms-color-success-text: color-mix(
 		in oklch,
@@ -559,6 +569,8 @@
 	--cms-stage-dot-halo: 2px;
 	--cms-stage-dot-halo-gap: 0px;
 	--cms-stage-halo-strength: 28%;
+	/* Unset, the halo takes each stage's own colour. */
+	--cms-stage-halo-color: initial;
 
 	/**
 	 * Component — scrollbars

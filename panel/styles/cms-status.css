@@ -119,7 +119,11 @@
 	border-radius: var(--cms-radius-full);
 	background: var(--color);
 	outline: var(--halo) solid
-		color-mix(in oklch, var(--color) var(--cms-stage-halo-strength), transparent);
+		color-mix(
+			in oklch,
+			var(--cms-stage-halo-color, var(--color)) var(--cms-stage-halo-strength),
+			transparent
+		);
 	outline-offset: var(--cms-stage-dot-halo-gap);
 
 	&[data-state='none'] {
@@ -253,17 +257,22 @@ button.cms-status-dots {
 	}
 }
 
-/* The tooltip is dark in both themes, where the shaded tint would vanish. */
-button.cms-status-dots > .tooltip .mark.mark {
-	background: color-mix(in oklch, var(--tone), transparent 70%);
-	color: color-mix(in oklch, var(--tone), var(--cms-color-white) 35%);
+/* The tooltip is dark in both themes; its marks take the dark theme's
+   stage colours and inks, on a tint strong enough for the small size. */
+button.cms-status-dots > .tooltip {
+	color-scheme: dark;
+
+	& .mark {
+		--fill: color-mix(in oklch, var(--tone) max(var(--cms-stage-tint), 30%), transparent);
+	}
 }
 
 /* A stage's mark: its icon on a tint of the stage's colour, grey while the
    stage is empty, ringed by the halo while it holds something. */
 :is(.cms-status-dots, .cms-stage-filters, .cms-status-pipeline, .cms-popconfirm) .mark {
 	--tone: var(--cms-color-stage-idle);
-	--ink: color-mix(in oklch, var(--tone), var(--cms-color-shade) 18%);
+	--ink: var(--cms-color-stage-idle-ink);
+	--fill: color-mix(in oklch, var(--tone) var(--cms-stage-tint), transparent);
 	--cms-icon-size: calc(var(--size) / 2);
 	display: inline-grid;
 	place-items: center;
@@ -271,10 +280,14 @@ button.cms-status-dots > .tooltip .mark.mark {
 	width: var(--size);
 	height: var(--size);
 	border-radius: var(--cms-radius-full);
-	background: color-mix(in oklch, var(--tone) var(--cms-stage-tint), transparent);
+	background: var(--fill);
 	color: var(--ink);
 	outline: var(--cms-stage-halo) solid
-		color-mix(in oklch, var(--tone) var(--cms-stage-halo-strength), transparent);
+		color-mix(
+			in oklch,
+			var(--cms-stage-halo-color, var(--tone)) var(--cms-stage-halo-strength),
+			transparent
+		);
 	outline-offset: var(--cms-stage-halo-gap);
 
 	&[data-state='none'] {
@@ -283,6 +296,7 @@ button.cms-status-dots > .tooltip .mark.mark {
 
 	&[data-stage='main'][data-state='unpublished'] {
 		--tone: var(--cms-color-stage-offline);
+		--ink: var(--cms-color-stage-offline-ink);
 		outline: none;
 	}
 
@@ -580,10 +594,11 @@ button.cms-status-dots > .tooltip .mark.mark {
 			background: var(--cms-color-text);
 			color: var(--cms-color-surface);
 
-			/* The chip inverts the theme, where the shaded tint would vanish. */
+			/* The chip inverts the theme: the mark keeps the page's surface under
+			   its tint so it reads as it does everywhere else. */
 			& .mark.mark {
-				background: color-mix(in oklch, var(--tone), transparent 65%);
-				color: var(--tone);
+				background-color: var(--cms-color-surface);
+				background-image: linear-gradient(var(--fill) 0 0);
 			}
 
 			& .count {

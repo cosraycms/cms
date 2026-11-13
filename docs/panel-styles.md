@@ -67,11 +67,12 @@ Depth uses the `--cms-shadow-*`, `--cms-gradient-raised`, and `--cms-pane-shadow
 
 A node's stages (the main version, the editorial draft, the user's own changes) appear as icons, dots, or the compact main icon with small dots beside it, in the editor head, lists, filters, and the status tab. The `--cms-color-stage-*` tokens colour them everywhere:
 
-- `main`, `draft`, `mine`, and `problem` colour a stage that holds something; each has an `-ink` variant for the icon drawn on its tint.
-- `idle` is the icon of an empty stage, `offline` the icon of a main version that is not published. Dots show the latter as a ring in the main colour.
+- `main`, `draft`, `mine`, and `problem` colour a stage that holds something.
+- `idle` colours an empty stage's icon, `offline` the icon of a main version that is not published. Dots show the latter as a ring in the main colour.
+- Each of these six has an `-ink` variant for the icon drawn on its tinted circle.
 - `empty` fills the dot of an empty stage.
 
-The `--cms-stage-*` tokens shape them: `mark-size` and `mark-size-sm` for icons (head and lists), `dot-size` and `pip-size` for the dots, and `tint` for the strength of an icon's background. A halo rings every stage that holds something. Icons have none by default and dots a soft 2px band; `halo` and `dot-halo` set the ring width, `halo-gap` and `dot-halo-gap` its distance from the mark, and `halo-strength` how much of the stage colour it shows. Neighbouring marks move apart by the halo's reach.
+The `--cms-stage-*` tokens shape them: `mark-size` and `mark-size-sm` for icons (head and lists), `dot-size` and `pip-size` for the dots, and `tint` for the strength of an icon's background. A halo rings every stage that holds something. Icons have none by default and dots a soft 2px band; `halo` and `dot-halo` set the ring width, `halo-gap` and `dot-halo-gap` its distance from the mark, `halo-strength` how much colour it shows, and `halo-color` a colour for every ring instead of each stage's own. Neighbouring marks move apart by the halo's reach.
 
 ```css
 @layer theme {
@@ -83,7 +84,32 @@ The `--cms-stage-*` tokens shape them: `mark-size` and `mark-size-sm` for icons 
 }
 ```
 
-Sizes and halo widths need units, also when zero, because they are used in `calc()`. The styleguide's status section shows each look with and without a halo.
+A full `tint` with light inks inverts the icons: a solid circle in the stage's colour, a light icon, and a light ring. Yellow needs a dark ink to stay readable.
+
+```css
+@layer theme {
+	:root {
+		--cms-stage-tint: 100%;
+		--cms-stage-halo: 2px;
+		--cms-stage-halo-gap: 1px;
+		--cms-stage-halo-strength: 35%;
+		--cms-color-stage-main-ink: white;
+		--cms-color-stage-draft-ink: var(--cms-color-neutral-900);
+		--cms-color-stage-mine-ink: white;
+		--cms-color-stage-problem-ink: white;
+		--cms-color-stage-idle: light-dark(
+			var(--cms-color-neutral-200),
+			var(--cms-color-neutral-700)
+		);
+		--cms-color-stage-idle-ink: light-dark(
+			var(--cms-color-neutral-600),
+			var(--cms-color-neutral-300)
+		);
+	}
+}
+```
+
+Sizes and halo widths need units, also when zero, because they are used in `calc()`. The editor head's tooltip is dark in both themes and draws its marks with the dark theme's values. The styleguide's status section shows each look with and without a halo.
 
 ## Class names
 
