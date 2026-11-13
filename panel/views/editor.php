@@ -128,7 +128,7 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 							<?= escape(__('editor:duplicate')) ?>
 						</button>
 						<?php if ($deletable): ?>
-							<button type="submit" form="node-editor-delete" class="danger">
+							<button type="submit" form="node-editor-delete" class="cms-action-menu-danger">
 								<?= Icon::render('trash3') ?>
 								<?= escape(__('editor:delete')) ?>
 							</button>
@@ -151,7 +151,7 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 							<?= Icon::render('eye') ?>
 						</button>
 						<button
-							class="cms-button cms-button-secondary toggle"
+							class="cms-button cms-button-secondary cms-split-button-toggle"
 							type="button"
 							popovertarget="editor-preview-options"
 							aria-haspopup="menu"

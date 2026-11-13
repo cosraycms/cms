@@ -6,6 +6,6 @@ $insert = (string) u($insert);
 <button type="button" class="choice"
 	data-repeater-add="<?= $this->escape($choice['type']) ?>"
 	data-repeater-insert="<?= $this->escape($insert) ?>">
-	<span class="icon" aria-hidden="true"><?= $choice['icon'] ?></span>
+	<span class="cms-action-menu-icon" aria-hidden="true"><?= $choice['icon'] ?></span>
 	<span><?= $this->escape($choice['label']) ?></span>
 </button>

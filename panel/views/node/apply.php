@@ -55,7 +55,7 @@ $items = ['draft' => 'people', 'mine' => 'person'];
 		</button>
 		<?php if (!$published): ?>
 			<button
-				class="cms-button cms-button-primary toggle"
+				class="cms-button cms-button-primary cms-split-button-toggle"
 				type="button"
 				popovertarget="editor-apply-menu"
 				aria-haspopup="menu"

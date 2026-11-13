@@ -157,7 +157,7 @@ $confirm = $descendants === 0
 					data-confirm-action="<?= escape(__('menu:delete')) ?>"
 					data-confirm-tone="danger">
 					<?php $this->include('component/csrf') ?>
-					<button type="submit" class="danger"><?= escape(__('menu:delete')) ?></button>
+					<button type="submit" class="cms-action-menu-danger"><?= escape(__('menu:delete')) ?></button>
 				</form>
 		</div>
 	</div>

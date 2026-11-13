@@ -156,7 +156,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				<div class="sample" data-sample="button:split">
 					<div class="cms-split-button">
 						<button type="button" class="cms-button cms-button-primary"><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
-						<button type="button" class="cms-button cms-button-primary toggle" popovertarget="sample-save-options"
+						<button type="button" class="cms-button cms-button-primary cms-split-button-toggle" popovertarget="sample-save-options"
 							aria-haspopup="menu" aria-label="More save options"><?= \Cosray\Panel\Icon::render('chevron-down') ?></button>
 						<div id="sample-save-options" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
 							<button type="button"><?= \Cosray\Panel\Icon::render('floppy') ?> Save and publish</button>
@@ -164,7 +164,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					</div>
 					<div class="cms-split-button">
 						<button type="button" class="cms-button cms-button-secondary">Export</button>
-						<button type="button" class="cms-button cms-button-secondary toggle" popovertarget="sample-export-options"
+						<button type="button" class="cms-button cms-button-secondary cms-split-button-toggle" popovertarget="sample-export-options"
 							aria-haspopup="menu" aria-label="More export options"><?= \Cosray\Panel\Icon::render('chevron-down') ?></button>
 						<div id="sample-export-options" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
 							<button type="button">Export as CSV</button>
@@ -196,7 +196,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 								<a href="#sample-icons">Icon examples</a>
 								<hr />
 								<button type="button" disabled>Unavailable action</button>
-								<button type="button" class="danger">Destructive appearance</button>
+								<button type="button" class="cms-action-menu-danger">Destructive appearance</button>
 							</div>
 						<?php endforeach ?>
 					</div>

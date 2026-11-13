@@ -73,7 +73,7 @@ $readonly = (bool) (u($readonly ?? null) ?? false);
 					<button type="button" data-repeater-move="down">
 						<?= $this->escape(__('common:move-down')) ?>
 					</button>
-					<button type="button" class="danger" data-repeater-remove>
+					<button type="button" class="cms-action-menu-danger" data-repeater-remove>
 						<?= $this->escape(__('field:remove-item')) ?>
 					</button>
 			</div>

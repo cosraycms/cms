@@ -250,10 +250,10 @@ $retype = count($blockTypes) > 1;
 					<button type="button" data-split-into="rows" data-places="rows">
 						<?= $this->escape(__('field:split')) ?>
 					</button>
-					<button type="button" class="danger" data-repeater-remove data-places="block">
+					<button type="button" class="cms-action-menu-danger" data-repeater-remove data-places="block">
 						<?= $this->escape(__('field:remove-block')) ?>
 					</button>
-					<button type="button" class="danger" data-split-remove data-places="columns rows">
+					<button type="button" class="cms-action-menu-danger" data-split-remove data-places="columns rows">
 						<?= $this->escape(__('field:remove-block')) ?>
 					</button>
 				<?php else: ?>
@@ -276,7 +276,7 @@ $retype = count($blockTypes) > 1;
 							<?= $this->escape(__('field:change-type')) ?>
 						</button>
 					<?php endif ?>
-					<button type="button" class="danger" data-repeater-remove>
+					<button type="button" class="cms-action-menu-danger" data-repeater-remove>
 						<?= $this->escape(__('field:remove-block')) ?>
 					</button>
 				<?php endif ?>

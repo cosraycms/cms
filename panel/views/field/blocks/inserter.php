@@ -18,7 +18,7 @@ $places = u($places ?? null);
 			<?php $choiceId = "{$id}-choice-{$index}"; ?>
 			<div class="choice" role="group" aria-labelledby="<?= $this->escape($choiceId) ?>">
 				<span class="caption" id="<?= $this->escape($choiceId) ?>">
-					<span class="icon" aria-hidden="true"><?= $choice['icon'] ?></span>
+					<span class="cms-action-menu-icon" aria-hidden="true"><?= $choice['icon'] ?></span>
 					<span><?= $this->escape($choice['label']) ?></span>
 				</span>
 				<span class="cms-block-actions">
