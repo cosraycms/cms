@@ -72,21 +72,21 @@ $profileUrl = (string) $profileUrl;
 						style="--columns: minmax(12rem, 2fr) minmax(8rem, 1fr) minmax(8rem, 1fr) minmax(8rem, 1fr) max-content">
 						<thead role="rowgroup">
 							<tr role="row">
-								<th role="columnheader"><span class="inner"><?= escape(__('tokens:name')) ?></span></th>
-								<th role="columnheader"><span class="inner"><?= escape(__('tokens:created-at')) ?></span></th>
-								<th role="columnheader"><span class="inner"><?= escape(__('tokens:expires')) ?></span></th>
-								<th role="columnheader"><span class="inner"><?= escape(__('tokens:used')) ?></span></th>
-								<th class="col-actions" role="columnheader"><span class="cms-sr-only"><?= escape(__('tokens:revoke')) ?></span></th>
+								<th role="columnheader"><span class="cms-list-heading"><?= escape(__('tokens:name')) ?></span></th>
+								<th role="columnheader"><span class="cms-list-heading"><?= escape(__('tokens:created-at')) ?></span></th>
+								<th role="columnheader"><span class="cms-list-heading"><?= escape(__('tokens:expires')) ?></span></th>
+								<th role="columnheader"><span class="cms-list-heading"><?= escape(__('tokens:used')) ?></span></th>
+								<th class="cms-list-col-actions" role="columnheader"><span class="cms-sr-only"><?= escape(__('tokens:revoke')) ?></span></th>
 							</tr>
 						</thead>
 						<tbody role="rowgroup">
 							<?php foreach ($tokens as $token): ?>
-								<tr class="row" role="row">
-									<td class="cell" role="cell" data-label="<?= escape(__('tokens:name')) ?>"><span class="value"><?= escape((string) $token['name']) ?></span></td>
-									<td class="cell" role="cell" data-label="<?= escape(__('tokens:created-at')) ?>"><span class="value"><?= escape((string) $token['created']) ?></span></td>
-									<td class="cell" role="cell" data-label="<?= escape(__('tokens:expires')) ?>"><span class="value"><?= escape((string) ($token['expires'] ?? __('tokens:never'))) ?></span></td>
-									<td class="cell" role="cell" data-label="<?= escape(__('tokens:used')) ?>"><span class="value"><?= escape((string) ($token['used'] ?? __('tokens:never'))) ?></span></td>
-									<td class="cell col-actions" role="cell">
+								<tr class="cms-list-row" role="row">
+									<td class="cms-list-cell" role="cell" data-label="<?= escape(__('tokens:name')) ?>"><span class="cms-list-value"><?= escape((string) $token['name']) ?></span></td>
+									<td class="cms-list-cell" role="cell" data-label="<?= escape(__('tokens:created-at')) ?>"><span class="cms-list-value"><?= escape((string) $token['created']) ?></span></td>
+									<td class="cms-list-cell" role="cell" data-label="<?= escape(__('tokens:expires')) ?>"><span class="cms-list-value"><?= escape((string) ($token['expires'] ?? __('tokens:never'))) ?></span></td>
+									<td class="cms-list-cell" role="cell" data-label="<?= escape(__('tokens:used')) ?>"><span class="cms-list-value"><?= escape((string) ($token['used'] ?? __('tokens:never'))) ?></span></td>
+									<td class="cms-list-cell cms-list-col-actions" role="cell">
 										<form
 											method="post"
 											action="<?= escape((string) $token['revokeUrl']) ?>"

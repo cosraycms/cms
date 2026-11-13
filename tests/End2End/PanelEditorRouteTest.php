@@ -901,7 +901,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'href="/panel/node/panel-editor-link?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Blimit%5D=10"',
 			$html,
 		);
-		$this->assertStringContainsString('class="value link"', $html);
+		$this->assertStringContainsString('class="cms-list-value"', $html);
 	}
 
 	public function testStaleCollectionOriginDoesNotPreventEditing(): void

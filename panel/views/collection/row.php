@@ -19,10 +19,10 @@ $lead = array_values(array_filter((array) $row['cells'], static fn(array $cell):
 $name = (string) ($lead['value'] ?? $row['uid']);
 $grip = $group === null
 	? ''
-	: '<span class="grip" data-order-grip aria-hidden="true">' . \Cosray\Panel\Icon::render('grip-vertical') . '</span>';
+	: '<span class="cms-list-grip" data-order-grip aria-hidden="true">' . \Cosray\Panel\Icon::render('grip-vertical') . '</span>';
 ?>
 <tr
-	class="row<?= $treeMode ? ' is-tree' : '' ?>"
+	class="cms-list-row<?= $treeMode ? ' is-tree' : '' ?>"
 	role="row"
 	data-uid="<?= escape((string) $row['uid']) ?>"
 	data-depth="<?= (int) $row['depth'] ?>"
@@ -35,7 +35,7 @@ $grip = $group === null
 	<?php endif ?>
 	style="--tree-depth: <?= (int) $row['depth'] ?>">
 	<?php if ($bulk): ?>
-		<td class="cell col-select" role="cell">
+		<td class="cms-list-cell cms-list-col-select" role="cell">
 			<input
 				type="checkbox"
 				name="nodes[]"
@@ -49,12 +49,12 @@ $grip = $group === null
 	<?php foreach ((array) $row['cells'] as $cell): ?>
 		<?php $isLead = (bool) ($cell['lead'] ?? false); ?>
 		<td
-			class="cell <?= escape((string) $cell['class']) ?><?= $isLead ? ' is-lead' : '' ?>"
+			class="cms-list-cell <?= escape((string) $cell['class']) ?><?= $isLead ? ' is-lead' : '' ?>"
 			role="cell"
 			data-label="<?= escape((string) $cell['label']) ?>">
 			<?php if (is_array($cell['status'] ?? null)): ?>
 				<?php // A status column: its stages, then hidden or locked. ?>
-				<div class="status-list">
+				<div class="cms-list-status">
 					<?php if ($cell['status']['stages'] !== []): ?>
 						<?php $this->include('component/status-dots', [
 							'status' => $cell['status'],
@@ -69,14 +69,14 @@ $grip = $group === null
 					<?php endforeach ?>
 				</div>
 			<?php elseif ($isLead && $showChildren): ?>
-				<div class="title<?= $treeMode ? '' : ' is-flat' ?>">
+				<div class="cms-list-title<?= $treeMode ? '' : ' is-flat' ?>">
 					<?php if ($treeMode): ?>
 						<?php foreach ((array) ($row['guides'] ?? []) as $guide): ?>
-							<span class="guide" style="--guide-depth: <?= (int) $guide ?>" aria-hidden="true"></span>
+							<span class="cms-list-guide" style="--guide-depth: <?= (int) $guide ?>" aria-hidden="true"></span>
 						<?php endforeach ?>
 						<?php if ($row['childrenUrl'] !== null): ?>
 							<a
-								class="toggle<?= $row['expanded'] ? ' is-open' : '' ?>"
+								class="cms-list-toggle<?= $row['expanded'] ? ' is-open' : '' ?>"
 								href="<?= escape((string) $row['childrenUrl']) ?>"
 								aria-expanded="<?= $row['expanded'] ? 'true' : 'false' ?>"
 								data-collection-toggle
@@ -88,40 +88,40 @@ $grip = $group === null
 								<?= \Cosray\Panel\Icon::render('chevron-right') ?>
 							</a>
 						<?php else: ?>
-							<span class="toggle is-spacer" aria-hidden="true"></span>
+							<span class="cms-list-toggle is-spacer" aria-hidden="true"></span>
 						<?php endif ?>
 					<?php endif ?>
 					<?= $grip ?>
 					<?php if ($cell['editUrl'] !== null): ?>
-						<a class="value link" href="<?= escape((string) $cell['editUrl']) ?>">
+						<a class="cms-list-value" href="<?= escape((string) $cell['editUrl']) ?>">
 							<?= escape((string) $cell['value']) ?>
 						</a>
 					<?php else: ?>
-						<span class="value"><?= escape((string) $cell['value']) ?></span>
+						<span class="cms-list-value"><?= escape((string) $cell['value']) ?></span>
 					<?php endif ?>
 				</div>
 			<?php elseif ($cell['editUrl'] !== null): ?>
 				<?= $isLead ? $grip : '' ?>
-				<a class="value link" href="<?= escape((string) $cell['editUrl']) ?>">
+				<a class="cms-list-value" href="<?= escape((string) $cell['editUrl']) ?>">
 					<?= escape((string) $cell['value']) ?>
 				</a>
 			<?php else: ?>
-				<span class="value"><?= escape((string) $cell['value']) ?></span>
+				<span class="cms-list-value"><?= escape((string) $cell['value']) ?></span>
 			<?php endif ?>
 		</td>
 	<?php endforeach ?>
 	<?php if ($hasRowActions): ?>
-		<td class="cell col-actions" role="cell">
-			<span class="row-actions">
+		<td class="cms-list-cell cms-list-col-actions" role="cell">
+			<span class="cms-list-row-actions">
 				<?php if ($group !== null): ?>
 					<?php foreach (['up' => $row['moveUp'], 'down' => $row['moveDown']] as $direction => $enabled): ?>
-						<form class="move" method="post" action="<?= escape($positionUrl) ?>" data-order-move="<?= $direction ?>">
+						<form class="cms-list-move" method="post" action="<?= escape($positionUrl) ?>" data-order-move="<?= $direction ?>">
 							<?php $this->include('component/csrf') ?>
 							<input type="hidden" name="node" value="<?= escape((string) $row['uid']) ?>" />
 							<input type="hidden" name="move" value="<?= $direction ?>" />
 							<button
 								type="submit"
-								class="chip is-icon"
+								class="cms-list-chip is-icon"
 								aria-label="<?= escape($direction === 'up'
 									? __('collection:move-up', ['name' => $name])
 									: __('collection:move-down', ['name' => $name])) ?>"
@@ -133,14 +133,14 @@ $grip = $group === null
 				<?php endif ?>
 				<?php if ($row['focusedChildrenUrl'] !== null): ?>
 					<a
-						class="chip"
+						class="cms-list-chip"
 						href="<?= escape((string) $row['focusedChildrenUrl']) ?>">
 						<?= escape(__('collection:children')) ?>
 					</a>
 				<?php endif ?>
 				<?php foreach ((array) $row['childCreateLinks'] as $link): ?>
 					<a
-						class="chip is-create"
+						class="cms-list-chip is-create"
 						href="<?= escape((string) $link['url']) ?>"
 						data-create-dialog
 						hx-boost="false"

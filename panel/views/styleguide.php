@@ -726,14 +726,14 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 								style="--columns: var(--cms-list-select-width) minmax(12rem, 2fr) max-content minmax(5rem, auto) minmax(5rem, auto) max-content">
 								<thead role="rowgroup">
 									<tr role="row">
-										<th class="col-select" role="columnheader">
+										<th class="cms-list-col-select" role="columnheader">
 											<input type="checkbox" data-bulk-all aria-label="Select all" />
 										</th>
-										<th class="is-lead" role="columnheader"><span class="inner">Title</span></th>
-										<th class="col-status" role="columnheader">Status</th>
-										<th role="columnheader"><span class="inner">Type</span></th>
-										<th role="columnheader"><span class="inner">Modified</span></th>
-										<th class="col-actions" role="columnheader"></th>
+										<th class="is-lead" role="columnheader"><span class="cms-list-heading">Title</span></th>
+										<th class="cms-list-col-status" role="columnheader">Status</th>
+										<th role="columnheader"><span class="cms-list-heading">Type</span></th>
+										<th role="columnheader"><span class="cms-list-heading">Modified</span></th>
+										<th class="cms-list-col-actions" role="columnheader"></th>
 									</tr>
 								</thead>
 								<tbody role="rowgroup">

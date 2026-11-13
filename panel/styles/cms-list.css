@@ -43,7 +43,7 @@
 		text-transform: uppercase;
 		white-space: nowrap;
 
-		& .inner {
+		& .cms-list-heading {
 			display: inline-flex;
 			align-items: center;
 			gap: var(--cms-space-1);
@@ -51,19 +51,19 @@
 			text-decoration: none;
 		}
 
-		& a.inner:hover {
+		& a.cms-list-heading:hover {
 			color: var(--cms-color-text);
 		}
 
-		& .sort {
+		& .cms-list-sort {
 			color: var(--cms-color-text-faint);
 		}
 
-		&:not(.is-sorted) .sort {
+		&:not(.is-sorted) .cms-list-sort {
 			visibility: hidden;
 		}
 
-		&.is-sorted-desc .sort {
+		&.is-desc .cms-list-sort {
 			display: inline-block;
 			transform: rotate(180deg);
 		}
@@ -74,7 +74,7 @@
 	 * column is its own stacking context and has to paint the same colour, or
 	 * the cells scrolling under it show through.
 	 */
-	& .row {
+	& .cms-list-row {
 		--row-bg: var(--cms-color-surface);
 
 		background: var(--row-bg);
@@ -98,20 +98,20 @@
 	 * name that identifies it. Harmless when nothing overflows — the cell sits
 	 * at its natural position.
 	 */
-	& .cell:is(.col-select, .is-lead) {
+	& .cms-list-cell:is(.cms-list-col-select, .is-lead) {
 		position: sticky;
 		left: 0;
 		z-index: 1;
 		background: var(--row-bg);
 	}
 
-	& th:is(.col-select, .is-lead) {
+	& th:is(.cms-list-col-select, .is-lead) {
 		position: sticky;
 		left: 0;
 		z-index: 3;
 	}
 
-	& .cell {
+	& .cms-list-cell {
 		display: flex;
 		align-items: center;
 		min-width: 0;
@@ -120,16 +120,16 @@
 		border-bottom: 1px solid var(--cms-color-border-soft);
 		color: var(--cms-color-text-muted);
 
-		&.is-bold .value {
+		&.is-bold .cms-list-value {
 			color: var(--cms-color-text);
 			font-weight: 500;
 		}
 
-		&.is-italic .value {
+		&.is-italic .cms-list-value {
 			font-style: italic;
 		}
 
-		&.col-status {
+		&.cms-list-col-status {
 			justify-content: flex-start;
 		}
 	}
@@ -139,7 +139,7 @@
 	 * left edge and the title cell moves its pin right by the fixed column
 	 * width, so a sideways scroll hides neither.
 	 */
-	& .col-select {
+	& .cms-list-col-select {
 		justify-content: flex-start;
 		padding-right: 0;
 		padding-left: var(--cms-space-6);
@@ -149,22 +149,22 @@
 		margin: 0;
 	}
 
-	& :is(.cell, th).col-select ~ .is-lead {
+	& :is(.cms-list-cell, th).cms-list-col-select ~ .is-lead {
 		left: var(--cms-list-select-width);
 	}
 
 	& th:last-child,
-	& .cell:last-child {
+	& .cms-list-cell:last-child {
 		padding-right: var(--cms-space-6);
 	}
 
-	& .value {
+	& .cms-list-value {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
-	& a.value {
+	& a.cms-list-value {
 		color: var(--cms-color-text);
 		font-weight: 500;
 		text-decoration: none;
@@ -174,7 +174,7 @@
 		}
 	}
 
-	& .status-list {
+	& .cms-list-status {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--cms-space-2);
@@ -184,11 +184,11 @@
 	/*
 	 * A dashed line drops from the parent's toggle through its children, and
 	 * each child hangs from it by a branch; the last child ends the line at
-	 * its branch. An outer line still running past a nested row is a .guide
+	 * its branch. An outer line still running past a nested row is a guide
 	 * the row carries for it. The title stretches to the cell and the lines
 	 * overshoot the cell's padding, so they run unbroken from row to row.
 	 */
-	& .title {
+	& .cms-list-title {
 		--step: 1.375rem;
 		--line: var(--cms-color-text-faint);
 		--line-x: calc((var(--tree-depth, 0) - 0.5) * var(--step));
@@ -215,7 +215,7 @@
 		}
 
 		&:not(.is-flat)::before,
-		& .guide {
+		& .cms-list-guide {
 			top: calc(-1 * var(--cms-space-2));
 			bottom: calc(-1 * var(--cms-space-2));
 			width: 1px;
@@ -229,23 +229,23 @@
 			background-image: repeating-linear-gradient(to right, var(--line) 0 3px, transparent 3px 6px);
 		}
 
-		& .guide {
+		& .cms-list-guide {
 			position: absolute;
 			left: calc((var(--guide-depth) - 0.5) * var(--step));
 			pointer-events: none;
 		}
 	}
 
-	& .row[data-last='true'] .title::before {
+	& .cms-list-row[data-last='true'] .cms-list-title::before {
 		bottom: 50%;
 	}
 
-	& .row[data-depth='0'] .title::before,
-	& .row[data-depth='0'] .title::after {
+	& .cms-list-row[data-depth='0'] .cms-list-title::before,
+	& .cms-list-row[data-depth='0'] .cms-list-title::after {
 		display: none;
 	}
 
-	& .toggle {
+	& .cms-list-toggle {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -282,25 +282,13 @@
 		}
 	}
 
-	& .dot {
-		width: 0.4375rem;
-		height: 0.4375rem;
-		flex-shrink: 0;
-		border-radius: var(--cms-radius-full);
-		background: var(--cms-color-border-strong);
-
-		&.is-published {
-			background: var(--cms-color-success);
-		}
-	}
-
 	/*
 	 * Rows of a manually ordered group. The grip sits inside the title cell
 	 * rather than in a column of its own, so the pinned select and title
 	 * columns keep their offsets; in the tree it follows the toggle, at the
 	 * row's own depth.
 	 */
-	& .grip {
+	& .cms-list-grip {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -322,41 +310,41 @@
 		}
 	}
 
-	& .cell > .grip {
+	& .cms-list-cell > .cms-list-grip {
 		margin-right: var(--cms-space-2);
 	}
 
 	/* Marks where the last move put the row; outranks the child-row ground. */
-	& .row[data-moved],
-	& .row.is-tree[data-moved]:not([data-depth='0']) {
+	& .cms-list-row[data-moved],
+	& .cms-list-row.is-tree[data-moved]:not([data-depth='0']) {
 		--row-bg: var(--cms-color-selected);
 	}
 
-	& .row.sortable-ghost {
+	& .cms-list-row.is-dragging {
 		--row-bg: var(--cms-color-selected);
 
 		opacity: 0.6;
 	}
 
-	& .row.sortable-drag {
+	& .cms-list-row.is-lifted {
 		box-shadow: var(--cms-shadow-md);
 	}
 
-	& .row.is-drag-folded {
+	& .cms-list-row.is-drag-folded {
 		display: none;
 	}
 
-	& .move {
+	& .cms-list-move {
 		display: contents;
 	}
 
-	& .col-actions {
+	& .cms-list-col-actions {
 		justify-content: flex-end;
 		padding-left: 0;
 		white-space: nowrap;
 	}
 
-	& .row-actions {
+	& .cms-list-row-actions {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--cms-space-2);
@@ -364,12 +352,12 @@
 		transition: opacity 0.12s ease;
 	}
 
-	& .row:hover .row-actions,
-	& .row:focus-within .row-actions {
+	& .cms-list-row:hover .cms-list-row-actions,
+	& .cms-list-row:focus-within .cms-list-row-actions {
 		opacity: 1;
 	}
 
-	& .chip {
+	& .cms-list-chip {
 		display: inline-flex;
 		align-items: center;
 		height: 1.375rem;
@@ -416,7 +404,7 @@
 }
 
 @supports (animation-timeline: scroll(inline nearest)) {
-	.cms-list :is(.cell, th):is(.col-select, .is-lead) {
+	.cms-list :is(.cms-list-cell, th):is(.cms-list-col-select, .is-lead) {
 		animation: cms-list-pinned linear both;
 		animation-timeline: scroll(inline nearest);
 		animation-range: 0 2rem;
@@ -434,7 +422,7 @@
 }
 
 @media (pointer: coarse) {
-	.cms-list .row-actions {
+	.cms-list .cms-list-row-actions {
 		opacity: 1;
 	}
 }
@@ -456,12 +444,12 @@
 			border-bottom: 1px solid var(--cms-color-border);
 		}
 
-		& .cell:is(.col-select, .is-lead) {
+		& .cms-list-cell:is(.cms-list-col-select, .is-lead) {
 			position: static;
 			box-shadow: none;
 		}
 
-		& .col-select {
+		& .cms-list-col-select {
 			display: flex;
 
 			&::before {
@@ -469,7 +457,7 @@
 			}
 		}
 
-		& .cell {
+		& .cms-list-cell {
 			display: grid;
 			grid-column: 1 / -1;
 			grid-template-columns: subgrid;
@@ -488,11 +476,11 @@
 			}
 		}
 
-		& .value {
+		& .cms-list-value {
 			white-space: normal;
 		}
 
-		& .title {
+		& .cms-list-title {
 			padding-left: 0;
 			flex-wrap: wrap;
 
@@ -501,12 +489,12 @@
 			}
 		}
 
-		& .row-actions {
+		& .cms-list-row-actions {
 			opacity: 1;
 			flex-wrap: wrap;
 		}
 
-		& .col-actions {
+		& .cms-list-col-actions {
 			justify-content: flex-start;
 			padding-left: var(--cms-space-4);
 

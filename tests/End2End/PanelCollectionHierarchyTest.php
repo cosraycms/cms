@@ -257,7 +257,7 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 		// The first child's sibling line runs on past its grandchild to the
 		// second child, which closes the branch.
 		$this->assertMatchesRegularExpression(
-			'/data-uid="panel-tree-grandchild-deep"[^>]*data-last="true".*?<span class="guide" style="--guide-depth: 1"/s',
+			'/data-uid="panel-tree-grandchild-deep"[^>]*data-last="true".*?<span class="cms-list-guide" style="--guide-depth: 1"/s',
 			$html,
 		);
 		$this->assertMatchesRegularExpression(

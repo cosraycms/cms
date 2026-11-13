@@ -24,11 +24,11 @@ function tr(uid: string, depth: number, group?: string, disabled: string[] = [])
 						</form>`,
 					)
 					.join('');
-	const grip = group === undefined ? '' : '<span class="grip" data-order-grip></span>';
+	const grip = group === undefined ? '' : '<span class="cms-list-grip" data-order-grip></span>';
 
-	return `<tr class="row" data-uid="${uid}" data-depth="${depth}"${arranged}>
-		<td class="cell">${grip}<a class="value link" href="/panel/node/${uid}">${uid}</a></td>
-		<td class="cell col-actions"><span class="row-actions">${moves}</span></td>
+	return `<tr class="cms-list-row" data-uid="${uid}" data-depth="${depth}"${arranged}>
+		<td class="cms-list-cell">${grip}<a class="cms-list-value" href="/panel/node/${uid}">${uid}</a></td>
+		<td class="cms-list-cell cms-list-col-actions"><span class="cms-list-row-actions">${moves}</span></td>
 	</tr>`;
 }
 
@@ -153,7 +153,7 @@ describe('drag', () => {
 
 describe('keys', () => {
 	it('moves the focused row with Ctrl/Cmd+Shift+Up/Down', () => {
-		row('b').querySelector<HTMLElement>('a.value')!.focus();
+		row('b').querySelector<HTMLElement>('a.cms-list-value')!.focus();
 
 		press('ArrowDown', { ctrlKey: true, shiftKey: true });
 		press('ArrowUp', { metaKey: true, shiftKey: true });
@@ -162,7 +162,7 @@ describe('keys', () => {
 	});
 
 	it('claims the keys but submits nothing past the group’s end', () => {
-		row('a').querySelector<HTMLElement>('a.value')!.focus();
+		row('a').querySelector<HTMLElement>('a.cms-list-value')!.focus();
 		const event = new KeyboardEvent('keydown', {
 			code: 'ArrowUp',
 			ctrlKey: true,
@@ -178,9 +178,9 @@ describe('keys', () => {
 	});
 
 	it('leaves rows outside a manual order and plain arrows alone', () => {
-		row('s1').querySelector<HTMLElement>('a.value')!.focus();
+		row('s1').querySelector<HTMLElement>('a.cms-list-value')!.focus();
 		press('ArrowDown', { ctrlKey: true, shiftKey: true });
-		row('b').querySelector<HTMLElement>('a.value')!.focus();
+		row('b').querySelector<HTMLElement>('a.cms-list-value')!.focus();
 		press('ArrowDown');
 
 		expect(submitted).toEqual([]);
@@ -189,13 +189,13 @@ describe('keys', () => {
 
 describe('focus after a move', () => {
 	it('returns to the moved row’s title after a key move', () => {
-		row('b').querySelector<HTMLElement>('a.value')!.focus();
+		row('b').querySelector<HTMLElement>('a.cms-list-value')!.focus();
 		press('ArrowDown', { ctrlKey: true, shiftKey: true });
 
 		render('b');
 		document.dispatchEvent(new CustomEvent('htmx:after:swap'));
 
-		expect(document.activeElement).toBe(row('b').querySelector('a.value'));
+		expect(document.activeElement).toBe(row('b').querySelector('a.cms-list-value'));
 	});
 
 	it('returns to the same button when a move button was used', () => {

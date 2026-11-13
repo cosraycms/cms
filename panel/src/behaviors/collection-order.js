@@ -207,6 +207,9 @@ async function initDrag() {
 			draggable: 'tr[data-group]',
 			animation: 150,
 			fallbackOnBody: true,
+			ghostClass: 'is-dragging',
+			chosenClass: 'is-chosen',
+			dragClass: 'is-lifted',
 			onStart: (/** @type {SortableEvent} */ event) => fold(event.item),
 			onMove: (/** @type {MoveEvent} */ event) => accepts(event.dragged, event.related),
 			onEnd: (/** @type {SortableEvent} */ event) => drop(event.item),
@@ -312,7 +315,7 @@ function restoreFocus() {
 	const target =
 		button instanceof HTMLButtonElement && !button.disabled
 			? button
-			: row.querySelector('a.value.link');
+			: row.querySelector('a.cms-list-value');
 
 	if (target instanceof HTMLElement) {
 		target.focus({ preventScroll: true });

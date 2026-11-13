@@ -242,7 +242,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 						<thead role="rowgroup">
 							<tr role="row">
 								<?php if ($bulk): ?>
-									<th class="col-select" role="columnheader">
+									<th class="cms-list-col-select" role="columnheader">
 										<input
 											type="checkbox"
 											data-bulk-all
@@ -259,19 +259,19 @@ $columns .= $hasRowActions ? ' max-content' : '';
 										<?php if ($header['label'] === ''): ?>
 											<span class="cms-sr-only"><?= escape($header['name']) ?></span>
 										<?php elseif ($header['url'] === null): ?>
-											<span class="inner"><?= escape($header['label']) ?></span>
+											<span class="cms-list-heading"><?= escape($header['label']) ?></span>
 										<?php else: ?>
 											<a
-												class="inner"
+												class="cms-list-heading"
 												href="<?= escape($header['url']) ?>">
 												<?= escape($header['label']) ?>
-												<span class="sort" aria-hidden="true">⌃</span>
+												<span class="cms-list-sort" aria-hidden="true">⌃</span>
 											</a>
 										<?php endif ?>
 									</th>
 								<?php endforeach ?>
 								<?php if ($hasRowActions): ?>
-									<th class="col-actions" role="columnheader"></th>
+									<th class="cms-list-col-actions" role="columnheader"></th>
 								<?php endif ?>
 							</tr>
 						</thead>

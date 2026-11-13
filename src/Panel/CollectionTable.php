@@ -95,7 +95,7 @@ final class CollectionTable
 					'label' => $label,
 					'name' => $label !== '' ? $label : __('collection:status'),
 					'url' => null,
-					'class' => 'col-status',
+					'class' => 'cms-list-col-status',
 					'kind' => 'status',
 					'ariaSort' => null,
 					'lead' => false,
@@ -114,13 +114,13 @@ final class CollectionTable
 			$isSorted = $sort !== null && $sort->key === $urls->query->sort;
 			$nextDir = $sort?->direction;
 			$ariaSort = null;
-			$class = $sort === null ? '' : 'is-sortable';
+			$class = '';
 
 			if ($isSorted) {
 				$ascending = $urls->query->dir === 'asc';
 				$nextDir = $ascending ? 'desc' : 'asc';
 				$ariaSort = $ascending ? 'ascending' : 'descending';
-				$class .= ' is-sorted is-' . $urls->query->dir;
+				$class = 'is-sorted is-' . $urls->query->dir;
 			}
 
 			$headers[] = [
@@ -291,7 +291,7 @@ final class CollectionTable
 				$cells[] = [
 					'label' => $label,
 					'value' => '',
-					'class' => 'col-status',
+					'class' => 'cms-list-col-status',
 					'editUrl' => null,
 					'lead' => false,
 					'status' => self::stagesOf($header, $stages, $header['badges'] ? self::status($node, $meta) : []),
@@ -301,7 +301,7 @@ final class CollectionTable
 			}
 
 			$lead = $header === null ? $index === 0 : $header['lead'];
-			$classes = ['collection-cell'];
+			$classes = [];
 
 			if ((bool) ($column['bold'] ?? false)) {
 				$classes[] = 'is-bold';
@@ -309,10 +309,6 @@ final class CollectionTable
 
 			if ((bool) ($column['italic'] ?? false)) {
 				$classes[] = 'is-italic';
-			}
-
-			if ((bool) ($column['badge'] ?? false)) {
-				$classes[] = 'is-badge';
 			}
 
 			$cells[] = [

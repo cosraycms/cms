@@ -93,27 +93,27 @@ $listUrl = (string) $listUrl;
 						style="--columns: minmax(12rem, 2fr) minmax(12rem, 2fr) minmax(6rem, 1fr) minmax(8rem, 1fr) max-content">
 						<thead role="rowgroup">
 							<tr role="row">
-								<th role="columnheader"><span class="inner"><?= escape(__('user:name')) ?></span></th>
-								<th role="columnheader"><span class="inner"><?= escape(__('user:email')) ?></span></th>
-								<th role="columnheader"><span class="inner"><?= escape(__('user:type')) ?></span></th>
-								<th role="columnheader"><span class="inner"><?= escape(__('user:roles')) ?></span></th>
-								<th class="col-status" role="columnheader"><?= escape(__('collection:status')) ?></th>
+								<th role="columnheader"><span class="cms-list-heading"><?= escape(__('user:name')) ?></span></th>
+								<th role="columnheader"><span class="cms-list-heading"><?= escape(__('user:email')) ?></span></th>
+								<th role="columnheader"><span class="cms-list-heading"><?= escape(__('user:type')) ?></span></th>
+								<th role="columnheader"><span class="cms-list-heading"><?= escape(__('user:roles')) ?></span></th>
+								<th class="cms-list-col-status" role="columnheader"><?= escape(__('collection:status')) ?></th>
 							</tr>
 						</thead>
 						<tbody role="rowgroup">
 							<?php foreach ($rows as $row): ?>
-								<tr class="row" role="row">
-									<td class="cell" role="cell">
+								<tr class="cms-list-row" role="row">
+									<td class="cms-list-cell" role="cell">
 										<?php if (is_string($row['url'])): ?>
-											<a class="value link" href="<?= escape($row['url']) ?>"><?= escape((string) $row['title']) ?></a>
+											<a class="cms-list-value" href="<?= escape($row['url']) ?>"><?= escape((string) $row['title']) ?></a>
 										<?php else: ?>
-											<span class="value"><?= escape((string) $row['title']) ?></span>
+											<span class="cms-list-value"><?= escape((string) $row['title']) ?></span>
 										<?php endif ?>
 									</td>
-									<td class="cell" role="cell"><span class="value"><?= escape((string) $row['email']) ?></span></td>
-									<td class="cell" role="cell"><span class="value"><?= escape((string) $row['type']) ?></span></td>
-									<td class="cell" role="cell"><span class="value"><?= escape(implode(', ', $row['roles'])) ?></span></td>
-									<td class="cell col-status" role="cell">
+									<td class="cms-list-cell" role="cell"><span class="cms-list-value"><?= escape((string) $row['email']) ?></span></td>
+									<td class="cms-list-cell" role="cell"><span class="cms-list-value"><?= escape((string) $row['type']) ?></span></td>
+									<td class="cms-list-cell" role="cell"><span class="cms-list-value"><?= escape(implode(', ', $row['roles'])) ?></span></td>
+									<td class="cms-list-cell cms-list-col-status" role="cell">
 										<span class="cms-status <?= $row['active'] ? 'is-published' : 'is-unpublished' ?>">
 											<?= escape($row['active'] ? __('user:active') : __('user:inactive')) ?>
 										</span>

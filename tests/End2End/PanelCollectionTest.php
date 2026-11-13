@@ -61,7 +61,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		$this->assertStringContainsString('Panel Grid B', $html);
 		$this->assertStringContainsString('class="cms-list" role="table"', $html);
 		$this->assertHtmlNodeExists(
-			"//th[contains(@class, 'is-lead')]/following-sibling::th[1][@class='col-status' and normalize-space()='Status']",
+			"//th[contains(@class, 'is-lead')]/following-sibling::th[1][@class='cms-list-col-status' and normalize-space()='Status']",
 			$html,
 		);
 		$this->assertStringNotContainsString('class="collection-grid"', $html);
@@ -80,27 +80,30 @@ final class PanelCollectionTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertHtmlNodeCount(2, "//th[contains(@class, 'col-status')]", $html);
+		$this->assertHtmlNodeCount(2, "//th[contains(@class, 'cms-list-col-status')]", $html);
 		$this->assertHtmlNodeExists(
-			"//thead//th[not(contains(@class, 'col-select'))][1][contains(@class, 'col-status')]/span[@class='cms-sr-only' and .='Status']",
+			"//thead//th[not(contains(@class, 'cms-list-col-select'))][1][contains(@class, 'cms-list-col-status')]/span[@class='cms-sr-only' and .='Status']",
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			"//thead//th[not(contains(@class, 'col-select'))][3][contains(@class, 'col-status') and normalize-space()='Changes']",
+			"//thead//th[not(contains(@class, 'cms-list-col-select'))][3][contains(@class, 'cms-list-col-status') and normalize-space()='Changes']",
 			$html,
 		);
 
 		$row = "//tr[@data-uid='status-a']";
 		$this->assertHtmlNodeExists(
-			"{$row}/td[not(contains(@class, 'col-select'))][1]//*[@data-stage='main' and @data-state='published']/following::span[contains(@class, 'is-hidden')]",
+			"{$row}/td[not(contains(@class, 'cms-list-col-select'))][1]//*[@data-stage='main' and @data-state='published']/following::span[contains(@class, 'is-hidden')]",
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			"{$row}/td[not(contains(@class, 'col-select'))][2][contains(@class, 'is-lead')]/a[contains(., 'Status A')]",
+			"{$row}/td[not(contains(@class, 'cms-list-col-select'))][2][contains(@class, 'is-lead')]/a[contains(., 'Status A')]",
 			$html,
 		);
 		// Only stages that hold something: the fresh article has none here.
-		$this->assertHtmlNodeMissing("{$row}/td[not(contains(@class, 'col-select'))][3]//*[@data-stage]", $html);
+		$this->assertHtmlNodeMissing(
+			"{$row}/td[not(contains(@class, 'cms-list-col-select'))][3]//*[@data-stage]",
+			$html,
+		);
 	}
 
 	public function testCollectionConstructorIsAutowired(): void

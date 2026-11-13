@@ -1495,7 +1495,7 @@ final class Styleguide extends Panel
 				'status' => null,
 			],
 			[
-				'class' => 'col-status',
+				'class' => 'cms-list-col-status',
 				'label' => 'Status',
 				'value' => '',
 				'editUrl' => null,
