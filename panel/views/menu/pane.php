@@ -39,10 +39,10 @@ $orders = [
 ];
 $section = static fn(string $names): bool => !in_array($type, explode(' ', $names), true);
 ?>
-<div class="pane-form">
+<div>
 	<h2><?= escape($mode === 'create' ? __('menu:item-create-title') : __('menu:item-edit-title')) ?></h2>
 	<?php if (is_string($parentTitle)): ?>
-		<p class="pane-hint"><?= escape(__('menu:item-below', ['title' => $parentTitle])) ?></p>
+		<p class="cms-menu-tree-pane-hint"><?= escape(__('menu:item-below', ['title' => $parentTitle])) ?></p>
 	<?php endif ?>
 
 	<form method="post" action="<?= escape($action) ?>">
@@ -74,7 +74,7 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 				</select>
 			</div>
 			<?php if (isset($errors['type'])): ?>
-				<p class="error"><?= escape((string) $errors['type']) ?></p>
+				<p class="cms-menus-error"><?= escape((string) $errors['type']) ?></p>
 			<?php endif ?>
 		</div>
 
@@ -99,7 +99,7 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			<?= $section('node children') ? 'hidden' : '' ?>>
 			<label class="cms-field-label" for="menu-item-node"><div><?= escape(__('menu:item-node')) ?></div></label>
 			<div
-				class="cms-field-control menu-picker"
+				class="cms-field-control cms-menu-tree-picker"
 				data-menu-picker="nodes"
 				data-menu-picker-url="<?= escape((string) $searchUrls['node']) ?>">
 				<input
@@ -116,10 +116,10 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 					value="<?= escape((string) $values['nodeLabel']) ?>"
 					data-menu-picker-search
 					<?= isset($errors['node']) ? 'aria-invalid="true"' : '' ?> />
-				<div class="menu-picker-results" data-menu-picker-results hidden></div>
+				<div class="cms-menu-tree-picker-results" data-menu-picker-results hidden></div>
 			</div>
 			<?php if (isset($errors['node'])): ?>
-				<p class="error"><?= escape((string) $errors['node']) ?></p>
+				<p class="cms-menus-error"><?= escape((string) $errors['node']) ?></p>
 			<?php endif ?>
 		</div>
 
@@ -135,7 +135,7 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 					max="5"
 					value="<?= escape((string) $values['levels']) ?>" />
 			</div>
-			<p class="help"><?= escape(__('menu:children-help')) ?></p>
+			<p class="cms-menus-help"><?= escape(__('menu:children-help')) ?></p>
 		</div>
 
 		<div class="cms-field" data-menu-section="children" <?= $section('children') ? 'hidden' : '' ?>>
@@ -169,7 +169,7 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			<?= $section('asset') ? 'hidden' : '' ?>>
 			<label class="cms-field-label" for="menu-item-asset"><div><?= escape(__('menu:item-asset')) ?></div></label>
 			<div
-				class="cms-field-control menu-picker"
+				class="cms-field-control cms-menu-tree-picker"
 				data-menu-picker="assets"
 				data-menu-picker-url="<?= escape((string) $searchUrls['asset']) ?>">
 				<input
@@ -186,10 +186,10 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 					value="<?= escape((string) $values['assetLabel']) ?>"
 					data-menu-picker-search
 					<?= isset($errors['asset']) ? 'aria-invalid="true"' : '' ?> />
-				<div class="menu-picker-results" data-menu-picker-results hidden></div>
+				<div class="cms-menu-tree-picker-results" data-menu-picker-results hidden></div>
 			</div>
 			<?php if (isset($errors['asset'])): ?>
-				<p class="error"><?= escape((string) $errors['asset']) ?></p>
+				<p class="cms-menus-error"><?= escape((string) $errors['asset']) ?></p>
 			<?php endif ?>
 		</div>
 
@@ -197,7 +197,7 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			class="cms-field"
 			data-menu-section="node url asset"
 			<?= $section('node url asset') ? 'hidden' : '' ?>>
-			<label class="target">
+			<label class="cms-menu-tree-check">
 				<input
 					class="cms-checkbox"
 					type="checkbox"
@@ -209,7 +209,7 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 		</div>
 
 		<div class="cms-field">
-			<label class="target">
+			<label class="cms-menu-tree-check">
 				<input
 					class="cms-checkbox"
 					type="checkbox"
@@ -218,7 +218,7 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 					<?= $values['hidden'] ? 'checked' : '' ?> />
 				<span><?= escape(__('menu:item-hidden')) ?></span>
 			</label>
-			<p class="help"><?= escape(__('menu:item-hidden-help')) ?></p>
+			<p class="cms-menus-help"><?= escape(__('menu:item-hidden-help')) ?></p>
 		</div>
 
 		<div
@@ -227,7 +227,7 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			<?= $type === 'children' ? 'hidden' : '' ?>>
 			<label class="cms-field-label" for="menu-item-image"><div><?= escape(__('menu:item-image')) ?></div></label>
 			<div
-				class="cms-field-control menu-picker"
+				class="cms-field-control cms-menu-tree-picker"
 				data-menu-picker="assets"
 				data-menu-picker-url="<?= escape((string) $searchUrls['image']) ?>">
 				<input
@@ -244,10 +244,10 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 					value="<?= escape((string) $values['imageLabel']) ?>"
 					data-menu-picker-search
 					<?= isset($errors['image']) ? 'aria-invalid="true"' : '' ?> />
-				<div class="menu-picker-results" data-menu-picker-results hidden></div>
+				<div class="cms-menu-tree-picker-results" data-menu-picker-results hidden></div>
 			</div>
 			<?php if (isset($errors['image'])): ?>
-				<p class="error"><?= escape((string) $errors['image']) ?></p>
+				<p class="cms-menus-error"><?= escape((string) $errors['image']) ?></p>
 			<?php endif ?>
 		</div>
 
@@ -267,11 +267,11 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 					<?= isset($errors['class']) ? 'aria-invalid="true"' : '' ?> />
 			</div>
 			<?php if (isset($errors['class'])): ?>
-				<p class="error"><?= escape((string) $errors['class']) ?></p>
+				<p class="cms-menus-error"><?= escape((string) $errors['class']) ?></p>
 			<?php endif ?>
 		</div>
 
-		<footer class="form-actions">
+		<footer class="cms-menus-form-actions">
 			<a class="cms-button cms-button-secondary" href="<?= escape($cancelUrl) ?>"><?= escape(
 				__('menu:cancel'),
 			) ?></a>

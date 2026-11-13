@@ -48,11 +48,11 @@ $sectionHidden = (bool) ($sectionHidden ?? false);
 	</div>
 	<?php if (is_string($help)): ?>
 		<p
-			class="help"
+			class="cms-menus-help"
 			<?= is_string($helpSection) ? 'data-menu-section="' . escape($helpSection) . '"' : '' ?>
 			<?= $helpHidden ? 'hidden' : '' ?>><?= escape($help) ?></p>
 	<?php endif ?>
 	<?php if (is_string($error)): ?>
-		<p class="error"><?= escape($error) ?></p>
+		<p class="cms-menus-error"><?= escape($error) ?></p>
 	<?php endif ?>
 </div>

@@ -34,7 +34,7 @@ export function rows(root) {
 export function visibleRows(root) {
 	return rows(root).filter(
 		// Starting at the parent, so a collapsed row stays visible itself.
-		(row) => row.parentElement?.closest('.menu-node.is-collapsed') == null,
+		(row) => row.parentElement?.closest('.cms-menu-tree-node.is-collapsed') == null,
 	);
 }
 
@@ -168,9 +168,9 @@ export function restore() {
 	}
 
 	const selected = /** @type {HTMLElement | null} */ (
-		/** @type {HTMLElement | null} */ (root.querySelector('.menu-card.is-selected'))?.closest(
-			'[role="treeitem"]',
-		)
+		/** @type {HTMLElement | null} */ (
+			root.querySelector('.cms-menu-tree-card.is-selected')
+		)?.closest('[role="treeitem"]')
 	);
 	const target = selected ?? visibleRows(root)[0];
 

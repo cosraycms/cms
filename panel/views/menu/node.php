@@ -41,14 +41,14 @@ $confirm = $descendants === 0
 	);
 ?>
 <li
-	class="menu-node"
+	class="cms-menu-tree-node"
 	role="treeitem"
 	aria-level="<?= escape((string) $level) ?>"
 	<?= $hasChildren ? 'aria-expanded="true"' : '' ?>
 	tabindex="-1"
 	data-uid="<?= escape($id) ?>">
 	<div
-		class="menu-card<?= $id === $selected ? ' is-selected' : '' ?><?= $hidden
+		class="cms-menu-tree-card<?= $id === $selected ? ' is-selected' : '' ?><?= $hidden
 			? ' is-hidden'
 			: '' ?>">
 		<?php // The row owns `aria-expanded`, so the toggle is a pointer
@@ -57,16 +57,17 @@ $confirm = $descendants === 0
 		<?php if ($hasChildren): ?>
 			<button
 				type="button"
-				class="collapse"
+				class="cms-menu-tree-collapse"
 				tabindex="-1"
 				aria-hidden="true"
-				data-menu-collapse><span class="expanded-icon"><?= \Cosray\Panel\Icon::render(
+				data-menu-collapse><?= \Cosray\Panel\Icon::render(
 					'dash',
-				) ?></span><span class="collapsed-icon"><?= \Cosray\Panel\Icon::render('plus') ?></span></button>
+					'cms-menu-tree-expanded-icon',
+				) ?><?= \Cosray\Panel\Icon::render('plus', 'cms-menu-tree-collapsed-icon') ?></button>
 		<?php endif ?>
-		<span class="grip" data-menu-grip aria-hidden="true"><?= \Cosray\Panel\Icon::render('grip-vertical') ?></span>
+		<span class="cms-menu-tree-grip" data-menu-grip aria-hidden="true"><?= \Cosray\Panel\Icon::render('grip-vertical') ?></span>
 		<a
-			class="text"
+			class="cms-menu-tree-text"
 			tabindex="-1"
 			href="<?= escape($treeUrl) ?>?item=<?= escape(rawurlencode($id)) ?>">
 			<strong>
@@ -89,7 +90,7 @@ $confirm = $descendants === 0
 				) ?><?= is_string($href) && $href !== '' ? ' · ' . escape($href) : '' ?>
 			</small>
 		</a>
-		<button type="button" class="kebab" tabindex="-1"
+		<button type="button" class="cms-menu-tree-kebab" tabindex="-1"
 			popovertarget="<?= escape("menu-{$id}-actions") ?>"
 			aria-haspopup="menu" aria-label="<?= escape(__('menu:item-actions')) ?>">
 			<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
@@ -163,9 +164,9 @@ $confirm = $descendants === 0
 	</div>
 	<?php // Rendered even without children: every card owns a drop zone
 
-	// for the drag behavior, marked `no-children` while it is empty. ?>
+	// for the drag behavior, marked `is-empty` while it is empty. ?>
 	<ul
-		class="menu-children<?= $hasChildren ? '' : ' no-children' ?>"
+		class="cms-menu-tree-children<?= $hasChildren ? '' : ' is-empty' ?>"
 		role="<?= $hasChildren ? 'group' : 'presentation' ?>"
 		data-menu-list
 		data-parent="<?= escape($id) ?>">

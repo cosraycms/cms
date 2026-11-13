@@ -110,7 +110,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('data-uid="root-a"', $html);
-		$this->assertStringContainsString('class="menu-children"', $html);
+		$this->assertStringContainsString('class="cms-menu-tree-children"', $html);
 		$this->assertStringContainsString('Item grandchild-a', $html);
 		$this->assertStringContainsString('?item=root-a', $html);
 		$this->assertStringContainsString('?add=root-a', $html);
@@ -281,7 +281,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 			);
 
 			$this->assertHtmlNodeExists(
-				'//a[@href="/panel/menus/tree-menu?add=" and contains(concat(" ", normalize-space(@class), " "), " add ")]',
+				'//a[@href="/panel/menus/tree-menu?add=" and contains(concat(" ", normalize-space(@class), " "), " cms-menu-tree-add ")]',
 				$html,
 			);
 		}
@@ -524,7 +524,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		);
 		// The card's own controls leave the tab order; the row is the stop.
 		$this->assertHtmlNodeExists(
-			'//li[@role="treeitem"]//a[contains(concat(" ", normalize-space(@class), " "), " text ") and @tabindex="-1"]',
+			'//li[@role="treeitem"]//a[contains(concat(" ", normalize-space(@class), " "), " cms-menu-tree-text ") and @tabindex="-1"]',
 			$html,
 		);
 	}
@@ -550,7 +550,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		// carries an unrelated "Undo" of its own.
 		$html = $this->getHtmlResponse($this->makeRequest('GET', $location));
 		$this->assertHtmlNodeExists(
-			'//form[.//button[contains(concat(" ", normalize-space(@class), " "), " undo ")]]//input[@name="index" and @value="1"]',
+			'//form[.//button[contains(concat(" ", normalize-space(@class), " "), " cms-menu-tree-undo ")]]//input[@name="index" and @value="1"]',
 			$html,
 		);
 		$this->assertStringContainsString('“Item undo-b” moved.', $html);
@@ -576,7 +576,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->assertStringContainsString('notice=move-rejected', $location);
 		$this->assertStringNotContainsString('undoIndex', $location);
 		$this->assertHtmlNodeMissing(
-			'//button[contains(concat(" ", normalize-space(@class), " "), " undo ")]',
+			'//button[contains(concat(" ", normalize-space(@class), " "), " cms-menu-tree-undo ")]',
 			$this->getHtmlResponse($this->makeRequest('GET', $location)),
 		);
 	}
@@ -828,7 +828,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 
 		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/tree-menu'));
 
-		$this->assertStringContainsString('<details class="preview">', $html);
+		$this->assertStringContainsString('<details class="cms-menu-tree-preview">', $html);
 		$this->assertStringContainsString('hx-boost="false"', $html);
 		$this->assertStringContainsString('<ul class="nav-level-1">', $html);
 		$this->assertStringContainsString('<a href="/preview-me">', $html);

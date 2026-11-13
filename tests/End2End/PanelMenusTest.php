@@ -500,7 +500,7 @@ final class PanelMenusTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('A menu with this handle already exists.', $html);
 		// The tree is still on screen, and the field keeps what was typed.
-		$this->assertStringContainsString('class="menu-props"', $html);
+		$this->assertStringContainsString('class="cms-menu-tree-props"', $html);
 		$this->assertStringContainsString('value="taken"', $html);
 		$this->assertSame(['head', 'taken'], $this->menuHandles());
 	}

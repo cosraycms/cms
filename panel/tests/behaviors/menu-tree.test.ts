@@ -13,24 +13,24 @@ function row(uid: string): HTMLElement {
 
 function markup(selected = ''): string {
 	const card = (uid: string): string =>
-		`<div class="menu-card${uid === selected ? ' is-selected' : ''}">
+		`<div class="cms-menu-tree-card${uid === selected ? ' is-selected' : ''}">
 			<button type="button" data-menu-collapse tabindex="-1"></button>
-			<a class="text" tabindex="-1" href="#"></a>
+			<a class="cms-menu-tree-text" tabindex="-1" href="#"></a>
 		</div>`;
 
 	return `
 		<button id="outside" type="button"></button>
-		<ul class="menu-tree" role="tree" tabindex="-1" data-menu-tree="main">
-			<li class="menu-node" role="treeitem" aria-level="1" aria-expanded="true"
+		<ul class="cms-menu-tree-list" role="tree" tabindex="-1" data-menu-tree="main">
+			<li class="cms-menu-tree-node" role="treeitem" aria-level="1" aria-expanded="true"
 				tabindex="-1" data-uid="parent">
 				${card('parent')}
-				<ul class="menu-children" role="group">
-					<li class="menu-node" role="treeitem" aria-level="2" tabindex="-1" data-uid="child">
+				<ul class="cms-menu-tree-children" role="group">
+					<li class="cms-menu-tree-node" role="treeitem" aria-level="2" tabindex="-1" data-uid="child">
 						${card('child')}
 					</li>
 				</ul>
 			</li>
-			<li class="menu-node" role="treeitem" aria-level="1" tabindex="-1" data-uid="second">
+			<li class="cms-menu-tree-node" role="treeitem" aria-level="1" tabindex="-1" data-uid="second">
 				${card('second')}
 			</li>
 		</ul>
@@ -66,7 +66,7 @@ describe('collapse', () => {
 	it('leaves a row without children alone', () => {
 		const leaf = row('second');
 
-		click(leaf.querySelector('.menu-card')!);
+		click(leaf.querySelector('.cms-menu-tree-card')!);
 
 		expect(leaf.classList.contains('is-collapsed')).toBe(false);
 		expect(leaf.getAttribute('aria-expanded')).toBeNull();

@@ -25,7 +25,7 @@ import {
 
 /** @typedef {'up' | 'down' | 'in' | 'out'} Direction */
 
-const ACTIONS = ':scope > .menu-card > [data-action-menu]';
+const ACTIONS = ':scope > .cms-menu-tree-card > [data-action-menu]';
 
 /**
  * The vim layer is off unless a browser opts into it. What it really gates
@@ -168,7 +168,7 @@ function move(row, direction) {
  * @param {HTMLElement} row
  */
 function activate(row) {
-	/** @type {HTMLAnchorElement | null} */ (row.querySelector('a.text'))?.click();
+	/** @type {HTMLAnchorElement | null} */ (row.querySelector('a.cms-menu-tree-text'))?.click();
 }
 
 /**
@@ -188,7 +188,7 @@ function add(row, kind) {
  */
 function openKebab(row) {
 	const trigger = /** @type {HTMLButtonElement | null} */ (
-		row.querySelector(':scope > .menu-card > button[popovertarget]')
+		row.querySelector(':scope > .cms-menu-tree-card > button[popovertarget]')
 	);
 	if (trigger) openMenu(trigger, 'first', row);
 }

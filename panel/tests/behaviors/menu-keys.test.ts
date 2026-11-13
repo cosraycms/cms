@@ -18,7 +18,7 @@ function press(key: string, init: KeyboardEventInit = {}): void {
 
 /** The kebab as the tree renders it: one form per direction. */
 function kebab(uid: string, disabled: string[]): string {
-	return `<button type="button" class="kebab" tabindex="-1" popovertarget="${uid}-actions">Actions</button><div id="${uid}-actions" popover="auto" data-action-menu>
+	return `<button type="button" class="cms-menu-tree-kebab" tabindex="-1" popovertarget="${uid}-actions">Actions</button><div id="${uid}-actions" popover="auto" data-action-menu>
 		<a data-menu-add="before" href="/panel/menus/main?before=${uid}"></a>
 		<a data-menu-add="after" href="/panel/menus/main?after=${uid}"></a>
 		<a data-menu-add="child" href="/panel/menus/main?add=${uid}"></a>
@@ -40,21 +40,21 @@ beforeEach(() => {
 	localStorage.setItem('cosray:vim-keys', 'on');
 	submitted = [];
 	document.body.innerHTML = `
-		<ul class="menu-tree" role="tree" tabindex="-1" data-menu-tree="main">
-			<li class="menu-node" role="treeitem" aria-level="1" aria-expanded="true"
+		<ul class="cms-menu-tree-list" role="tree" tabindex="-1" data-menu-tree="main">
+			<li class="cms-menu-tree-node" role="treeitem" aria-level="1" aria-expanded="true"
 				tabindex="-1" data-uid="parent">
-				<div class="menu-card">
-					<a class="text" tabindex="-1" href="/panel/menus/main?item=parent"></a>
+				<div class="cms-menu-tree-card">
+					<a class="cms-menu-tree-text" tabindex="-1" href="/panel/menus/main?item=parent"></a>
 					${kebab('parent', ['up', 'in', 'out'])}
 				</div>
-				<ul class="menu-children" role="group">
-					<li class="menu-node" role="treeitem" aria-level="2" tabindex="-1" data-uid="child">
-						<div class="menu-card">${kebab('child', ['up', 'down', 'in'])}</div>
+				<ul class="cms-menu-tree-children" role="group">
+					<li class="cms-menu-tree-node" role="treeitem" aria-level="2" tabindex="-1" data-uid="child">
+						<div class="cms-menu-tree-card">${kebab('child', ['up', 'down', 'in'])}</div>
 					</li>
 				</ul>
 			</li>
-			<li class="menu-node" role="treeitem" aria-level="1" tabindex="-1" data-uid="second">
-				<div class="menu-card">${kebab('second', ['down', 'out'])}</div>
+			<li class="cms-menu-tree-node" role="treeitem" aria-level="1" tabindex="-1" data-uid="second">
+				<div class="cms-menu-tree-card">${kebab('second', ['down', 'out'])}</div>
 			</li>
 		</ul>
 		<input id="outside" />
@@ -148,7 +148,7 @@ describe('navigation', () => {
 
 		press('Escape');
 
-		expect(document.activeElement).toBe(document.querySelector('.menu-tree'));
+		expect(document.activeElement).toBe(document.querySelector('.cms-menu-tree-list'));
 	});
 });
 
@@ -217,7 +217,7 @@ describe('moves', () => {
 	});
 
 	it.each(['Enter', 'e'])('opens the item with %s', (key) => {
-		const link = row('parent').querySelector<HTMLAnchorElement>('a.text')!;
+		const link = row('parent').querySelector<HTMLAnchorElement>('a.cms-menu-tree-text')!;
 		const clicked = vi.fn((event: Event) => event.preventDefault());
 		link.addEventListener('click', clicked);
 		row('parent').focus();
@@ -305,7 +305,7 @@ describe('the vim layer', () => {
 		expect(submitted).toEqual(['second:up']);
 
 		press('Escape');
-		expect(document.activeElement).toBe(document.querySelector('.menu-tree'));
+		expect(document.activeElement).toBe(document.querySelector('.cms-menu-tree-list'));
 	});
 });
 

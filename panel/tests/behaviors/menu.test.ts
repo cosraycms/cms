@@ -15,12 +15,12 @@ beforeEach(() => {
 			<input type="hidden" name="parent" value="" />
 			<input type="hidden" name="index" value="" />
 		</form>
-		<ul class="menu-tree" data-menu-list data-parent="">
-			<li class="menu-node" data-uid="parent">
-				<div class="menu-card">
+		<ul class="cms-menu-tree-list" data-menu-list data-parent="">
+			<li class="cms-menu-tree-node" data-uid="parent">
+				<div class="cms-menu-tree-card">
 					<button type="button" data-menu-collapse aria-expanded="true"></button>
 				</div>
-				<ul class="menu-children" data-menu-list data-parent="parent"><li class="menu-node" data-uid="child"></li></ul>
+				<ul class="cms-menu-tree-children" data-menu-list data-parent="parent"><li class="cms-menu-tree-node" data-uid="child"></li></ul>
 			</li>
 		</ul>
 		<form>
@@ -34,7 +34,7 @@ beforeEach(() => {
 			<div id="url-section" data-menu-section="url" hidden></div>
 			<div id="target-section" data-menu-section="node url asset"></div>
 			<div id="title-section" data-menu-section-hide="children"></div>
-			<div class="cms-field-control menu-picker" data-menu-picker="nodes" data-menu-picker-url="/panel/reference/nodes?limit=8">
+			<div class="cms-field-control cms-menu-tree-picker" data-menu-picker="nodes" data-menu-picker-url="/panel/reference/nodes?limit=8">
 				<input type="hidden" name="node" value="old-uid" data-menu-picker-value />
 				<input type="text" data-menu-picker-search value="Old title" />
 				<div data-menu-picker-results hidden></div>
@@ -57,7 +57,7 @@ describe('drag submit', () => {
 		const form = document.querySelector<HTMLFormElement>('#menu-drag')!;
 		form.requestSubmit = vi.fn();
 
-		const item = document.querySelector<HTMLElement>('.menu-node[data-uid="child"]')!;
+		const item = document.querySelector<HTMLElement>('.cms-menu-tree-node[data-uid="child"]')!;
 		const to = document.querySelector<HTMLElement>('[data-menu-list][data-parent=""]')!;
 		const from = document.querySelector<HTMLElement>('[data-menu-list][data-parent="parent"]')!;
 
@@ -73,7 +73,7 @@ describe('drag submit', () => {
 		const form = document.querySelector<HTMLFormElement>('#menu-drag')!;
 		form.requestSubmit = vi.fn();
 
-		const item = document.querySelector<HTMLElement>('.menu-node[data-uid="child"]')!;
+		const item = document.querySelector<HTMLElement>('.cms-menu-tree-node[data-uid="child"]')!;
 		const list = document.querySelector<HTMLElement>('[data-menu-list][data-parent="parent"]')!;
 
 		submitMove(item, list, list, 0, 0);

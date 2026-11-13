@@ -13,7 +13,7 @@
 	flex-direction: column;
 	min-height: 0;
 
-	& .body {
+	& .cms-menus-body {
 		display: flex;
 		flex-direction: column;
 		gap: var(--cms-space-3);
@@ -31,7 +31,7 @@
 		overflow: hidden;
 	}
 
-	& .card {
+	& .cms-menus-card {
 		display: flex;
 		flex-direction: column;
 		flex: 1 1 auto;
@@ -43,7 +43,7 @@
 		overflow: hidden;
 	}
 
-	& .empty {
+	& .cms-menus-empty {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -52,17 +52,17 @@
 		color: var(--cms-color-text-muted);
 		text-align: center;
 
-		& .icon {
-			font-size: var(--cms-font-size-xl);
-		}
-
 		& p {
 			margin: 0;
 			font-size: var(--cms-font-size-sm);
 		}
 	}
 
-	& .form-card {
+	& .cms-menus-empty-icon {
+		font-size: var(--cms-font-size-xl);
+	}
+
+	& .cms-menus-form-card {
 		flex: 0 1 auto;
 		max-width: 36rem;
 		padding: var(--cms-space-6);
@@ -79,27 +79,29 @@
 		& .cms-field {
 			padding-inline: 0;
 		}
+	}
 
-		& .help {
-			margin: 0;
-			color: var(--cms-color-text-muted);
-			font-size: var(--cms-font-size-xs);
-		}
+	& .cms-menus-help {
+		margin: 0;
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-xs);
+	}
 
-		& .form-actions {
-			display: flex;
-			justify-content: flex-end;
-			gap: var(--cms-space-2);
-		}
+	& .cms-menus-form-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--cms-space-2);
 	}
 }
 
 .cms-menu-tree {
+	--menu-pane-width: 24rem;
+
 	/* The menu's own fields belong to the tree, not to the item pane beside
 	   it, so the bar stops where the pane column begins. The forms lay their
 	   controls out as cells of this grid, which is what lines the buttons up
 	   with the inputs across two separate forms. */
-	& .menu-props {
+	& .cms-menu-tree-props {
 		display: grid;
 		grid-template-columns:
 			minmax(0, 1fr)
@@ -132,28 +134,27 @@
 			margin-left: var(--cms-space-5);
 		}
 
-		& .error {
+		& .cms-menus-error {
 			margin: 0;
-			color: var(--cms-color-danger-text);
-			font-size: var(--cms-font-size-xs);
 		}
 
 		/* Under the handle, which is what it is about. The columns it spans
 		   are all intrinsic, so it has to be kept out of their sizing or a
 		   long sentence widens the buttons instead of wrapping. */
-		& > .help {
+		& > .cms-menus-help {
 			grid-column: 2 / -1;
 			width: 0;
 			min-width: 100%;
-			margin: 0;
-			color: var(--cms-color-text-muted);
-			font-size: var(--cms-font-size-xs);
 		}
 	}
 
-	--menu-pane-width: 24rem;
+	& .cms-menus-error {
+		margin: var(--cms-space-1) 0 0;
+		color: var(--cms-color-danger-text);
+		font-size: var(--cms-font-size-xs);
+	}
 
-	& .workspace {
+	& .cms-menu-tree-workspace {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) var(--menu-pane-width);
 		gap: var(--cms-space-4);
@@ -163,7 +164,7 @@
 		align-items: start;
 	}
 
-	& .tree {
+	& .cms-menu-tree-scroll {
 		min-height: 0;
 		height: 100%;
 		padding-bottom: var(--cms-space-6);
@@ -174,7 +175,7 @@
 	/* Sits where the item it creates will appear: after the last root card,
 	   in the tree column rather than the pane, so editing an item does not
 	   take the action away. */
-	& .tree > .add {
+	& .cms-menu-tree-add {
 		display: block;
 		margin-top: var(--cms-space-2);
 		padding: var(--cms-space-2) var(--cms-space-3);
@@ -191,14 +192,14 @@
 		}
 	}
 
-	& .tree > .empty {
+	& .cms-menu-tree-scroll > .cms-menus-empty {
 		border: 1px dashed var(--cms-color-border-strong);
 		border-radius: var(--cms-radius-lg);
 		background: var(--cms-color-surface);
 	}
 
-	& .menu-tree,
-	& .menu-children {
+	& .cms-menu-tree-list,
+	& .cms-menu-tree-children {
 		display: flex;
 		flex-direction: column;
 		gap: var(--cms-space-2);
@@ -207,7 +208,11 @@
 		list-style: none;
 	}
 
-	& .menu-children {
+	& .cms-menu-tree-list:focus {
+		outline: none;
+	}
+
+	& .cms-menu-tree-children {
 		/* The rail stays under the parent card's edge, so a wider indent
 		   lengthens the ticks rather than pushing the line along with the
 		   cards. Both are read by the child nodes that draw them. */
@@ -217,74 +222,78 @@
 		position: relative;
 		margin-top: var(--cms-space-2);
 		padding-left: var(--menu-indent);
+
+		/* An empty child list is invisible until a drag starts; then every
+		   card offers it as a drop zone for nesting. */
+		&.is-empty {
+			margin-top: 0;
+		}
+	}
+
+	& .cms-menu-tree-scroll.is-dragging .cms-menu-tree-children {
+		min-height: 1rem;
+
+		&.is-empty {
+			margin-top: var(--cms-space-1);
+			border: 1px dashed var(--cms-color-border-strong);
+			border-radius: var(--cms-radius-md);
+		}
 	}
 
 	/* The rail is drawn per child rather than once down the list: only the
 	   children know where the last tick is, and a last child with a tall
 	   subtree of its own would otherwise leave the line hanging below it. */
-	& .menu-children > .menu-node::after {
-		content: '';
-		position: absolute;
-		top: calc(-1 * var(--cms-space-2));
-		bottom: 0;
-		left: calc(-1 * var(--menu-tick));
-		border-left: 1px solid var(--cms-color-border-strong);
+	& .cms-menu-tree-children > .cms-menu-tree-node {
+		&::after {
+			content: '';
+			position: absolute;
+			top: calc(-1 * var(--cms-space-2));
+			bottom: 0;
+			left: calc(-1 * var(--menu-tick));
+			border-left: 1px solid var(--cms-color-border-strong);
+		}
+
+		&:last-child::after {
+			bottom: auto;
+			height: calc(var(--cms-space-2) + 1.25rem);
+		}
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: 1.25rem;
+			left: calc(-1 * var(--menu-tick));
+			width: var(--menu-tick);
+			border-top: 1px solid var(--cms-color-border-strong);
+		}
 	}
 
-	& .menu-children > .menu-node:last-child::after {
-		bottom: auto;
-		height: calc(var(--cms-space-2) + 1.25rem);
-	}
-
-	& .menu-children > .menu-node::before {
-		content: '';
-		position: absolute;
-		top: 1.25rem;
-		left: calc(-1 * var(--menu-tick));
-		width: var(--menu-tick);
-		border-top: 1px solid var(--cms-color-border-strong);
-	}
-
-	/* An empty child list is invisible until a drag starts; then every
-	   card offers it as a drop zone for nesting. */
-	& .menu-children.no-children {
-		margin-top: 0;
-	}
-
-	& .tree.is-dragging .menu-children {
-		min-height: 1rem;
-	}
-
-	& .tree.is-dragging .menu-children.no-children {
-		margin-top: var(--cms-space-1);
-		border: 1px dashed var(--cms-color-border-strong);
-		border-radius: var(--cms-radius-md);
-	}
-
-	& .sortable-ghost {
-		opacity: 0.5;
-	}
-
-	& .sortable-drag .menu-card {
-		box-shadow: var(--cms-shadow-md);
-	}
-
-	& .menu-node {
+	& .cms-menu-tree-node {
 		position: relative;
 		outline: none;
+
+		&.is-dragging {
+			opacity: 0.5;
+		}
+	}
+
+	& .cms-menu-tree-node.is-lifted .cms-menu-tree-card {
+		box-shadow: var(--cms-shadow-md);
 	}
 
 	/* The row is the focusable thing, but the card is what reads as a row,
 	   so the ring goes there. Inset: the tree scrolls, and an outline drawn
 	   outside the card is clipped at the container's edge. The selected card
 	   carries a background instead, so the two never read as the same thing. */
-	& .menu-node:focus > .menu-card {
+	& .cms-menu-tree-node:focus > .cms-menu-tree-card {
 		outline: 2px solid var(--cms-color-accent);
 		outline-offset: -2px;
 	}
 
-	& .menu-tree:focus {
-		outline: none;
+	& .cms-menu-tree-node.is-collapsed > .cms-menu-tree-children,
+	& .cms-menu-tree-node.is-collapsed > .cms-menu-tree-card .cms-menu-tree-expanded-icon,
+	& .cms-menu-tree-node:not(.is-collapsed) > .cms-menu-tree-card .cms-menu-tree-collapsed-icon {
+		display: none;
 	}
 
 	/* The notice keeps its undo action on the same line as its message: a
@@ -293,43 +302,20 @@
 		display: flex;
 		align-items: baseline;
 		gap: var(--cms-space-3);
-
-		& .undo {
-			border: 0;
-			background: none;
-			padding: 0;
-			color: var(--cms-color-accent);
-			font: inherit;
-			font-weight: 500;
-			text-decoration: underline;
-			cursor: pointer;
-		}
 	}
 
-	/* A hidden item is still fully editable, only visibly not part of the
-	   site — its subtree is hidden with it, so the whole branch recedes. */
-	& .menu-card.is-hidden {
-		opacity: 0.55;
-
-		& .text strong {
-			text-decoration: line-through;
-		}
+	& .cms-menu-tree-undo {
+		border: 0;
+		background: none;
+		padding: 0;
+		color: var(--cms-color-accent);
+		font: inherit;
+		font-weight: 500;
+		text-decoration: underline;
+		cursor: pointer;
 	}
 
-	& .menu-node.is-collapsed > .menu-children {
-		display: none;
-	}
-
-	& .menu-node > .menu-card .collapsed-icon,
-	& .menu-node.is-collapsed > .menu-card .expanded-icon {
-		display: none;
-	}
-
-	& .menu-node.is-collapsed > .menu-card .collapsed-icon {
-		display: inline-flex;
-	}
-
-	& .menu-card {
+	& .cms-menu-tree-card {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-2);
@@ -344,65 +330,75 @@
 			background: var(--cms-color-selected);
 		}
 
-		& .collapse {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			width: 1.25rem;
-			height: 1.25rem;
-			padding: 0;
-			border: 1px solid var(--cms-color-border-strong);
-			border-radius: 50%;
-			background: var(--cms-color-surface);
-			color: var(--cms-color-text-muted);
-			font-size: var(--cms-font-size-xs);
-			line-height: 1;
-			cursor: pointer;
-
-			&:hover {
-				background: var(--cms-color-hover);
-			}
-		}
-
-		& .grip {
-			color: var(--cms-color-text-faint);
-			font-size: var(--cms-font-size-sm);
-			cursor: grab;
-			user-select: none;
-		}
-
-		& .text {
-			display: flex;
-			flex-direction: column;
-			flex: 1 1 auto;
-			min-width: 0;
-			color: inherit;
-			text-decoration: none;
-
-			& strong {
-				overflow: hidden;
-				color: var(--cms-color-text);
-				font-size: var(--cms-font-size-sm);
-				font-weight: 600;
-				text-overflow: ellipsis;
-				white-space: nowrap;
-			}
-
-			& small {
-				overflow: hidden;
-				color: var(--cms-color-text-muted);
-				font-size: var(--cms-font-size-xs);
-				text-overflow: ellipsis;
-				white-space: nowrap;
-			}
-
-			&:hover strong {
-				color: var(--cms-color-accent-text);
-			}
+		/* A hidden item is still fully editable, only visibly not part of the
+		   site — its subtree is hidden with it, so the whole branch recedes. */
+		&.is-hidden {
+			opacity: 0.55;
 		}
 	}
 
-	& .kebab {
+	& .cms-menu-tree-card.is-hidden .cms-menu-tree-text strong {
+		text-decoration: line-through;
+	}
+
+	& .cms-menu-tree-collapse {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.25rem;
+		height: 1.25rem;
+		padding: 0;
+		border: 1px solid var(--cms-color-border-strong);
+		border-radius: 50%;
+		background: var(--cms-color-surface);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1;
+		cursor: pointer;
+
+		&:hover {
+			background: var(--cms-color-hover);
+		}
+	}
+
+	& .cms-menu-tree-grip {
+		color: var(--cms-color-text-faint);
+		font-size: var(--cms-font-size-sm);
+		cursor: grab;
+		user-select: none;
+	}
+
+	& .cms-menu-tree-text {
+		display: flex;
+		flex-direction: column;
+		flex: 1 1 auto;
+		min-width: 0;
+		color: inherit;
+		text-decoration: none;
+
+		& strong {
+			overflow: hidden;
+			color: var(--cms-color-text);
+			font-size: var(--cms-font-size-sm);
+			font-weight: 600;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		& small {
+			overflow: hidden;
+			color: var(--cms-color-text-muted);
+			font-size: var(--cms-font-size-xs);
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		&:hover strong {
+			color: var(--cms-color-accent-text);
+		}
+	}
+
+	& .cms-menu-tree-kebab {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -422,7 +418,7 @@
 		}
 	}
 
-	& .preview {
+	& .cms-menu-tree-preview {
 		margin-top: var(--cms-space-4);
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-md);
@@ -435,42 +431,43 @@
 			font-weight: 500;
 			cursor: pointer;
 		}
+	}
 
-		& .preview-body {
-			padding: var(--cms-space-1) var(--cms-space-4) var(--cms-space-4);
-			font-size: var(--cms-font-size-sm);
+	/* The site's own menu markup, so its classes are the renderer's. */
+	& .cms-menu-tree-preview-body {
+		padding: var(--cms-space-1) var(--cms-space-4) var(--cms-space-4);
+		font-size: var(--cms-font-size-sm);
 
-			& ul {
-				margin: 0;
-				padding-left: var(--cms-space-5);
-				list-style: disc;
-			}
+		& ul {
+			margin: 0;
+			padding-left: var(--cms-space-5);
+			list-style: disc;
+		}
 
-			& li {
-				margin: var(--cms-space-1) 0;
-			}
+		& li {
+			margin: var(--cms-space-1) 0;
+		}
 
-			& a {
-				color: var(--cms-color-accent-text);
-			}
+		& a {
+			color: var(--cms-color-accent-text);
+		}
 
-			& .nav-label {
-				display: inline;
-			}
+		& .nav-label {
+			display: inline;
+		}
 
-			& .nav-image {
-				display: inline-block;
-				margin-right: var(--cms-space-1);
-				vertical-align: middle;
+		& .nav-image {
+			display: inline-block;
+			margin-right: var(--cms-space-1);
+			vertical-align: middle;
 
-				& img {
-					max-height: 1.25rem;
-				}
+			& img {
+				max-height: 1.25rem;
 			}
 		}
 	}
 
-	& .pane {
+	& .cms-menu-tree-pane {
 		position: sticky;
 		top: 0;
 		max-height: 100%;
@@ -481,31 +478,10 @@
 		box-shadow: var(--cms-shadow-card);
 		overflow-y: auto;
 
-		& .pane-empty {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			gap: var(--cms-space-4);
-			padding: var(--cms-space-6) var(--cms-space-2);
-			color: var(--cms-color-text-muted);
-			font-size: var(--cms-font-size-sm);
-			text-align: center;
-
-			& p {
-				margin: 0;
-			}
-		}
-
 		& h2 {
 			margin: 0 0 var(--cms-space-1);
 			font-size: var(--cms-font-size-lg);
 			font-weight: 600;
-		}
-
-		& .pane-hint {
-			margin: 0 0 var(--cms-space-2);
-			color: var(--cms-color-text-muted);
-			font-size: var(--cms-font-size-xs);
 		}
 
 		& form {
@@ -514,82 +490,89 @@
 			gap: var(--cms-space-3);
 		}
 
-		& .error {
+		& .cms-menus-help {
 			margin: var(--cms-space-1) 0 0;
-			color: var(--cms-color-danger-text);
-			font-size: var(--cms-font-size-xs);
-		}
-
-		& .help {
-			margin: var(--cms-space-1) 0 0;
-			color: var(--cms-color-text-muted);
-			font-size: var(--cms-font-size-xs);
-		}
-
-		& .target {
-			display: flex;
-			align-items: center;
-			gap: var(--cms-space-2);
-			color: var(--cms-color-text-label);
-			font-size: var(--cms-font-size-sm);
-		}
-
-		& .form-actions {
-			display: flex;
-			justify-content: flex-end;
-			gap: var(--cms-space-2);
 		}
 	}
 
-	& .menu-picker {
+	& .cms-menu-tree-pane-empty {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--cms-space-4);
+		padding: var(--cms-space-6) var(--cms-space-2);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+		text-align: center;
+
+		& p {
+			margin: 0;
+		}
+	}
+
+	& .cms-menu-tree-pane-hint {
+		margin: 0 0 var(--cms-space-2);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-xs);
+	}
+
+	& .cms-menu-tree-check {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		color: var(--cms-color-text-label);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	& .cms-menu-tree-picker {
 		position: relative;
+	}
 
-		& .menu-picker-results {
-			position: absolute;
-			z-index: 6;
-			top: 100%;
-			right: 0;
-			left: 0;
+	& .cms-menu-tree-picker-results {
+		position: absolute;
+		z-index: 6;
+		top: 100%;
+		right: 0;
+		left: 0;
+		display: flex;
+		flex-direction: column;
+		margin-top: var(--cms-space-1);
+		padding: var(--cms-space-1);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface);
+		box-shadow: var(--cms-shadow-md);
+		max-height: 16rem;
+		overflow-y: auto;
+
+		/* display: flex outranks the UA rule behind the hidden attribute. */
+		&[hidden] {
+			display: none;
+		}
+
+		& button {
 			display: flex;
-
-			/* display: flex outranks the UA rule behind the hidden attribute. */
-			&[hidden] {
-				display: none;
-			}
 			flex-direction: column;
-			margin-top: var(--cms-space-1);
-			padding: var(--cms-space-1);
-			border: 1px solid var(--cms-color-border);
-			border-radius: var(--cms-radius-md);
-			background: var(--cms-color-surface);
-			box-shadow: var(--cms-shadow-md);
-			max-height: 16rem;
-			overflow-y: auto;
+			padding: var(--cms-space-1-5) var(--cms-space-2-5);
+			border: 0;
+			border-radius: var(--cms-radius-sm);
+			background: none;
+			text-align: left;
+			cursor: pointer;
 
-			& button {
-				display: flex;
-				flex-direction: column;
-				padding: var(--cms-space-1-5) var(--cms-space-2-5);
-				border: 0;
-				border-radius: var(--cms-radius-sm);
-				background: none;
-				text-align: left;
-				cursor: pointer;
+			& strong {
+				color: var(--cms-color-text);
+				font-size: var(--cms-font-size-sm);
+				font-weight: 500;
+			}
 
-				& strong {
-					color: var(--cms-color-text);
-					font-size: var(--cms-font-size-sm);
-					font-weight: 500;
-				}
+			& small {
+				color: var(--cms-color-text-muted);
+				font-size: var(--cms-font-size-xs);
+			}
 
-				& small {
-					color: var(--cms-color-text-muted);
-					font-size: var(--cms-font-size-xs);
-				}
-
-				&:hover {
-					background: var(--cms-color-hover);
-				}
+			&:hover {
+				background: var(--cms-color-hover);
 			}
 		}
 	}
@@ -597,11 +580,8 @@
 
 @media (width < 40rem), (height < 30rem) {
 	.cms-menus {
-		& .body {
+		& .cms-menus-body {
 			padding-inline: var(--cms-space-4);
-		}
-
-		& .body {
 			border-radius: 0;
 			box-shadow: none;
 			overflow: visible;
@@ -609,7 +589,7 @@
 	}
 
 	.cms-menu-tree {
-		& .menu-props {
+		& .cms-menu-tree-props {
 			grid-template-columns: minmax(0, 1fr);
 			align-items: stretch;
 			margin-right: 0;
@@ -618,21 +598,21 @@
 				margin-top: 0;
 			}
 
-			& > .help {
+			& > .cms-menus-help {
 				grid-column: 1;
 			}
 		}
 
-		& .workspace {
+		& .cms-menu-tree-workspace {
 			grid-template-columns: minmax(0, 1fr);
 		}
 
-		& .tree {
+		& .cms-menu-tree-scroll {
 			height: auto;
 			overflow: visible;
 		}
 
-		& .pane {
+		& .cms-menu-tree-pane {
 			position: static;
 			max-height: none;
 		}

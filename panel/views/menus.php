@@ -27,14 +27,14 @@ $createUrl = (string) $menuCreateUrl;
 		<?php endif ?>
 	</header>
 
-	<div class="body">
+	<div class="cms-menus-body">
 		<?php if (is_string($notice)): ?>
 			<?php $this->include('component/toast', ['kind' => 'success', 'message' => $notice]) ?>
 		<?php endif ?>
 
-		<div class="card">
-			<div class="empty">
-				<div class="icon" aria-hidden="true">☰</div>
+		<div class="cms-menus-card">
+			<div class="cms-menus-empty">
+				<div class="cms-menus-empty-icon" aria-hidden="true">☰</div>
 				<strong><?= escape(__('menu:empty')) ?></strong>
 				<?php if ($manages): ?>
 					<p><?= escape(__('menu:empty-help')) ?></p>

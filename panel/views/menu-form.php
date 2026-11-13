@@ -33,8 +33,8 @@ $maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 		]) ?>
 	</header>
 
-	<div class="body">
-		<div class="card form-card">
+	<div class="cms-menus-body">
+		<div class="cms-menus-card cms-menus-form-card">
 			<form method="post" action="<?= escape($action) ?>">
 				<?php $this->include('component/csrf') ?>
 				<?php if (count($errors) > 0): ?>
@@ -60,7 +60,7 @@ $maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 							value="<?= escape($handle) ?>"
 							<?= isset($errors['menu']) ? 'aria-invalid="true"' : '' ?> />
 					</div>
-					<p class="help"><?= escape(__('menu:handle-help')) ?></p>
+					<p class="cms-menus-help"><?= escape(__('menu:handle-help')) ?></p>
 				</div>
 
 				<?php $this->include('menu/localized', [
@@ -89,13 +89,13 @@ $maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 							value="<?= escape($maxDepth === null ? '' : (string) $maxDepth) ?>"
 							<?= isset($errors['maxDepth']) ? 'aria-invalid="true"' : '' ?> />
 					</div>
-					<p class="help"><?= escape(__('menu:max-depth-help')) ?></p>
+					<p class="cms-menus-help"><?= escape(__('menu:max-depth-help')) ?></p>
 					<?php if (isset($errors['maxDepth'])): ?>
-						<p class="error"><?= escape((string) $errors['maxDepth']) ?></p>
+						<p class="cms-menus-error"><?= escape((string) $errors['maxDepth']) ?></p>
 					<?php endif ?>
 				</div>
 
-				<footer class="form-actions">
+				<footer class="cms-menus-form-actions">
 					<a class="cms-button cms-button-secondary" href="<?= escape($backUrl) ?>"><?= escape(
 						__('menu:cancel'),
 					) ?></a>

@@ -20,7 +20,7 @@ $maxDepth = $props['maxDepth'] === null ? null : (int) $props['maxDepth'];
 // disabled, so it never reaches the body, and the write ignores it anyway.
 $manages = (bool) $manages;
 ?>
-<div class="menu-props">
+<div class="cms-menu-tree-props">
 	<form method="post" action="<?= escape((string) $urls['edit']) ?>">
 		<?php $this->include('component/csrf') ?>
 		<?php $this->include('menu/localized', [
@@ -50,7 +50,7 @@ $manages = (bool) $manages;
 					<?= isset($errors['maxDepth']) ? 'aria-invalid="true"' : '' ?> />
 			</div>
 			<?php if (isset($errors['maxDepth'])): ?>
-				<p class="error"><?= escape((string) $errors['maxDepth']) ?></p>
+				<p class="cms-menus-error"><?= escape((string) $errors['maxDepth']) ?></p>
 			<?php endif ?>
 		</div>
 
@@ -69,7 +69,7 @@ $manages = (bool) $manages;
 					<?= isset($errors['menu']) ? 'aria-invalid="true"' : '' ?> />
 			</div>
 			<?php if (isset($errors['menu'])): ?>
-				<p class="error"><?= escape((string) $errors['menu']) ?></p>
+				<p class="cms-menus-error"><?= escape((string) $errors['menu']) ?></p>
 			<?php endif ?>
 		</div>
 
@@ -94,7 +94,7 @@ $manages = (bool) $manages;
 		</form>
 	<?php endif ?>
 
-	<p class="help"><?= escape(__('menu:handle-help')) ?> <?= escape(
+	<p class="cms-menus-help"><?= escape(__('menu:handle-help')) ?> <?= escape(
 		$manages ? __('menu:rename-warning') : __('menu:handle-locked'),
 	) ?></p>
 </div>

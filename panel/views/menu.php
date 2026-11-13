@@ -44,7 +44,7 @@ $defaultLocale = (string) $props['defaultLocale'];
 		</div>
 	</header>
 
-	<div class="body">
+	<div class="cms-menus-body">
 		<?php $this->include('menu/properties') ?>
 
 		<?php // A notice that offers to undo stays; the rest is a toast. ?>
@@ -61,16 +61,16 @@ $defaultLocale = (string) $props['defaultLocale'];
 					<input type="hidden" name="index" value="<?= escape(
 						(string) $undo['index'],
 					) ?>" />
-					<button type="submit" class="undo"><?= escape(__('menu:undo')) ?></button>
+					<button type="submit" class="cms-menu-tree-undo"><?= escape(__('menu:undo')) ?></button>
 				</form>
 			</div>
 		<?php endif ?>
 
-		<div class="workspace">
-			<div class="tree">
+		<div class="cms-menu-tree-workspace">
+			<div class="cms-menu-tree-scroll">
 				<?php if (count($tree) === 0): ?>
-					<div class="empty">
-						<div class="icon" aria-hidden="true">☰</div>
+					<div class="cms-menus-empty">
+						<div class="cms-menus-empty-icon" aria-hidden="true">☰</div>
 						<strong><?= escape(__('menu:tree-empty')) ?></strong>
 						<p><?= escape(__('menu:tree-empty-help')) ?></p>
 					</div>
@@ -92,7 +92,7 @@ $defaultLocale = (string) $props['defaultLocale'];
 					// carries tabindex 0, and the behavior moves it. That is
 					// what frees Tab and Shift+Tab for indenting. ?>
 					<ul
-						class="menu-tree"
+						class="cms-menu-tree-list"
 						role="tree"
 						tabindex="-1"
 						aria-label="<?= escape($description) ?>"
@@ -113,28 +113,28 @@ $defaultLocale = (string) $props['defaultLocale'];
 				<?php // Adding at the root belongs to the tree, not to the pane:
 
 				// it has to stay reachable while an item is being edited. ?>
-				<a class="add" href="<?= escape($urls['add']) ?>"><?= \Cosray\Panel\Icon::render('plus') ?> <?= escape(
+				<a class="cms-menu-tree-add" href="<?= escape($urls['add']) ?>"><?= \Cosray\Panel\Icon::render('plus') ?> <?= escape(
 					__('menu:add-item'),
 				) ?></a>
 
 				<?php if ($preview !== ''): ?>
-					<details class="preview">
+					<details class="cms-menu-tree-preview">
 						<summary><?= escape(__('menu:preview')) ?></summary>
 						<?php // hx-boost off: preview links leave the panel for
 
 						// the real pages instead of swapping them into #main. ?>
-						<div class="preview-body" hx-boost="false">
+						<div class="cms-menu-tree-preview-body" hx-boost="false">
 							<?= $preview ?>
 						</div>
 					</details>
 				<?php endif ?>
 			</div>
 
-			<aside class="pane" id="menu-item-pane">
+			<aside class="cms-menu-tree-pane" id="menu-item-pane">
 				<?php if (is_array($pane)): ?>
 					<?php $this->include('menu/pane', ['pane' => $pane]) ?>
 				<?php else: ?>
-					<div class="pane-empty">
+					<div class="cms-menu-tree-pane-empty">
 						<p><?= escape(__('menu:pane-empty')) ?></p>
 					</div>
 				<?php endif ?>

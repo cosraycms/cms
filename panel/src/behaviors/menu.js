@@ -27,7 +27,7 @@ const enhanced = /** @type {WeakSet<Element>} */ (new WeakSet());
 
 /** @returns {Element | null} */
 function tree() {
-	return document.querySelector('.cms-menu-tree .tree');
+	return document.querySelector('.cms-menu-tree-scroll');
 }
 
 async function initDrag() {
@@ -54,6 +54,9 @@ async function initDrag() {
 			animation: 150,
 			fallbackOnBody: true,
 			swapThreshold: 0.65,
+			ghostClass: 'is-dragging',
+			chosenClass: 'is-chosen',
+			dragClass: 'is-lifted',
 			onStart: () => tree()?.classList.add('is-dragging'),
 			onEnd: (/** @type {SortableEvent} */ event) => {
 				tree()?.classList.remove('is-dragging');
