@@ -47,7 +47,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		</div>
 
 		<div class="cms-page-actions">
-			<output id="editor-status" class="status" role="status"></output>
+			<output id="editor-status" class="cms-node-status" role="status"></output>
 			<?php if ($profile): ?>
 				<a class="cms-button cms-button-secondary" href="<?= escape((string) $panelPath . '/profile/tokens') ?>">
 					<?= escape(__('tokens:title')) ?>
@@ -81,22 +81,22 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 
 	<form
 		id="node-editor-form"
-		class="panes"
+		class="cms-node-panes"
 		method="post"
 		action="<?= escape((string) $action) ?>"
 		hx-swap="none"
 		data-json-form
 		novalidate>
 		<?php $this->include('component/csrf') ?>
-		<div class="pane">
-			<div class="pane-scroll">
-				<div class="inner">
+		<div class="cms-node-pane">
+			<div class="cms-node-pane-scroll">
+				<div class="cms-node-column">
 					<?php if (is_string($notice)): ?>
 						<?php $this->include('component/toast', ['kind' => 'success', 'message' => $notice]) ?>
 					<?php endif ?>
-					<div id="editor-errors" class="errors" hidden></div>
+					<div id="editor-errors" class="cms-errors" hidden></div>
 
-					<div class="sheet">
+					<div class="cms-node-sheet">
 						<fieldset class="cms-fieldset" data-fieldset="account">
 							<legend class="cms-fieldset-legend"><?= escape(__('user:account')) ?></legend>
 							<div class="cms-fields cms-fieldset-fields">

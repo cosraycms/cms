@@ -13,13 +13,13 @@ $conflict = is_array($status['conflict'] ?? null) ? $status['conflict'] : null;
 ?>
 <div
 	id="editor-conflict"
-	class="conflict"
+	class="cms-node-conflict"
 	<?= $conflict === null ? 'hidden' : 'role="alert"' ?>
 	<?= $oob ? 'hx-swap-oob="true"' : '' ?>>
 	<?php if ($conflict !== null): ?>
-		<div class="copy">
-			<p class="title"><?= escape(__($conflict['draft'] ? 'editor:conflict-draft' : 'editor:conflict-entry')) ?></p>
-			<p class="help"><?= escape(__('editor:conflict-help', [
+		<div class="cms-node-conflict-copy">
+			<p class="cms-node-conflict-title"><?= escape(__($conflict['draft'] ? 'editor:conflict-draft' : 'editor:conflict-entry')) ?></p>
+			<p class="cms-node-conflict-help"><?= escape(__('editor:conflict-help', [
 				'editor' => $conflict['editor'] !== '' ? $conflict['editor'] : __('editor:conflict-someone'),
 				'time' => $conflict['time'],
 			])) ?></p>

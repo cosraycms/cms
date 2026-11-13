@@ -86,21 +86,21 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 
 		<div class="cms-page-actions">
 			<?php // A save's outcome for the scripts; the node editor shows it as a toast. ?>
-			<output id="editor-status" class="status" role="status" <?= $embed === null ? 'hidden' : '' ?>></output>
+			<output id="editor-status" class="cms-node-status" role="status" <?= $embed === null ? 'hidden' : '' ?>></output>
 			<?php // Filled and shown by errors.js while a failed save has open issues. ?>
-			<div id="editor-problems" class="problems" hidden>
-				<button class="cms-problems" type="button" popovertarget="editor-problems-menu">
-					<span class="mark" aria-hidden="true">!</span>
-					<span class="count"></span>
+			<div id="editor-problems" class="cms-node-problems" hidden>
+				<button class="cms-node-problems-button" type="button" popovertarget="editor-problems-menu">
+					<span class="cms-node-problems-mark" aria-hidden="true">!</span>
+					<span class="cms-node-problems-count"></span>
 				</button>
 				<div
 					id="editor-problems-menu"
-					class="cms-action-menu cms-problems-menu"
+					class="cms-action-menu cms-node-problems-menu"
 					popover="auto"
 					data-action-menu
 					data-align="end">
-					<p class="heading"><?= escape(__('editor:problems-heading')) ?></p>
-					<div class="entries"></div>
+					<p class="cms-node-problems-heading"><?= escape(__('editor:problems-heading')) ?></p>
+					<div class="cms-node-problems-entries"></div>
 				</div>
 			</div>
 			<?php if ($embed !== null): ?>
@@ -226,7 +226,7 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 	// nested JSON body, so PHP's max_input_vars cannot truncate large forms. ?>
 	<form
 		id="node-editor-form"
-		class="panes"
+		class="cms-node-panes"
 		method="post"
 		action="<?= escape($action) ?>"
 		hx-swap="none"
@@ -235,13 +235,13 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 		<?= $contentLocales ? "data-content-locales='" . escape(json_encode($locales, $jsonFlags)) . "'" : '' ?>
 		novalidate>
 		<?php $this->include('component/csrf') ?>
-		<div class="pane">
-			<div class="pane-scroll">
-				<div class="inner">
+		<div class="cms-node-pane">
+			<div class="cms-node-pane-scroll">
+				<div class="cms-node-column">
 					<?php if ($status !== null): ?>
 						<?php $this->include('node/conflict', ['status' => $status]) ?>
 					<?php endif ?>
-					<div id="editor-errors" class="errors" hidden></div>
+					<div id="editor-errors" class="cms-errors" hidden></div>
 					<?php if ($embed !== null): ?>
 						<?php // The embedding application reads the main version: its saves apply and publish. ?>
 						<input type="hidden" name="apply" value="publish" />

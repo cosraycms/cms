@@ -352,19 +352,19 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					partials the editor uses, so these cannot fall out of step with it. The pane
 					ground is the editor's, so a state is judged against the colour it sits on.
 				</p>
-				<?php // Mirrors the editor: .inner is where its width cap lives and
+				<?php // Mirrors the editor: the column is where its width cap lives and
 
-				// .pane the ground it sits on, so a sample reads as it will. ?>
+				// the pane the ground it sits on, so a sample reads as it will. ?>
 				<div
 					class="cms-node"
 					data-sample="fields:pane"
 					data-content-locale-scope
 					data-content-locale="<?= escape($defaultLocale) ?>"
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
-					<div class="pane">
-						<div class="pane-scroll">
-							<div class="inner">
-								<div class="sheet">
+					<div class="cms-node-pane">
+						<div class="cms-node-pane-scroll">
+							<div class="cms-node-column">
+								<div class="cms-node-sheet">
 									<?php $this->include('component/content-locales', [
 										'locales' => $locales,
 										'selected' => $defaultLocale,
@@ -411,8 +411,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locale-scope
 					data-content-locale="de"
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
-					<div class="inner">
-						<div class="sheet">
+					<div class="cms-node-column">
+						<div class="cms-node-sheet">
 							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => 'de',
@@ -455,8 +455,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locale-scope
 					data-content-locale="<?= escape($defaultLocale) ?>"
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
-					<div class="inner">
-						<div class="sheet">
+					<div class="cms-node-column">
+						<div class="cms-node-sheet">
 							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => $defaultLocale,
@@ -491,8 +491,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locale-scope
 					data-content-locale="<?= escape($defaultLocale) ?>"
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
-					<div class="inner">
-						<div class="sheet">
+					<div class="cms-node-column">
+						<div class="cms-node-sheet">
 							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => $defaultLocale,
@@ -527,8 +527,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locale-scope
 					data-content-locale="<?= escape($defaultLocale) ?>"
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
-					<div class="inner">
-						<div class="sheet">
+					<div class="cms-node-column">
+						<div class="cms-node-sheet">
 							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => $defaultLocale,
@@ -572,8 +572,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locale-scope
 					data-content-locale="<?= escape($defaultLocale) ?>"
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
-					<div class="inner">
-						<div class="sheet">
+					<div class="cms-node-column">
+						<div class="cms-node-sheet">
 							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => $defaultLocale,
@@ -608,8 +608,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locale-scope
 					data-content-locale="<?= escape($defaultLocale) ?>"
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
-					<div class="inner">
-						<div class="sheet">
+					<div class="cms-node-column">
+						<div class="cms-node-sheet">
 							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => $defaultLocale,
@@ -645,8 +645,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locale-scope
 					data-content-locale="<?= escape($defaultLocale) ?>"
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
-					<div class="inner">
-						<div class="sheet">
+					<div class="cms-node-column">
+						<div class="cms-node-sheet">
 							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => $defaultLocale,

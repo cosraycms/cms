@@ -14,7 +14,7 @@ $oob = (bool) (u($oob ?? null) ?? false);
 $stages = array_column((array) ($status['stages'] ?? []), null, 'key');
 $draft = $stages['draft'] ?? null;
 ?>
-<div id="editor-discard" class="discard" <?= $oob ? 'hx-swap-oob="true"' : '' ?>>
+<div id="editor-discard" class="cms-node-discard" <?= $oob ? 'hx-swap-oob="true"' : '' ?>>
 	<?php if (($status['discardDraft'] ?? false) && is_array($draft)): ?>
 		<div
 			id="editor-discard-draft"

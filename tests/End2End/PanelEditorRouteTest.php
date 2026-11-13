@@ -946,7 +946,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// The form wraps both panes, so the inspector's settings submit with the
 		// content fields.
 		$this->assertStringContainsString('id="node-editor-form"', $html);
-		$this->assertStringContainsString('class="panes"', $html);
+		$this->assertStringContainsString('class="cms-node-panes"', $html);
 		$this->assertStringContainsString(
 			'action="/panel/node/panel-editor-a?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Boffset%5D=20&amp;list%5Blimit%5D=10"',
 			$html,

@@ -69,7 +69,7 @@ it('waits with creating until the required fields are filled', () => {
 	const host = document.querySelector<HTMLElement>('dialog.cms-modal .cms-modal-host')!;
 	host.innerHTML = `
 		<form data-create>
-			<div class="sheet"><input name="title" required></div>
+			<div class="cms-node-sheet"><input name="title" required></div>
 			<button type="submit">Create</button>
 		</form>`;
 	document.dispatchEvent(new CustomEvent('htmx:after:swap', { detail: { ctx: { target: host } } }));

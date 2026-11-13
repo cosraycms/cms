@@ -36,8 +36,8 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<input type="hidden" name="uid" value="<?= escape($uid) ?>" />
 	<input type="hidden" name="dialog" value="1" />
 	<div class="cms-modal-body">
-		<div id="editor-errors" class="errors" hidden></div>
-		<output id="editor-status" class="status" role="status" hidden></output>
+		<div id="editor-errors" class="cms-errors" hidden></div>
+		<output id="editor-status" class="cms-node-status" role="status" hidden></output>
 		<?php $this->include('field/sheet', [
 			'fields' => $node['fields'] ?? [],
 			'fieldsets' => $node['fieldsets'] ?? [],
@@ -49,7 +49,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			'pathSourceFields' => $pathSourceFields,
 		]) ?>
 		<?php // What creating means: an unpublished main version, or a record saved directly. ?>
-		<div class="hint">
+		<div class="cms-create-hint">
 			<?php if (!$record): ?>
 				<span class="cms-status-dots is-sm" aria-hidden="true">
 					<span class="mark" data-stage="main" data-state="unpublished"><?= Icon::render('globe') ?></span>

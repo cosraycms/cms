@@ -6,11 +6,11 @@ import { install as installContentLocales } from '../../src/behaviors/content-lo
 function editor(): void {
 	document.body.innerHTML = `
 		<div id="editor-problems" hidden>
-			<button type="button" popovertarget="editor-problems-menu"><span class="count"></span></button>
-			<div id="editor-problems-menu" popover="auto" data-action-menu><div class="entries"></div></div>
+			<button type="button" popovertarget="editor-problems-menu"><span class="cms-node-problems-count"></span></button>
+			<div id="editor-problems-menu" popover="auto" data-action-menu><div class="cms-node-problems-entries"></div></div>
 		</div>
 		<form id="node-editor-form">
-			<div id="editor-errors" class="errors" tabindex="-1" hidden></div>
+			<div id="editor-errors" class="cms-errors" tabindex="-1" hidden></div>
 			<div class="cms-field" data-field="title">
 				<label class="cms-field-label"><div><span class="cms-field-name">Title</span></div></label>
 				<div class="cms-field-control">
@@ -130,14 +130,14 @@ type Item = { path: unknown; message: string; code?: string };
 function respond(items: Item[]): HTMLElement {
 	const box = document.createElement('div');
 	box.id = 'editor-errors';
-	box.className = 'errors';
+	box.className = 'cms-errors';
 	box.tabIndex = -1;
 	box.hidden = items.length === 0;
 	box.innerHTML =
-		'<span class="mark">!</span><div class="summary"><p class="title">Not saved</p></div>';
+		'<span class="cms-errors-mark">!</span><div class="cms-errors-summary"><p class="cms-errors-title">Not saved</p></div>';
 
 	const list = document.createElement('ul');
-	list.className = 'issues';
+	list.className = 'cms-errors-issues';
 
 	for (const item of items) {
 		const entry = document.createElement('li');
@@ -156,7 +156,7 @@ function respond(items: Item[]): HTMLElement {
 		list.append(entry);
 	}
 
-	box.querySelector('.summary')!.append(list);
+	box.querySelector('.cms-errors-summary')!.append(list);
 	document.getElementById('editor-errors')?.replaceWith(box);
 	document.dispatchEvent(new CustomEvent('htmx:after:swap'));
 
@@ -164,7 +164,7 @@ function respond(items: Item[]): HTMLElement {
 }
 
 function chips(box: HTMLElement): string[] {
-	return Array.from(box.querySelectorAll('.chips [data-error-jump]'), (chip) =>
+	return Array.from(box.querySelectorAll('.cms-errors-chips [data-error-jump]'), (chip) =>
 		(chip.textContent ?? '').trim(),
 	);
 }
@@ -381,11 +381,10 @@ describe('errors behavior', () => {
 
 		expect(document.querySelectorAll('[data-invalid]').length).toBe(0);
 		expect(document.querySelectorAll('[data-error-message]').length).toBe(0);
-		expect(Array.from(box.querySelectorAll('.general li'), (item) => item.textContent)).toEqual([
-			'Gone is invalid',
-			'Something else failed',
-		]);
-		expect(document.querySelector('#editor-problems .count')?.textContent).toBe(
+		expect(
+			Array.from(box.querySelectorAll('.cms-errors-general li'), (item) => item.textContent),
+		).toEqual(['Gone is invalid', 'Something else failed']);
+		expect(document.querySelector('#editor-problems .cms-node-problems-count')?.textContent).toBe(
 			'editor:problems-plural',
 		);
 	});
@@ -555,7 +554,7 @@ describe('errors behavior', () => {
 		]);
 
 		expect(chips(box)).toEqual(['Title →', 'sub →']);
-		expect(box.querySelector('.lead')?.textContent).toBe('editor:errors-invalid-plural');
+		expect(box.querySelector('.cms-errors-lead')?.textContent).toBe('editor:errors-invalid-plural');
 		expect(
 			Array.from(
 				field('title').querySelectorAll('[data-error-message]'),
@@ -576,8 +575,8 @@ describe('errors behavior', () => {
 		expect(field('title').querySelector('[data-error-message]')?.textContent).toBe(
 			'editor:error-fill',
 		);
-		expect(box.querySelector('.lead')?.textContent).toBe('editor:errors-empty');
-		expect(box.querySelector('.title')?.textContent).toBe('Not saved');
+		expect(box.querySelector('.cms-errors-lead')?.textContent).toBe('editor:errors-empty');
+		expect(box.querySelector('.cms-errors-title')?.textContent).toBe('Not saved');
 	});
 
 	it('counts the open problems in the header and jumps from its menu', () => {
@@ -588,15 +587,17 @@ describe('errors behavior', () => {
 
 		const holder = document.getElementById('editor-problems')!;
 		const entries = Array.from(
-			holder.querySelectorAll<HTMLElement>('.entries [data-error-jump]'),
+			holder.querySelectorAll<HTMLElement>('.cms-node-problems-entries [data-error-jump]'),
 			(entry) => entry.textContent,
 		);
 
 		expect(holder.hidden).toBe(false);
-		expect(holder.querySelector('.count')?.textContent).toBe('editor:problems-plural');
+		expect(holder.querySelector('.cms-node-problems-count')?.textContent).toBe(
+			'editor:problems-plural',
+		);
 		expect(entries).toEqual(['Title – editor:error-missing→', 'Styled – editor:error-invalid→']);
 
-		holder.querySelector<HTMLElement>('.entries [data-error-jump]')?.click();
+		holder.querySelector<HTMLElement>('.cms-node-problems-entries [data-error-jump]')?.click();
 
 		expect(document.activeElement).toBe(input('content[title][value][de]'));
 	});
@@ -609,8 +610,8 @@ describe('errors behavior', () => {
 		input('content[styled][value][zxx]').dispatchEvent(new Event('change', { bubbles: true }));
 
 		expect(box.classList.contains('is-resolved')).toBe(true);
-		expect(box.querySelector('.lead')?.textContent).toBe('editor:errors-resolved');
-		expect(box.querySelector<HTMLElement>('.title')?.hidden).toBe(true);
+		expect(box.querySelector('.cms-errors-lead')?.textContent).toBe('editor:errors-resolved');
+		expect(box.querySelector<HTMLElement>('.cms-errors-title')?.hidden).toBe(true);
 		expect(document.getElementById('editor-problems')?.hidden).toBe(true);
 	});
 

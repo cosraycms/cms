@@ -357,7 +357,7 @@
 			visibility 0s;
 	}
 
-	.cms-node .panes,
+	.cms-node .cms-node-panes,
 	.cms-media-workspace {
 		overflow-x: clip;
 	}

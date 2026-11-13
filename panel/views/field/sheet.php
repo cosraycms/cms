@@ -73,7 +73,7 @@ foreach ($fields as $field) {
 }
 ?>
 
-<div class="sheet">
+<div class="cms-node-sheet">
 	<?php foreach ($sections as $section): ?>
 		<?php if (isset($section['fieldset'])): ?>
 			<?php $this->include('field/fieldset', [

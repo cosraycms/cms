@@ -29,7 +29,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 <?php // With issues to show, the summary box speaks for the failed save. ?>
 <output
 	id="editor-status"
-	class="status <?= $saved ? 'is-success' : 'is-error' ?>"
+	class="cms-node-status <?= $saved ? 'is-success' : 'is-error' ?>"
 	role="status"
 	<?= $saved ? 'data-saved="true"' : '' ?>
 	<?= $toast ? 'hidden' : '' ?>
@@ -42,15 +42,15 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 // the header's problem count, and keeps them current while the user edits. ?>
 <div
 	id="editor-errors"
-	class="errors"
+	class="cms-errors"
 	tabindex="-1"
 	hx-swap-oob="true"
 	<?= $saved || $issues === [] ? 'hidden' : 'role="alert"' ?>>
 	<?php if (!$saved && $issues !== []): ?>
-		<span class="mark" aria-hidden="true">!</span>
-		<div class="summary">
-			<p class="title"><?= escape(__('editor:not-saved')) ?></p>
-			<ul class="issues">
+		<span class="cms-errors-mark" aria-hidden="true">!</span>
+		<div class="cms-errors-summary">
+			<p class="cms-errors-title"><?= escape(__('editor:not-saved')) ?></p>
+			<ul class="cms-errors-issues">
 				<?php foreach ($issues as $issue): ?>
 					<?php $path = $issue['path'] ?? null; ?>
 					<li>

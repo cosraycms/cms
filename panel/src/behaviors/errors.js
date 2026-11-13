@@ -482,8 +482,8 @@ function jumpTo(problem, button) {
 function renderBox(box) {
 	const open = problems.filter((problem) => problem.open);
 	const resolved = open.length === 0 && general.length === 0;
-	const summary = box.querySelector(':scope > .summary');
-	const mark = box.querySelector(':scope > .mark');
+	const summary = box.querySelector(':scope > .cms-errors-summary');
+	const mark = box.querySelector(':scope > .cms-errors-mark');
 
 	if (!summary) {
 		return;
@@ -495,11 +495,13 @@ function renderBox(box) {
 		mark.textContent = resolved ? '✓' : '!';
 	}
 
-	summary.querySelector(':scope > .title')?.toggleAttribute('hidden', resolved);
-	summary.querySelectorAll(':scope > :not(.title)').forEach((element) => element.remove());
+	summary.querySelector(':scope > .cms-errors-title')?.toggleAttribute('hidden', resolved);
+	summary
+		.querySelectorAll(':scope > :not(.cms-errors-title)')
+		.forEach((element) => element.remove());
 
 	if (resolved) {
-		summary.append(create('p', 'lead', __('editor:errors-resolved')));
+		summary.append(create('p', 'cms-errors-lead', __('editor:errors-resolved')));
 
 		return;
 	}
@@ -509,11 +511,11 @@ function renderBox(box) {
 		const lead = empty
 			? __n('editor:errors-empty', 'editor:errors-empty-plural', open.length)
 			: __n('editor:errors-invalid', 'editor:errors-invalid-plural', open.length);
-		const chips = create('ul', 'chips');
+		const chips = create('ul', 'cms-errors-chips');
 
 		for (const problem of open) {
-			const chip = jumpTo(problem, create('button', 'chip', `${problem.label} `));
-			chip.append(create('span', 'arrow', '→'));
+			const chip = jumpTo(problem, create('button', 'cms-errors-chip', `${problem.label} `));
+			chip.append(create('span', undefined, '→'));
 			chip.lastElementChild?.setAttribute('aria-hidden', 'true');
 
 			const item = create('li');
@@ -521,11 +523,11 @@ function renderBox(box) {
 			chips.append(item);
 		}
 
-		summary.append(create('p', 'lead', lead), chips);
+		summary.append(create('p', 'cms-errors-lead', lead), chips);
 	}
 
 	if (general.length > 0) {
-		const list = create('ul', 'general');
+		const list = create('ul', 'cms-errors-general');
 
 		for (const message of general) {
 			list.append(create('li', undefined, message));
@@ -552,13 +554,13 @@ function renderProblems() {
 		closeMenu(menu);
 	}
 
-	const count = holder.querySelector('.count');
+	const count = holder.querySelector('.cms-node-problems-count');
 
 	if (count) {
 		count.textContent = __n('editor:problems', 'editor:problems-plural', total);
 	}
 
-	const entries = holder.querySelector('.entries');
+	const entries = holder.querySelector('.cms-node-problems-entries');
 
 	if (!entries) {
 		return;
@@ -570,9 +572,9 @@ function renderProblems() {
 		const short = problem.issues.every((issue) => issue.empty)
 			? __('editor:error-missing')
 			: __('editor:error-invalid');
-		const text = create('span', 'text');
+		const text = create('span', 'cms-node-problems-text');
 		text.append(create('strong', undefined, problem.label), ` – ${short}`);
-		const arrow = create('span', 'arrow', '→');
+		const arrow = create('span', 'cms-node-problems-arrow', '→');
 		arrow.setAttribute('aria-hidden', 'true');
 		const button = jumpTo(problem, create('button'));
 		button.append(text, arrow);
@@ -580,7 +582,7 @@ function renderProblems() {
 	}
 
 	for (const message of general) {
-		entries.append(create('p', 'general', message));
+		entries.append(create('p', 'cms-node-problems-general', message));
 	}
 }
 
@@ -608,7 +610,7 @@ function paint(box) {
 		return;
 	}
 
-	box.querySelectorAll('.issues > li').forEach((item) => {
+	box.querySelectorAll('.cms-errors-issues > li').forEach((item) => {
 		const button = item.querySelector('[data-error-path]');
 		const message = (button ?? item).textContent?.trim() ?? '';
 		const path = button && parsePath(button);

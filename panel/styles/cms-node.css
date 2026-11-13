@@ -23,7 +23,7 @@
 		}
 	}
 
-	& .status {
+	& .cms-node-status {
 		font-size: var(--cms-font-size-sm);
 		font-weight: 500;
 
@@ -41,11 +41,11 @@
 	}
 
 	/* Open issues of a failed save, next to the actions they block. */
-	& .problems[hidden] {
+	& .cms-node-problems[hidden] {
 		display: none;
 	}
 
-	& .cms-problems {
+	& .cms-node-problems-button {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--cms-space-1-5);
@@ -69,70 +69,101 @@
 			outline: var(--cms-focus-outline);
 			outline-offset: var(--cms-focus-offset);
 		}
-
-		& > .mark {
-			display: grid;
-			place-items: center;
-			width: 1rem;
-			height: 1rem;
-			border-radius: var(--cms-radius-full);
-			background: var(--cms-color-danger);
-			color: var(--cms-color-text-on-fill);
-			font-size: 0.6875rem;
-			font-weight: 700;
-			line-height: 1;
-		}
 	}
 
-	& .cms-problems-menu {
+	& .cms-node-problems-mark {
+		display: grid;
+		place-items: center;
+		width: 1rem;
+		height: 1rem;
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-danger);
+		color: var(--cms-color-text-on-fill);
+		font-size: 0.6875rem;
+		font-weight: 700;
+		line-height: 1;
+	}
+
+	& .cms-node-problems-menu {
 		--width: 18rem;
-
-		& .heading {
-			margin: 0;
-			padding: var(--cms-space-1-5) var(--cms-space-2-5);
-			color: var(--cms-color-text-subtle);
-			font-size: var(--cms-font-size-xs);
-		}
-
-		& .entries {
-			display: contents;
-		}
 
 		& button {
 			justify-content: space-between;
 		}
+	}
 
-		& .text {
-			min-width: 0;
-			color: var(--cms-color-text-muted);
-			overflow-wrap: anywhere;
+	& .cms-node-problems-heading {
+		margin: 0;
+		padding: var(--cms-space-1-5) var(--cms-space-2-5);
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+	}
 
-			& strong {
-				color: var(--cms-color-text);
-				font-weight: 600;
-			}
-		}
+	& .cms-node-problems-entries {
+		display: contents;
+	}
 
-		& .arrow {
-			color: var(--cms-color-text-faint);
-		}
+	& .cms-node-problems-text {
+		min-width: 0;
+		color: var(--cms-color-text-muted);
+		overflow-wrap: anywhere;
 
-		& .general {
-			margin: 0;
-			padding: var(--cms-space-1-5) var(--cms-space-2-5);
-			color: var(--cms-color-danger-text);
-			font-size: var(--cms-font-size-sm);
+		& strong {
+			color: var(--cms-color-text);
+			font-weight: 600;
 		}
 	}
 
-	& .panes {
+	& .cms-node-problems-arrow {
+		color: var(--cms-color-text-faint);
+	}
+
+	& .cms-node-problems-general {
+		margin: 0;
+		padding: var(--cms-space-1-5) var(--cms-space-2-5);
+		color: var(--cms-color-danger-text);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	/* The head's way into the main version and the questions before discarding
+	   take no room of their own: their buttons sit in the head's row. */
+	& .cms-node-apply {
+		display: contents;
+
+		& [hidden] {
+			display: none;
+		}
+	}
+
+	& .cms-node-discard {
+		display: contents;
+	}
+
+	/* The head's apply menu: each entry says what applying does. */
+	& .cms-node-apply-menu {
+		--width: 17rem;
+
+		& button {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.125rem;
+		}
+	}
+
+	& .cms-node-apply-help {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 400;
+	}
+
+	& .cms-node-panes {
 		display: flex;
 		align-items: stretch;
 		flex: 1 1 auto;
 		min-height: 0;
 	}
 
-	& .pane {
+	& .cms-node-pane {
 		display: flex;
 		flex: 1 1 auto;
 		border-start-start-radius: var(--cms-pane-radius-start);
@@ -147,7 +178,7 @@
 		min-height: 0;
 	}
 
-	.pane-scroll {
+	& .cms-node-pane-scroll {
 		container: content / inline-size;
 		flex: 1 1 auto;
 		min-width: 0;
@@ -157,7 +188,7 @@
 		overscroll-behavior: contain;
 	}
 
-	& .inner {
+	& .cms-node-column {
 		width: 100%;
 		max-width: var(--cms-editor-max-width);
 		margin-inline: auto;
@@ -187,25 +218,25 @@
 		display: none;
 	}
 
-	& .sheet {
+	& .cms-node-sheet {
 		display: flex;
 		flex-direction: column;
 		gap: var(--cms-space-7);
 
 		& > * + *,
-		& + .sheet {
+		& + .cms-node-sheet {
 			padding-top: var(--cms-space-7);
 			border-top: 1px solid var(--cms-color-border-soft);
 		}
 
-		& + .sheet {
+		& + .cms-node-sheet {
 			margin-top: var(--cms-space-7);
 		}
 	}
 
 	/* The user's edits started from an older state than one saved meanwhile:
 	   the editor's one banner, above the fields. */
-	& .conflict {
+	& .cms-node-conflict {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
@@ -221,28 +252,28 @@
 			display: none;
 		}
 
-		& .copy {
-			flex: 1 1 18rem;
-		}
-
 		& p {
 			margin: 0;
 		}
-
-		& .title {
-			color: var(--cms-color-danger-text);
-			font-size: var(--cms-font-size-sm);
-			font-weight: 600;
-		}
-
-		& .help {
-			color: var(--cms-color-text);
-			font-size: var(--cms-font-size-xs);
-			line-height: 1.4;
-		}
 	}
 
-	& .preview {
+	& .cms-node-conflict-copy {
+		flex: 1 1 18rem;
+	}
+
+	& .cms-node-conflict-title {
+		color: var(--cms-color-danger-text);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 600;
+	}
+
+	& .cms-node-conflict-help {
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.4;
+	}
+
+	& .cms-node-preview {
 		position: fixed;
 		top: 0;
 		left: 0;
@@ -265,42 +296,38 @@
 			/* Site content, not panel chrome: it does not follow the theme. */
 			background: var(--cms-color-white);
 		}
+	}
 
-		& .close {
-			position: absolute;
-			top: var(--cms-space-2);
-			right: var(--cms-space-2);
-			padding: var(--cms-space-1) var(--cms-space-4);
-			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-danger);
-			color: var(--cms-color-text-on-fill);
+	& .cms-node-preview-close {
+		position: absolute;
+		top: var(--cms-space-2);
+		right: var(--cms-space-2);
+		padding: var(--cms-space-1) var(--cms-space-4);
+		border-radius: var(--cms-radius-md);
+		background-color: var(--cms-color-danger);
+		color: var(--cms-color-text-on-fill);
 
-			&:hover {
-				background-color: var(--cms-color-danger-hover);
-			}
+		&:hover {
+			background-color: var(--cms-color-danger-hover);
 		}
 	}
 }
 
 @media (width < 40rem), (height < 30rem) {
 	.cms-node {
-		& .panes {
+		& .cms-node-panes {
 			flex-direction: column;
 		}
 
-		& .pane {
+		& .cms-node-pane {
 			padding: 0;
 			border-radius: 0;
 			box-shadow: none;
+		}
 
-			& > .pane-scroll {
-				padding: var(--cms-space-4);
-				overflow: visible;
-
-				&::before {
-					display: none;
-				}
-			}
+		& .cms-node-pane-scroll {
+			padding: var(--cms-space-4);
+			overflow: visible;
 		}
 	}
 }
@@ -317,161 +344,5 @@
 @container content (width <= 53rem) {
 	.cms-node .cms-field-width-toggle {
 		display: none;
-	}
-}
-
-/* The summary of a failed save: what keeps the entry from saving, each
-   field a chip that jumps to it. */
-:is(.cms-node, .cms-create) .errors {
-	display: flex;
-	align-items: flex-start;
-	gap: var(--cms-space-3-5);
-	margin-bottom: var(--cms-space-6);
-	padding: var(--cms-space-4);
-	border: 1px solid var(--cms-color-danger-border-soft);
-	border-radius: var(--cms-radius-lg);
-	background: var(--cms-color-surface);
-	font-size: var(--cms-font-size-sm);
-
-	&[hidden] {
-		display: none;
-	}
-
-	&:focus-visible {
-		outline: var(--cms-focus-outline);
-		outline-offset: var(--cms-focus-offset);
-	}
-
-	& > .mark {
-		flex: none;
-		display: grid;
-		place-items: center;
-		width: 1.375rem;
-		height: 1.375rem;
-		border-radius: var(--cms-radius-full);
-		background: var(--cms-color-danger);
-		color: var(--cms-color-text-on-fill);
-		font-size: 0.8125rem;
-		font-weight: 700;
-		line-height: 1;
-	}
-
-	& .summary {
-		display: flex;
-		flex: 1 1 auto;
-		flex-direction: column;
-		gap: var(--cms-space-2-5);
-		min-width: 0;
-		padding-top: 0.125rem;
-	}
-
-	& .title {
-		margin: 0;
-		font-weight: 600;
-
-		&[hidden] {
-			display: none;
-		}
-	}
-
-	/* The lead belongs to the title above it, not to the chips below. */
-	& .title + .lead {
-		margin-top: calc(0.125rem - var(--cms-space-2-5));
-	}
-
-	& .lead {
-		margin: 0;
-		color: var(--cms-color-text-muted);
-	}
-
-	& .chips {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--cms-space-2);
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-
-	& .chip {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--cms-space-1-5);
-		min-height: 1.75rem;
-		padding: 0 var(--cms-space-2-5);
-		border: 1px solid var(--cms-color-danger-border-soft);
-		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-danger-surface);
-		color: var(--cms-color-danger-text);
-		font: inherit;
-		text-align: start;
-		cursor: pointer;
-
-		&:hover {
-			background: color-mix(in oklch, var(--cms-color-danger), var(--cms-color-surface) 84%);
-		}
-
-		&:focus-visible {
-			outline: var(--cms-focus-outline);
-			outline-offset: var(--cms-focus-offset);
-		}
-	}
-
-	& .general {
-		margin: 0;
-		padding-left: var(--cms-space-4);
-		color: var(--cms-color-danger-text);
-	}
-
-	&.is-resolved {
-		align-items: center;
-		border-color: color-mix(in oklch, var(--cms-color-success), transparent 70%);
-
-		& > .mark {
-			background: var(--cms-color-success);
-		}
-
-		& .summary {
-			padding-top: 0;
-		}
-
-		& .lead {
-			color: var(--cms-color-success-text);
-		}
-	}
-}
-
-/* The create dialog: a few required fields and what creating means. */
-.cms-create {
-	& .cms-modal-body {
-		display: flex;
-		flex-direction: column;
-		gap: var(--cms-space-5);
-	}
-
-	& .errors {
-		margin-bottom: 0;
-	}
-
-	& .hint {
-		display: flex;
-		align-items: flex-start;
-		gap: var(--cms-space-3);
-		padding: var(--cms-space-3) var(--cms-space-4);
-		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-canvas);
-		color: var(--cms-color-text-muted);
-		font-size: var(--cms-font-size-sm);
-		line-height: 1.45;
-
-		& .cms-status-dots {
-			flex: none;
-			margin-top: 0.3rem;
-		}
-
-		& p {
-			margin: 0;
-		}
 	}
 }

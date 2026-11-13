@@ -40,6 +40,8 @@
 @import './cms-block-actions.css' layer(panel);
 @import './cms-block-picker.css' layer(panel);
 @import './cms-node.css' layer(panel);
+@import './cms-errors.css' layer(panel);
+@import './cms-create.css' layer(panel);
 @import './cms-inspector.css' layer(panel);
 @import './cms-tabs.css' layer(panel);
 @import './cms-modal.css' layer(panel);

@@ -614,32 +614,3 @@ button.cms-status-dots > .tooltip {
 		font-variant-numeric: tabular-nums;
 	}
 }
-
-/* The head's apply menu: each entry says what applying does. */
-.cms-action-menu.cms-apply-menu {
-	--width: 17rem;
-
-	& button {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 0.125rem;
-	}
-
-	& .help {
-		color: var(--cms-color-text-subtle);
-		font-size: var(--cms-font-size-xs);
-		font-weight: 400;
-	}
-}
-
-.cms-node > .cms-page-head .apply {
-	display: contents;
-
-	& [hidden] {
-		display: none;
-	}
-}
-
-.cms-node > .discard {
-	display: contents;
-}

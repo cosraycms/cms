@@ -41,7 +41,9 @@ function loaded(host) {
 
 	ready(form);
 	form.addEventListener('input', () => ready(form));
-	const first = form.querySelector('.sheet :is(input, textarea, select):not([type="hidden"])');
+	const first = form.querySelector(
+		'.cms-node-sheet :is(input, textarea, select):not([type="hidden"])',
+	);
 
 	if (first instanceof HTMLElement) {
 		first.focus();

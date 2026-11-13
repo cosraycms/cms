@@ -15,7 +15,7 @@ test('a failed save names the open fields and follows the edits', async ({ page 
 	await expect(summary).toBeVisible();
 	await expect(summary.getByText('Entry was not saved')).toBeVisible();
 	await expect(summary.getByText('2 required fields are empty:')).toBeVisible();
-	await expect(summary.locator('.chip')).toHaveText(['Title →', 'Date →']);
+	await expect(summary.locator('.cms-errors-chip')).toHaveText(['Title →', 'Date →']);
 	await expect(title).toBeFocused();
 	await expect(title).toHaveAttribute('aria-invalid', 'true');
 	await expect(page.locator('.cms-field[data-field="title"] .cms-field-error')).toHaveText(
@@ -35,7 +35,7 @@ test('a failed save names the open fields and follows the edits', async ({ page 
 	await expect(date).toBeFocused();
 
 	await title.fill('Back again');
-	await expect(summary.locator('.chip')).toHaveText(['Date →']);
+	await expect(summary.locator('.cms-errors-chip')).toHaveText(['Date →']);
 	await expect(problems.getByRole('button', { name: '1 problem' })).toBeVisible();
 	await expect(title).not.toHaveAttribute('aria-invalid');
 

@@ -8,8 +8,8 @@ use function Cosray\escape;
 
 $preview = (string) u($preview);
 ?>
-<div id="editor-preview" class="preview" hx-swap-oob="true">
-	<button type="button" class="close" data-overlay-close>
+<div id="editor-preview" class="cms-node-preview" hx-swap-oob="true">
+	<button type="button" class="cms-node-preview-close" data-overlay-close>
 		<?= escape(__('editor:close')) ?>
 	</button>
 	<iframe src="<?= escape($preview) ?>" title="<?= escape(__('editor:preview')) ?>"></iframe>

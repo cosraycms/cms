@@ -24,7 +24,7 @@ $items = ['draft' => 'people', 'mine' => 'person'];
 ?>
 <div
 	id="editor-apply"
-	class="apply"
+	class="cms-node-apply"
 	data-published="<?= $published ? 'true' : 'false' ?>"
 	<?= $oob ? 'hx-swap-oob="true"' : '' ?>>
 	<?php if (!$published): ?>
@@ -66,13 +66,13 @@ $items = ['draft' => 'people', 'mine' => 'person'];
 			</button>
 			<div
 				id="editor-apply-menu"
-				class="cms-action-menu cms-apply-menu"
+				class="cms-action-menu cms-node-apply-menu"
 				popover="auto"
 				data-action-menu
 				data-align="end">
 				<button type="submit" form="node-editor-form" name="apply" value="publish" data-editor-submit>
-					<span class="label"><?= escape(__('editor:apply-publish')) ?></span>
-					<span class="help"><?= escape(__('editor:apply-publish-help')) ?></span>
+					<span><?= escape(__('editor:apply-publish')) ?></span>
+					<span class="cms-node-apply-help"><?= escape(__('editor:apply-publish-help')) ?></span>
 				</button>
 			</div>
 		<?php endif ?>

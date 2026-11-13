@@ -380,7 +380,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 	{
 		// The editor is a server-rendered form regardless of the panel static assets.
 		$this->assertStringContainsString('id="node-editor-form"', $html);
-		$this->assertStringContainsString('class="panes"', $html);
+		$this->assertStringContainsString('class="cms-node-panes"', $html);
 		$this->assertStringContainsString(
 			'action="/panel/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bq%5D=Hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Bopen%5D=panel-create-parent&amp;parent=panel-create-parent"',
 			$html,

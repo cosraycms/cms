@@ -777,11 +777,11 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		// stay the ones the editor styles — otherwise a save silently strips the
 		// styling off the element it swaps.
 		$this->assertHtmlNodeExists(
-			'//*[@id="editor-status" and @hx-swap-oob="true" and contains(concat(" ", normalize-space(@class), " "), " status ") and contains(concat(" ", normalize-space(@class), " "), " is-success ")]',
+			'//*[@id="editor-status" and @hx-swap-oob="true" and contains(concat(" ", normalize-space(@class), " "), " cms-node-status ") and contains(concat(" ", normalize-space(@class), " "), " is-success ")]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//*[@id="editor-errors" and contains(concat(" ", normalize-space(@class), " "), " errors ")]',
+			'//*[@id="editor-errors" and contains(concat(" ", normalize-space(@class), " "), " cms-errors ")]',
 			$html,
 		);
 
@@ -877,7 +877,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertHtmlNodeExists(
-			'//*[@id="editor-status" and contains(concat(" ", normalize-space(@class), " "), " status ") and contains(concat(" ", normalize-space(@class), " "), " is-error ")]',
+			'//*[@id="editor-status" and contains(concat(" ", normalize-space(@class), " "), " cms-node-status ") and contains(concat(" ", normalize-space(@class), " "), " is-error ")]',
 			$html,
 		);
 		// The box is worth nothing if it arrives empty or hidden, which is

@@ -15,7 +15,7 @@ afterEach(() => {
 describe('editor chrome', () => {
 	it('empties and hides the preview overlay without removing its anchor', () => {
 		document.body.innerHTML = `
-			<div id="editor-preview" class="cms-preview is-open">
+			<div id="editor-preview" class="cms-node-preview">
 				<button type="button" data-overlay-close><span>Close</span></button>
 				<iframe></iframe>
 			</div>
