@@ -277,7 +277,7 @@ describe('YouTube control', () => {
 				.querySelector('form')!
 				.insertAdjacentHTML(
 					'afterbegin',
-					`<div id="editor-errors" tabindex="-1"><span class="mark">!</span><div class="summary"><ul class="issues"><li><button type="button" data-error-path='["content","video","value","zxx"]' data-error-code="missing">Video is required</button></li></ul></div></div>`,
+					`<div id="editor-errors" class="cms-errors" tabindex="-1"><span class="cms-errors-mark">!</span><div class="cms-errors-summary"><ul class="cms-errors-issues"><li><button type="button" data-error-path='["content","video","value","zxx"]' data-error-code="missing">Video is required</button></li></ul></div></div>`,
 				);
 			document.dispatchEvent(new Event('htmx:after:swap'));
 			document.querySelector<HTMLButtonElement>('[data-error-jump]')!.click();
