@@ -131,10 +131,10 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 				<h3 class="heading"><?= escape(__('status:visibility')) ?></h3>
 				<span class="instant"><?= Icon::render('lightning') ?><?= escape(__('status:instant')) ?></span>
 			</div>
-			<label class="toggle">
-				<span class="copy">
-					<span class="title"><?= escape(__('editor:published-label')) ?></span>
-					<span class="help"><?= escape(__('editor:published-help')) ?></span>
+			<label class="cms-inspector-toggle">
+				<span class="cms-inspector-copy">
+					<span class="cms-inspector-title"><?= escape(__('editor:published-label')) ?></span>
+					<span class="cms-inspector-help"><?= escape(__('editor:published-help')) ?></span>
 				</span>
 				<input
 					id="editor-published-switch"
@@ -146,10 +146,10 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 					data-editor-state
 					<?= $visibility['published'] ? 'checked' : '' ?> />
 			</label>
-			<label class="toggle">
-				<span class="copy">
-					<span class="title"><?= escape(__('editor:listed-label')) ?></span>
-					<span class="help"><?= escape(__('editor:listed-help')) ?></span>
+			<label class="cms-inspector-toggle">
+				<span class="cms-inspector-copy">
+					<span class="cms-inspector-title"><?= escape(__('editor:listed-label')) ?></span>
+					<span class="cms-inspector-help"><?= escape(__('editor:listed-help')) ?></span>
 				</span>
 				<input
 					type="checkbox"

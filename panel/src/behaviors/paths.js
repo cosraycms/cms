@@ -83,7 +83,7 @@ function render(row, path, note, derived) {
  */
 function offer(input, suggestion, path) {
 	const offer = /** @type {HTMLElement | null} */ (
-		input.closest('.field')?.querySelector('[data-path-suggestion]')
+		input.closest('.cms-inspector-field')?.querySelector('[data-path-suggestion]')
 	);
 
 	if (!offer) {
@@ -180,7 +180,7 @@ function click(event) {
 		return;
 	}
 
-	const field = target.closest('[data-path-use]')?.closest('.field');
+	const field = target.closest('[data-path-use]')?.closest('.cms-inspector-field');
 	const control = /** @type {HTMLInputElement | null} */ (field?.querySelector(INPUT));
 	const suggestion = control ? generated()[control.dataset.pathLocale ?? ''] : undefined;
 

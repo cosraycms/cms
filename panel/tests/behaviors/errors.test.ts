@@ -104,12 +104,12 @@ function editor(): void {
 					<section data-paths>
 						<button type="button" data-dialog-open="paths">Edit</button>
 						<dialog data-dialog="paths">
-							<div class="field"><input name="paths[en]" data-path-locale="en" type="text" /></div>
+							<div class="cms-inspector-field"><input name="paths[en]" data-path-locale="en" type="text" /></div>
 						</dialog>
 					</section>
 				</div>
 				<div id="panel-advanced" role="tabpanel" hidden>
-					<div class="field"><input name="handle" type="text" /></div>
+					<div class="cms-inspector-field"><input name="handle" type="text" /></div>
 				</div>
 			</aside>
 		</form>`;

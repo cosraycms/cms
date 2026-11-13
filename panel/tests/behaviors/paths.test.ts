@@ -32,7 +32,7 @@ function mount(values: Record<string, string>, generated: Record<string, string>
 				<dialog data-dialog="paths">
 					${LOCALES.map(
 						(locale) => `
-							<div class="field">
+							<div class="cms-inspector-field">
 								<input name="paths[${locale}]" data-path-locale="${locale}" value="${values[locale] ?? ''}" />
 								<div data-path-suggestion hidden>
 									<span data-path-suggestion-value></span>
@@ -65,7 +65,7 @@ function input(locale: string): HTMLInputElement {
 
 function suggestion(locale: string): string | null {
 	const offer = input(locale)
-		.closest('.field')!
+		.closest('.cms-inspector-field')!
 		.querySelector<HTMLElement>('[data-path-suggestion]')!;
 
 	return offer.hidden ? null : offer.textContent!.replace('Use', '').trim();
@@ -112,7 +112,10 @@ describe('paths behavior', () => {
 		expect(suggestion('en')).toBeNull();
 		expect(suggestion('it')).toBe('/notizie/nuovo');
 
-		input('it').closest('.field')!.querySelector<HTMLElement>('[data-path-use]')!.click();
+		input('it')
+			.closest('.cms-inspector-field')!
+			.querySelector<HTMLElement>('[data-path-use]')!
+			.click();
 
 		expect(input('it').value).toBe('/notizie/nuovo');
 		expect(inputs).toBe(1);

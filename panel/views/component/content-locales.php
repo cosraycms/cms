@@ -27,11 +27,11 @@ if (count($locales) < 2) {
 }
 ?>
 <?php if ($labelled): ?>
-	<div class="field">
+	<div class="cms-content-locales-field">
 		<?php if ($radios): ?>
-			<span id="<?= escape($labelId) ?>" class="label"><?= escape($title) ?></span>
+			<span id="<?= escape($labelId) ?>" class="cms-content-locales-label"><?= escape($title) ?></span>
 		<?php else: ?>
-			<label class="label" for="<?= escape($controlId) ?>"><?= escape($title) ?></label>
+			<label class="cms-content-locales-label" for="<?= escape($controlId) ?>"><?= escape($title) ?></label>
 		<?php endif ?>
 <?php endif ?>
 <?php if ($radios): ?>

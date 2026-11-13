@@ -126,10 +126,10 @@ unset($search['page']);
 				aria-label="<?= escape(__('media:file-details')) ?>"
 				data-inspector
 				<?= $collapsed ? 'data-collapsed' : '' ?>>
-				<div class="strip">
+				<div class="cms-inspector-strip">
 					<button
 						type="button"
-						class="tool"
+						class="cms-inspector-tool"
 						title="<?= escape(__('media:details-show')) ?>"
 						aria-label="<?= escape(__('media:details-show')) ?>"
 						data-inspector-expand>
@@ -142,19 +142,19 @@ unset($search['page']);
 						'strip' => true,
 					]) ?>
 				</div>
-				<div class="drawer">
-					<div class="top">
-						<span class="heading"><?= escape(__('media:file-details')) ?></span>
+				<div class="cms-inspector-drawer">
+					<div class="cms-inspector-top">
+						<span class="cms-inspector-heading"><?= escape(__('media:file-details')) ?></span>
 						<button
 							type="button"
-							class="tool"
+							class="cms-inspector-tool"
 							title="<?= escape(__('media:details-hide')) ?>"
 							aria-label="<?= escape(__('media:details-hide')) ?>"
 							data-inspector-collapse>
 							<?= Icon::render('layout-sidebar-inset-reverse') ?>
 						</button>
 					</div>
-					<div class="scroll">
+					<div class="cms-inspector-scroll">
 						<?php $this->include('component/content-locales', [
 							'locales' => $contentLocales,
 							'selected' => $defaultLocale,

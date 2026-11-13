@@ -9,13 +9,13 @@ function editor(collapsed = false): void {
 		<span id="editor-dirty" hidden></span>
 		<form id="node-editor-form">
 			<aside data-tabs data-inspector ${collapsed ? 'data-collapsed' : ''}>
-				<div class="strip">
+				<div class="cms-inspector-strip">
 					<button type="button" data-inspector-expand>Show</button>
 					<input type="checkbox" data-inspector-published data-editor-state />
 					<button type="button" data-inspector-open="tab-status">Status</button>
 					<button type="button" data-inspector-open="tab-advanced">Advanced</button>
 				</div>
-				<div class="drawer">
+				<div class="cms-inspector-drawer">
 					<div role="tablist">
 						<button type="button" role="tab" id="tab-status" aria-controls="panel-status" aria-selected="true" tabindex="0">Status</button>
 						<button type="button" role="tab" id="tab-advanced" aria-controls="panel-advanced" aria-selected="false" tabindex="-1">Advanced</button>

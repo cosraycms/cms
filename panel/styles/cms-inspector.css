@@ -24,7 +24,7 @@
 		width: var(--cms-inspector-collapsed-width);
 	}
 
-	& .drawer {
+	& .cms-inspector-drawer {
 		position: absolute;
 		inset-block: 0;
 		left: 0;
@@ -36,7 +36,7 @@
 			visibility 0s;
 	}
 
-	&[data-collapsed] .drawer {
+	&[data-collapsed] .cms-inspector-drawer {
 		opacity: 0;
 		visibility: hidden;
 		transition:
@@ -44,7 +44,7 @@
 			visibility 0s 200ms;
 	}
 
-	& .strip {
+	& .cms-inspector-strip {
 		position: absolute;
 		inset-block: 0;
 		right: 0;
@@ -63,7 +63,7 @@
 			visibility 0s 100ms;
 	}
 
-	&[data-collapsed] .strip {
+	&[data-collapsed] .cms-inspector-strip {
 		opacity: 1;
 		visibility: visible;
 		transition:
@@ -71,7 +71,7 @@
 			visibility 0s;
 	}
 
-	& .shortcuts {
+	& .cms-inspector-shortcuts {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -80,7 +80,7 @@
 		border-top: 1px solid var(--cms-color-border-soft);
 	}
 
-	& .tool {
+	& .cms-inspector-tool {
 		--cms-icon-size: 1rem;
 
 		display: inline-flex;
@@ -108,7 +108,7 @@
 	}
 
 	/* The line sits under the whole row, so the tabs' underline overlaps it. */
-	& .top {
+	& .cms-inspector-top {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-2);
@@ -124,13 +124,13 @@
 
 		/* Without tabs the heading sets the row's height, so it repeats a
 		   tab's vertical padding. */
-		& > .heading {
+		& > .cms-inspector-heading {
 			flex: 1 1 auto;
 			padding-block: var(--cms-space-3);
 		}
 	}
 
-	& .scroll {
+	& .cms-inspector-scroll {
 		flex: 1 1 auto;
 		min-height: 0;
 		padding: var(--cms-space-5);
@@ -138,33 +138,36 @@
 		overscroll-behavior: contain;
 	}
 
-	& .section {
+	& .cms-inspector-section {
 		display: flex;
 		flex-direction: column;
 		gap: var(--cms-space-4);
 
-		& + .section {
+		& + .cms-inspector-section {
 			margin-top: var(--cms-space-6);
 			padding-top: var(--cms-space-6);
 			border-top: 1px solid var(--cms-color-border-soft);
 		}
 	}
 
-	& .field {
+	/* The content-language selector's labelled form lays out like a field here. */
+	& .cms-inspector-field,
+	& .cms-content-locales-field {
 		display: flex;
 		flex-direction: column;
 		gap: var(--cms-space-1-5);
 		min-width: 0;
 	}
 
-	& .heading {
+	& .cms-inspector-heading {
 		margin: 0;
 		color: var(--cms-color-text);
 		font-size: var(--cms-font-size-sm);
 		font-weight: 600;
 	}
 
-	& .label {
+	& .cms-inspector-label,
+	& .cms-content-locales-label {
 		color: var(--cms-color-text-label);
 		font-size: var(--cms-font-size-sm);
 		font-weight: 500;
@@ -178,7 +181,7 @@
 		}
 	}
 
-	& .facts {
+	& .cms-inspector-facts {
 		display: grid;
 		grid-template-columns: auto 1fr;
 		gap: var(--cms-space-2) var(--cms-space-3);
@@ -198,14 +201,14 @@
 		}
 	}
 
-	& .bar {
+	& .cms-inspector-bar {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--cms-space-3);
 	}
 
-	& .paths {
+	& .cms-inspector-paths {
 		display: flex;
 		flex-direction: column;
 		gap: var(--cms-space-3);
@@ -226,18 +229,18 @@
 			color: var(--cms-color-text);
 			font-size: var(--cms-font-size-sm);
 		}
-
-		& .is-derived .url {
-			color: var(--cms-color-text-subtle);
-		}
-
-		& .hint {
-			color: var(--cms-color-text-subtle);
-			font-size: var(--cms-font-size-xs);
-		}
 	}
 
-	& .suggestion {
+	& .cms-inspector-path.is-derived .cms-inspector-url {
+		color: var(--cms-color-text-subtle);
+	}
+
+	& .cms-inspector-hint {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+	}
+
+	& .cms-inspector-suggestion {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -249,14 +252,14 @@
 		&[hidden] {
 			display: none;
 		}
-
-		& .text {
-			min-width: 0;
-			overflow-wrap: anywhere;
-		}
 	}
 
-	& .toggle {
+	& .cms-inspector-text {
+		min-width: 0;
+		overflow-wrap: anywhere;
+	}
+
+	& .cms-inspector-toggle {
 		display: flex;
 		align-items: flex-start;
 		justify-content: space-between;
@@ -264,54 +267,23 @@
 		cursor: pointer;
 	}
 
-	& .copy {
+	& .cms-inspector-copy {
 		display: flex;
 		flex-direction: column;
 		flex: 1 1 auto;
 		min-width: 0;
-
-		& .title {
-			color: var(--cms-color-text-label);
-			font-size: var(--cms-font-size-sm);
-			font-weight: 500;
-		}
 	}
 
-	& .help {
+	& .cms-inspector-title {
+		color: var(--cms-color-text-label);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+	}
+
+	& .cms-inspector-help {
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-xs);
 		line-height: 1.4;
-	}
-
-	& .changes {
-		display: flex;
-		flex-direction: column;
-		gap: var(--cms-space-0-5);
-		padding: var(--cms-space-2) var(--cms-space-3);
-		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-warning-surface);
-
-		&[hidden] {
-			display: none;
-		}
-
-		& .title,
-		& .help {
-			margin: 0;
-		}
-
-		& .title {
-			color: var(--cms-color-warning-text);
-			font-size: var(--cms-font-size-sm);
-			font-weight: 500;
-		}
-
-		& .actions {
-			display: flex;
-			justify-content: flex-end;
-			gap: var(--cms-space-2);
-			margin-top: var(--cms-space-2);
-		}
 	}
 }
 
@@ -330,12 +302,12 @@
 		width: var(--cms-inspector-collapsed-width);
 		overflow: visible;
 
-		& .strip {
+		& .cms-inspector-strip {
 			opacity: 1;
 			visibility: visible;
 		}
 
-		& .drawer {
+		& .cms-inspector-drawer {
 			right: 0;
 			left: auto;
 			opacity: 1;
@@ -349,7 +321,7 @@
 		}
 	}
 
-	.cms-inspector[data-open] .drawer {
+	.cms-inspector[data-open] .cms-inspector-drawer {
 		visibility: visible;
 		translate: 0;
 		transition:
@@ -375,7 +347,7 @@
 		overflow: visible;
 		border-bottom: 1px solid var(--cms-color-border);
 
-		& .strip {
+		& .cms-inspector-strip {
 			position: static;
 			flex-direction: row;
 			flex-wrap: wrap;
@@ -390,14 +362,14 @@
 			}
 		}
 
-		& .shortcuts {
+		& .cms-inspector-shortcuts {
 			flex-direction: row;
 			margin-left: auto;
 			padding-top: 0;
 			border-top: 0;
 		}
 
-		& .drawer {
+		& .cms-inspector-drawer {
 			display: none;
 			position: static;
 			width: auto;
@@ -405,18 +377,18 @@
 			visibility: visible;
 		}
 
-		& .scroll {
+		& .cms-inspector-scroll {
 			padding: var(--cms-space-4);
 			overflow: visible;
 		}
 	}
 
 	.cms-inspector[data-open] {
-		& .strip {
+		& .cms-inspector-strip {
 			display: none;
 		}
 
-		& .drawer {
+		& .cms-inspector-drawer {
 			display: flex;
 		}
 	}
@@ -426,8 +398,8 @@
 	.cms-inspector,
 	.cms-inspector[data-collapsed] {
 		&,
-		& .drawer,
-		& .strip {
+		& .cms-inspector-drawer,
+		& .cms-inspector-strip {
 			transition: none;
 		}
 	}

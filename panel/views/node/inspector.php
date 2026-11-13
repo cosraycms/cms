@@ -70,10 +70,10 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 	data-tabs
 	data-inspector
 	<?= $collapsed ? 'data-collapsed' : '' ?>>
-	<div class="strip cms-scrollbar-quiet">
+	<div class="cms-inspector-strip cms-scrollbar-quiet">
 		<button
 			type="button"
-			class="tool"
+			class="cms-inspector-tool"
 			title="<?= escape($show) ?>"
 			aria-label="<?= escape($show) ?>"
 			data-inspector-expand>
@@ -97,11 +97,11 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 				data-editor-state
 				<?= $visibility['published'] ? 'checked' : '' ?> />
 		<?php endif ?>
-		<div class="shortcuts">
+		<div class="cms-inspector-shortcuts">
 			<?php foreach ($tabs as $key => $label): ?>
 				<button
 					type="button"
-					class="tool"
+					class="cms-inspector-tool"
 					title="<?= escape($label) ?>"
 					aria-label="<?= escape($label) ?>"
 					data-inspector-open="cms-inspector-tab-<?= $key ?>">
@@ -110,8 +110,8 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 			<?php endforeach ?>
 		</div>
 	</div>
-	<div class="drawer">
-		<div class="top">
+	<div class="cms-inspector-drawer">
+		<div class="cms-inspector-top">
 			<div class="cms-tabs" role="tablist" aria-label="<?= escape(__('editor:settings')) ?>">
 				<?php foreach ($tabs as $key => $label): ?>
 					<button
@@ -134,14 +134,14 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 			</div>
 			<button
 				type="button"
-				class="tool"
+				class="cms-inspector-tool"
 				title="<?= escape($hide) ?>"
 				aria-label="<?= escape($hide) ?>"
 				data-inspector-collapse>
 				<?= Icon::render('layout-sidebar-inset-reverse') ?>
 			</button>
 		</div>
-		<div class="scroll cms-scrollbar-quiet">
+		<div class="cms-inspector-scroll cms-scrollbar-quiet">
 			<?php if (isset($tabs['status'])): ?>
 				<div
 					id="cms-inspector-panel-status"
@@ -149,7 +149,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 					aria-labelledby="cms-inspector-tab-status"
 					<?= $first === 'status' ? '' : 'hidden' ?>>
 					<?php if ($contentLocales): ?>
-						<section class="section">
+						<section class="cms-inspector-section">
 							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => $defaultLocale,
@@ -158,7 +158,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 					<?php endif ?>
 
 					<?php if ($status !== null): ?>
-						<section class="section">
+						<section class="cms-inspector-section">
 							<?php $this->include('node/status', ['status' => $status]) ?>
 						</section>
 					<?php endif ?>
@@ -172,26 +172,26 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 					aria-labelledby="cms-inspector-tab-paths"
 					<?= $first === 'paths' ? '' : 'hidden' ?>>
 					<section
-						class="section"
+						class="cms-inspector-section"
 						data-paths
 						data-locales="<?= escape(json_encode(array_values($locales), JSON_THROW_ON_ERROR)) ?>"
 						data-note-fallback="<?= escape(__('editor:path-fallback', ['language' => '{language}'])) ?>"
 						data-note-generated="<?= escape(__('editor:path-generated')) ?>"
 						data-note-none="<?= escape(__('editor:path-none')) ?>">
-						<div class="bar">
-							<h2 class="heading"><?= escape(__('editor:paths')) ?><?= $mark('paths') ?></h2>
+						<div class="cms-inspector-bar">
+							<h2 class="cms-inspector-heading"><?= escape(__('editor:paths')) ?><?= $mark('paths') ?></h2>
 							<button type="button" class="cms-button cms-button-secondary cms-button-small" data-dialog-open="paths">
 								<?= escape(__('editor:paths-edit')) ?>
 							</button>
 						</div>
-						<dl class="paths">
+						<dl class="cms-inspector-paths">
 							<?php foreach ($locales as $locale): ?>
 								<?php $path = (string) ($paths[$locale['id']] ?? ''); ?>
-								<div class="path" data-path-row="<?= escape($locale['id']) ?>">
+								<div class="cms-inspector-path" data-path-row="<?= escape($locale['id']) ?>">
 									<dt><?= escape($locale['title']) ?></dt>
 									<dd>
-										<span class="url" data-path-value<?= $path === '' ? ' hidden' : '' ?>><?= escape($path) ?></span>
-										<span class="hint" data-path-note hidden></span>
+										<span class="cms-inspector-url" data-path-value<?= $path === '' ? ' hidden' : '' ?>><?= escape($path) ?></span>
+										<span class="cms-inspector-hint" data-path-note hidden></span>
 									</dd>
 								</div>
 							<?php endforeach ?>
@@ -200,8 +200,8 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 						<?php $this->component('component/dialog', ['name' => 'paths', 'title' => __('editor:paths')]) ?>
 							<div class="cms-modal-body cms-settings">
 								<?php foreach ($locales as $locale): ?>
-									<div class="field cms-settings-field">
-										<label class="label" for="cms-node-path-<?= escape($locale['id']) ?>">
+									<div class="cms-inspector-field cms-settings-field">
+										<label class="cms-inspector-label" for="cms-node-path-<?= escape($locale['id']) ?>">
 											<?= escape($locale['title']) ?>
 										</label>
 										<input
@@ -211,8 +211,8 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 											name="paths[<?= escape($locale['id']) ?>]"
 											data-path-locale="<?= escape($locale['id']) ?>"
 											value="<?= escape((string) ($paths[$locale['id']] ?? '')) ?>" />
-										<div class="suggestion" data-path-suggestion hidden>
-											<span class="text">
+										<div class="cms-inspector-suggestion" data-path-suggestion hidden>
+											<span class="cms-inspector-text">
 												<?= escape(__('editor:path-suggestion')) ?>
 												<span data-path-suggestion-value></span>
 											</span>
@@ -245,9 +245,9 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 				role="tabpanel"
 				aria-labelledby="cms-inspector-tab-advanced"
 				<?= $first === 'advanced' ? '' : 'hidden' ?>>
-				<section class="section">
-					<div class="field">
-						<label class="label" for="cms-node-handle"><?= escape(__('editor:handle')) ?><?= $mark('handle') ?></label>
+				<section class="cms-inspector-section">
+					<div class="cms-inspector-field">
+						<label class="cms-inspector-label" for="cms-node-handle"><?= escape(__('editor:handle')) ?><?= $mark('handle') ?></label>
 						<input
 							id="cms-node-handle"
 							class="cms-input cms-path-source"
@@ -260,8 +260,8 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 				</section>
 
 				<?php if ($showMeta): ?>
-					<section class="section">
-						<dl class="facts">
+					<section class="cms-inspector-section">
+						<dl class="cms-inspector-facts">
 							<?php if ($showType): ?>
 								<dt><?= escape(__('editor:type')) ?></dt>
 								<dd><?= escape($typeLabel) ?></dd>

@@ -786,7 +786,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		);
 
 		// The inspector lists the node's fact rows for an existing node.
-		$this->assertStringContainsString('class="facts"', $html);
+		$this->assertStringContainsString('class="cms-inspector-facts"', $html);
 		$this->assertStringContainsString('<dt>Created</dt>', $html);
 		$this->assertStringContainsString('<code>' . $uid . '</code>', $html);
 	}
