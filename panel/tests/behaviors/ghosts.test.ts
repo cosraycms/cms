@@ -463,7 +463,7 @@ describe('ghost insert', () => {
 		const dialog = document.querySelector<HTMLDialogElement>('dialog[open]')!;
 
 		expect(
-			[...dialog.querySelectorAll<HTMLElement>('.cms-block-actions')].every(
+			[...dialog.querySelectorAll<HTMLElement>('.cms-blocks-actions')].every(
 				(group) => group.hidden,
 			),
 		).toBe(true);

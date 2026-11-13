@@ -28,7 +28,7 @@ function catalog(host, anchored, choose) {
 	for (const choice of choices) {
 		choice.setAttribute('role', anchored ? 'group' : 'button');
 		/** @type {HTMLElement} */ (
-			/** @type {HTMLElement | null} */ (choice.querySelector('.cms-block-actions'))
+			/** @type {HTMLElement | null} */ (choice.querySelector('.cms-blocks-actions'))
 		).hidden = !anchored;
 	}
 
@@ -56,7 +56,7 @@ function catalog(host, anchored, choose) {
 		const query = search.value.trim().toLocaleLowerCase(document.documentElement.lang || undefined);
 		visible = choices.filter((choice) => {
 			const text =
-				`${/** @type {Element} */ (choice.querySelector('.select')).textContent} ${choice.dataset.handle}`.toLocaleLowerCase(
+				`${/** @type {Element} */ (choice.querySelector('.cms-blocks-catalog-select')).textContent} ${choice.dataset.handle}`.toLocaleLowerCase(
 					document.documentElement.lang || undefined,
 				);
 			choice.hidden = !text.includes(query);

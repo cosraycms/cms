@@ -673,6 +673,36 @@
 		color: var(--cms-color-text);
 	}
 
+	/* The + menu: each common type beside its before and after buttons. */
+	& .cms-blocks-editor-picker {
+		--width: max-content;
+	}
+
+	& .cms-blocks-editor-picker-choices {
+		display: grid;
+		grid-template-columns: minmax(0, max-content) max-content;
+		column-gap: var(--cms-space-4);
+	}
+
+	& .cms-blocks-editor-picker-choice {
+		display: grid;
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
+		align-items: center;
+		column-gap: inherit;
+		padding: var(--cms-space-2) var(--cms-space-2-5);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	& .cms-blocks-editor-picker-caption {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-width: 0;
+		max-width: 18rem;
+		overflow-wrap: anywhere;
+	}
+
 	/* The layout numbers in the settings dialog: three short inputs abreast. */
 	& .cms-blocks-editor-layout {
 		display: grid;

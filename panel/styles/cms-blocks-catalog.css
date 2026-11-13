@@ -1,4 +1,4 @@
-.cms-block-catalog {
+.cms-blocks-catalog {
 	--action-height: 1.375rem;
 
 	display: flex;
@@ -9,7 +9,7 @@
 		overflow: hidden;
 	}
 
-	& .search {
+	& .cms-blocks-catalog-search {
 		display: grid;
 		gap: var(--cms-space-2);
 		flex: 0 0 auto;
@@ -21,14 +21,14 @@
 		min-width: 0;
 	}
 
-	& .status {
+	& .cms-blocks-catalog-status {
 		margin: 0;
 		flex: 0 0 auto;
 		color: var(--cms-color-text-muted);
 		font-size: var(--cms-font-size-sm);
 	}
 
-	& .results {
+	& .cms-blocks-catalog-results {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr));
 		gap: var(--cms-space-2);
@@ -38,7 +38,7 @@
 		overscroll-behavior: contain;
 	}
 
-	& .choice {
+	& .cms-blocks-catalog-choice {
 		position: relative;
 		display: flex;
 		flex-direction: column;
@@ -59,7 +59,7 @@
 			display: none;
 		}
 
-		&:has(> .cms-block-actions:not([hidden])) {
+		&:has(> .cms-blocks-actions:not([hidden])) {
 			padding-block-end: var(--action-height);
 			cursor: default;
 		}
@@ -74,7 +74,7 @@
 		}
 	}
 
-	& .select {
+	& .cms-blocks-catalog-select {
 		display: flex;
 		flex: 1;
 		flex-direction: column;
@@ -85,7 +85,7 @@
 		min-width: 0;
 	}
 
-	& .cms-block-actions {
+	& .cms-blocks-actions {
 		position: absolute;
 		inset-inline: -1px;
 		inset-block-end: -1px;
@@ -105,19 +105,19 @@
 		}
 	}
 
-	& .choice:is(:hover, :focus-within) > .cms-block-actions {
+	& .cms-blocks-catalog-choice:is(:hover, :focus-within) > .cms-blocks-actions {
 		opacity: 1;
 		pointer-events: auto;
 	}
 
 	@media (hover: none), (any-pointer: coarse) {
-		& .cms-block-actions {
+		& .cms-blocks-actions {
 			opacity: 1;
 			pointer-events: auto;
 		}
 	}
 
-	& .icon {
+	& .cms-blocks-catalog-icon {
 		display: flex;
 		font-size: var(--cms-font-size-xl);
 	}

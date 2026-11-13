@@ -43,8 +43,7 @@
 @import './cms-media-field.css' layer(panel);
 @import './cms-entries.css' layer(panel);
 @import './cms-blocks-editor.css' layer(panel);
-@import './cms-block-actions.css' layer(panel);
-@import './cms-block-picker.css' layer(panel);
+@import './cms-blocks-actions.css' layer(panel);
 @import './cms-node.css' layer(panel);
 @import './cms-errors.css' layer(panel);
 @import './cms-create.css' layer(panel);
@@ -52,7 +51,7 @@
 @import './cms-tabs.css' layer(panel);
 @import './cms-modal.css' layer(panel);
 @import './cms-layout-preview.css' layer(panel);
-@import './cms-block-catalog.css' layer(panel);
+@import './cms-blocks-catalog.css' layer(panel);
 @import './cms-settings.css' layer(panel);
 @import './cms-confirm.css' layer(panel);
 @import './cms-toasts.css' layer(panel);

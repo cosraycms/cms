@@ -3,7 +3,7 @@
 $choice = (array) u($choice);
 $insert = (string) u($insert);
 ?>
-<button type="button" class="choice"
+<button type="button"
 	data-repeater-add="<?= $this->escape($choice['type']) ?>"
 	data-repeater-insert="<?= $this->escape($insert) ?>">
 	<span class="cms-action-menu-icon" aria-hidden="true"><?= $choice['icon'] ?></span>
