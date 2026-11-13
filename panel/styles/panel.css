@@ -29,6 +29,7 @@
 @import './cms-group.css' layer(panel);
 @import './cms-repeater.css' layer(panel);
 @import './cms-reference.css' layer(panel);
+@import './cms-link-row.css' layer(panel);
 @import './cms-link.css' layer(panel);
 @import './cms-dropzone.css' layer(panel);
 @import './cms-media-field.css' layer(panel);

@@ -119,7 +119,7 @@ export class CosrayLink extends HTMLElement {
 
 	/** @param {string} edited */
 	#showFallback(edited) {
-		this.#root.querySelector(':scope > .fallback')?.remove();
+		this.#root.querySelector(':scope > .cms-link-fallback')?.remove();
 		const all = this.locales?.all ?? [];
 		const fallback =
 			this.field.translate && !hasTarget(this.#value[edited])
@@ -127,7 +127,7 @@ export class CosrayLink extends HTMLElement {
 				: null;
 
 		if (fallback?.value) {
-			const note = create('p', 'fallback', `${fallbackLabel(fallback, all)}:`);
+			const note = create('p', 'cms-link-fallback', `${fallbackLabel(fallback, all)}:`);
 			note.append(linkText(fallback.value, (uid) => this.#asset(uid)));
 			this.#root.append(note);
 		}

@@ -130,7 +130,7 @@ describe('link field', () => {
 			'de',
 		);
 
-		expect(element.querySelector('.fallback')?.textContent).toBe(
+		expect(element.querySelector('.cms-link-fallback')?.textContent).toBe(
 			'field:fallback-from English:/en.pdf',
 		);
 
@@ -138,7 +138,7 @@ describe('link field', () => {
 		await enterAddress('/de.pdf');
 
 		expect(changes).toHaveBeenLastCalledWith({ en: { href: '/en.pdf' }, de: { href: '/de.pdf' } });
-		expect(element.querySelector('.fallback')).toBeNull();
+		expect(element.querySelector('.cms-link-fallback')).toBeNull();
 
 		element.locale = 'en';
 

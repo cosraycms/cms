@@ -524,12 +524,12 @@ describe('image details', () => {
 		it('warns while a linked image has no alt text', async () => {
 			await details({ uid: 'cover', meta: { link: { href: '/about' } } }, { link: true });
 
-			expect(row()?.querySelector('.warning')?.textContent).toBe('image:link-no-alt');
+			expect(row()?.querySelector('.cms-link-row-warning')?.textContent).toBe('image:link-no-alt');
 
 			field('alt').value = 'A kettle';
 			field('alt').dispatchEvent(new Event('input', { bubbles: true }));
 
-			expect(row()?.querySelector('.warning')).toBeNull();
+			expect(row()?.querySelector('.cms-link-row-warning')).toBeNull();
 		});
 
 		it('shows where the image links to on its card', async () => {

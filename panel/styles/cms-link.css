@@ -1,28 +1,3 @@
-/* A stored link: where it points, with buttons to change it. */
-.cms-link-row {
-	& .target {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-2);
-		min-width: 0;
-	}
-
-	& .cms-link-text {
-		flex: 1 1 auto;
-		min-width: 0;
-		overflow: hidden;
-		font-size: var(--cms-font-size-sm);
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	& .warning {
-		margin: 0;
-		color: var(--cms-color-warning-text);
-		font-size: var(--cms-font-size-xs);
-	}
-}
-
 /* A Link field's control. */
 .cms-link {
 	/* The buttons stay beside the target in a wide field. */
@@ -30,7 +5,7 @@
 		flex-grow: 0;
 	}
 
-	& .fallback {
+	& .cms-link-fallback {
 		display: flex;
 		align-items: baseline;
 		gap: var(--cms-space-1-5);
@@ -38,12 +13,12 @@
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-xs);
 		font-style: italic;
-	}
 
-	& .fallback .cms-link-text {
-		min-width: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+		& .cms-link-text {
+			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
 	}
 }

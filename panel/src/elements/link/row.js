@@ -64,8 +64,8 @@ export function linkRow({
 }) {
 	const element = create('div', 'cms-link-row');
 	const entry = create('div', 'entry');
-	const target = create('div', 'target');
-	const notice = create('p', 'warning', warning ?? '');
+	const target = create('div', 'cms-link-row-target');
+	const notice = create('p', 'cms-link-row-warning', warning ?? '');
 
 	if (caption !== undefined) {
 		const heading = create('span', 'caption', `${caption} `);
