@@ -4,7 +4,7 @@
 	flex-direction: column;
 	min-height: 0;
 
-	& .body {
+	& .cms-dashboard-body {
 		display: flex;
 		flex: 1 1 auto;
 		flex-direction: column;
@@ -20,18 +20,18 @@
 		overscroll-behavior: contain;
 	}
 
-	& .cards,
-	& .recent {
+	& .cms-dashboard-cards,
+	& .cms-dashboard-recent {
 		flex: 0 0 auto;
 	}
 
-	& .cards {
+	& .cms-dashboard-cards {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr));
 		gap: var(--cms-space-4);
 	}
 
-	& .card {
+	& .cms-dashboard-card {
 		display: flex;
 		flex-direction: column;
 		padding: var(--cms-space-5);
@@ -50,31 +50,31 @@
 			outline: 2px solid var(--cms-color-focus);
 			outline-offset: 2px;
 		}
-
-		& .label {
-			font-size: var(--cms-font-size-xs);
-			font-weight: 600;
-			letter-spacing: 0.09em;
-			color: var(--cms-color-text-faint);
-			text-transform: uppercase;
-		}
-
-		& .value {
-			padding-top: var(--cms-space-2);
-			font-size: var(--cms-font-size-3xl);
-			font-variant-numeric: tabular-nums;
-			font-weight: 600;
-			letter-spacing: -0.03em;
-		}
-
-		& .note {
-			padding-top: var(--cms-space-1);
-			font-size: var(--cms-font-size-xs);
-			color: var(--cms-color-text-subtle);
-		}
 	}
 
-	& .recent {
+	& .cms-dashboard-label {
+		font-size: var(--cms-font-size-xs);
+		font-weight: 600;
+		letter-spacing: 0.09em;
+		color: var(--cms-color-text-faint);
+		text-transform: uppercase;
+	}
+
+	& .cms-dashboard-value {
+		padding-top: var(--cms-space-2);
+		font-size: var(--cms-font-size-3xl);
+		font-variant-numeric: tabular-nums;
+		font-weight: 600;
+		letter-spacing: -0.03em;
+	}
+
+	& .cms-dashboard-note {
+		padding-top: var(--cms-space-1);
+		font-size: var(--cms-font-size-xs);
+		color: var(--cms-color-text-subtle);
+	}
+
+	& .cms-dashboard-recent {
 		background: var(--cms-dashboard-card-bg);
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-xl);
@@ -88,54 +88,54 @@
 			font-weight: 600;
 			border-bottom: 1px solid var(--cms-color-border);
 		}
+	}
 
-		& .row {
-			display: grid;
-			grid-template-columns: max-content minmax(0, 1fr) minmax(8rem, max-content) 7rem;
-			gap: var(--cms-space-3);
-			align-items: center;
-			padding: var(--cms-space-3) var(--cms-space-4);
-			border-bottom: 1px solid var(--cms-color-border-soft);
+	& .cms-dashboard-row {
+		display: grid;
+		grid-template-columns: max-content minmax(0, 1fr) minmax(8rem, max-content) 7rem;
+		gap: var(--cms-space-3);
+		align-items: center;
+		padding: var(--cms-space-3) var(--cms-space-4);
+		border-bottom: 1px solid var(--cms-color-border-soft);
 
-			&:last-child {
-				border-bottom: 0;
-			}
+		&:last-child {
+			border-bottom: 0;
 		}
+	}
 
-		& .title {
-			min-width: 0;
-			font-size: var(--cms-font-size-sm);
-			font-weight: 500;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
+	& .cms-dashboard-title {
+		min-width: 0;
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
 
-		& .type,
-		& .changed {
-			font-size: var(--cms-font-size-xs);
-			font-variant-numeric: tabular-nums;
-			color: var(--cms-color-text-faint);
-			white-space: nowrap;
-		}
+	& .cms-dashboard-type,
+	& .cms-dashboard-changed {
+		font-size: var(--cms-font-size-xs);
+		font-variant-numeric: tabular-nums;
+		color: var(--cms-color-text-faint);
+		white-space: nowrap;
+	}
 
-		& .changed {
-			text-align: right;
-		}
+	& .cms-dashboard-changed {
+		text-align: right;
+	}
 
-		& .empty {
-			margin: 0;
-			padding: var(--cms-space-6) var(--cms-space-4);
-			font-size: var(--cms-font-size-sm);
-			color: var(--cms-color-text-subtle);
-			text-align: center;
-		}
+	& .cms-dashboard-empty {
+		margin: 0;
+		padding: var(--cms-space-6) var(--cms-space-4);
+		font-size: var(--cms-font-size-sm);
+		color: var(--cms-color-text-subtle);
+		text-align: center;
 	}
 }
 
 @media (width < 40rem), (height < 30rem) {
 	.cms-dashboard {
-		& .body {
+		& .cms-dashboard-body {
 			margin: 0;
 			padding-inline: var(--cms-space-4);
 			border-width: 1px 0 0;
@@ -144,17 +144,17 @@
 			overflow: visible;
 		}
 
-		& .recent .row {
+		& .cms-dashboard-row {
 			grid-template-columns: max-content minmax(0, 1fr) auto;
+		}
 
-			& .type {
-				grid-column: 2;
-			}
+		& .cms-dashboard-type {
+			grid-column: 2;
+		}
 
-			& .changed {
-				grid-column: 3;
-				grid-row: 1 / span 2;
-			}
+		& .cms-dashboard-changed {
+			grid-column: 3;
+			grid-row: 1 / span 2;
 		}
 	}
 }

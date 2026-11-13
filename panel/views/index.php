@@ -13,9 +13,9 @@ $recent = (array) u($recent ?? []);
 		<h1><?= escape(__('nav:dashboard')) ?></h1>
 	</header>
 
-	<section class="body">
+	<section class="cms-dashboard-body">
 		<?php if ($cards !== []): ?>
-			<div class="cards">
+			<div class="cms-dashboard-cards">
 				<?php foreach ($cards as $card): ?>
 					<?php
 
@@ -24,14 +24,14 @@ $recent = (array) u($recent ?? []);
 					$linked = is_string($url) && trim($url) !== '';
 					?>
 					<?php if ($linked): ?>
-						<a class="card" href="<?= escape($url) ?>" hx-target="#frame">
+						<a class="cms-dashboard-card" href="<?= escape($url) ?>" hx-target="#frame">
 					<?php else: ?>
-						<article class="card">
+						<article class="cms-dashboard-card">
 					<?php endif ?>
-						<span class="label"><?= escape((string) ($card['label'] ?? '')) ?></span>
-						<strong class="value"><?= escape((string) ($card['value'] ?? '')) ?></strong>
+						<span class="cms-dashboard-label"><?= escape((string) ($card['label'] ?? '')) ?></span>
+						<strong class="cms-dashboard-value"><?= escape((string) ($card['value'] ?? '')) ?></strong>
 						<?php if (trim((string) ($card['note'] ?? '')) !== ''): ?>
-							<span class="note"><?= escape((string) $card['note']) ?></span>
+							<span class="cms-dashboard-note"><?= escape((string) $card['note']) ?></span>
 						<?php endif ?>
 					<?php if ($linked): ?>
 						</a>
@@ -42,24 +42,24 @@ $recent = (array) u($recent ?? []);
 			</div>
 		<?php endif ?>
 
-		<section class="recent" aria-labelledby="dashboard-recent-title">
+		<section class="cms-dashboard-recent" aria-labelledby="dashboard-recent-title">
 			<h2 id="dashboard-recent-title"><?= escape(__('dashboard:recent')) ?></h2>
 
 			<?php if ($recent === []): ?>
-				<p class="empty"><?= escape(__('dashboard:recent-empty')) ?></p>
+				<p class="cms-dashboard-empty"><?= escape(__('dashboard:recent-empty')) ?></p>
 			<?php else: ?>
-				<div class="rows">
+				<div>
 					<?php foreach ($recent as $row): ?>
 						<?php $row = (array) u($row) ?>
-						<div class="row">
+						<div class="cms-dashboard-row">
 							<?php if (is_array($row['dots'] ?? null)): ?>
 								<?php $this->include('component/status-dots', ['status' => $row['dots'], 'size' => 'sm']) ?>
 							<?php endif ?>
-							<a class="title" href="<?= escape((string) $row['url']) ?>" hx-target="#frame"><?= escape(
+							<a class="cms-dashboard-title" href="<?= escape((string) $row['url']) ?>" hx-target="#frame"><?= escape(
 								(string) ($row['title'] ?? ''),
 							) ?></a>
-							<span class="type"><?= escape((string) ($row['type'] ?? '')) ?></span>
-							<time class="changed" datetime="<?= escape((string) ($row['datetime'] ?? '')) ?>"><?= escape(
+							<span class="cms-dashboard-type"><?= escape((string) ($row['type'] ?? '')) ?></span>
+							<time class="cms-dashboard-changed" datetime="<?= escape((string) ($row['datetime'] ?? '')) ?>"><?= escape(
 								(string) ($row['changed'] ?? ''),
 							) ?></time>
 						</div>

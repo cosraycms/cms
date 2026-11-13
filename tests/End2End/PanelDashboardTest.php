@@ -90,31 +90,31 @@ final class PanelDashboardTest extends End2EndTestCase
 		$changesTotal = (int) $changes['total'] + 2;
 		$recentChanges = (int) $changes['recent'] + 1;
 		$this->assertHtmlNodeExists(
-			'//*[contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Entries"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="'
+			'//*[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-card ")][span[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-label ") and normalize-space(.)="Entries"]][strong[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-value ") and normalize-space(.)="'
 				. $entryTotal
-				. '"]][span[contains(concat(" ", normalize-space(@class), " "), " note ") and normalize-space(.)="across 1 collection"]]',
+				. '"]][span[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-note ") and normalize-space(.)="across 1 collection"]]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//*[contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Drafts"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="'
+			'//*[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-card ")][span[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-label ") and normalize-space(.)="Drafts"]][strong[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-value ") and normalize-space(.)="'
 				. $changesTotal
-				. '"]][span[contains(concat(" ", normalize-space(@class), " "), " note ") and normalize-space(.)="'
+				. '"]][span[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-note ") and normalize-space(.)="'
 				. $recentChanges
 				. ' since last week"]]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//a[@href="/panel/media" and @hx-target="#frame" and contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Media files"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="2"]][span[contains(concat(" ", normalize-space(@class), " "), " note ") and normalize-space(.)="3.0 KB used"]]',
+			'//a[@href="/panel/media" and @hx-target="#frame" and contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-card ")][span[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-label ") and normalize-space(.)="Media files"]][strong[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-value ") and normalize-space(.)="2"]][span[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-note ") and normalize-space(.)="3.0 KB used"]]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//*[contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Custom total"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="'
+			'//*[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-card ")][span[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-label ") and normalize-space(.)="Custom total"]][strong[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-value ") and normalize-space(.)="'
 				. $entryTotal
 				. ' total"]]',
 			$html,
 		);
 
-		$this->assertStringContainsString('<span class="label">Instance card</span>', $html);
+		$this->assertStringContainsString('<span class="cms-dashboard-label">Instance card</span>', $html);
 		$this->assertStringNotContainsString('Hidden card', $html);
 		$this->assertStringNotContainsString('Deleted', $html);
 		$this->assertStringNotContainsString('Old draft', $html);
@@ -127,7 +127,7 @@ final class PanelDashboardTest extends End2EndTestCase
 			$this->assertGreaterThan($previous, $position);
 			$previous = $position;
 		}
-		$this->assertStringContainsString('<span class="type">Test Page</span>', $html);
+		$this->assertStringContainsString('<span class="cms-dashboard-type">Test Page</span>', $html);
 		$this->assertHtmlNodeExists(
 			"//*[contains(@class, 'cms-status-dots')]/*[@data-stage='main' and @data-state='published']",
 			$html,
@@ -137,7 +137,7 @@ final class PanelDashboardTest extends End2EndTestCase
 			substr_count($html, 'data-stage="draft" data-state="present"'),
 		);
 		$this->assertHtmlNodeExists(
-			'//time[contains(concat(" ", normalize-space(@class), " "), " changed ") and string-length(@datetime) > 0 and string-length(normalize-space(.)) > 0]',
+			'//time[contains(concat(" ", normalize-space(@class), " "), " cms-dashboard-changed ") and string-length(@datetime) > 0 and string-length(normalize-space(.)) > 0]',
 			$html,
 		);
 	}
@@ -150,7 +150,7 @@ final class PanelDashboardTest extends End2EndTestCase
 		$this->createDashboardNode($type, 'dashboard-link', 'Recent page', false, new DateTimeImmutable());
 
 		$dashboard = HTMLDocument::createFromString($this->html());
-		$link = $dashboard->querySelector('.recent a');
+		$link = $dashboard->querySelector('.cms-dashboard-recent a');
 		$this->assertNotNull($link);
 		$this->assertSame('Recent page', trim($link->textContent));
 		$this->assertSame('#frame', $link->getAttribute('hx-target'));
