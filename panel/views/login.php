@@ -6,10 +6,10 @@ $this->layout('layer/document');
 
 ?>
 <main id="main" class="cms-login">
-	<section class="card" aria-labelledby="auth-title">
-		<header class="head">
+	<section class="cms-login-card" aria-labelledby="auth-title">
+		<header class="cms-login-head">
 			<?php if ($logo !== null): ?>
-				<img class="logo" src="<?= escape((string) $logo) ?>" alt="<?= escape(__('panel:logo')) ?>" />
+				<img class="cms-login-logo" src="<?= escape((string) $logo) ?>" alt="<?= escape(__('panel:logo')) ?>" />
 			<?php endif ?>
 			<h1 id="auth-title"><?= escape(__('auth:sign-in-title')) ?></h1>
 		</header>
@@ -19,10 +19,10 @@ $this->layout('layer/document');
 			<input type="hidden" name="next" value="<?= escape($next) ?>" />
 
 			<?php if ($message !== null): ?>
-				<p class="message" role="alert"><?= escape($message) ?></p>
+				<p class="cms-login-message" role="alert"><?= escape($message) ?></p>
 			<?php endif ?>
 
-			<div class="field">
+			<div class="cms-login-field">
 				<label for="login"><?= escape(__('auth:login-label')) ?></label>
 				<input
 					class="cms-input"
@@ -34,7 +34,7 @@ $this->layout('layer/document');
 					required />
 			</div>
 
-			<div class="field">
+			<div class="cms-login-field">
 				<label for="password"><?= escape(__('auth:password')) ?></label>
 				<input
 					class="cms-input"
@@ -45,8 +45,8 @@ $this->layout('layer/document');
 					required />
 			</div>
 
-			<div class="options">
-				<label class="remember" for="rememberme">
+			<div class="cms-login-options">
+				<label class="cms-login-remember" for="rememberme">
 					<input
 						class="cms-checkbox"
 						id="rememberme"
@@ -58,11 +58,11 @@ $this->layout('layer/document');
 				</label>
 
 				<?php if ($passwordReset): ?>
-					<a class="forgot" href="<?= escape($panelPath) ?>/password" hx-boost="false"><?= escape(__('auth:forgot-password')) ?></a>
+					<a class="cms-login-link" href="<?= escape($panelPath) ?>/password" hx-boost="false"><?= escape(__('auth:forgot-password')) ?></a>
 				<?php endif ?>
 			</div>
 
-			<button class="cms-button cms-button-primary submit" type="submit"><?= escape(__('auth:sign-in')) ?></button>
+			<button class="cms-button cms-button-primary cms-login-submit" type="submit"><?= escape(__('auth:sign-in')) ?></button>
 		</form>
 
 		<?php $this->include('component/auth-locale') ?>

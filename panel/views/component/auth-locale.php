@@ -6,7 +6,7 @@ use function Cosray\escape;
 
 ?>
 <?php if (count($panelLocales) > 1): ?>
-	<form class="locale" method="post" action="<?= escape($panelPath) ?>/login/locale" hx-boost="false" data-autosubmit>
+	<form class="cms-login-locale" method="post" action="<?= escape($panelPath) ?>/login/locale" hx-boost="false" data-autosubmit>
 		<?php $this->include('component/csrf') ?>
 		<label for="auth-locale">
 			<?= Icon::render('translate') ?>

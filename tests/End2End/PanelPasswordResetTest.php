@@ -282,7 +282,7 @@ final class PanelPasswordResetTest extends End2EndTestCase
 
 	private function message(string $html): string
 	{
-		preg_match('#<p class="intro" role="status">(.*?)</p>#s', $html, $match);
+		preg_match('#<p class="cms-login-intro" role="status">(.*?)</p>#s', $html, $match);
 
 		return trim($match[1] ?? '');
 	}

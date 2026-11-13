@@ -7,10 +7,10 @@ $step = u($step);
 
 ?>
 <main id="main" class="cms-login">
-	<section class="card" aria-labelledby="auth-title">
-		<header class="head">
+	<section class="cms-login-card" aria-labelledby="auth-title">
+		<header class="cms-login-head">
 			<?php if ($logo !== null): ?>
-				<img class="logo" src="<?= escape((string) $logo) ?>" alt="<?= escape(__('panel:logo')) ?>" />
+				<img class="cms-login-logo" src="<?= escape((string) $logo) ?>" alt="<?= escape(__('panel:logo')) ?>" />
 			<?php endif ?>
 			<h1 id="auth-title"><?= escape($step === 'choose' ? __('auth:reset-choose') : __('auth:reset-title')) ?></h1>
 		</header>
@@ -18,13 +18,13 @@ $step = u($step);
 		<?php if ($step === 'request'): ?>
 			<form method="post" action="<?= escape($panelPath) ?>/password" hx-boost="false" novalidate>
 				<?php $this->include('component/csrf') ?>
-				<p class="intro"><?= escape(__('auth:reset-intro')) ?></p>
+				<p class="cms-login-intro"><?= escape(__('auth:reset-intro')) ?></p>
 
 				<?php if ($message !== null): ?>
-					<p class="message" role="alert"><?= escape($message) ?></p>
+					<p class="cms-login-message" role="alert"><?= escape($message) ?></p>
 				<?php endif ?>
 
-				<div class="field">
+				<div class="cms-login-field">
 					<label for="login"><?= escape(__('auth:login-label')) ?></label>
 					<input
 						class="cms-input"
@@ -36,16 +36,16 @@ $step = u($step);
 						required />
 				</div>
 
-				<button class="cms-button cms-button-primary submit" type="submit"><?= escape(__('auth:reset-send')) ?></button>
+				<button class="cms-button cms-button-primary cms-login-submit" type="submit"><?= escape(__('auth:reset-send')) ?></button>
 			</form>
 		<?php elseif ($step === 'choose'): ?>
 			<form method="post" action="<?= escape($panelPath) ?>/password/<?= escape($token) ?>" hx-boost="false" novalidate>
 				<?php $this->include('component/csrf') ?>
 				<?php if ($message !== null): ?>
-					<p class="message" role="alert"><?= escape($message) ?></p>
+					<p class="cms-login-message" role="alert"><?= escape($message) ?></p>
 				<?php endif ?>
 
-				<div class="field">
+				<div class="cms-login-field">
 					<label for="password"><?= escape(__('user:new-password')) ?></label>
 					<input
 						class="cms-input"
@@ -56,10 +56,10 @@ $step = u($step);
 						minlength="12"
 						aria-describedby="password-help"
 						required />
-					<p class="help" id="password-help"><?= escape(__('user:password-help')) ?></p>
+					<p class="cms-login-help" id="password-help"><?= escape(__('user:password-help')) ?></p>
 				</div>
 
-				<div class="field">
+				<div class="cms-login-field">
 					<label for="password_repeat"><?= escape(__('user:password-repeat')) ?></label>
 					<input
 						class="cms-input"
@@ -70,23 +70,23 @@ $step = u($step);
 						required />
 				</div>
 
-				<button class="cms-button cms-button-primary submit" type="submit"><?= escape(__('auth:reset-save')) ?></button>
+				<button class="cms-button cms-button-primary cms-login-submit" type="submit"><?= escape(__('auth:reset-save')) ?></button>
 			</form>
 		<?php else: ?>
-			<p class="intro" role="status"><?= escape(match ($step) {
+			<p class="cms-login-intro" role="status"><?= escape(match ($step) {
 				'sent' => __('auth:reset-sent'),
 				'invalid' => __('auth:reset-invalid'),
 				default => __('auth:reset-done'),
 			}) ?></p>
 
 			<?php if ($step === 'invalid'): ?>
-				<a class="cms-button cms-button-primary submit" href="<?= escape($panelPath) ?>/password" hx-boost="false"><?= escape(__('auth:reset-request-new')) ?></a>
+				<a class="cms-button cms-button-primary cms-login-submit" href="<?= escape($panelPath) ?>/password" hx-boost="false"><?= escape(__('auth:reset-request-new')) ?></a>
 			<?php endif ?>
 		<?php endif ?>
 
 		<?php if ($step !== 'choose'): ?>
-			<div class="options">
-				<a class="forgot" href="<?= escape($panelPath) ?>/login" hx-boost="false"><?= escape(__('auth:back-to-sign-in')) ?></a>
+			<div class="cms-login-options">
+				<a class="cms-login-link" href="<?= escape($panelPath) ?>/login" hx-boost="false"><?= escape(__('auth:back-to-sign-in')) ?></a>
 			</div>
 		<?php endif ?>
 
