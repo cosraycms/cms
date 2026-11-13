@@ -64,7 +64,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 ?>
 <?php if ($section !== ''): ?>
 	<style>
-		.cms-styleguide .sections > .section:not([data-section="<?= escape($section) ?>"]) {
+		.cms-styleguide-section:not([data-section="<?= escape($section) ?>"]) {
 			display: none;
 		}
 	</style>
@@ -91,33 +91,33 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			</button>
 	</header>
 
-	<section class="body">
-		<div class="sections">
-			<section class="section" data-section="tokens">
+	<section class="cms-styleguide-body">
+		<div class="cms-styleguide-sections">
+			<section class="cms-styleguide-section" data-section="tokens">
 				<h2>Tokens</h2>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					Read out of <code>panel/styles/tokens.css</code> at request time, so this list
 					cannot drift from the stylesheet. Primitives are panel-internal; semantic and
 					component tokens are what a project overrides in <code>@layer theme</code>.
 				</p>
 				<?php foreach ($tokenGroups as $group): ?>
-					<details class="group"<?= $group['open'] ? ' open' : '' ?>>
-						<summary><?= escape((string) $group['title']) ?> <span class="count"><?= count(
+					<details class="cms-styleguide-group"<?= $group['open'] ? ' open' : '' ?>>
+						<summary><?= escape((string) $group['title']) ?> <span class="cms-styleguide-count"><?= count(
 							(array) $group['tokens'],
 						) ?></span></summary>
-					<div class="tokens">
+					<div class="cms-styleguide-tokens">
 						<?php foreach ((array) $group['tokens'] as $token): ?>
 							<?php $name = (string) $token['name']; ?>
-							<div class="token">
+							<div class="cms-styleguide-token">
 								<?php if ($token['swatch']): ?>
-									<span class="swatch" style="background: var(<?= escape($name) ?>)"></span>
+									<span class="cms-styleguide-swatch" style="background: var(<?= escape($name) ?>)"></span>
 								<?php elseif (str_contains($name, 'shadow')): ?>
-									<span class="swatch" style="box-shadow: var(<?= escape($name) ?>)"></span>
+									<span class="cms-styleguide-swatch" style="box-shadow: var(<?= escape($name) ?>)"></span>
 								<?php else: ?>
-									<span class="swatch is-empty"></span>
+									<span class="cms-styleguide-swatch is-empty"></span>
 								<?php endif ?>
-								<code class="name"><?= escape($name) ?></code>
-								<code class="value" title="<?= escape(
+								<code class="cms-styleguide-name"><?= escape($name) ?></code>
+								<code class="cms-styleguide-value" title="<?= escape(
 									(string) $token['value'],
 								) ?>"><?= escape((string) $token['value']) ?></code>
 							</div>
@@ -127,33 +127,33 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				<?php endforeach ?>
 			</section>
 
-			<section class="section" data-section="buttons">
+			<section class="cms-styleguide-section" data-section="buttons">
 				<h2>Buttons</h2>
-				<div class="sample">
+				<div class="cms-styleguide-sample">
 					<button type="button" class="cms-button cms-button-primary"><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
 					<button type="button" class="cms-button cms-button-secondary"><?= \Cosray\Panel\Icon::render('eye') ?> Preview</button>
 					<button type="button" class="cms-button cms-button-danger"><?= \Cosray\Panel\Icon::render('trash3') ?> Delete</button>
 					<a class="cms-button cms-button-secondary" href="#">Link</a>
 				</div>
-				<div class="sample">
+				<div class="cms-styleguide-sample">
 					<button type="button" class="cms-button cms-button-primary" disabled><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
 					<button type="button" class="cms-button cms-button-secondary" disabled><?= \Cosray\Panel\Icon::render(
 						'eye',
 					) ?> Preview</button>
 					<button type="button" class="cms-button cms-button-danger" disabled><?= \Cosray\Panel\Icon::render('trash3') ?> Delete</button>
 				</div>
-				<div class="sample" data-sample="button:danger-solid">
+				<div class="cms-styleguide-sample" data-sample="button:danger-solid">
 					<button type="button" class="cms-button cms-button-secondary">Cancel</button>
 					<button type="button" class="cms-button cms-button-danger cms-button-solid">Delete</button>
 					<button type="button" class="cms-button cms-button-danger cms-button-solid" disabled>Delete</button>
 				</div>
-				<div class="sample" data-sample="button:small">
+				<div class="cms-styleguide-sample" data-sample="button:small">
 					<button type="button" class="cms-button cms-button-primary cms-button-small">Save</button>
 					<button type="button" class="cms-button cms-button-secondary cms-button-small">Edit</button>
 					<button type="button" class="cms-button cms-button-danger cms-button-small">Delete</button>
 					<button type="button" class="cms-button cms-button-secondary cms-button-small" disabled>Use</button>
 				</div>
-				<div class="sample" data-sample="button:split">
+				<div class="cms-styleguide-sample" data-sample="button:split">
 					<div class="cms-split-button">
 						<button type="button" class="cms-button cms-button-primary"><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
 						<button type="button" class="cms-button cms-button-primary cms-split-button-toggle" popovertarget="sample-save-options"
@@ -172,7 +172,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 						</div>
 					</div>
 				</div>
-				<div class="sample" data-sample="button:menu">
+				<div class="cms-styleguide-sample" data-sample="button:menu">
 					<button type="button" class="cms-button cms-button-primary" popovertarget="sample-create-options"
 						aria-haspopup="menu">New entry <?= \Cosray\Panel\Icon::render('chevron-down') ?></button>
 					<div id="sample-create-options" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
@@ -183,11 +183,11 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 			</section>
 
-			<section class="section" data-section="dialogs">
+			<section class="cms-styleguide-section" data-section="dialogs">
 				<h2>Dialogs and action menus</h2>
-				<p class="note">The shared PHP/TypeScript shell, including menu-to-dialog focus and nested menus, and the two questions confirm() and alert() ask. These samples never submit.</p>
+				<p class="cms-styleguide-note">The shared PHP/TypeScript shell, including menu-to-dialog focus and nested menus, and the two questions confirm() and alert() ask. These samples never submit.</p>
 				<form data-meta-owner onsubmit="event.preventDefault()">
-					<div class="sample">
+					<div class="cms-styleguide-sample">
 						<?php foreach (['start', 'center', 'end'] as $align): ?>
 							<button type="button" class="cms-button cms-button-secondary"
 								popovertarget="sample-actions-<?= $align ?>" aria-haspopup="menu">Actions (<?= $align ?>)</button>
@@ -219,7 +219,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 						<div class="cms-modal-footer"><button type="button" class="cms-button cms-button-secondary" data-dialog-close>Close</button></div>
 					<?php $this->end() ?>
 				</form>
-				<div class="sample" data-sample="questions">
+				<div class="cms-styleguide-sample" data-sample="questions">
 					<button type="button" class="cms-button cms-button-danger" data-dialog-open="sample-confirm">Destructive question</button>
 					<button type="button" class="cms-button cms-button-secondary" data-dialog-open="sample-alert">Notice</button>
 					<?php $this->component('component/dialog', ['name' => 'sample-confirm', 'size' => 'compact', 'title' => 'Delete file']) ?>
@@ -238,19 +238,19 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 			</section>
 
-			<section class="section" id="sample-icons" data-section="icons">
+			<section class="cms-styleguide-section" id="sample-icons" data-section="icons">
 				<h2>Icons</h2>
-				<p class="note">Regular Bootstrap artwork shared with the element controls. Icons inherit text color and are decorative.</p>
-				<div class="sample">
+				<p class="cms-styleguide-note">Regular Bootstrap artwork shared with the element controls. Icons inherit text color and are decorative.</p>
+				<div class="cms-styleguide-sample">
 					<?php foreach (['plus', 'plus-circle', 'gear', 'three-dots-vertical', 'x-lg'] as $icon): ?>
 						<span><?= \Cosray\Panel\Icon::render($icon) ?> <?= escape($icon) ?></span>
 					<?php endforeach ?>
 				</div>
 			</section>
 
-			<section class="section" data-section="status">
+			<section class="cms-styleguide-section" data-section="status">
 				<h2>Pills and status</h2>
-				<div class="sample">
+				<div class="cms-styleguide-sample">
 					<span class="cms-count">24 entries</span>
 					<?php foreach ($statuses as $status): ?>
 						<span class="cms-status is-<?= escape($status) ?>"><?= escape(ucfirst($status)) ?></span>
@@ -258,7 +258,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 				<?php // A status column's looks, row by row: icons, dots, compact. ?>
 				<?php foreach (['icons', 'dots', 'compact'] as $look): ?>
-					<div class="sample">
+					<div class="cms-styleguide-sample">
 						<code><?= escape($look) ?></code>
 						<?php foreach ($stageSamples as $sample): ?>
 							<?php $this->include('component/status-dots', ['status' => $sample, 'size' => 'sm', 'look' => $look]) ?>
@@ -282,7 +282,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					['icons', 'icons inverted', $inverted],
 					['compact', 'compact inverted', $inverted],
 				] as [$look, $label, $style]): ?>
-					<div class="sample" style="<?= escape($style) ?>">
+					<div class="cms-styleguide-sample" style="<?= escape($style) ?>">
 						<code><?= escape($label) ?></code>
 						<?php foreach ($stageSamples as $sample): ?>
 							<?php $this->include('component/status-dots', ['status' => $sample, 'size' => 'sm', 'look' => $look]) ?>
@@ -291,13 +291,13 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				<?php endforeach ?>
 			</section>
 
-			<section class="section" data-section="controls">
+			<section class="cms-styleguide-section" data-section="controls">
 				<h2>Controls</h2>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					Every control in every state it can reach, in the classes the panel renders:
 					editable, read-only, disabled, invalid.
 				</p>
-				<div class="sample" data-sample="input:states">
+				<div class="cms-styleguide-sample" data-sample="input:states">
 					<input class="cms-input" type="text" value="Editable" data-sample="input:editable" />
 					<input class="cms-input" type="text" placeholder="Placeholder" data-sample="input:empty" />
 					<input class="cms-input" type="text" value="Read-only" readonly data-sample="input:readonly" />
@@ -309,7 +309,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 						aria-invalid="true"
 						data-sample="input:invalid" />
 				</div>
-				<div class="sample" data-sample="select:states">
+				<div class="cms-styleguide-sample" data-sample="select:states">
 					<select class="cms-select" data-sample="select:editable">
 						<option>News</option>
 						<option>Event</option>
@@ -317,37 +317,37 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					<select class="cms-select" disabled data-sample="select:disabled">
 						<option>News</option>
 					</select>
-					<label class="sample">
+					<label class="cms-styleguide-sample">
 						<input class="cms-checkbox" type="checkbox" checked data-sample="checkbox:checked" />
 						Checkbox
 					</label>
-					<label class="sample">
+					<label class="cms-styleguide-sample">
 						<input class="cms-checkbox" type="checkbox" disabled data-sample="checkbox:disabled" />
 						Disabled
 					</label>
 				</div>
-				<div class="sample" data-sample="switch:states">
-					<label class="sample">
+				<div class="cms-styleguide-sample" data-sample="switch:states">
+					<label class="cms-styleguide-sample">
 						<input type="checkbox" class="cms-switch" checked data-sample="switch:on" /> Switch on
 					</label>
-					<label class="sample">
+					<label class="cms-styleguide-sample">
 						<input type="checkbox" class="cms-switch" data-sample="switch:off" /> Switch off
 					</label>
-					<label class="sample">
+					<label class="cms-styleguide-sample">
 						<input type="checkbox" class="cms-switch" checked disabled data-sample="switch:disabled" />
 						Disabled
 					</label>
 				</div>
-				<div class="sample" data-sample="textarea:states">
+				<div class="cms-styleguide-sample" data-sample="textarea:states">
 					<textarea class="cms-textarea" rows="2" data-sample="textarea:editable">Zweisprachige Betreuung für Kinder von 10 Monaten bis 3 Jahren.</textarea>
 					<textarea class="cms-textarea" rows="2" readonly data-sample="textarea:readonly">Read-only</textarea>
 					<textarea class="cms-textarea" rows="2" disabled data-sample="textarea:disabled">Disabled</textarea>
 				</div>
 			</section>
 
-			<section class="section" data-section="fields">
+			<section class="cms-styleguide-section" data-section="fields">
 				<h2>Fields</h2>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					Rendered through <code>panel/views/field/*</code> with fixture data — the same
 					partials the editor uses, so these cannot fall out of step with it. The pane
 					ground is the editor's, so a state is judged against the colour it sits on.
@@ -402,7 +402,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					</div>
 				</div>
 				<h3>Fallback preview</h3>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					The German target is empty. The English value is a placeholder only and
 					disappears while the input has focus.
 				</p>
@@ -434,9 +434,9 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 			</section>
 
-			<section class="section" data-section="alignment">
+			<section class="cms-styleguide-section" data-section="alignment">
 				<h2>Field alignment</h2>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					Mixed label lengths share a control start line. Help and errors stay with their
 					own control, while row spans and conditional fields keep their grid placement.
 					Resize the viewport to check wrapping and stacked fields.
@@ -444,9 +444,9 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				<?php $this->include('styleguide/alignment') ?>
 			</section>
 
-			<section class="section" data-section="richtext">
+			<section class="cms-styleguide-section" data-section="richtext">
 				<h2>Richtext</h2>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					The default toolbar, a <code>#[Tools]</code>-trimmed field with the source view,
 					and the read-only state, which mounts without a toolbar.
 				</p>
@@ -480,9 +480,9 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 			</section>
 
-			<section class="section" data-section="code">
+			<section class="cms-styleguide-section" data-section="code">
 				<h2>Code</h2>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					A field offering several syntaxes, a translated field whose empty German value
 					shows the English fallback, and the read-only state.
 				</p>
@@ -516,9 +516,9 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 			</section>
 
-			<section class="section" data-section="links">
+			<section class="cms-styleguide-section" data-section="links">
 				<h2>Links</h2>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					Link fields: empty and required, a file opening in a new tab, a translated link whose
 					empty German value shows the English one, and the read-only state.
 				</p>
@@ -552,9 +552,9 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 			</section>
 
-			<section class="section" data-section="media">
+			<section class="cms-styleguide-section" data-section="media">
 				<h2>Media</h2>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					The media controls — a single image, a gallery, files, a video — filled, empty
 					and read-only. Fixture assets are inline SVG plates; uploads and the library
 					picker are live. The toggle drags a pretend file over every control.
@@ -597,9 +597,9 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 			</section>
 
-			<section class="section" data-section="entries">
+			<section class="cms-styleguide-section" data-section="entries">
 				<h2>Entries</h2>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					Stored rows collapse to a summary and open their form beneath it. The read-only
 					field keeps its rows and drops everything that restructures them.
 				</p>
@@ -633,9 +633,9 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 			</section>
 
-			<section class="section" data-section="blocks">
+			<section class="cms-styleguide-section" data-section="blocks">
 				<h2>Blocks</h2>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					A one-column list and a twelve-column grid, both on the field's own well. A
 					block's chrome appears on the active row; the + inserts before it, the footer
 					appends, and More blocks opens the catalog.
@@ -670,24 +670,24 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 			</section>
 
-			<section class="section" data-section="inspector">
+			<section class="cms-styleguide-section" data-section="inspector">
 				<h2>Inspector</h2>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					Rendered through <code>panel/views/node/inspector.php</code> — the status,
 					paths and advanced tabs of an existing node.
 				</p>
 				<?php $this->include('node/inspector', (array) u($inspector)) ?>
 			</section>
 
-			<section class="section" data-section="page-head">
+			<section class="cms-styleguide-section" data-section="page-head">
 				<h2>Page head</h2>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					Every part is optional and the order is fixed. <code>cms-page.css</code>
 					styles all of them; a screen adds only what is its own. The toolbar is a row of
 					the content column, outside its scroller, so it stays put while the content
 					moves.
 				</p>
-				<div class="cms-page sample-page">
+				<div class="cms-page cms-styleguide-sample-page">
 					<header class="cms-page-head">
 						<div class="cms-page-titles">
 							<div class="cms-page-line">
@@ -711,9 +711,9 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 			</section>
 
-			<section class="section" data-section="listing">
+			<section class="cms-styleguide-section" data-section="listing">
 				<h2>Listing</h2>
-				<p class="note">
+				<p class="cms-styleguide-note">
 					Rendered through <code>panel/views/collection/row.php</code>: tree depth, hover
 					actions and every status badge at once, which a real collection rarely shows.
 				</p>
@@ -753,7 +753,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 			</section>
 
-			<section class="section" data-section="empty">
+			<section class="cms-styleguide-section" data-section="empty">
 				<h2>Empty state</h2>
 				<div class="cms-collection">
 					<div class="cms-collection-listing">

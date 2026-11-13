@@ -9,14 +9,13 @@
 	}
 
 	/* A page head shown as a sample, framed so its own edges are visible. */
-	& .sample-page {
+	& .cms-styleguide-sample-page {
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-lg);
 		overflow: hidden;
 	}
 
-	/* The page's own body only: the samples inside have parts of that name. */
-	& > .body {
+	& .cms-styleguide-body {
 		display: flex;
 		flex-direction: column;
 		flex: 1 1 auto;
@@ -25,7 +24,7 @@
 		overflow: hidden;
 	}
 
-	& .sections {
+	& .cms-styleguide-sections {
 		display: flex;
 		flex: 1;
 		flex-direction: column;
@@ -35,7 +34,7 @@
 		overflow-y: auto;
 	}
 
-	& .section {
+	& .cms-styleguide-section {
 		display: flex;
 		flex-direction: column;
 		gap: var(--cms-space-4);
@@ -43,14 +42,14 @@
 
 	/* Scoped to the block's own section headings: samples nest real editor
 	   content, and a bare h2 selector reaches the headings inside it. */
-	& .section > h2 {
+	& .cms-styleguide-section > h2 {
 		margin: 0;
 		padding-bottom: var(--cms-space-2);
 		border-bottom: 1px solid var(--cms-color-border);
 		font-size: var(--cms-font-size-lg);
 	}
 
-	& .group {
+	& .cms-styleguide-group {
 		display: flex;
 		flex-direction: column;
 		gap: var(--cms-space-3);
@@ -63,14 +62,14 @@
 			letter-spacing: 0.09em;
 			text-transform: uppercase;
 		}
-
-		& .count {
-			color: var(--cms-color-text-faint);
-			font-variant-numeric: tabular-nums;
-		}
 	}
 
-	& .note {
+	& .cms-styleguide-count {
+		color: var(--cms-color-text-faint);
+		font-variant-numeric: tabular-nums;
+	}
+
+	& .cms-styleguide-note {
 		max-width: 68ch;
 		margin: 0;
 		color: var(--cms-color-text-muted);
@@ -81,20 +80,20 @@
 		font-size: var(--cms-font-size-xs);
 	}
 
-	& .sample {
+	& .cms-styleguide-sample {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--cms-space-3);
 	}
 
-	& .tokens {
+	& .cms-styleguide-tokens {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
 		gap: var(--cms-space-2);
 	}
 
-	& .tokens > .token {
+	& .cms-styleguide-token {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-3);
@@ -105,8 +104,7 @@
 		min-width: 0;
 	}
 
-	/* Scoped to the token list: color fields in the samples have a swatch too. */
-	& .token > .swatch {
+	& .cms-styleguide-swatch {
 		flex-shrink: 0;
 		width: 2rem;
 		height: 2rem;
@@ -119,12 +117,12 @@
 		}
 	}
 
-	& .name {
+	& .cms-styleguide-name {
 		flex-shrink: 0;
 		color: var(--cms-color-text);
 	}
 
-	& .value {
+	& .cms-styleguide-value {
 		min-width: 0;
 		margin-left: auto;
 		overflow: hidden;
@@ -134,7 +132,7 @@
 	}
 
 	/* Panel inputs stretch to their field wrapper; the sampler has none. */
-	& .sample {
+	& .cms-styleguide-sample {
 		& input:not([type='checkbox']),
 		& select {
 			width: auto;

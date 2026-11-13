@@ -7,7 +7,7 @@ $alignmentFields = (array) u($alignmentFields);
 		<div class="pane-scroll">
 			<div class="inner">
 				<form id="node-editor-form" class="sheet" onsubmit="event.preventDefault()">
-					<div class="sample">
+					<div class="cms-styleguide-sample">
 						<button
 							type="button"
 							class="cms-button cms-button-secondary"
