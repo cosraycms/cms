@@ -14,10 +14,10 @@ function editor(): void {
 			<div class="cms-field" data-field="title">
 				<label class="cms-field-label"><div><span class="cms-field-name">Title</span></div></label>
 				<div class="cms-field-control">
-					<div class="variant" data-locale="en">
+					<div class="cms-locale-variant" data-locale="en">
 						<input name="content[title][value][en]" type="text" />
 					</div>
-					<div class="variant" data-locale="de" hidden>
+					<div class="cms-locale-variant" data-locale="de" hidden>
 						<input name="content[title][value][de]" type="text" />
 					</div>
 				</div>
@@ -50,12 +50,12 @@ function editor(): void {
 								</div>
 								<div class="cms-field" data-field="trans">
 									<div class="cms-field-control">
-										<div class="variant" data-locale="en">
+										<div class="cms-locale-variant" data-locale="en">
 											<input
 												name="content[entries][value][zxx][0][fields][trans][value][en]"
 												type="text" />
 										</div>
-										<div class="variant" data-locale="de" hidden>
+										<div class="cms-locale-variant" data-locale="de" hidden>
 											<input
 												name="content[entries][value][zxx][0][fields][trans][value][de]"
 												type="text" />
@@ -426,7 +426,9 @@ describe('errors behavior', () => {
 
 		box.querySelector<HTMLElement>('[data-error-jump]')?.click();
 
-		const variant = field('title').querySelector<HTMLElement>('.variant[data-locale="de"]');
+		const variant = field('title').querySelector<HTMLElement>(
+			'.cms-locale-variant[data-locale="de"]',
+		);
 		const input = document.querySelector('[name="content[title][value][de]"]');
 
 		expect(variant?.hidden).toBe(false);

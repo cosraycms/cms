@@ -15,11 +15,11 @@ const STORE = 'cosray:content-locale';
  * @param {ParentNode} [root]
  */
 function show(scope, locale, root = scope) {
-	/** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll('.variant[data-locale]')).forEach(
-		(variant) => {
-			variant.hidden = variant.dataset.locale !== locale;
-		},
-	);
+	/** @type {NodeListOf<HTMLElement>} */ (
+		root.querySelectorAll('.cms-locale-variant[data-locale]')
+	).forEach((variant) => {
+		variant.hidden = variant.dataset.locale !== locale;
+	});
 
 	/** @type {NodeListOf<HTMLLabelElement>} */ (
 		root.querySelectorAll('[data-locale-label-for]')

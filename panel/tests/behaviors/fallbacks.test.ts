@@ -49,13 +49,13 @@ function renderBlocks(): void {
 			<select data-content-locale-control data-content-locale-select><option value="en">English</option><option value="de" selected>Deutsch</option></select>
 			<div class="cms-field">
 				<div class="cms-field-body"><div class="cms-field-control">
-					<div class="variant" data-locale="en" data-blocks-locale hidden>
+					<div class="cms-locale-variant" data-locale="en" data-blocks-locale hidden>
 						<div class="cms-blocks-editor"><div data-repeater-list>
-							<div data-repeater-row><div class="variant" data-locale="en">English block</div><div class="variant" data-locale="de">German block</div></div>
+							<div data-repeater-row><div class="cms-locale-variant" data-locale="en">English block</div><div class="cms-locale-variant" data-locale="de">German block</div></div>
 						</div></div>
 						<span data-blocks-fallback-source data-template="Fallback from {language}" hidden></span>
 					</div>
-					<div class="variant" data-locale="de" data-blocks-locale>
+					<div class="cms-locale-variant" data-locale="de" data-blocks-locale>
 						<div class="cms-blocks-editor"><div data-repeater-list></div><button type="button">Add block</button></div>
 						<span data-blocks-fallback-source data-template="Fallback from {language}" hidden></span>
 					</div>
@@ -65,11 +65,15 @@ function renderBlocks(): void {
 }
 
 function input(locale: string): HTMLInputElement | HTMLTextAreaElement {
-	return document.querySelector(`.variant[data-locale="${locale}"] [data-fallback-input]`)!;
+	return document.querySelector(
+		`.cms-locale-variant[data-locale="${locale}"] [data-fallback-input]`,
+	)!;
 }
 
 function source(locale: string): HTMLElement {
-	return document.querySelector(`.variant[data-locale="${locale}"] [data-fallback-source]`)!;
+	return document.querySelector(
+		`.cms-locale-variant[data-locale="${locale}"] [data-fallback-source]`,
+	)!;
 }
 
 describe('native fallback previews', () => {
@@ -240,8 +244,12 @@ describe('native fallback previews', () => {
 		expect(english.hidden).toBe(false);
 		expect(english.inert).toBe(true);
 		expect(english.classList.contains('is-fallback-preview')).toBe(true);
-		expect(english.querySelector<HTMLElement>('.variant[data-locale="en"]')!.hidden).toBe(false);
-		expect(english.querySelector<HTMLElement>('.variant[data-locale="de"]')!.hidden).toBe(true);
+		expect(
+			english.querySelector<HTMLElement>('.cms-locale-variant[data-locale="en"]')!.hidden,
+		).toBe(false);
+		expect(
+			english.querySelector<HTMLElement>('.cms-locale-variant[data-locale="de"]')!.hidden,
+		).toBe(true);
 		expect(english.querySelector('[data-blocks-fallback-source]')?.textContent).toBe(
 			'Fallback from English',
 		);

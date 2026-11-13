@@ -10,7 +10,7 @@
 	background: var(--cms-color-surface-sunken);
 	box-shadow: var(--cms-shadow-recessed);
 
-	& .option {
+	& .cms-content-locales-option {
 		display: block;
 		flex: 1 1 0;
 		min-width: 0;
@@ -67,7 +67,7 @@
 		flex-direction: column;
 		width: auto;
 
-		& .option {
+		& .cms-content-locales-option {
 			flex: 0 0 auto;
 			padding-inline: var(--cms-space-1-5);
 			font-size: var(--cms-font-size-xs);
@@ -80,7 +80,7 @@
 		width: auto;
 		margin-left: auto;
 
-		& .option {
+		& .cms-content-locales-option {
 			flex: 0 0 auto;
 		}
 	}

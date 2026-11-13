@@ -124,7 +124,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			<?php if ($variants): ?>
 				<?php foreach ($locales as $locale): ?>
 					<div
-						class="variant"
+						class="cms-locale-variant"
 						data-locale="<?= escape($locale['id']) ?>"
 						<?= $asymmetric ? 'data-blocks-locale' : '' ?>
 						<?= $locale['id'] === $defaultLocale ? '' : 'hidden' ?>>
@@ -147,14 +147,14 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 						]) ?>
 						<?php if ($fallbackPreview): ?>
 							<span
-								class="cms-fallback-source"
+								class="cms-locale-variant-source"
 								data-fallback-source
 								data-template="<?= escape(__('field:fallback-from', ['language' => '{language}'])) ?>"
 								data-neutral="<?= escape(__('field:fallback-shared')) ?>"
 								hidden></span>
 						<?php elseif ($asymmetric): ?>
 							<span
-								class="cms-blocks-fallback-source"
+								class="cms-locale-variant-source"
 								data-blocks-fallback-source
 								data-template="<?= escape(__('field:fallback-from', ['language' => '{language}'])) ?>"
 								hidden></span>

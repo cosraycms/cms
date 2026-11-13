@@ -42,7 +42,7 @@ $defaultLocale = (string) u($menuDefaultLocale);
 							<?php foreach ($locales as $locale): ?>
 								<?php $own = (string) (((array) $entry['description'])[$locale['id']] ?? '') ?>
 								<span
-									class="variant<?= $own === '' ? ' is-fallback' : '' ?>"
+									class="cms-locale-variant<?= $own === '' ? ' is-fallback' : '' ?>"
 									data-locale="<?= escape((string) $locale['id']) ?>"
 									<?= $locale['id'] === $defaultLocale ? '' : 'hidden' ?>><?= escape(
 										$own !== '' ? $own : (string) $entry['label'],

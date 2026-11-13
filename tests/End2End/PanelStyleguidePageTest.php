@@ -47,7 +47,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		// the pane's selector, like a top-level field.
 		$this->assertHtmlNodeExists(
 			'//div[@data-content-locale-scope]//*[@data-content-locale-control]'
-				. '/following::div[@data-repeater-row]//div[@class="variant"][@data-locale="de"]',
+				. '/following::div[@data-repeater-row]//div[@class="cms-locale-variant"][@data-locale="de"]',
 			$html,
 		);
 		// A block with one field hides that field's label from sight; a

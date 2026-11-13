@@ -360,8 +360,8 @@ describe('YouTube control', () => {
 		];
 		document.body.innerHTML = `<form data-content-locale-scope data-content-locales='${JSON.stringify(locales)}'>${markup('', { translate: true }, { locales, defaultLocale: 'de', data: { value: { zxx: ID } } })}</form>`;
 		stops.push(installFallbacks());
-		const en = document.querySelector<HTMLElement>('.variant[data-locale="en"]')!;
-		const de = document.querySelector<HTMLElement>('.variant[data-locale="de"]')!;
+		const en = document.querySelector<HTMLElement>('.cms-locale-variant[data-locale="en"]')!;
+		const de = document.querySelector<HTMLElement>('.cms-locale-variant[data-locale="de"]')!;
 		expect(input(de).placeholder).toBe(ID);
 		expect(submitted('content[video][value][de]')).toBe('');
 		input(de).focus();

@@ -152,7 +152,7 @@ export function contentLocales(locales, locale) {
 		control.setAttribute('aria-labelledby', label.id);
 
 		for (const entry of locales) {
-			const option = button('option', entry.title, () => choose(entry.id));
+			const option = button('cms-content-locales-option', entry.title, () => choose(entry.id));
 			option.dataset.locale = entry.id;
 			control.append(option);
 		}

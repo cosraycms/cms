@@ -62,7 +62,7 @@
 		min-width: 0;
 
 		& > span:last-child,
-		& > .variant {
+		& > .cms-locale-variant {
 			overflow-wrap: anywhere;
 		}
 	}

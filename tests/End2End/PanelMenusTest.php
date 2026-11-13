@@ -294,7 +294,7 @@ final class PanelMenusTest extends End2EndTestCase
 		// so switching the content language needs no round trip.
 		$this->assertHtmlNodeExists(
 			'//*[@data-uid="german-only"]//strong'
-				. '/span[@data-locale="de"][not(@class="variant is-fallback")]'
+				. '/span[@data-locale="de"][not(@class="cms-locale-variant is-fallback")]'
 				. '[normalize-space()="Nur auf Deutsch"]',
 			$html,
 		);

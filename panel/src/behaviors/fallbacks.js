@@ -7,7 +7,7 @@ const CONTENT_SCOPE = '[data-content-locale-scope]';
 const CONTENT_CONTROL = '[data-content-locale-control]';
 const INPUT = '[data-fallback-input]';
 const BLOCK_VARIANT =
-	':scope > .cms-field-body > .cms-field-control > .variant[data-blocks-locale]';
+	':scope > .cms-field-body > .cms-field-control > .cms-locale-variant[data-blocks-locale]';
 
 /**
  * @param {Element} scope
@@ -40,7 +40,7 @@ function fieldInputs(field) {
 	return Array.from(
 		/** @type {NodeListOf<HTMLInputElement | HTMLTextAreaElement>} */ (
 			field.querySelectorAll(
-				`:scope > .cms-field-body > .cms-field-control > .variant[data-locale] ${INPUT}`,
+				`:scope > .cms-field-body > .cms-field-control > .cms-locale-variant[data-locale] ${INPUT}`,
 			)
 		),
 	);
@@ -57,8 +57,9 @@ function refreshField(field) {
 	const map = { [ZXX]: field.getAttribute('data-fallback-neutral') ?? '' };
 
 	for (const control of controls) {
-		const locale = /** @type {HTMLElement | null} */ (control.closest('.variant[data-locale]'))
-			?.dataset.locale;
+		const locale = /** @type {HTMLElement | null} */ (
+			control.closest('.cms-locale-variant[data-locale]')
+		)?.dataset.locale;
 
 		if (locale) {
 			map[locale] = control.value;
@@ -66,7 +67,9 @@ function refreshField(field) {
 	}
 
 	for (const control of controls) {
-		const variant = /** @type {HTMLElement | null} */ (control.closest('.variant[data-locale]'));
+		const variant = /** @type {HTMLElement | null} */ (
+			control.closest('.cms-locale-variant[data-locale]')
+		);
 		const locale = variant?.dataset.locale ?? '';
 		const editor =
 			/** @type {HTMLInputElement | null} */ (
@@ -150,7 +153,7 @@ function refreshBlockField(field) {
 	variant.classList.add('is-fallback-preview');
 
 	for (const nested of /** @type {NodeListOf<HTMLElement>} */ (
-		variant.querySelectorAll('.variant[data-locale]')
+		variant.querySelectorAll('.cms-locale-variant[data-locale]')
 	)) {
 		if (nested.closest('[data-blocks-locale]') === variant) {
 			nested.hidden = nested.dataset.locale !== fallback.locale;

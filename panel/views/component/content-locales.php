@@ -46,7 +46,7 @@ if (count($locales) < 2) {
 			<?php $active = $locale['id'] === $selected ?>
 			<button
 				type="button"
-				class="option"
+				class="cms-content-locales-option"
 				role="radio"
 				aria-checked="<?= $active ? 'true' : 'false' ?>"
 				tabindex="<?= $active ? '0' : '-1' ?>"

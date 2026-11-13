@@ -20,6 +20,7 @@
 @import './cms-fieldset.css' layer(panel);
 @import './cms-fields.css' layer(panel);
 @import './cms-content-locales.css' layer(panel);
+@import './cms-locale-variant.css' layer(panel);
 @import './cms-control.css' layer(panel);
 @import './cms-reference.css' layer(panel);
 @import './cms-link.css' layer(panel);

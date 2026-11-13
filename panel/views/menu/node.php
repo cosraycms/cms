@@ -75,7 +75,7 @@ $confirm = $descendants === 0
 				<?php else: ?>
 					<?php foreach ($titles as $variant): ?>
 						<span
-							class="variant<?= $variant['fallback'] ? ' is-fallback' : '' ?>"
+							class="cms-locale-variant<?= $variant['fallback'] ? ' is-fallback' : '' ?>"
 							data-locale="<?= escape((string) $variant['locale']) ?>"
 							<?= $variant['locale'] === $defaultLocale ? '' : 'hidden' ?>><?= escape(
 								(string) $variant['title'],

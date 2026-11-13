@@ -147,7 +147,7 @@ $closeUrl = $screen->url(['file' => null]);
 							$value = is_array($value) ? (string) json_encode($value) : (string) $value;
 							$name = "meta[{$key}][{$entry['id']}]";
 							?>
-							<div class="variant" data-locale="<?= escape($entry['id']) ?>" <?= $entry['id'] === $defaultLocale ? '' : 'hidden' ?>>
+							<div class="cms-locale-variant" data-locale="<?= escape($entry['id']) ?>" <?= $entry['id'] === $defaultLocale ? '' : 'hidden' ?>>
 								<?php if ($key === 'caption'): ?>
 									<input type="hidden" id="<?= escape("{$id}-{$entry['id']}") ?>" name="<?= escape($name) ?>" value="<?= escape($value) ?>" data-media-caption />
 								<?php else: ?>

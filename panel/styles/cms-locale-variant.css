@@ -1,0 +1,48 @@
+/* One locale's copy of a translated control: the content-language
+   selector shows the active one. */
+.cms-locale-variant {
+	/* Names the language a fallback comes from. */
+	& .cms-locale-variant-source {
+		display: block;
+		margin-block-start: var(--cms-space-1);
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-style: italic;
+	}
+
+	/* Shown, but not editable here: an outline with no fill, like a
+	   disabled control. */
+	&.is-fallback-preview {
+		margin-bottom: var(--cms-space-3);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		color: var(--cms-color-text-subtle);
+
+		& > .cms-locale-variant-source {
+			margin-block-start: 0;
+			padding: 0 var(--cms-space-3) var(--cms-space-3);
+		}
+
+		& .cms-blocks-editor {
+			border: 0;
+			background: transparent;
+			box-shadow: none;
+		}
+
+		& .cms-blocks-editor > .adders,
+		& .block > .chrome,
+		& .block > .resize,
+		& .block > dialog,
+		& .richtext-toolbar,
+		& .cms-code-control-toolbar,
+		& .cms-media-field > .bar,
+		& .cms-image-card .controls,
+		& .cms-image-figure .overlay,
+		& .cms-video-figure .overlay,
+		& .cms-gallery .tile-tools,
+		& .cms-media-meta,
+		& .cms-file-row :is(.tool, .replace) {
+			display: none;
+		}
+	}
+}

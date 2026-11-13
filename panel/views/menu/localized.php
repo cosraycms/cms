@@ -33,7 +33,7 @@ $sectionHidden = (bool) ($sectionHidden ?? false);
 	<div class="cms-field-control">
 		<?php foreach ($locales as $locale): ?>
 			<div
-				class="variant"
+				class="cms-locale-variant"
 				data-locale="<?= escape($locale['id']) ?>"
 				<?= $locale['id'] === $defaultLocale ? '' : 'hidden' ?>>
 				<input

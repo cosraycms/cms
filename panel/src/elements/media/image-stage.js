@@ -159,7 +159,7 @@ export function imageStage({ item, info, source, readonly, cropping, mode, modeC
 			['focus', __('image:focus')],
 			['crop', __('image:crop-tool')],
 		])) {
-			const option = button('option', label, () => {
+			const option = button('cms-content-locales-option', label, () => {
 				tool = name;
 				modeChanged(name);
 				refresh();

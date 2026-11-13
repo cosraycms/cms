@@ -184,7 +184,9 @@ function contentLocale(form, path, control) {
 	}
 
 	const ids = contentLocaleIds(localeControl);
-	const variant = /** @type {HTMLElement | null} */ (control.closest('.variant[data-locale]'));
+	const variant = /** @type {HTMLElement | null} */ (
+		control.closest('.cms-locale-variant[data-locale]')
+	);
 
 	if (variant?.dataset.locale && ids.has(variant.dataset.locale)) {
 		return variant.dataset.locale;

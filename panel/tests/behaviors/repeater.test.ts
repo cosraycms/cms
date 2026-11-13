@@ -311,10 +311,10 @@ describe('repeater behavior', () => {
 
 			return `<div data-repeater-row>
 				<label for="${id}-en" data-locale-label-for="${id}">Title</label>
-				<div class="variant" data-locale="en">
+				<div class="cms-locale-variant" data-locale="en">
 					<input id="${id}-en" name="${NAME}[${index}][fields][title][value][en]">
 				</div>
-				<div class="variant" data-locale="de" hidden>
+				<div class="cms-locale-variant" data-locale="de" hidden>
 					<input id="${id}-de" name="${NAME}[${index}][fields][title][value][de]">
 				</div>
 				<button type="button" data-repeater-remove>Remove</button>
@@ -353,7 +353,7 @@ describe('repeater behavior', () => {
 				for (const row of container.querySelectorAll('[data-repeater-row]')) {
 					const input = row.querySelector<HTMLInputElement>(`[data-locale="${locale}"] input`)!;
 					expect(row.querySelector('label')!.control).toBe(input);
-					expect(input.closest<HTMLElement>('.variant')!.hidden).toBe(false);
+					expect(input.closest<HTMLElement>('.cms-locale-variant')!.hidden).toBe(false);
 				}
 			}
 		});

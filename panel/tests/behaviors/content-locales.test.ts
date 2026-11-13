@@ -25,8 +25,8 @@ function screen(selected = 'en'): void {
 			</div>
 			<div class="cms-field">
 				<label data-locale-label-for="field-title" for="field-title-${selected}">Title</label>
-				<div class="variant" data-locale="en" ${hidden('en')}><input id="field-title-en" /></div>
-				<div class="variant" data-locale="de" ${hidden('de')}><input id="field-title-de" /></div>
+				<div class="cms-locale-variant" data-locale="en" ${hidden('en')}><input id="field-title-en" /></div>
+				<div class="cms-locale-variant" data-locale="de" ${hidden('de')}><input id="field-title-de" /></div>
 				<cosray-host data-translated="true"></cosray-host>
 				<cosray-host id="neutral"></cosray-host>
 				<dialog><div id="mirror"></div></dialog>
@@ -141,8 +141,8 @@ describe('content language', () => {
 		choose('de');
 		const row = document.createElement('div');
 		row.innerHTML = `
-			<div class="variant" data-locale="en"></div>
-			<div class="variant" data-locale="de" hidden></div>
+			<div class="cms-locale-variant" data-locale="en"></div>
+			<div class="cms-locale-variant" data-locale="de" hidden></div>
 			<cosray-host data-translated="true"></cosray-host>`;
 		scope().append(row);
 		row.dispatchEvent(new CustomEvent('repeater:stamp', { bubbles: true }));
