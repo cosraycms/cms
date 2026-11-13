@@ -952,7 +952,7 @@
 }
 
 /* The details dialog of an image. Its header holds two lines. */
-.cms-modal:has(> .element > .cms-image-head) > .modal-close {
+.cms-modal:has(> .cms-modal-host > .cms-image-head) > .cms-modal-close {
 	top: 1.375rem;
 }
 
@@ -1026,7 +1026,7 @@
 	}
 }
 
-.cms-modal .modal-body.cms-image-details {
+.cms-modal .cms-modal-body.cms-image-details {
 	display: grid;
 	grid-template-columns: minmax(0, 1.6fr) minmax(20rem, 1fr);
 	grid-template-rows: minmax(0, 1fr);
@@ -1422,7 +1422,7 @@
 	}
 }
 
-.cms-modal .modal-footer:has(> .replace) {
+.cms-modal .cms-modal-footer:has(> .replace) {
 	& > .replace {
 		margin-inline-end: auto;
 	}

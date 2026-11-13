@@ -142,7 +142,7 @@ $label = __('field:split-block');
 		} ?>
 	</div>
 	<?php $this->component('component/dialog', ['name' => 'meta', 'size' => 'compact', 'title' => $label . ' — ' . __('field:block-settings')]) ?>
-		<div class="modal-body cms-settings">
+		<div class="cms-modal-body cms-settings">
 			<?php $this->include('field/blocks/layout', [
 				'layout' => $layout->array(),
 				'columns' => $columns,

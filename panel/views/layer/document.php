@@ -39,10 +39,10 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<div id="cms-toasts" class="cms-toasts" aria-live="polite"></div>
 
 	<?php $this->component('component/dialog', ['name' => 'csrf-expired', 'size' => 'compact', 'title' => __('auth:expired-title')]) ?>
-		<div class="modal-body">
+		<div class="cms-modal-body">
 			<p><?= escape(__('auth:csrf-expired')) ?></p>
 		</div>
-		<footer class="modal-footer">
+		<footer class="cms-modal-footer">
 			<button type="button" class="cms-button cms-button-secondary" data-dialog-close><?= escape(__('common:close')) ?></button>
 			<button type="button" class="cms-button cms-button-primary" data-csrf-reload data-dialog-focus><?= escape(
 				__('auth:expired-reload'),

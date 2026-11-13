@@ -163,7 +163,7 @@ These hooks describe the current shared behavior. If changing the markup, update
 
 ## Dialogs
 
-Every panel dialog is a `.cms-modal`, a native dialog with `.modal-header`, `.modal-title`, `.modal-body` and an optional `.modal-footer`; `data-size` selects `compact`, `wide` or `stage`. [Modal lifecycle](controls.md#modal-controls) documents cancellation, cleanup, ownership and focus. There are three ways to one, by what it holds:
+Every panel dialog is a `.cms-modal`, a native dialog with `.cms-modal-header`, `.cms-modal-title`, `.cms-modal-body` and an optional `.cms-modal-footer`; `data-size` selects `compact`, `wide` or `stage`. [Modal lifecycle](controls.md#modal-controls) documents cancellation, cleanup, ownership and focus. There are three ways to one, by what it holds:
 
 - A question before an action on a form or link: `hx-confirm` with the question, plus `data-confirm-action` for the button's label and `data-confirm-tone="danger"` when the action destroys something; `data-confirm-title` titles the dialog when the action alone does not. A global handler asks it in a panel dialog before htmx sends the request.
 - A question at the button that asks it: a `popover` marked `data-confirm`, named by the button's `popovertarget`, with `role="dialog"` and a title for `aria-labelledby`. [confirm.js](../panel/src/behaviors/confirm.js) places it below or above the button, at its end with `data-align="end"`, focuses the element marked `data-confirm-focus`, and closes it on `data-confirm-cancel` or its submit button. Use it where the question shows what the action takes along, as applying and discarding in the node editor do.

@@ -390,7 +390,7 @@ describe('image details', () => {
 			row.querySelector('dd')?.textContent,
 		]);
 
-		expect(modal.querySelector('.modal-header .filename')?.textContent).toBe('cover.jpg');
+		expect(modal.querySelector('.cms-modal-header .filename')?.textContent).toBe('cover.jpg');
 		expect(modal.querySelector('.preview img')?.getAttribute('src')).toBe(
 			'/media/cover-preview.jpg',
 		);
@@ -1373,8 +1373,8 @@ describe('image details', () => {
 
 		await vi.waitFor(() => {
 			const alert = [...document.querySelectorAll('dialog[open]')].at(-1);
-			expect(alert?.querySelector('.modal-title')?.textContent).toBe('common:error');
-			expect(alert?.querySelector('.modal-body')?.textContent).toBe('upload:file-error');
+			expect(alert?.querySelector('.cms-modal-title')?.textContent).toBe('common:error');
+			expect(alert?.querySelector('.cms-modal-body')?.textContent).toBe('upload:file-error');
 		});
 		expect(document.querySelector('.cms-modal .preview img')?.getAttribute('src')).toBe(
 			'/media/cover-preview.jpg',
@@ -1706,7 +1706,7 @@ describe('gallery details', () => {
 	}
 
 	const alt = () => document.querySelector<HTMLTextAreaElement>('.cms-modal textarea[id$="-alt"]')!;
-	const shown = () => document.querySelector('.cms-modal .modal-header .filename')?.textContent;
+	const shown = () => document.querySelector('.cms-modal .cms-modal-header .filename')?.textContent;
 
 	it('opens an image from its tile, by the button or the picture', async () => {
 		const { element } = await gallery();
@@ -1815,7 +1815,7 @@ describe('gallery details', () => {
 			thumbUrl: '/media/d.jpg',
 			kind: 'image',
 		});
-		library.querySelector('.modal-body > div')!.append(tile);
+		library.querySelector('.cms-modal-body > div')!.append(tile);
 		tile.click();
 		await tick();
 

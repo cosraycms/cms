@@ -362,7 +362,7 @@ $retype = count($blockTypes) > 1;
 	</div>
 	<?php if ($settings): ?>
 		<?php $this->component('component/dialog', ['name' => 'meta', 'size' => 'compact', 'title' => $label . ' — ' . __('field:block-settings')]) ?>
-			<div class="modal-body cms-settings">
+			<div class="cms-modal-body cms-settings">
 			<?php if ($settingsSubs !== []): ?>
 				<div class="cms-fields fields">
 					<?php $this->include('field/row-fields', [

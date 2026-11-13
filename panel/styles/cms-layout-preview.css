@@ -13,13 +13,13 @@
 	--width: 80rem;
 	height: calc(100dvh - 2 * var(--cms-space-4));
 
-	& .modal-header {
+	& .cms-modal-header {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-3);
 	}
 
-	& .modal-title {
+	& .cms-modal-title {
 		flex: 0 0 auto;
 	}
 
@@ -93,7 +93,7 @@
 		flex: 0 0 auto;
 	}
 
-	& .modal-body {
+	& .cms-modal-body {
 		display: flex;
 		flex-direction: column;
 		padding: var(--cms-space-4);

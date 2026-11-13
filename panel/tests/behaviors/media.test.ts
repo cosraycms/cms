@@ -192,13 +192,15 @@ describe('deleting the selection', () => {
 		const question = document.querySelector('dialog[open] .question');
 		expect(question?.textContent).toBe('media:confirm-delete-selected-plural');
 		document
-			.querySelector<HTMLElement>('dialog[open] .modal-footer .cms-button-secondary')!
+			.querySelector<HTMLElement>('dialog[open] .cms-modal-footer .cms-button-secondary')!
 			.click();
 		await new Promise((resolve) => setTimeout(resolve));
 		expect(post).not.toHaveBeenCalled();
 
 		button.click();
-		document.querySelector<HTMLElement>('dialog[open] .modal-footer .cms-button-danger')!.click();
+		document
+			.querySelector<HTMLElement>('dialog[open] .cms-modal-footer .cms-button-danger')!
+			.click();
 
 		await vi.waitFor(() => expect(ajax).toHaveBeenCalled());
 		expect(post).toHaveBeenCalledOnce();

@@ -31,8 +31,8 @@ $presets = [
 	data-layout-preview-dialog
 	data-url="<?= escape($url) ?>"
 	data-error="<?= escape(__('editor:layout-preview-failed')) ?>">
-	<header class="modal-header">
-		<h2 class="modal-title" data-dialog-title><?= escape(__('editor:layout-preview')) ?></h2>
+	<header class="cms-modal-header">
+		<h2 class="cms-modal-title" data-dialog-title><?= escape(__('editor:layout-preview')) ?></h2>
 		<span class="note"><?= escape(__('editor:layout-preview-note')) ?></span>
 		<div class="widths" role="group" aria-label="<?= escape(__('editor:layout-preview-width')) ?>">
 			<?php foreach ($presets as $preset): ?>
@@ -62,11 +62,11 @@ $presets = [
 			title="<?= escape(__('editor:layout-preview-reload')) ?>">
 			<?= Icon::render('arrow-clockwise') ?>
 		</button>
-		<button type="button" class="modal-close" data-dialog-close aria-label="<?= escape(__('common:close')) ?>">
+		<button type="button" class="cms-modal-close" data-dialog-close aria-label="<?= escape(__('common:close')) ?>">
 			<?= Icon::render('x-lg') ?>
 		</button>
 	</header>
-	<div class="modal-body">
+	<div class="cms-modal-body">
 		<div class="stage" data-layout-preview-stage>
 			<?php // No scripts: the iframe block emits editor markup raw. Same origin
 

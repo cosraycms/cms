@@ -34,7 +34,7 @@
 			height: auto;
 		}
 
-		& > .element {
+		& > .cms-modal-host {
 			flex: 1 1 auto;
 		}
 	}
@@ -44,7 +44,7 @@
 		backdrop-filter: blur(var(--cms-blur-sm));
 	}
 
-	& > .element {
+	& > .cms-modal-host {
 		display: flex;
 		flex-direction: column;
 		min-height: 0;
@@ -52,7 +52,7 @@
 		overscroll-behavior: contain;
 	}
 
-	& .modal-close {
+	& .cms-modal-close {
 		position: absolute;
 		top: var(--cms-space-3);
 		right: var(--cms-space-3);
@@ -76,20 +76,20 @@
 		}
 	}
 
-	& .modal-header {
+	& .cms-modal-header {
 		flex: 0 0 auto;
 		padding: var(--cms-space-4) var(--cms-space-6);
 		padding-inline-end: var(--cms-space-12);
 		border-bottom: 1px solid var(--cms-color-border);
 	}
 
-	& .modal-title {
+	& .cms-modal-title {
 		margin: 0;
 		font-size: var(--cms-font-size-base);
 		font-weight: 600;
 	}
 
-	& .modal-body {
+	& .cms-modal-body {
 		flex: 1 1 auto;
 		min-height: 0;
 		padding: var(--cms-space-6);
@@ -97,7 +97,7 @@
 		overscroll-behavior: contain;
 	}
 
-	& .modal-footer {
+	& .cms-modal-footer {
 		display: flex;
 		align-items: center;
 		justify-content: flex-end;

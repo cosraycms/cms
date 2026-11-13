@@ -194,7 +194,7 @@ function question(): HTMLDialogElement | null {
 async function answer(yes: boolean): Promise<void> {
 	question()!
 		.querySelector<HTMLElement>(
-			`.modal-footer ${yes ? '.cms-button-danger' : '.cms-button-secondary'}`,
+			`.cms-modal-footer ${yes ? '.cms-button-danger' : '.cms-button-secondary'}`,
 		)!
 		.click();
 	await new Promise((resolve) => setTimeout(resolve));

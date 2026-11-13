@@ -175,9 +175,9 @@ export function imageDialog({
 
 	const handle = cosray().modal.open(
 		(host) => {
-			const header = create('header', 'modal-header cms-image-head');
+			const header = create('header', 'cms-modal-header cms-image-head');
 			const heading = create('div', 'heading');
-			const title = create('h2', 'modal-title', __('image:details'));
+			const title = create('h2', 'cms-modal-title', __('image:details'));
 			title.dataset.dialogTitle = '';
 			const filename = create('p', 'filename');
 			heading.append(title, filename);
@@ -200,7 +200,7 @@ export function imageDialog({
 				header.append(stepper);
 			}
 
-			const body = create('div', 'modal-body cms-image-details');
+			const body = create('div', 'cms-modal-body cms-image-details');
 			const stage = create('div', 'stage');
 			const fields = create('div', 'fields');
 			const list = create('dl', 'facts');
@@ -297,7 +297,7 @@ export function imageDialog({
 				}
 			}
 
-			const footer = create('footer', 'modal-footer');
+			const footer = create('footer', 'cms-modal-footer');
 
 			if (readonly) {
 				const close = button('cms-button cms-button-secondary', __('common:close'), () =>

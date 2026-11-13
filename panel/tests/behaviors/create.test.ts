@@ -66,7 +66,7 @@ it('waits with creating until the required fields are filled', () => {
 	document
 		.getElementById('new')!
 		.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-	const host = document.querySelector<HTMLElement>('dialog.cms-modal .element')!;
+	const host = document.querySelector<HTMLElement>('dialog.cms-modal .cms-modal-host')!;
 	host.innerHTML = `
 		<form data-create>
 			<div class="sheet"><input name="title" required></div>

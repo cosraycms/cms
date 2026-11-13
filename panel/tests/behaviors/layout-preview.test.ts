@@ -35,8 +35,8 @@ function page(locale = 'de'): void {
 		</form>
 		<dialog class="cms-modal cms-layout-preview" data-layout-preview-dialog
 			data-url="/panel/node/node-1/blocks" data-error="Preview failed">
-			<header class="modal-header">
-				<h2 class="modal-title" data-dialog-title>Layout preview</h2>
+			<header class="cms-modal-header">
+				<h2 class="cms-modal-title" data-dialog-title>Layout preview</h2>
 				<div class="widths" role="group">
 					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="1200">Desktop</button>
 					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="1024" data-layout-preview-height="768">Tablet landscape</button>
@@ -46,7 +46,7 @@ function page(locale = 'de'): void {
 				<button type="button" data-layout-preview-reload>Reload</button>
 				<button type="button" data-dialog-close>Close</button>
 			</header>
-			<div class="modal-body">
+			<div class="cms-modal-body">
 				<div class="stage" data-layout-preview-stage>
 					<iframe class="frame" sandbox="allow-same-origin" data-layout-preview-frame></iframe>
 				</div>

@@ -35,7 +35,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<?php $this->include('component/csrf') ?>
 	<input type="hidden" name="uid" value="<?= escape($uid) ?>" />
 	<input type="hidden" name="dialog" value="1" />
-	<div class="modal-body">
+	<div class="cms-modal-body">
 		<div id="editor-errors" class="errors" hidden></div>
 		<output id="editor-status" class="status" role="status" hidden></output>
 		<?php $this->include('field/sheet', [
@@ -60,7 +60,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			<p><?= escape(__($record ? 'editor:create-record' : 'editor:create-entry')) ?></p>
 		</div>
 	</div>
-	<footer class="modal-footer">
+	<footer class="cms-modal-footer">
 		<button type="button" class="cms-button cms-button-secondary" data-dialog-close><?= escape(__('editor:cancel')) ?></button>
 		<button type="submit" class="cms-button cms-button-primary" data-editor-submit><?= escape(__('editor:create')) ?></button>
 	</footer>

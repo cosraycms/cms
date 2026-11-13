@@ -37,7 +37,7 @@ export function openModal(render, options = {}) {
 	if (!options.hideClose) {
 		const close = document.createElement('button');
 		close.type = 'button';
-		close.className = 'modal-close';
+		close.className = 'cms-modal-close';
 		close.dataset.dialogClose = '';
 		close.setAttribute('aria-label', __('common:close'));
 		close.innerHTML = icon('x-lg');
@@ -45,7 +45,7 @@ export function openModal(render, options = {}) {
 	}
 
 	const host = document.createElement('div');
-	host.className = 'element';
+	host.className = 'cms-modal-host';
 	dialog.append(host);
 	document.body.append(dialog);
 	/** @type {(() => void) | void} */
@@ -105,20 +105,20 @@ export function button(label, variant, onclick) {
  */
 export function frame(host, title, body, footer) {
 	const header = document.createElement('header');
-	header.className = 'modal-header';
+	header.className = 'cms-modal-header';
 	const heading = document.createElement('h2');
-	heading.className = 'modal-title';
+	heading.className = 'cms-modal-title';
 	heading.dataset.dialogTitle = '';
 	heading.textContent = title;
 	header.append(heading);
 	const main = document.createElement('div');
-	main.className = 'modal-body';
+	main.className = 'cms-modal-body';
 	main.append(...body);
 	host.append(header, main);
 
 	if (footer) {
 		const foot = document.createElement('footer');
-		foot.className = 'modal-footer';
+		foot.className = 'cms-modal-footer';
 		foot.append(...footer);
 		host.append(foot);
 	}

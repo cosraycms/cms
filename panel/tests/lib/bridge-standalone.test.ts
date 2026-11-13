@@ -94,7 +94,7 @@ describe('standalone bridge', () => {
 		const modal = bridge().modal.open(render);
 		const overlay = document.querySelector<HTMLElement>('.cms-modal')!;
 
-		expect(render).toHaveBeenCalledWith(overlay.querySelector('.element'));
+		expect(render).toHaveBeenCalledWith(overlay.querySelector('.cms-modal-host'));
 		expect(overlay.textContent).toContain('Control');
 		expect(overlay.querySelector<HTMLButtonElement>('[data-dialog-close]')?.ariaLabel).toBe(
 			'translated:common:close',

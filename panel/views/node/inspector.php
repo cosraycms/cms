@@ -198,7 +198,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 						</dl>
 
 						<?php $this->component('component/dialog', ['name' => 'paths', 'title' => __('editor:paths')]) ?>
-							<div class="modal-body cms-settings">
+							<div class="cms-modal-body cms-settings">
 								<?php foreach ($locales as $locale): ?>
 									<div class="field">
 										<label class="label" for="cms-node-path-<?= escape($locale['id']) ?>">
@@ -223,7 +223,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 									</div>
 								<?php endforeach ?>
 							</div>
-							<footer class="modal-footer">
+							<footer class="cms-modal-footer">
 								<button type="button" class="cms-button cms-button-primary" data-dialog-close>
 									<?= escape(__('editor:paths-done')) ?>
 								</button>

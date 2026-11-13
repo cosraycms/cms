@@ -188,7 +188,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			'size' => 'compact',
 			'title' => ($field['label'] ?? $fieldName) . ' — ' . __('field:meta'),
 		]) ?>
-			<div class="modal-body cms-settings">
+			<div class="cms-modal-body cms-settings">
 			<?php // The blocks field renders its gap group with the split toggle. ?>
 			<?php $this->include($controlName === 'blocks' ? 'field/blocks/meta' : 'field/meta', [
 				'field' => $field,

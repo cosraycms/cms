@@ -201,7 +201,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 						<?php endforeach ?>
 					</div>
 					<?php $this->component('component/dialog', ['name' => 'meta', 'size' => 'compact', 'title' => 'Shared dialog']) ?>
-						<div class="modal-body">
+						<div class="cms-modal-body">
 							<label for="sample-dialog-name">Name</label>
 							<input id="sample-dialog-name" class="cms-input" data-dialog-focus value="Live setting" />
 							<div data-meta-owner>
@@ -211,27 +211,27 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 									<button type="button" disabled>Unavailable action</button>
 								</div>
 								<?php $this->component('component/dialog', ['name' => 'meta', 'size' => 'compact', 'title' => 'Nested dialog']) ?>
-									<div class="modal-body">Escape returns to the underlying dialog.</div>
-									<div class="modal-footer"><button type="button" class="cms-button cms-button-secondary" data-dialog-close>Close</button></div>
+									<div class="cms-modal-body">Escape returns to the underlying dialog.</div>
+									<div class="cms-modal-footer"><button type="button" class="cms-button cms-button-secondary" data-dialog-close>Close</button></div>
 								<?php $this->end() ?>
 							</div>
 						</div>
-						<div class="modal-footer"><button type="button" class="cms-button cms-button-secondary" data-dialog-close>Close</button></div>
+						<div class="cms-modal-footer"><button type="button" class="cms-button cms-button-secondary" data-dialog-close>Close</button></div>
 					<?php $this->end() ?>
 				</form>
 				<div class="sample" data-sample="questions">
 					<button type="button" class="cms-button cms-button-danger" data-dialog-open="sample-confirm">Destructive question</button>
 					<button type="button" class="cms-button cms-button-secondary" data-dialog-open="sample-alert">Notice</button>
 					<?php $this->component('component/dialog', ['name' => 'sample-confirm', 'size' => 'compact', 'title' => 'Delete file']) ?>
-						<div class="modal-body cms-confirm"><p class="question">Delete the file "report.pdf"?</p></div>
-						<footer class="modal-footer">
+						<div class="cms-modal-body cms-confirm"><p class="question">Delete the file "report.pdf"?</p></div>
+						<footer class="cms-modal-footer">
 							<button type="button" class="cms-button cms-button-secondary" data-dialog-close data-dialog-focus>Cancel</button>
 							<button type="button" class="cms-button cms-button-danger cms-button-solid" data-dialog-close>Delete file</button>
 						</footer>
 					<?php $this->end() ?>
 					<?php $this->component('component/dialog', ['name' => 'sample-alert', 'size' => 'compact', 'title' => 'Error']) ?>
-						<div class="modal-body"><p>Only one file can be added here.</p></div>
-						<footer class="modal-footer">
+						<div class="cms-modal-body"><p>Only one file can be added here.</p></div>
+						<footer class="cms-modal-footer">
 							<button type="button" class="cms-button cms-button-primary" data-dialog-close data-dialog-focus>OK</button>
 						</footer>
 					<?php $this->end() ?>

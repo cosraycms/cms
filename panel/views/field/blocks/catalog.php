@@ -8,7 +8,7 @@ $title = __('field:add-block') . ($label !== '' ? ' — ' . $label : '');
 ?>
 <template data-block-catalog>
 	<?php $this->include('component/modal-header', ['title' => $title]) ?>
-	<div class="modal-body cms-block-catalog">
+	<div class="cms-modal-body cms-block-catalog">
 		<label class="search">
 			<?= $this->escape(__('field:search-blocks')) ?>
 			<input type="search" class="cms-input" data-block-search data-dialog-focus autocomplete="off" />
