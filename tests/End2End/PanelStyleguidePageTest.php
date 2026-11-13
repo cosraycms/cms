@@ -33,7 +33,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		$this->assertStringContainsString('background: var(--cms-color-canvas)', $html);
 		// Components render through the same partials the editor uses.
 		$this->assertStringContainsString('class="cms-button cms-button-primary"', $html);
-		$this->assertStringContainsString('class="cms-field required"', $html);
+		$this->assertStringContainsString('class="cms-field"', $html);
 		$this->assertHtmlNodeExists(
 			'//div[@data-content-locale-scope][@data-content-locale="de"]'
 				. '//*[@data-content-locale-control]/*[@data-content-locale-option="de"][@aria-checked="true"]',
@@ -59,7 +59,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeExists(
 			'//div[@data-repeater-row]//div[contains(@class, "cms-field")]'
-				. '/label[@class="label"]',
+				. '/label[@class="cms-field-label"]',
 			$html,
 		);
 		// No block marks a field on its canvas as required: reaching for the
@@ -67,12 +67,11 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		// and so does a field out of sight in the block's settings dialog.
 		$this->assertHtmlNodeMissing(
 			'//div[contains(concat(" ", normalize-space(@class), " "), " block ")][@data-repeater-row]'
-				. '/div[@class="body"]//div[contains(concat(" ", normalize-space(@class), " "), " required ")]',
+				. '/div[@class="body"]//div[@data-required="true"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//div[@data-repeater-row]/dialog[@data-dialog="meta"]'
-				. '//div[contains(concat(" ", normalize-space(@class), " "), " required ")]',
+			'//div[@data-repeater-row]/dialog[@data-dialog="meta"]//div[@data-required="true"]',
 			$html,
 		);
 		$this->assertHtmlNodeMissing(
@@ -80,8 +79,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//div[contains(concat(" ", normalize-space(@class), " "), " cms-field ")]'
-				. '[contains(concat(" ", normalize-space(@class), " "), " required ")]',
+			'//div[contains(concat(" ", normalize-space(@class), " "), " cms-field ")][@data-required="true"]',
 			$html,
 		);
 		$this->assertStringContainsString('<th class="col-actions" role="columnheader"></th>', $html);

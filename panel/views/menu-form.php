@@ -46,10 +46,10 @@ $maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 				<?php endif ?>
 
 				<div class="cms-field<?= isset($errors['menu']) ? ' has-error' : '' ?>">
-					<label class="label" for="menu-handle"><div><?= escape(
+					<label class="cms-field-label" for="menu-handle"><div><?= escape(
 						__('menu:handle'),
 					) ?></div></label>
-					<div class="control">
+					<div class="cms-field-control">
 						<input
 							class="cms-input"
 							id="menu-handle"
@@ -74,10 +74,10 @@ $maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 				]) ?>
 
 				<div class="cms-field<?= isset($errors['maxDepth']) ? ' has-error' : '' ?>">
-					<label class="label" for="menu-max-depth"><div><?= escape(
+					<label class="cms-field-label" for="menu-max-depth"><div><?= escape(
 						__('menu:max-depth'),
 					) ?></div></label>
-					<div class="control">
+					<div class="cms-field-control">
 						<input
 							class="cms-input"
 							id="menu-max-depth"

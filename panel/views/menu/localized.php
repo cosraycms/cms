@@ -25,12 +25,12 @@ $sectionHidden = (bool) ($sectionHidden ?? false);
 	<?= is_string($sectionHide) ? 'data-menu-section-hide="' . escape($sectionHide) . '"' : '' ?>
 	<?= $sectionHidden ? 'hidden' : '' ?>>
 	<label
-		class="label"
+		class="cms-field-label"
 		for="<?= escape($id) ?>-<?= escape($defaultLocale) ?>"
 		data-locale-label-for="<?= escape($id) ?>">
 		<div><?= escape($label) ?></div>
 	</label>
-	<div class="control">
+	<div class="cms-field-control">
 		<?php foreach ($locales as $locale): ?>
 			<div
 				class="variant"

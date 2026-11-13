@@ -22,9 +22,9 @@ function page(locale = 'de'): void {
 	document.body.innerHTML = `
 		<form id="node-editor-form" data-content-locale-scope data-content-locale="${locale}">
 			<div class="cms-field" data-field="content">
-				<label class="label">
+				<label class="cms-field-label">
 					<div>Content</div>
-					<button type="button" class="meta-button layout-preview" data-layout-preview="content">Layout preview</button>
+					<button type="button" class="cms-field-button cms-field-layout-preview" data-layout-preview="content">Layout preview</button>
 				</label>
 				<div class="cms-blocks-editor"><div class="grid"><div class="block"></div></div></div>
 				<input name="content[content][value][zxx][0][uid]" value="abc" />

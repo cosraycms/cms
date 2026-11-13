@@ -12,7 +12,7 @@
 	min-width: 0;
 	padding-inline: var(--cms-space-2);
 
-	& .label {
+	& .cms-field-label {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-2);
@@ -27,8 +27,8 @@
 		}
 	}
 
-	& .requirement,
-	& .state {
+	& .cms-field-requirement,
+	& .cms-field-state {
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-xs);
 		font-weight: 400;
@@ -41,32 +41,32 @@
 		}
 	}
 
-	& > .field-body {
+	& > .cms-field-body {
 		display: flex;
 		flex-direction: column;
 		gap: var(--cms-space-1-5);
 		min-width: 0;
 	}
 
-	& .control {
+	& .cms-field-control {
 		display: flex;
 		flex-direction: column;
 		gap: var(--cms-space-2);
 		min-width: 0;
 	}
 
-	& .description {
+	& .cms-field-description {
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-xs);
 		line-height: 1.45;
 	}
 
 	/* Nothing to lay out yet: the preview waits for the first block. */
-	&:not(:has(.cms-blocks-editor > .grid > *)) .layout-preview {
+	&:not(:has(.cms-blocks-editor > .grid > *)) .cms-field-layout-preview {
 		display: none;
 	}
 
-	& .meta-button {
+	& .cms-field-button {
 		padding: 0 var(--cms-space-2);
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius);
@@ -114,74 +114,5 @@
 		line-height: 1;
 		content: '!' / '';
 		translate: 0 0.125rem;
-	}
-}
-
-.cms-fieldset {
-	min-width: 0;
-	margin: 0;
-	padding: 0;
-	border: 0;
-
-	& .legend {
-		padding: 0;
-		color: var(--cms-color-text);
-		font-size: var(--cms-font-size-base);
-		font-weight: 600;
-		letter-spacing: -0.012em;
-	}
-
-	& .description {
-		max-width: 62ch;
-		padding: var(--cms-space-1) 0 0;
-		color: var(--cms-color-text-subtle);
-		font-size: var(--cms-font-size-xs);
-		line-height: 1.5;
-	}
-
-	& .fields {
-		width: 100%;
-		margin-top: var(--cms-space-4);
-	}
-}
-
-/* Column gutters use field padding: a gap would repeat across all 100 columns. */
-.cms-fields {
-	display: grid;
-	grid-template-columns: repeat(100, minmax(0, 1fr));
-
-	/* Item margins separate logical rows without adding gaps inside a row span.
-	   Cancel the trailing margin only when the grid has visible items. */
-	&:has(> :not([hidden])) {
-		margin-block-end: calc(-1 * var(--cms-space-8));
-	}
-
-	& > * {
-		--rows: 1;
-		grid-row: span calc(2 * var(--rows));
-		margin-block-end: var(--cms-space-8);
-	}
-
-	& > .cms-field:not([hidden]) {
-		display: grid;
-		grid-template-rows: subgrid;
-		row-gap: 0;
-	}
-
-	& > .cms-field > .label {
-		grid-row: 1;
-		align-self: end;
-		margin-block-end: var(--cms-space-1);
-	}
-
-	& > .cms-field > .field-body {
-		grid-row: 2 / -1;
-		align-self: start;
-	}
-}
-
-@container content (width < 45rem) {
-	.cms-fields > * {
-		grid-column: 1 / -1 !important;
 	}
 }

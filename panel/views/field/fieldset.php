@@ -24,14 +24,14 @@ $descriptionId = "fieldset-{$name}-description";
 		? 'aria-describedby="' . escape($descriptionId) . '"'
 		: '' ?>>
 	<?php if (is_string($label) && $label !== ''): ?>
-		<legend class="legend"><?= escape($label) ?></legend>
+		<legend class="cms-fieldset-legend"><?= escape($label) ?></legend>
 	<?php endif ?>
 	<?php if (is_string($description) && $description !== ''): ?>
-		<div id="<?= escape($descriptionId) ?>" class="description">
+		<div id="<?= escape($descriptionId) ?>" class="cms-fieldset-description">
 			<?= escape($description) ?>
 		</div>
 	<?php endif ?>
-	<div class="cms-fields fields">
+	<div class="cms-fields cms-fieldset-fields">
 		<?php foreach ((array) ($fieldset['fields'] ?? []) as $fieldName): ?>
 			<?php if (!is_string($fieldName) || !isset($fieldsByName[$fieldName])) {
 				continue;

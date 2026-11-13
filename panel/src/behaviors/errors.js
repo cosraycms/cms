@@ -344,7 +344,9 @@ function labelOf(control, path) {
 		field;
 		field = field.parentElement?.closest('.cms-field') ?? null
 	) {
-		const name = field.querySelector(':scope > .label .name')?.textContent?.trim();
+		const name = field
+			.querySelector(':scope > .cms-field-label .cms-field-name')
+			?.textContent?.trim();
 
 		if (name) {
 			names.unshift(name);
@@ -394,7 +396,7 @@ function show(problem) {
 	const field = problem.field;
 	field.setAttribute(INVALID, 'true');
 
-	const body = field.querySelector(':scope > .field-body') ?? field;
+	const body = field.querySelector(':scope > .cms-field-body') ?? field;
 	/** @type {Map<string, HTMLElement>} */
 	const notes = new Map();
 
@@ -415,8 +417,8 @@ function show(problem) {
 			const messages = body.querySelectorAll(`:scope > [${MESSAGE}]`);
 			const anchor =
 				messages[messages.length - 1] ??
-				body.querySelector(':scope > .description') ??
-				body.querySelector(':scope > .control');
+				body.querySelector(':scope > .cms-field-description') ??
+				body.querySelector(':scope > .cms-field-control');
 
 			if (anchor) {
 				anchor.after(note);

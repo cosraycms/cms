@@ -34,7 +34,7 @@ beforeEach(() => {
 			<div id="url-section" data-menu-section="url" hidden></div>
 			<div id="target-section" data-menu-section="node url asset"></div>
 			<div id="title-section" data-menu-section-hide="children"></div>
-			<div class="control menu-picker" data-menu-picker="nodes" data-menu-picker-url="/panel/reference/nodes?limit=8">
+			<div class="cms-field-control menu-picker" data-menu-picker="nodes" data-menu-picker-url="/panel/reference/nodes?limit=8">
 				<input type="hidden" name="node" value="old-uid" data-menu-picker-value />
 				<input type="text" data-menu-picker-search value="Old title" />
 				<div data-menu-picker-results hidden></div>

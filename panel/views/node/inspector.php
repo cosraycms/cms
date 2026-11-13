@@ -206,7 +206,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 										</label>
 										<input
 											id="cms-node-path-<?= escape($locale['id']) ?>"
-											class="cms-input js-path-source"
+											class="cms-input cms-path-source"
 											type="text"
 											name="paths[<?= escape($locale['id']) ?>]"
 											data-path-locale="<?= escape($locale['id']) ?>"
@@ -250,7 +250,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 						<label class="label" for="cms-node-handle"><?= escape(__('editor:handle')) ?><?= $mark('handle') ?></label>
 						<input
 							id="cms-node-handle"
-							class="cms-input js-path-source"
+							class="cms-input cms-path-source"
 							type="text"
 							name="handle"
 							maxlength="64"

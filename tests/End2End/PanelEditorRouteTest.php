@@ -744,11 +744,11 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 
-		// Handle and path inputs carry the js-path-source hook so the preview
+		// Handle and path inputs carry the cms-path-source hook so the preview
 		// only recomputes when a route-determining input changes.
 		$this->assertStringContainsString('id="cms-node-handle"', $html);
 		$this->assertHtmlNodeExists(
-			'//input[@id="cms-node-handle"][contains(concat(" ", normalize-space(@class), " "), " js-path-source ")]',
+			'//input[@id="cms-node-handle"][contains(concat(" ", normalize-space(@class), " "), " cms-path-source ")]',
 			$html,
 		);
 		$this->assertStringContainsString('name="paths[en]"', $html);
@@ -768,7 +768,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// The preview trigger is scoped to those inputs, not the whole form,
 		// so editing content fields no longer fires the paths POST.
 		$this->assertStringContainsString('id="generated-paths"', $html);
-		$this->assertStringContainsString('from:.js-path-source', $html);
+		$this->assertStringContainsString('from:.cms-path-source', $html);
 		$this->assertStringNotContainsString('from:#node-editor-form', $html);
 
 		// The initial preview renders server-side (route is /test/{uid}).
@@ -778,9 +778,9 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		);
 
 		// The /test/{uid} route references no content field, so no field
-		// wrapper is marked (only the handle input carries js-path-source).
+		// wrapper is marked (only the handle input carries cms-path-source).
 		$this->assertHtmlNodeMissing(
-			'//div[contains(concat(" ", normalize-space(@class), " "), " js-path-source ")]'
+			'//div[contains(concat(" ", normalize-space(@class), " "), " cms-path-source ")]'
 				. '//input[starts-with(@name, "content[")]',
 			$html,
 		);
@@ -856,10 +856,10 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 
 		// The route /{parent}/{title} references the title content field, so
-		// its wrapper is marked js-path-source and edits to it live-refresh
+		// its wrapper is marked cms-path-source and edits to it live-refresh
 		// the preview; the referenced input stays inside that wrapper.
 		$this->assertHtmlNodeExists(
-			'//div[contains(concat(" ", normalize-space(@class), " "), " js-path-source ")]//input[starts-with(@name, "content[title][value]")]',
+			'//div[contains(concat(" ", normalize-space(@class), " "), " cms-path-source ")]//input[starts-with(@name, "content[title][value]")]',
 			$html,
 		);
 	}

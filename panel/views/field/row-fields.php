@@ -54,12 +54,12 @@ foreach ((array) ($type['fieldsets'] ?? []) as $fieldset) {
 		?>
 		<fieldset class="cms-fieldset" style="<?= $this->escape($style) ?>">
 			<?php if (is_string($fieldset['label'] ?? null) && $fieldset['label'] !== ''): ?>
-				<legend class="legend"><?= $this->escape($fieldset['label']) ?></legend>
+				<legend class="cms-fieldset-legend"><?= $this->escape($fieldset['label']) ?></legend>
 			<?php endif ?>
 			<?php if (is_string($fieldset['description'] ?? null) && $fieldset['description'] !== ''): ?>
-				<div class="description"><?= $this->escape($fieldset['description']) ?></div>
+				<div class="cms-fieldset-description"><?= $this->escape($fieldset['description']) ?></div>
 			<?php endif ?>
-			<div class="cms-fields fields">
+			<div class="cms-fields cms-fieldset-fields">
 				<?php foreach ($fieldsetsByFirst[$subName]['members'] as $member): ?>
 					<?php $this->include('field/row-fields/field', ['sub' => $subsByName[$member]]) ?>
 				<?php endforeach ?>

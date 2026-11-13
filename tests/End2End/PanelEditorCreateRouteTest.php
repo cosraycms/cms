@@ -333,7 +333,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		// ...and the {title} field the route references is marked so editing
 		// it refreshes the preview.
 		$this->assertHtmlNodeExists(
-			'//div[contains(concat(" ", normalize-space(@class), " "), " js-path-source ")]'
+			'//div[contains(concat(" ", normalize-space(@class), " "), " cms-path-source ")]'
 				. '//input[starts-with(@name, "content[title][value]")]',
 			$html,
 		);

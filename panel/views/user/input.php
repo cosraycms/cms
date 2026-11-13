@@ -15,19 +15,19 @@ $width = (int) ($width ?? 50);
 ?>
 
 <div
-	class="cms-field<?= $required ? ' required' : '' ?>"
+	class="cms-field"
 	style="grid-column: span <?= $width ?> / span <?= $width ?>"
 	data-field="<?= escape($name) ?>">
-	<label class="label" for="user-<?= escape($name) ?>">
+	<label class="cms-field-label" for="user-<?= escape($name) ?>">
 		<div>
-			<span class="name"><?= escape($label) ?></span>
+			<span class="cms-field-name"><?= escape($label) ?></span>
 			<?php if ($required): ?>
-				<span class="requirement"><?= escape(__('field:required')) ?></span>
+				<span class="cms-field-requirement"><?= escape(__('field:required')) ?></span>
 			<?php endif ?>
 		</div>
 	</label>
-	<div class="field-body">
-		<div class="control">
+	<div class="cms-field-body">
+		<div class="cms-field-control">
 			<input
 				class="cms-input"
 				id="user-<?= escape($name) ?>"
@@ -38,7 +38,7 @@ $width = (int) ($width ?? 50);
 				<?= $required ? 'required' : '' ?> />
 		</div>
 		<?php if (is_string($help)): ?>
-			<div class="description"><?= escape($help) ?></div>
+			<div class="cms-field-description"><?= escape($help) ?></div>
 		<?php endif ?>
 	</div>
 </div>

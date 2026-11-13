@@ -59,7 +59,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 ?>
 
 <div
-	class="cms-field<?= $required ? ' required' : '' ?><?= $pathSource ? ' js-path-source' : '' ?><?= $widens ? ' can-widen' : '' ?>"
+	class="cms-field<?= $pathSource ? ' cms-path-source' : '' ?><?= $widens ? ' cms-field-widenable' : '' ?>"
 	<?= $gridStyle !== '' ? 'style="' . escape($gridStyle) . '"' : '' ?>
 	data-field="<?= escape($fieldName) ?>"
 	<?= $fallbackPreview && is_scalar($value[$neutral] ?? null)
@@ -74,27 +74,27 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		id="<?= escape($labelFor) ?>-label"
 		for="<?= escape($labelFor) ?>"
 		<?= $variants ? 'data-locale-label-for="' . escape($idRoot) . '"' : '' ?>
-		class="label<?= $bareLabel && !is_array($metaControl) ? ' cms-sr-only' : '' ?>">
+		class="cms-field-label<?= $bareLabel && !is_array($metaControl) ? ' cms-sr-only' : '' ?>">
 		<div<?= $bareLabel ? ' class="cms-sr-only"' : '' ?>>
-			<span class="name"><?= escape((string) ($field['label'] ?? $fieldName)) ?></span>
+			<span class="cms-field-name"><?= escape((string) ($field['label'] ?? $fieldName)) ?></span>
 			<?php // A field the editor cannot change is never also required of them. ?>
 			<?php if ($immutable): ?>
-				<span class="state"><?= escape(__('field:readonly')) ?></span>
+				<span class="cms-field-state"><?= escape(__('field:readonly')) ?></span>
 			<?php elseif ($required): ?>
-				<span class="requirement"><?= escape(__('field:required')) ?></span>
+				<span class="cms-field-requirement"><?= escape(__('field:required')) ?></span>
 			<?php endif ?>
 			<?php if ($changed): ?>
 				<span class="cms-changed" data-restored-mark><?= escape(__('editor:changed')) ?></span>
 			<?php endif ?>
 		</div>
 		<?php if (is_array($metaControl)): ?>
-			<button type="button" class="meta-button" data-dialog-open="meta">
+			<button type="button" class="cms-field-button" data-dialog-open="meta">
 				<?= escape(__('field:meta')) ?>
 			</button>
 		<?php endif ?>
 		<?php if ($controlName === 'blocks'): ?>
 			<?php // The layout-preview behavior posts the form and opens the shared dialog. ?>
-			<button type="button" class="meta-button layout-preview" data-layout-preview="<?= escape($fieldName) ?>">
+			<button type="button" class="cms-field-button cms-field-layout-preview" data-layout-preview="<?= escape($fieldName) ?>">
 				<?= escape(__('editor:layout-preview')) ?>
 			</button>
 		<?php endif ?>
@@ -102,7 +102,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			<?php // The editor syncs aria-pressed; the icons follow its data-wide-blocks. ?>
 			<button
 				type="button"
-				class="meta-button width-toggle"
+				class="cms-field-button cms-field-width-toggle"
 				data-blocks-width
 				aria-pressed="false"
 				aria-label="<?= escape(__('field:full-width')) ?>"
@@ -112,7 +112,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			</button>
 		<?php endif ?>
 	</label>
-	<div class="field-body">
+	<div class="cms-field-body">
 		<?php if ($controlName === 'blocks'): ?>
 			<?php // The grid the blocks were placed on is saved with them. ?>
 			<input
@@ -120,7 +120,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				name="<?= escape("{$nameRoot}[columns]") ?>"
 				value="<?= $columns ?>" />
 		<?php endif ?>
-		<div class="control">
+		<div class="cms-field-control">
 			<?php if ($variants): ?>
 				<?php foreach ($locales as $locale): ?>
 					<div
@@ -179,7 +179,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			<?php endif ?>
 		</div>
 		<?php if (is_string($description) && $description !== ''): ?>
-			<div class="description"><?= escape($description) ?></div>
+			<div class="cms-field-description"><?= escape($description) ?></div>
 		<?php endif ?>
 	</div>
 	<?php if (is_array($metaControl)): ?>

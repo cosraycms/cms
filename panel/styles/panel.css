@@ -17,6 +17,8 @@
 @import './cms-list.css' layer(panel);
 @import './cms-status.css' layer(panel);
 @import './cms-field.css' layer(panel);
+@import './cms-fieldset.css' layer(panel);
+@import './cms-fields.css' layer(panel);
 @import './cms-content-locales.css' layer(panel);
 @import './cms-control.css' layer(panel);
 @import './cms-reference.css' layer(panel);

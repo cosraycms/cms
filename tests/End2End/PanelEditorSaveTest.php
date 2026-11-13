@@ -102,11 +102,11 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//div[@data-field="reference"][@data-readonly="true"]//span[@class="state"]',
+			'//div[@data-field="reference"][@data-readonly="true"]//span[@class="cms-field-state"]',
 			$html,
 		);
 		$this->assertHtmlNodeMissing(
-			'//div[@data-field="reference"]//span[@class="requirement"]',
+			'//div[@data-field="reference"]//span[@class="cms-field-requirement"]',
 			$html,
 		);
 		// An element control reads the flag out of its payload and renders

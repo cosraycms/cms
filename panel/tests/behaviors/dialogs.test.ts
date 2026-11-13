@@ -64,7 +64,7 @@ describe('dialog triggers', () => {
 	it('opens the dialog of the block row, not of the field around it', () => {
 		document.body.innerHTML = `
 			<div data-meta-owner>
-				<button type="button" class="meta-button" data-dialog-open="meta">Field meta</button>
+				<button type="button" class="cms-field-button" data-dialog-open="meta">Field meta</button>
 				<div data-meta-owner>
 					<button type="button" class="gear" data-dialog-open="meta">Block meta</button>
 					<div data-meta-owner><dialog data-dialog="meta" id="sub"></dialog></div>
@@ -79,7 +79,7 @@ describe('dialog triggers', () => {
 		expect(block.open).toBe(true);
 		expect(field.open).toBe(false);
 		closeDialog(block);
-		document.querySelector<HTMLElement>('.meta-button')!.click();
+		document.querySelector<HTMLElement>('.cms-field-button')!.click();
 		expect(field.open).toBe(true);
 		expect(document.querySelector<HTMLDialogElement>('#sub')!.open).toBe(false);
 	});

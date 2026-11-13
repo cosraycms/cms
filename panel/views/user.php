@@ -98,8 +98,8 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 
 					<div class="sheet">
 						<fieldset class="cms-fieldset" data-fieldset="account">
-							<legend class="legend"><?= escape(__('user:account')) ?></legend>
-							<div class="cms-fields fields">
+							<legend class="cms-fieldset-legend"><?= escape(__('user:account')) ?></legend>
+							<div class="cms-fields cms-fieldset-fields">
 								<?php $this->include('user/input', [
 									'name' => 'email',
 									'label' => __('user:email'),
@@ -120,11 +120,11 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 								]) ?>
 								<?php if (count($panelLocaleChoices) > 1): ?>
 									<div class="cms-field" style="grid-column: span 50 / span 50" data-field="panel_locale">
-										<label class="label" for="user-panel-locale"><div><?= escape(
+										<label class="cms-field-label" for="user-panel-locale"><div><?= escape(
 											__('user:panel-language'),
 										) ?></div></label>
-										<div class="field-body">
-											<div class="control">
+										<div class="cms-field-body">
+											<div class="cms-field-control">
 												<select class="cms-input" id="user-panel-locale" name="panel_locale">
 													<option value=""><?= escape(__('user:panel-language-auto')) ?></option>
 													<?php foreach ($panelLocaleChoices as $id => $label): ?>

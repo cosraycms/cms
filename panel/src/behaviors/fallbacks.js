@@ -6,7 +6,8 @@ import { ZXX } from '../lib/content.js';
 const CONTENT_SCOPE = '[data-content-locale-scope]';
 const CONTENT_CONTROL = '[data-content-locale-control]';
 const INPUT = '[data-fallback-input]';
-const BLOCK_VARIANT = ':scope > .field-body > .control > .variant[data-blocks-locale]';
+const BLOCK_VARIANT =
+	':scope > .cms-field-body > .cms-field-control > .variant[data-blocks-locale]';
 
 /**
  * @param {Element} scope
@@ -38,7 +39,9 @@ function locales(scope) {
 function fieldInputs(field) {
 	return Array.from(
 		/** @type {NodeListOf<HTMLInputElement | HTMLTextAreaElement>} */ (
-			field.querySelectorAll(`:scope > .field-body > .control > .variant[data-locale] ${INPUT}`)
+			field.querySelectorAll(
+				`:scope > .cms-field-body > .cms-field-control > .variant[data-locale] ${INPUT}`,
+			)
 		),
 	);
 }

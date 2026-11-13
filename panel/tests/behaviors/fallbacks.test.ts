@@ -48,7 +48,7 @@ function renderBlocks(): void {
 		]'>
 			<select data-content-locale-control data-content-locale-select><option value="en">English</option><option value="de" selected>Deutsch</option></select>
 			<div class="cms-field">
-				<div class="field-body"><div class="control">
+				<div class="cms-field-body"><div class="cms-field-control">
 					<div class="variant" data-locale="en" data-blocks-locale hidden>
 						<div class="cms-blocks-editor"><div data-repeater-list>
 							<div data-repeater-row><div class="variant" data-locale="en">English block</div><div class="variant" data-locale="de">German block</div></div>

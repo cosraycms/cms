@@ -60,8 +60,8 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 		<?php endif ?>
 
 		<div class="cms-field<?= isset($errors['type']) ? ' has-error' : '' ?>">
-			<label class="label" for="menu-item-type"><div><?= escape(__('menu:item-type')) ?></div></label>
-			<div class="control">
+			<label class="cms-field-label" for="menu-item-type"><div><?= escape(__('menu:item-type')) ?></div></label>
+			<div class="cms-field-control">
 				<select class="cms-select" id="menu-item-type" name="type" data-menu-type>
 					<?php foreach ($types as $option): ?>
 						<option value="<?= escape($option) ?>"<?= $option === $type ? ' selected' : '' ?>><?= escape(
@@ -97,9 +97,9 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			class="cms-field<?= isset($errors['node']) ? ' has-error' : '' ?>"
 			data-menu-section="node children"
 			<?= $section('node children') ? 'hidden' : '' ?>>
-			<label class="label" for="menu-item-node"><div><?= escape(__('menu:item-node')) ?></div></label>
+			<label class="cms-field-label" for="menu-item-node"><div><?= escape(__('menu:item-node')) ?></div></label>
 			<div
-				class="control menu-picker"
+				class="cms-field-control menu-picker"
 				data-menu-picker="nodes"
 				data-menu-picker-url="<?= escape((string) $searchUrls['node']) ?>">
 				<input
@@ -124,8 +124,8 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 		</div>
 
 		<div class="cms-field" data-menu-section="children" <?= $section('children') ? 'hidden' : '' ?>>
-			<label class="label" for="menu-item-levels"><div><?= escape(__('menu:item-levels')) ?></div></label>
-			<div class="control">
+			<label class="cms-field-label" for="menu-item-levels"><div><?= escape(__('menu:item-levels')) ?></div></label>
+			<div class="cms-field-control">
 				<input
 					class="cms-input"
 					id="menu-item-levels"
@@ -139,8 +139,8 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 		</div>
 
 		<div class="cms-field" data-menu-section="children" <?= $section('children') ? 'hidden' : '' ?>>
-			<label class="label" for="menu-item-order"><div><?= escape(__('menu:item-order')) ?></div></label>
-			<div class="control">
+			<label class="cms-field-label" for="menu-item-order"><div><?= escape(__('menu:item-order')) ?></div></label>
+			<div class="cms-field-control">
 				<select class="cms-select" id="menu-item-order" name="order">
 					<?php foreach ($orders as $value => $label): ?>
 						<option value="<?= escape($value) ?>"<?= $value === $values['order'] ? ' selected' : '' ?>><?= escape(
@@ -167,9 +167,9 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			class="cms-field<?= isset($errors['asset']) ? ' has-error' : '' ?>"
 			data-menu-section="asset"
 			<?= $section('asset') ? 'hidden' : '' ?>>
-			<label class="label" for="menu-item-asset"><div><?= escape(__('menu:item-asset')) ?></div></label>
+			<label class="cms-field-label" for="menu-item-asset"><div><?= escape(__('menu:item-asset')) ?></div></label>
 			<div
-				class="control menu-picker"
+				class="cms-field-control menu-picker"
 				data-menu-picker="assets"
 				data-menu-picker-url="<?= escape((string) $searchUrls['asset']) ?>">
 				<input
@@ -225,9 +225,9 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			class="cms-field<?= isset($errors['image']) ? ' has-error' : '' ?>"
 			data-menu-section-hide="children"
 			<?= $type === 'children' ? 'hidden' : '' ?>>
-			<label class="label" for="menu-item-image"><div><?= escape(__('menu:item-image')) ?></div></label>
+			<label class="cms-field-label" for="menu-item-image"><div><?= escape(__('menu:item-image')) ?></div></label>
 			<div
-				class="control menu-picker"
+				class="cms-field-control menu-picker"
 				data-menu-picker="assets"
 				data-menu-picker-url="<?= escape((string) $searchUrls['image']) ?>">
 				<input
@@ -255,8 +255,8 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			class="cms-field<?= isset($errors['class']) ? ' has-error' : '' ?>"
 			data-menu-section-hide="children"
 			<?= $type === 'children' ? 'hidden' : '' ?>>
-			<label class="label" for="menu-item-class"><div><?= escape(__('menu:item-class')) ?></div></label>
-			<div class="control">
+			<label class="cms-field-label" for="menu-item-class"><div><?= escape(__('menu:item-class')) ?></div></label>
+			<div class="cms-field-control">
 				<input
 					class="cms-input"
 					id="menu-item-class"

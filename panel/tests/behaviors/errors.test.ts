@@ -12,8 +12,8 @@ function editor(): void {
 		<form id="node-editor-form">
 			<div id="editor-errors" class="errors" tabindex="-1" hidden></div>
 			<div class="cms-field" data-field="title">
-				<label class="label"><div><span class="name">Title</span></div></label>
-				<div class="control">
+				<label class="cms-field-label"><div><span class="cms-field-name">Title</span></div></label>
+				<div class="cms-field-control">
 					<div class="variant" data-locale="en">
 						<input name="content[title][value][en]" type="text" />
 					</div>
@@ -21,35 +21,35 @@ function editor(): void {
 						<input name="content[title][value][de]" type="text" />
 					</div>
 				</div>
-				<div class="description">About the title</div>
+				<div class="cms-field-description">About the title</div>
 			</div>
 			<div class="cms-field" data-field="body">
-				<div class="control"><x-host name="content[body][json]"></x-host></div>
+				<div class="cms-field-control"><x-host name="content[body][json]"></x-host></div>
 			</div>
 			<div class="cms-field" data-field="styled">
-				<label class="label"><div><span class="name">Styled</span></div>
-					<button type="button" class="meta-button" data-dialog-open="meta">Meta</button>
+				<label class="cms-field-label"><div><span class="cms-field-name">Styled</span></div>
+					<button type="button" class="cms-field-button" data-dialog-open="meta">Meta</button>
 				</label>
-				<div class="control"><input name="content[styled][value][zxx]" type="text" /></div>
+				<div class="cms-field-control"><input name="content[styled][value][zxx]" type="text" /></div>
 				<dialog data-dialog="meta">
 					<input name="content[styled][meta][cssClass][zxx]" type="text" />
 				</dialog>
 			</div>
 			<div class="cms-field" data-field="entries">
-				<div class="control">
+				<div class="cms-field-control">
 					<div data-repeater>
 						<div data-repeater-row>
 							<button type="button" data-repeater-collapse aria-expanded="false">Row</button>
 							<div class="body" data-repeater-body hidden>
 								<div class="cms-field" data-field="sub">
-									<div class="control">
+									<div class="cms-field-control">
 										<input
 											name="content[entries][value][zxx][0][fields][sub][value][zxx]"
 											type="text" />
 									</div>
 								</div>
 								<div class="cms-field" data-field="trans">
-									<div class="control">
+									<div class="cms-field-control">
 										<div class="variant" data-locale="en">
 											<input
 												name="content[entries][value][zxx][0][fields][trans][value][en]"
@@ -68,13 +68,13 @@ function editor(): void {
 				</div>
 			</div>
 			<div class="cms-field" data-field="blocks">
-				<div class="control">
+				<div class="cms-field-control">
 					<div data-repeater>
 						<div class="block" data-repeater-row data-meta-owner data-field="block">
 							<button type="button" class="gear" data-dialog-open="meta">Settings</button>
 							<div class="body">
 								<div class="cms-field" data-field="video">
-									<div class="control">
+									<div class="cms-field-control">
 										<input name="content[blocks][value][zxx][0][fields][video][value][zxx]" type="text" />
 									</div>
 								</div>
@@ -85,7 +85,7 @@ function editor(): void {
 									name="content[blocks][value][zxx][0][fields][video][meta][aspectRatioX][zxx]"
 									type="number" />
 								<div class="cms-field" data-field="style">
-									<div class="control">
+									<div class="cms-field-control">
 										<select name="content[blocks][value][zxx][0][fields][style][value][zxx]"></select>
 									</div>
 								</div>
@@ -116,11 +116,11 @@ function editor(): void {
 
 	for (const field of document.querySelectorAll('.cms-field')) {
 		const body = document.createElement('div');
-		body.className = 'field-body';
-		const control = field.querySelector(':scope > .control')!;
+		body.className = 'cms-field-body';
+		const control = field.querySelector(':scope > .cms-field-control')!;
 		control.before(body);
 		body.append(control);
-		const description = field.querySelector(':scope > .description');
+		const description = field.querySelector(':scope > .cms-field-description');
 		if (description) body.append(description);
 	}
 }
