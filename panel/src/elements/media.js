@@ -553,7 +553,7 @@ class MediaControl extends HTMLElement {
 		}
 
 		if (!readonly) {
-			const drop = create('div', 'drop');
+			const drop = create('div', 'cms-dropzone-label');
 			drop.setAttribute('aria-hidden', 'true');
 			drop.append(
 				svg('cloud-upload'),

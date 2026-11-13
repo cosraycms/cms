@@ -217,7 +217,9 @@ describe('the frame', () => {
 		drag(bar, 'dragenter', ['Files']);
 		await tick();
 		expect(frame.classList.contains('is-dragging')).toBe(true);
-		expect(frame.querySelector('.drop')?.textContent?.trim()).toBe('media:drop-to-upload');
+		expect(frame.querySelector('.cms-dropzone-label')?.textContent?.trim()).toBe(
+			'media:drop-to-upload',
+		);
 
 		drag(bar, 'dragleave', ['Files']);
 		await tick();
@@ -245,7 +247,9 @@ describe('the frame', () => {
 		drag(frame, 'dragenter', ['Files']);
 		await tick();
 
-		expect(frame.querySelector('.drop')?.textContent?.trim()).toBe('upload:drop-to-replace');
+		expect(frame.querySelector('.cms-dropzone-label')?.textContent?.trim()).toBe(
+			'upload:drop-to-replace',
+		);
 	});
 
 	it('renders a read-only field without the bar and names an empty one', async () => {

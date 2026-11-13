@@ -115,7 +115,7 @@ unset($search['page']);
 					<?php endif ?>
 				</div>
 
-				<div class="drop" aria-hidden="true">
+				<div class="cms-dropzone-label" aria-hidden="true">
 					<?= Icon::render('cloud-upload') ?>
 					<?= escape(__('media:drop-to-upload')) ?>
 				</div>
