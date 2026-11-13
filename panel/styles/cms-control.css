@@ -69,6 +69,15 @@
 .cms-textarea {
 	resize: vertical;
 	line-height: 1.55;
+
+	/* Inverted on purpose in both themes, like the code editor. */
+	&.cms-textarea-code {
+		background-color: var(--cms-code-bg);
+		color: var(--cms-code-text);
+		font-family:
+			'JetBrains Mono', 'Menlo', 'DejaVu Sans Mono', 'Liberation Mono', 'Consolas', 'Ubuntu Mono',
+			'Courier New', 'andale mono', 'lucida console', monospace;
+	}
 }
 
 /* The native look ignores line-height, which leaves a select shorter than an
@@ -217,122 +226,6 @@
 	cursor: default;
 }
 
-.cms-toggle {
-	& .toggle {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--cms-space-2);
-		min-height: var(--cms-control-height);
-		color: var(--cms-color-text);
-		font-size: var(--cms-font-size-sm);
-		cursor: pointer;
-
-		&:has(:disabled) {
-			cursor: default;
-		}
-	}
-
-	& .cms-switch {
-		width: 2.75rem;
-		height: 1.625rem;
-
-		&::before {
-			width: 1.25rem;
-			height: 1.25rem;
-		}
-
-		&:checked::before {
-			translate: 1.125rem 0;
-		}
-	}
-
-	& .status {
-		display: grid;
-
-		& > span {
-			grid-area: 1 / 1;
-		}
-	}
-
-	& .on,
-	& :checked ~ .status .off {
-		visibility: hidden;
-	}
-
-	& :checked ~ .status .on {
-		visibility: visible;
-	}
-}
-
-.cms-tristate {
-	display: inline-flex;
-	align-self: flex-start;
-	max-width: 100%;
-	min-height: var(--cms-control-height);
-	padding: var(--cms-space-1);
-	gap: var(--cms-space-1);
-	border: 1px solid var(--cms-color-border-control);
-	border-radius: var(--cms-control-radius);
-	background: var(--cms-color-surface-sunken);
-	box-shadow: var(--cms-shadow-recessed);
-	color: var(--cms-color-text);
-	font-size: var(--cms-font-size-sm);
-
-	& .option {
-		position: relative;
-		display: flex;
-		min-width: 0;
-
-		& > span {
-			display: flex;
-			align-items: center;
-			padding: 0 var(--cms-space-2);
-			border: 1px solid transparent;
-			border-radius: var(--cms-radius);
-			overflow-wrap: anywhere;
-			cursor: pointer;
-		}
-	}
-
-	& :checked + span {
-		border-color: var(--cms-color-border-control);
-		background: var(--cms-color-surface);
-		box-shadow: var(--cms-shadow-raised);
-	}
-
-	& :focus-visible + span {
-		outline: var(--cms-focus-outline);
-		outline-offset: var(--cms-focus-offset);
-	}
-
-	& :disabled + span {
-		color: var(--cms-color-text-subtle);
-		cursor: default;
-	}
-
-	.cms-field[data-readonly='true'] & :checked + span {
-		color: var(--cms-color-text);
-	}
-
-	@media (forced-colors: active) {
-		& :checked + span {
-			forced-color-adjust: none;
-			border-color: Highlight;
-			background: Highlight;
-			color: HighlightText;
-			box-shadow: none;
-		}
-
-		& :focus-visible + span {
-			outline-color: Highlight;
-		}
-
-		.cms-field[data-readonly='true'] & :checked + span {
-			color: HighlightText;
-		}
-	}
-}
-
 .cms-checkbox-label {
 	display: inline-flex;
 	align-items: center;
@@ -355,179 +248,6 @@
 	font-size: var(--cms-font-size-sm);
 }
 
-.cms-group {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--cms-space-3);
-	container-type: inline-size;
-}
-
-.cms-group-field {
-	flex: 1 1 12rem;
-	min-width: 0;
-}
-
-.cms-group-field[data-width] {
-	flex: 1 1 calc(var(--group-width) - var(--cms-space-3));
-}
-
-@container (max-width: 26rem) {
-	.cms-group-field[data-width] {
-		flex-basis: 100%;
-	}
-}
-
-.cms-repeater {
-	display: flex;
-	flex-direction: column;
-	gap: var(--cms-space-2);
-}
-
-.cms-repeater-item {
-	display: flex;
-	align-items: flex-end;
-	gap: var(--cms-space-2);
-}
-
-.cms-repeater-item-control {
-	flex: 1 1 auto;
-	min-width: 0;
-}
-
-.cms-youtube {
-	display: grid;
-	gap: var(--cms-space-2);
-
-	& .player {
-		display: block;
-		width: 100%;
-		max-width: calc(30rem * var(--ratio, 16 / 9));
-		aspect-ratio: var(--ratio, 16 / 9);
-		border: 0;
-		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-surface);
-	}
-
-	& .entry {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: var(--cms-space-2);
-
-		& .cms-input {
-			flex: 1 1 12rem;
-			min-width: 0;
-		}
-	}
-
-	& .replace {
-		justify-self: end;
-	}
-
-	& .quiet {
-		border-color: transparent;
-		background: none;
-		box-shadow: none;
-		color: var(--cms-color-text-muted);
-
-		&:hover {
-			background: var(--cms-color-hover);
-			color: var(--cms-color-text);
-		}
-	}
-
-	& [hidden] {
-		display: none;
-	}
-
-	& .cms-field-error {
-		margin: 0;
-	}
-}
-
-/* The native picker lies invisibly over the swatch, so clicking the swatch
-   opens it and the swatch can show "no colour", which the picker cannot. */
-.cms-color {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: var(--cms-space-2);
-
-	& .swatch {
-		position: relative;
-		flex: none;
-		width: var(--cms-control-height);
-		height: var(--cms-control-height);
-		border: 1px solid var(--cms-color-border-control);
-		border-radius: var(--cms-control-radius);
-		outline: 1px solid transparent;
-		background-color: var(--color);
-		box-shadow: var(--cms-shadow-raised);
-
-		&[data-empty] {
-			background-color: var(--cms-color-surface);
-			background-image: linear-gradient(
-				to top right,
-				transparent calc(50% - 0.75px),
-				var(--cms-color-border-control) calc(50% - 0.75px) calc(50% + 0.75px),
-				transparent calc(50% + 0.75px)
-			);
-		}
-
-		&:has(:focus-visible) {
-			border-color: var(--cms-color-focus);
-			box-shadow: var(--cms-focus-ring);
-		}
-	}
-
-	& input[type='color'] {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		padding: 0;
-		border: 0;
-		opacity: 0;
-		cursor: pointer;
-
-		&:disabled {
-			cursor: default;
-		}
-	}
-
-	& .cms-input {
-		width: 8rem;
-		font-variant-numeric: tabular-nums;
-	}
-
-	& .palette {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--cms-space-1);
-
-		& .swatch {
-			width: var(--cms-control-height-sm);
-			height: var(--cms-control-height-sm);
-			padding: 0;
-			cursor: pointer;
-
-			&[aria-pressed='true'] {
-				outline: 2px solid var(--cms-color-text);
-				outline-offset: 2px;
-			}
-
-			&:focus-visible {
-				border-color: var(--cms-color-focus);
-				box-shadow: var(--cms-focus-ring);
-			}
-
-			&:disabled {
-				cursor: default;
-			}
-		}
-	}
-}
-
 .cms-sub-label {
 	display: block;
 	margin-bottom: var(--cms-space-1);
@@ -536,25 +256,10 @@
 	font-weight: 500;
 }
 
-.cms-control-unknown,
-.cms-control-element-pending {
+.cms-control-unknown {
 	padding: var(--cms-space-3);
 	border: 1px dashed var(--cms-color-danger-border);
 	border-radius: var(--cms-radius-md);
 	color: var(--cms-color-danger-text);
 	font-size: var(--cms-font-size-sm);
-}
-
-.cms-control-element-pending {
-	border-color: var(--cms-color-border-strong);
-	color: var(--cms-color-text-muted);
-}
-
-/* Inverted on purpose in both themes, like the code editor. */
-.cms-textarea.iframe {
-	background-color: var(--cms-code-bg);
-	color: var(--cms-code-text);
-	font-family:
-		'JetBrains Mono', 'Menlo', 'DejaVu Sans Mono', 'Liberation Mono', 'Consolas', 'Ubuntu Mono',
-		'Courier New', 'andale mono', 'lucida console', monospace;
 }

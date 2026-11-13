@@ -1,0 +1,16 @@
+.cms-repeater {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-2);
+
+	& .cms-repeater-item {
+		display: flex;
+		align-items: flex-end;
+		gap: var(--cms-space-2);
+	}
+
+	& .cms-repeater-item-control {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+}

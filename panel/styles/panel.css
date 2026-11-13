@@ -22,6 +22,12 @@
 @import './cms-content-locales.css' layer(panel);
 @import './cms-locale-variant.css' layer(panel);
 @import './cms-control.css' layer(panel);
+@import './cms-toggle.css' layer(panel);
+@import './cms-tristate.css' layer(panel);
+@import './cms-color.css' layer(panel);
+@import './cms-youtube.css' layer(panel);
+@import './cms-group.css' layer(panel);
+@import './cms-repeater.css' layer(panel);
 @import './cms-reference.css' layer(panel);
 @import './cms-link.css' layer(panel);
 @import './cms-dropzone.css' layer(panel);

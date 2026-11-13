@@ -23,7 +23,7 @@ $value = u($value ?? null);
 		aria-labelledby="<?= escape($id) ?>-label"
 		data-checkbox>
 		<?php foreach (['null' => null, 'true' => true, 'false' => false] as $state => $choice): ?>
-			<label class="option">
+			<label class="cms-tristate-option">
 				<input
 					type="radio"
 					class="cms-sr-only"
@@ -42,7 +42,7 @@ $value = u($value ?? null);
 		<?php if (!$immutable): ?>
 			<input type="hidden" name="<?= escape($name) ?>" value="" />
 		<?php endif ?>
-		<label class="toggle">
+		<label class="cms-toggle-label">
 			<input
 				id="<?= escape($id) ?>"
 				name="<?= escape($name) ?>"
@@ -54,9 +54,9 @@ $value = u($value ?? null);
 				value="1"
 				<?= $value ? 'checked' : '' ?>
 				<?= $immutable ? 'disabled' : '' ?> />
-			<span class="status" id="<?= escape($id) ?>-status">
-				<span class="on"><?= escape($labels['true']) ?></span>
-				<span class="off"><?= escape($labels['false']) ?></span>
+			<span class="cms-toggle-status" id="<?= escape($id) ?>-status">
+				<span class="cms-toggle-on"><?= escape($labels['true']) ?></span>
+				<span class="cms-toggle-off"><?= escape($labels['false']) ?></span>
 			</span>
 		</label>
 	</div>

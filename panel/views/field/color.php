@@ -25,7 +25,7 @@ $palette = array_map(
 );
 ?>
 <div class="cms-color" data-color>
-	<span class="swatch" <?= $color === null ? 'data-empty' : 'style="--color: ' . $color . '"' ?>>
+	<span class="cms-color-swatch" <?= $color === null ? 'data-empty' : 'style="--color: ' . $color . '"' ?>>
 		<input
 			type="color"
 			data-color-picker
@@ -45,12 +45,12 @@ $palette = array_map(
 		<?= $field['required'] ?? false ? 'required' : '' ?>
 		<?= $readonly ? 'readonly' : '' ?> />
 	<?php if ($palette !== []): ?>
-		<div class="palette" role="group" aria-label="<?= escape(__('color:palette')) ?>">
+		<div class="cms-color-palette" role="group" aria-label="<?= escape(__('color:palette')) ?>">
 			<?php foreach ($palette as $option): ?>
 				<?php $title = $option['label'] === null ? $option['value'] : "{$option['label']} ({$option['value']})"; ?>
 				<button
 					type="button"
-					class="swatch"
+					class="cms-color-swatch"
 					style="--color: <?= escape($option['value']) ?>"
 					data-color-option="<?= escape($option['value']) ?>"
 					aria-label="<?= escape($title) ?>"

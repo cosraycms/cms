@@ -14,7 +14,7 @@ $fallbackPreview ??= false;
 ?>
 <textarea
 	<?= $fallbackPreview ? 'data-fallback-input data-schema-placeholder="' . escape((string) $placeholder) . '"' : '' ?>
-	class="cms-textarea<?= $iframe ? ' iframe' : '' ?>"
+	class="cms-textarea<?= $iframe ? ' cms-textarea-code' : '' ?>"
 	id="<?= escape($id) ?>"
 	name="<?= escape($name) ?>"
 	<?= is_string($placeholder) && $placeholder !== '' ? 'placeholder="' . escape($placeholder) . '"' : '' ?>

@@ -26,14 +26,14 @@ $ratio = $side('aspectRatioX', 16) . ' / ' . $side('aspectRatioY', 9);
 		name="<?= escape($name) ?>"
 		value="<?= escape($value) ?>" />
 	<iframe
-		class="player"
+		class="cms-youtube-player"
 		data-youtube-player
 		title="<?= escape(__('block:youtube')) ?>"
 		loading="lazy"
 		referrerpolicy="strict-origin-when-cross-origin"
 		allow="fullscreen; encrypted-media; picture-in-picture"
 		<?= $video !== '' ? 'src="' . escape("https://www.youtube-nocookie.com/embed/{$video}") . '"' : 'hidden' ?>></iframe>
-	<div class="entry" data-youtube-entry data-editor-state <?= $video !== '' ? 'hidden' : '' ?>>
+	<div class="cms-youtube-entry" data-youtube-entry data-editor-state <?= $video !== '' ? 'hidden' : '' ?>>
 		<input
 			class="cms-input"
 			type="text"
@@ -57,7 +57,7 @@ $ratio = $side('aspectRatioX', 16) . ' / ' . $side('aspectRatioY', 9);
 		<?= escape(__('youtube:invalid')) ?>
 	</p>
 	<?php if (!$readonly): ?>
-		<button type="button" class="cms-button quiet cms-button-small replace" data-youtube-replace <?= $video === '' ? 'hidden' : '' ?>>
+		<button type="button" class="cms-button cms-button-small cms-youtube-replace" data-youtube-replace <?= $video === '' ? 'hidden' : '' ?>>
 			<?= escape(__('youtube:replace')) ?>
 		</button>
 	<?php endif ?>

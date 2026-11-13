@@ -721,7 +721,7 @@
 		}
 	}
 
-	& .cms-youtube .player {
+	& .cms-youtube-player {
 		justify-self: center;
 	}
 
@@ -760,7 +760,7 @@
 		}
 
 		/* Code stays inverted: it reads as code, not as the document. */
-		& .cms-textarea.iframe {
+		& .cms-textarea.cms-textarea-code {
 			background-color: var(--cms-code-bg);
 			font-size: var(--cms-font-size-sm);
 
