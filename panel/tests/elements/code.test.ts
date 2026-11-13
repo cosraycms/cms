@@ -31,7 +31,7 @@ async function code(props: Partial<HostPayload> & { locale?: string }) {
 
 function input(element: HTMLElement): HTMLTextAreaElement {
 	return element.querySelector<HTMLTextAreaElement>(
-		'.cms-code-editor:not(.cms-code-editor-preview) textarea',
+		'.cms-code-editor:not(.cms-code-preview) textarea',
 	)!;
 }
 
@@ -107,7 +107,7 @@ describe('code editing', () => {
 			field: { name: 'snippet', translate: true },
 			locale: 'de',
 		});
-		const fallback = () => element.querySelector('.cms-code-editor-fallback');
+		const fallback = () => element.querySelector('.cms-code-fallback');
 
 		await vi.waitFor(() => expect(fallback()?.textContent).toContain('english'));
 		expect(fallback()?.querySelector('span')?.textContent).toBe('field:fallback-from');
@@ -127,7 +127,7 @@ describe('code editing', () => {
 			field: { name: 'snippet', translate: true },
 			locale: 'de',
 		});
-		const fallback = () => element.querySelector('.cms-code-editor-fallback');
+		const fallback = () => element.querySelector('.cms-code-fallback');
 
 		expect(fallback()).toBeNull();
 		input(element).value = '';

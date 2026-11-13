@@ -1,0 +1,194 @@
+/* The editor's own layout: a transparent textarea over the highlighted
+   lines. It joins the panel layer, where its class selectors outrank the
+   element rules of base.css; a sublayer would lose to them. */
+@import '../modules/prism-code-editor/src/layout.css';
+
+.cms-code {
+	& .cms-code-toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--cms-space-2);
+		margin-bottom: var(--cms-space-2);
+	}
+
+	& .cms-code-syntax-label {
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+		color: var(--cms-color-text-label);
+	}
+
+	& .cms-code-syntax {
+		width: auto;
+		min-width: 9rem;
+	}
+
+	& .cms-code-stack {
+		position: relative;
+	}
+
+	& .cms-code-fallback {
+		position: absolute;
+		z-index: 1;
+		inset: 0;
+		overflow: hidden;
+		border: var(--cms-border);
+		border-radius: var(--cms-control-radius);
+		background-color: var(--cms-code-bg);
+		color: var(--cms-code-muted);
+		pointer-events: none;
+
+		> span {
+			position: absolute;
+			z-index: 1;
+			right: var(--cms-space-3);
+			bottom: var(--cms-space-2);
+			padding: var(--cms-space-0-5) var(--cms-space-1);
+			border-radius: var(--cms-radius-sm);
+			background: color-mix(in srgb, var(--cms-code-bg) 90%, transparent);
+			font-size: var(--cms-font-size-xs);
+			font-style: italic;
+		}
+	}
+
+	& .cms-code-preview {
+		height: 100%;
+		border: 0;
+		border-radius: inherit;
+		box-shadow: none;
+
+		& .prism-code-editor {
+			height: 100%;
+		}
+	}
+
+	& .cms-code-editor {
+		position: relative;
+		overflow: hidden;
+		border: var(--cms-border);
+		border-radius: var(--cms-control-radius);
+		background-color: var(--cms-code-bg);
+		box-shadow: var(--cms-shadow-sm);
+
+		&:focus-within {
+			border-color: var(--cms-color-focus);
+			outline: 1px solid transparent;
+			box-shadow: var(--cms-focus-ring);
+		}
+
+		& .prism-code-editor {
+			--pce-bg: var(--cms-code-bg);
+			--pce-cursor: var(--cms-code-text);
+			--pce-selection: var(--cms-color-info-ring);
+			--pce-line-number: var(--cms-code-muted);
+			--pce-bg-highlight: color-mix(in srgb, var(--cms-color-neutral-600) 35%, transparent);
+			--number-spacing: 1em;
+
+			min-height: 16rem;
+			color: var(--cms-code-text);
+			font-family:
+				'JetBrains Mono', 'Menlo', 'DejaVu Sans Mono', 'Liberation Mono', 'Consolas', 'Ubuntu Mono',
+				'Courier New', 'andale mono', 'lucida console', monospace;
+			font-size: 0.875rem;
+			line-height: 1.5;
+			color-scheme: dark;
+		}
+
+		/* The gutter: a column behind the line numbers, ending half the
+		   number spacing before the code. */
+		& .show-line-numbers::before {
+			width: calc(var(--padding-left) - 0.5em);
+			border-right: 1px solid color-mix(in srgb, var(--cms-color-neutral-500) 55%, transparent);
+			background-color: color-mix(in srgb, var(--cms-color-neutral-700) 75%, var(--cms-code-bg));
+		}
+
+		& .active-line {
+			--pce-line-number: var(--cms-code-text);
+		}
+
+		& .active-bracket {
+			box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cms-color-info-ring) 80%, transparent);
+		}
+
+		& .token {
+			&:is(.comment, .prolog, .cdata) {
+				color: var(--cms-code-comment);
+				font-style: italic;
+			}
+
+			&:is(.keyword, .important, .keyword-null, .keyword-this) {
+				color: var(--cms-code-keyword);
+			}
+
+			&:is(.boolean, .number, .constant, .color, .symbol, .unit) {
+				color: var(--cms-code-literal);
+			}
+
+			&:is(.string, .char, .attr-value, .string-property) {
+				color: var(--cms-code-string);
+			}
+
+			&:is(.regex, .escape, .interpolation-punctuation) {
+				color: var(--cms-code-regex);
+			}
+
+			&:is(.function, .function-definition) {
+				color: var(--cms-code-function);
+			}
+
+			&:is(.variable, .parameter) {
+				color: var(--cms-code-variable);
+			}
+
+			&:is(.property, .attr-name, .property-access) {
+				color: var(--cms-code-property);
+			}
+
+			&:is(.class-name, .maybe-class-name, .namespace, .builtin, .tag, .selector, .doctype) {
+				color: var(--cms-code-type);
+			}
+
+			&.operator {
+				color: var(--cms-code-regex);
+			}
+
+			&.url {
+				color: var(--cms-code-function);
+				text-decoration: underline;
+			}
+
+			&.title {
+				color: var(--cms-code-meta);
+				font-weight: bold;
+			}
+
+			&.bold {
+				font-weight: bold;
+			}
+
+			&.italic {
+				font-style: italic;
+			}
+
+			&.strike {
+				text-decoration: line-through;
+			}
+
+			&:is(.atrule, .annotation, .decorator, .directive, .delimiter) {
+				color: var(--cms-code-meta);
+			}
+
+			&.punctuation {
+				color: var(--cms-code-punctuation);
+			}
+
+			&.inserted {
+				color: var(--cms-code-inserted);
+			}
+
+			&.deleted {
+				color: var(--cms-code-deleted);
+			}
+		}
+	}
+}

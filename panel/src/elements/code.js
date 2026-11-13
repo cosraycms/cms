@@ -57,15 +57,15 @@ export class CosrayCode extends HTMLElement {
 	#preview = null;
 	/** @type {HTMLElement | null} */
 	#previewBox = null;
-	#wrap = document.createElement('div');
+	#stack = document.createElement('div');
 	#box = document.createElement('div');
 
 	constructor() {
 		super();
-		this.#wrap.className = 'cms-code-editor-wrap';
-		this.#wrap.addEventListener('focusin', () => this.#focus(true));
-		this.#wrap.addEventListener('focusout', (event) => {
-			if (!(event.relatedTarget instanceof Node) || !this.#wrap.contains(event.relatedTarget)) {
+		this.#stack.className = 'cms-code-stack';
+		this.#stack.addEventListener('focusin', () => this.#focus(true));
+		this.#stack.addEventListener('focusout', (event) => {
+			if (!(event.relatedTarget instanceof Node) || !this.#stack.contains(event.relatedTarget)) {
 				this.#focus(false);
 			}
 		});
@@ -118,15 +118,17 @@ export class CosrayCode extends HTMLElement {
 			this.#syntax = this.#readSyntax();
 		}
 
-		this.replaceChildren();
+		const root = document.createElement('div');
+		root.className = 'cms-code';
 		const options = this.#syntaxOptions();
 
 		if (options.length > 1) {
-			this.append(this.#toolbar(options));
+			root.append(this.#toolbar(options));
 		}
 
-		this.#wrap.replaceChildren(this.#box);
-		this.append(this.#wrap);
+		this.#stack.replaceChildren(this.#box);
+		root.append(this.#stack);
+		this.replaceChildren(root);
 		this.#rendered = true;
 		void this.#mount();
 	}
@@ -159,13 +161,13 @@ export class CosrayCode extends HTMLElement {
 	#toolbar(options) {
 		const id = `${this.field.name}-syntax`;
 		const toolbar = document.createElement('div');
-		toolbar.className = 'cms-code-control-toolbar';
+		toolbar.className = 'cms-code-toolbar';
 		const label = document.createElement('label');
-		label.className = 'cms-code-control-syntax-label';
+		label.className = 'cms-code-syntax-label';
 		label.htmlFor = id;
 		label.textContent = __('code:syntax');
 		const select = document.createElement('select');
-		select.className = 'cms-select cms-code-control-syntax-select';
+		select.className = 'cms-select cms-code-syntax';
 		select.id = id;
 		select.disabled = this.field.immutable ?? false;
 
@@ -292,16 +294,16 @@ export class CosrayCode extends HTMLElement {
 		}
 
 		const box = document.createElement('div');
-		box.className = 'cms-code-editor-fallback';
+		box.className = 'cms-code-fallback';
 		// Hidden from assistive technology, and the read-only editor's
 		// textarea cannot take focus.
 		box.inert = true;
 		const code = document.createElement('div');
-		code.className = 'cms-code-editor cms-code-editor-preview';
+		code.className = 'cms-code-editor cms-code-preview';
 		const badge = document.createElement('span');
 		badge.textContent = fallbackLabel(fallback, this.locales?.all ?? []);
 		box.append(code, badge);
-		this.#wrap.prepend(box);
+		this.#stack.prepend(box);
 		this.#previewBox = box;
 
 		void loadCodeLanguage(this.#syntax[ZXX]).then((language) => {

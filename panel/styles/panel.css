@@ -46,7 +46,7 @@
 @import './cms-confirm.css' layer(panel);
 @import './cms-toasts.css' layer(panel);
 @import './cms-util.css' layer(panel);
-@import './code.css' layer(panel);
+@import './cms-code.css' layer(panel);
 @import './richtext.css' layer(panel);
 @import './cms-richtext-dialogs.css' layer(panel);
 @import './cms-styleguide.css' layer(panel);
