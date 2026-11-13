@@ -37,18 +37,18 @@ function page(locale = 'de'): void {
 			data-url="/panel/node/node-1/blocks" data-error="Preview failed">
 			<header class="cms-modal-header">
 				<h2 class="cms-modal-title" data-dialog-title>Layout preview</h2>
-				<div class="widths" role="group">
-					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="1200">Desktop</button>
-					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="1024" data-layout-preview-height="768">Tablet landscape</button>
-					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="768" data-layout-preview-height="1024">Tablet portrait</button>
-					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="390" data-layout-preview-height="844">Smartphone</button>
+				<div class="cms-layout-preview-widths" role="group">
+					<button type="button" class="cms-layout-preview-option" aria-pressed="false" data-layout-preview-width="1200">Desktop</button>
+					<button type="button" class="cms-layout-preview-option" aria-pressed="false" data-layout-preview-width="1024" data-layout-preview-height="768">Tablet landscape</button>
+					<button type="button" class="cms-layout-preview-option" aria-pressed="false" data-layout-preview-width="768" data-layout-preview-height="1024">Tablet portrait</button>
+					<button type="button" class="cms-layout-preview-option" aria-pressed="false" data-layout-preview-width="390" data-layout-preview-height="844">Smartphone</button>
 				</div>
 				<button type="button" data-layout-preview-reload>Reload</button>
 				<button type="button" data-dialog-close>Close</button>
 			</header>
 			<div class="cms-modal-body">
-				<div class="stage" data-layout-preview-stage>
-					<iframe class="frame" sandbox="allow-same-origin" data-layout-preview-frame></iframe>
+				<div class="cms-layout-preview-stage" data-layout-preview-stage>
+					<iframe class="cms-layout-preview-frame" sandbox="allow-same-origin" data-layout-preview-frame></iframe>
 				</div>
 			</div>
 		</dialog>

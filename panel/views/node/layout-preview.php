@@ -33,12 +33,12 @@ $presets = [
 	data-error="<?= escape(__('editor:layout-preview-failed')) ?>">
 	<header class="cms-modal-header">
 		<h2 class="cms-modal-title" data-dialog-title><?= escape(__('editor:layout-preview')) ?></h2>
-		<span class="note"><?= escape(__('editor:layout-preview-note')) ?></span>
-		<div class="widths" role="group" aria-label="<?= escape(__('editor:layout-preview-width')) ?>">
+		<span class="cms-layout-preview-note"><?= escape(__('editor:layout-preview-note')) ?></span>
+		<div class="cms-layout-preview-widths" role="group" aria-label="<?= escape(__('editor:layout-preview-width')) ?>">
 			<?php foreach ($presets as $preset): ?>
 				<button
 					type="button"
-					class="option"
+					class="cms-layout-preview-option"
 					aria-pressed="false"
 					title="<?= escape(
 						$preset['label']
@@ -50,13 +50,13 @@ $presets = [
 					data-layout-preview-width="<?= $preset['width'] ?>"
 					<?= $preset['height'] !== null ? 'data-layout-preview-height="' . $preset['height'] . '"' : '' ?>>
 					<?= Icon::render($preset['icon']) ?>
-					<span class="text"><?= escape($preset['label']) ?></span>
+					<span class="cms-layout-preview-label"><?= escape($preset['label']) ?></span>
 				</button>
 			<?php endforeach ?>
 		</div>
 		<button
 			type="button"
-			class="cms-button cms-button-secondary cms-button-small reload"
+			class="cms-button cms-button-secondary cms-button-small cms-layout-preview-reload"
 			data-layout-preview-reload
 			aria-label="<?= escape(__('editor:layout-preview-reload')) ?>"
 			title="<?= escape(__('editor:layout-preview-reload')) ?>">
@@ -67,12 +67,12 @@ $presets = [
 		</button>
 	</header>
 	<div class="cms-modal-body">
-		<div class="stage" data-layout-preview-stage>
+		<div class="cms-layout-preview-stage" data-layout-preview-stage>
 			<?php // No scripts: the iframe block emits editor markup raw. Same origin
 
 			// stays on so permission-checked renditions receive the session. ?>
 			<iframe
-				class="frame"
+				class="cms-layout-preview-frame"
 				title="<?= escape(__('editor:layout-preview')) ?>"
 				sandbox="allow-same-origin"
 				data-layout-preview-frame></iframe>

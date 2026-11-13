@@ -5,7 +5,6 @@
  * its top left corner when the stage is narrower and gives it the height
  * the scale eats, so it fills the stage either way. Narrower than the
  * preset the frame is scaled, wider it is centred.
- * Part names are declared on this block (naming rule 5).
  */
 .cms-layout-preview {
 	/* Room for the 1200px desktop preset unscaled: the frame plus the
@@ -23,7 +22,7 @@
 		flex: 0 0 auto;
 	}
 
-	& .note {
+	& .cms-layout-preview-note {
 		flex: 1 1 auto;
 		min-width: 0;
 		overflow: hidden;
@@ -34,7 +33,7 @@
 	}
 
 	/* The width presets: a segmented group like the content-language control. */
-	& .widths {
+	& .cms-layout-preview-widths {
 		display: flex;
 		flex: 0 0 auto;
 		gap: var(--cms-space-0-5);
@@ -42,54 +41,54 @@
 		border-radius: var(--cms-radius-full);
 		background: var(--cms-color-surface-sunken);
 		box-shadow: var(--cms-shadow-recessed);
+	}
 
-		& .option {
-			display: inline-flex;
-			align-items: center;
-			gap: var(--cms-space-1-5);
-			padding: var(--cms-space-1) var(--cms-space-2);
-			/* Transparent, not none: choosing a width must not shift the labels. */
-			border: 1px solid transparent;
-			border-radius: var(--cms-radius-full);
-			color: var(--cms-color-text-muted);
-			font-size: var(--cms-font-size-xs);
-			font-weight: 500;
-			white-space: nowrap;
+	& .cms-layout-preview-option {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-1-5);
+		padding: var(--cms-space-1) var(--cms-space-2);
+		/* Transparent, not none: choosing a width must not shift the labels. */
+		border: 1px solid transparent;
+		border-radius: var(--cms-radius-full);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 500;
+		white-space: nowrap;
 
-			&:hover {
-				color: var(--cms-color-text);
-			}
+		&:hover {
+			color: var(--cms-color-text);
+		}
 
-			&[aria-pressed='true'] {
-				border-color: var(--cms-button-secondary-border);
-				background: var(--cms-button-secondary-bg);
-				background-image: var(--cms-gradient-raised);
-				box-shadow: var(--cms-button-secondary-shadow);
-				color: var(--cms-button-secondary-text);
+		&[aria-pressed='true'] {
+			border-color: var(--cms-button-secondary-border);
+			background: var(--cms-button-secondary-bg);
+			background-image: var(--cms-gradient-raised);
+			box-shadow: var(--cms-button-secondary-shadow);
+			color: var(--cms-button-secondary-text);
 
-				@media (forced-colors: active) {
-					forced-color-adjust: none;
-					border-color: Highlight;
-					background: Highlight;
-					box-shadow: none;
-					color: HighlightText;
-				}
-			}
-
-			&:focus-visible {
-				outline: var(--cms-focus-outline);
-				outline-offset: var(--cms-focus-offset);
+			@media (forced-colors: active) {
+				forced-color-adjust: none;
+				border-color: Highlight;
+				background: Highlight;
+				box-shadow: none;
+				color: HighlightText;
 			}
 		}
 
-		@container content (width < 50rem) {
-			& .option .text {
-				display: none;
-			}
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
 		}
 	}
 
-	& .reload {
+	@container content (width < 50rem) {
+		& .cms-layout-preview-label {
+			display: none;
+		}
+	}
+
+	& .cms-layout-preview-reload {
 		flex: 0 0 auto;
 	}
 
@@ -100,12 +99,12 @@
 		background: var(--cms-color-surface-sunken);
 	}
 
-	& .stage {
+	& .cms-layout-preview-stage {
 		flex: 1 1 auto;
 		min-height: 0;
 		overflow: hidden;
 
-		&.is-loading .frame {
+		&.is-loading .cms-layout-preview-frame {
 			opacity: 0.5;
 		}
 	}
@@ -114,7 +113,7 @@
 	   size, so the document inside sees exactly those pixels, and a box
 	   larger than the stage is pulled back in by the transform. An outline,
 	   not a border, so the edge adds nothing to that size. */
-	& .frame {
+	& .cms-layout-preview-frame {
 		display: block;
 		width: 100%;
 		height: 100%;
