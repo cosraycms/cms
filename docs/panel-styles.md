@@ -113,11 +113,11 @@ Sizes and halo widths need units, also when zero, because they are used in `calc
 
 ## Class names
 
-The usual pattern is a `cms-` component root with nested part names and `is-`/`has-` state classes:
+Every class the panel defines or looks up starts with `cms-` and names its component: the root is `cms-<component>`, a part `cms-<component>-<part>`, and a variant `cms-<component>-<variant>`. States stay short as `is-`/`has-` classes, always beside a component's class. Rules for parts nest under their root:
 
 ```css
 .cms-list {
-	& .row {
+	& .cms-list-row {
 		&.is-selected {
 			background: var(--cms-color-selected);
 		}
@@ -125,17 +125,15 @@ The usual pattern is a `cms-` component root with nested part names and `is-`/`h
 }
 ```
 
-Prefer shallow selectors and files named after their component. Element selectors are useful where the markup is owned; classes help when a part varies or needs a behavior hook. Local custom properties suit value variations, but extra selectors or a different file boundary can be clearer for structural differences.
-
-Nested selectors match the whole subtree, not just a component's own parts. A generic `.row` in a shell may accidentally match a child list's rows. Distinct part names, direct-child selectors, or `@scope` can prevent that. Self-nesting field grids already use scoped styles:
-
-```css
-@scope (.cms-fields) to (.cms-fields) {
-	.label {
-		/* Only this field grid's labels. */
-	}
-}
+```html
+<button class="cms-button cms-button-primary cms-button-small">Save</button>
 ```
+
+Panel markup may meet a site's stylesheet, and components nest inside each other, so a short part name such as `.row` or `.title` would match far beyond its own component. A part keeps its component's name however deep it sits; a part that grows parts of its own and appears elsewhere becomes a component with its own root and file. Utilities follow the same prefix, such as `cms-truncate` and `cms-col-span-6`.
+
+Classes that third-party code sets, such as ProseMirror's and the code editor's syntax tokens, keep their names. Panel components avoid the names the site's block rendering emits with its default prefix: `cms-blocks`, `cms-block`, `cms-blocks-images`, `cms-figure`, and `cms-image-gallery` with its items.
+
+Prefer shallow selectors and files named after their component. Element selectors are useful where the markup is owned; classes help when a part varies or needs a behavior hook. Local custom properties suit value variations, but extra selectors or a different file boundary can be clearer for structural differences.
 
 Markup that changes place keeps one form. A block of the blocks canvas renders the same on the field's grid and as a part of a split, because splitting and removing parts move blocks between the two; its place-dependent controls — the inserter, the resize edges, the action menu's entries, the settings dialog's layout numbers — list the places they serve in `data-places` (`block`, `columns`, `rows`), and [cms-blocks-editor.css](../panel/styles/cms-blocks-editor.css) shows them from where the block sits: `.grid > .block`, or `.parts > .block` inside a `.block.is-split` whose `data-split` names the direction. The split's own chrome carries no places.
 
