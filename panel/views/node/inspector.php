@@ -200,7 +200,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 						<?php $this->component('component/dialog', ['name' => 'paths', 'title' => __('editor:paths')]) ?>
 							<div class="cms-modal-body cms-settings">
 								<?php foreach ($locales as $locale): ?>
-									<div class="field">
+									<div class="field cms-settings-field">
 										<label class="label" for="cms-node-path-<?= escape($locale['id']) ?>">
 											<?= escape($locale['title']) ?>
 										</label>

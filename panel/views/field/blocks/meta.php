@@ -40,7 +40,7 @@ $render = function (string $key, bool $hidden) use ($subs, $subField, $id, $name
 
 	$subId = "{$id}-{$key}";
 	?>
-	<div class="field" data-gap-<?= $key === 'gap' ? 'single' : 'separate' ?><?= $hidden ? ' hidden' : '' ?>>
+	<div class="cms-settings-field" data-gap-<?= $key === 'gap' ? 'single' : 'separate' ?><?= $hidden ? ' hidden' : '' ?>>
 		<label class="cms-sub-label" for="<?= escape($subId) ?>">
 			<?= escape((string) ($sub['label'] ?? $key)) ?>
 		</label>
@@ -56,10 +56,10 @@ $render = function (string $key, bool $hidden) use ($subs, $subField, $id, $name
 	<?php
 };
 ?>
-<div class="fields" data-gap-scope>
+<div class="cms-settings-fields" data-gap-scope>
 	<?php $render('gap', $split) ?>
 	<?php if ($columns > 1): ?>
-		<label class="field split">
+		<label class="cms-settings-field cms-settings-split">
 			<input type="checkbox" class="cms-checkbox" data-gap-split <?= $split ? 'checked' : '' ?> />
 			<span><?= escape(__('field:gap-split')) ?></span>
 		</label>

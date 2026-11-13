@@ -1,23 +1,23 @@
 .cms-settings {
-	& .field + .field {
+	& .cms-settings-field + .cms-settings-field {
 		margin-top: var(--cms-space-3);
 	}
 
-	& .fields + .fields,
-	& .fields + .section {
+	& .cms-settings-fields + .cms-settings-fields,
+	& .cms-settings-fields + .cms-settings-section {
 		margin-top: var(--cms-space-5);
 	}
 
-	& .fields + .cms-settings-slot {
+	& .cms-settings-fields + .cms-settings-slot {
 		margin-top: var(--cms-space-3);
 	}
 
-	& .section {
+	& .cms-settings-section {
 		font-weight: 600;
 	}
 
 	/* Sets a block's own fields off from its layout and spacing. */
-	& .rule {
+	& .cms-settings-rule {
 		margin-block: var(--cms-space-5);
 		border: 0;
 		border-top: 1px solid var(--cms-color-border-soft);
@@ -29,26 +29,26 @@
 	}
 
 	/* The toggle between one gap and a row and column gap of their own. */
-	& .split {
+	& .cms-settings-split {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-2);
 		font-size: var(--cms-font-size-sm);
 		cursor: pointer;
 	}
-}
 
-/* Most element controls keep nothing in the slot they are offered. */
-.cms-settings .cms-sub-label.section:has(+ .cms-settings-slot:empty),
-.cms-settings .cms-settings-slot:empty {
-	display: none;
-}
+	/* Most element controls keep nothing in the slot they are offered. */
+	& .cms-settings-section:has(+ .cms-settings-slot:empty),
+	& .cms-settings-slot:empty {
+		display: none;
+	}
 
-/* An element's per-use form stacks in the compact dialog. */
-.cms-settings .cms-settings-slot .cms-media-meta {
-	grid-template-columns: minmax(0, 1fr);
-}
+	/* An element's per-use form stacks in the compact dialog. */
+	& .cms-settings-slot .cms-media-meta {
+		grid-template-columns: minmax(0, 1fr);
+	}
 
-.cms-settings .cms-settings-slot .cms-content-language {
-	margin-block: var(--cms-space-3);
+	& .cms-settings-slot .cms-content-language {
+		margin-block: var(--cms-space-3);
+	}
 }

@@ -18,14 +18,14 @@ $nameRoot = (string) ($nameRoot ?? "content[{$fieldName}]");
 $subs = (array) (($control['props'] ?? [])['fields'] ?? []);
 $subField = ['required' => false, 'immutable' => false];
 ?>
-<div class="fields">
+<div class="cms-settings-fields">
 	<?php foreach ($subs as $sub): ?>
 		<?php
 
 		$key = (string) ($sub['key'] ?? '');
 		$subId = "{$id}-{$key}";
 		?>
-		<div class="field">
+		<div class="cms-settings-field">
 			<label class="cms-sub-label" id="<?= escape($subId) ?>-label" for="<?= escape($subId) ?>">
 				<?= escape((string) ($sub['label'] ?? $key)) ?>
 			</label>

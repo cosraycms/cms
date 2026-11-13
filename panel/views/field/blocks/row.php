@@ -364,7 +364,7 @@ $retype = count($blockTypes) > 1;
 		<?php $this->component('component/dialog', ['name' => 'meta', 'size' => 'compact', 'title' => $label . ' — ' . __('field:block-settings')]) ?>
 			<div class="cms-modal-body cms-settings">
 			<?php if ($settingsSubs !== []): ?>
-				<div class="cms-fields fields">
+				<div class="cms-fields cms-settings-fields">
 					<?php $this->include('field/row-fields', [
 						'type' => $blockType,
 						'subs' => $settingsSubs,
@@ -376,7 +376,7 @@ $retype = count($blockTypes) > 1;
 					]) ?>
 				</div>
 				<?php if (!$readonly && ($columns > 1 || $metaControl !== null || $subMetas !== [] || $slots !== [])): ?>
-					<hr class="rule" />
+					<hr class="cms-settings-rule" />
 				<?php endif ?>
 			<?php endif ?>
 			<?php if (!$readonly && $columns > 1) {
@@ -399,7 +399,7 @@ $retype = count($blockTypes) > 1;
 			<?php foreach ($readonly ? [] : $subMetas as $sub): ?>
 				<?php $subName = (string) ($sub['name'] ?? ''); ?>
 				<?php if ($labels): ?>
-					<div class="cms-sub-label section"><?= $this->escape((string) ($sub['label'] ?? $subName)) ?></div>
+					<div class="cms-sub-label cms-settings-section"><?= $this->escape((string) ($sub['label'] ?? $subName)) ?></div>
 				<?php endif ?>
 				<?php $this->include('field/meta', [
 					'field' => $sub,
@@ -412,7 +412,7 @@ $retype = count($blockTypes) > 1;
 			<?php foreach ($readonly ? [] : $slots as $sub): ?>
 				<?php $subName = (string) ($sub['name'] ?? ''); ?>
 				<?php if ($labels): ?>
-					<div class="cms-sub-label section"><?= $this->escape((string) ($sub['label'] ?? $subName)) ?></div>
+					<div class="cms-sub-label cms-settings-section"><?= $this->escape((string) ($sub['label'] ?? $subName)) ?></div>
 				<?php endif ?>
 				<div class="cms-settings-slot" data-settings-slot="<?= $this->escape($subName) ?>"></div>
 			<?php endforeach ?>
