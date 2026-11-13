@@ -41,18 +41,18 @@ unset($search['page']);
 ?>
 
 <div
-	class="page cms-media"
+	class="cms-page cms-media"
 	data-content-locale-scope
 	data-content-locale="<?= escape($defaultLocale) ?>"
 	data-media>
-	<header class="head">
-		<div class="titles">
-			<div class="line">
+	<header class="cms-page-head">
+		<div class="cms-page-titles">
+			<div class="cms-page-line">
 				<h1><?= escape(__('media:title')) ?></h1>
 				<span class="cms-count"><?= escape(__n('media:file-count', 'media:file-count-plural', $listing->total)) ?></span>
 			</div>
 		</div>
-		<div class="actions">
+		<div class="cms-page-actions">
 			<div class="cms-media-toolbar">
 				<button type="button" class="cms-button cms-button-primary" data-media-upload>
 					<?= Icon::render('cloud-upload') ?>
@@ -66,12 +66,12 @@ unset($search['page']);
 	<section class="body">
 		<div class="cms-media-workspace">
 			<section class="cms-media-pane cms-dropzone" aria-label="<?= escape(__('media:title')) ?>" data-media-drop>
-				<div class="toolbar">
-					<form class="search" method="get" action="<?= escape($screen->path) ?>" data-media-keep-file>
+				<div class="cms-page-toolbar">
+					<form class="cms-page-search" method="get" action="<?= escape($screen->path) ?>" data-media-keep-file>
 						<?php foreach ($search as $name => $value): ?>
 							<input type="hidden" name="<?= escape($name) ?>" value="<?= escape($value) ?>" />
 						<?php endforeach ?>
-						<span class="icon" aria-hidden="true">⌕</span>
+						<span class="cms-page-search-icon" aria-hidden="true">⌕</span>
 						<input
 							class="cms-input"
 							type="search"

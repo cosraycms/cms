@@ -15,16 +15,16 @@ $notice = u($notice ?? null);
 $listUrl = (string) $listUrl;
 ?>
 
-<div class="page cms-collection cms-users">
-	<header class="head">
-		<div class="titles">
-			<div class="line">
+<div class="cms-page cms-collection cms-users">
+	<header class="cms-page-head">
+		<div class="cms-page-titles">
+			<div class="cms-page-line">
 				<h1><?= escape(__('user:users')) ?></h1>
 				<span class="cms-count"><?= escape(__n('user:count', 'user:count-plural', $total)) ?></span>
 			</div>
 		</div>
 
-		<div class="actions">
+		<div class="cms-page-actions">
 			<?php if (count($types) > 1): ?>
 				<nav class="view-toggle" aria-label="<?= escape(__('user:type')) ?>">
 					<a class="view-toggle-link<?= $type === null ? ' is-active' : '' ?>" href="<?= escape($listUrl) ?>">
@@ -62,10 +62,10 @@ $listUrl = (string) $listUrl;
 			<?php $this->include('component/toast', ['kind' => 'success', 'message' => $notice]) ?>
 		<?php endif ?>
 
-		<div class="toolbar">
-			<form class="search" method="get" action="<?= escape($listUrl) ?>">
+		<div class="cms-page-toolbar">
+			<form class="cms-page-search" method="get" action="<?= escape($listUrl) ?>">
 				<label class="cms-sr-only" for="users-search"><?= escape(__('user:search')) ?></label>
-				<span class="icon" aria-hidden="true">⌕</span>
+				<span class="cms-page-search-icon" aria-hidden="true">⌕</span>
 				<input
 					id="users-search"
 					class="cms-input"

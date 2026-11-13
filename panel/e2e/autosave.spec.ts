@@ -55,7 +55,7 @@ test('leaving inside the panel does not ask once the edits are kept', async ({ p
 	await openNode(page, 'later');
 	await edit(page, 'Left behind');
 
-	await page.locator('.breadcrumb a').click();
+	await page.locator('.cms-page-breadcrumb a').click();
 
 	await expect(page.getByRole('dialog')).toHaveCount(0);
 	await expect(page).not.toHaveURL(/\/panel\/node\//);

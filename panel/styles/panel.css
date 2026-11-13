@@ -7,7 +7,7 @@
 @import './cms-shell.css' layer(panel);
 @import './cms-scrollbar.css' layer(panel);
 @import './cms-sidebar.css' layer(panel);
-@import './cms-page-head.css' layer(panel);
+@import './cms-page.css' layer(panel);
 @import './cms-media.css' layer(panel);
 @import './cms-dashboard.css' layer(panel);
 @import './cms-collection.css' layer(panel);

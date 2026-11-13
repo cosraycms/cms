@@ -54,7 +54,7 @@ final class PanelCollectionTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('class="page cms-collection"', $html);
+		$this->assertStringContainsString('class="cms-page cms-collection"', $html);
 		$this->assertStringContainsString('<h1>Test articles</h1>', $html);
 		$this->assertStringNotContainsString('href="/panel/assets/styles/collection.css"', $html);
 		$this->assertStringContainsString('Panel Grid A', $html);
@@ -374,7 +374,7 @@ final class PanelCollectionTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('class="page cms-collection"', $html);
+		$this->assertStringContainsString('class="cms-page cms-collection"', $html);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
 		$this->assertStringNotContainsString('class="panel"', $html);
 	}

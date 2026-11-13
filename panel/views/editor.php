@@ -51,7 +51,7 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 ?>
 
 <div
-	class="page cms-node"
+	class="cms-page cms-node"
 	<?= $wideBlocks ? 'data-wide-blocks' : '' ?>
 	<?php if ($embed !== null): ?>
 		data-embed
@@ -59,9 +59,9 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 		data-embed-origins='<?= json_encode($embed['origins'] ?? [], $jsonFlags) ?>'
 		<?= ($embed['created'] ?? false) ? 'data-embed-created' : '' ?>
 	<?php endif ?>>
-	<header class="head">
-		<div class="titles">
-			<div class="line">
+	<header class="cms-page-head">
+		<div class="cms-page-titles">
+			<div class="cms-page-line">
 				<?php if ($status !== null): ?>
 					<?php $this->include('component/status-dots', [
 						'status' => $status,
@@ -69,9 +69,9 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 					]) ?>
 				<?php endif ?>
 				<?php if ($embed === null): ?>
-					<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
+					<nav class="cms-page-breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
 						<a href="<?= escape($backUrl) ?>" hx-target="#frame"><?= escape($backLabel) ?></a>
-						<span class="sep" aria-hidden="true">/</span>
+						<span class="cms-page-sep" aria-hidden="true">/</span>
 					</nav>
 				<?php endif ?>
 				<h1><?= $node['title'] ?? '' ?></h1>
@@ -84,7 +84,7 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 			</div>
 		</div>
 
-		<div class="actions">
+		<div class="cms-page-actions">
 			<?php // A save's outcome for the scripts; the node editor shows it as a toast. ?>
 			<output id="editor-status" class="status" role="status" <?= $embed === null ? 'hidden' : '' ?>></output>
 			<?php // Filled and shown by errors.js while a failed save has open issues. ?>

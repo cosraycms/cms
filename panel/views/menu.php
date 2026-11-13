@@ -20,12 +20,12 @@ $defaultLocale = (string) $props['defaultLocale'];
 ?>
 
 <div
-	class="page cms-menus cms-menu-tree"
+	class="cms-page cms-menus cms-menu-tree"
 	data-content-locale-scope
 	data-content-locale="<?= escape($defaultLocale) ?>">
-	<header class="head">
-		<div class="titles">
-			<div class="line">
+	<header class="cms-page-head">
+		<div class="cms-page-titles">
+			<div class="cms-page-line">
 				<h1><?= escape($description) ?></h1>
 				<span class="cms-count"><?= escape(__n(
 					'menu:item-count',
@@ -34,7 +34,7 @@ $defaultLocale = (string) $props['defaultLocale'];
 				)) ?></span>
 			</div>
 		</div>
-		<div class="actions">
+		<div class="cms-page-actions">
 			<?php $this->include('component/content-locales', [
 				'locales' => $locales,
 				'selected' => $defaultLocale,

@@ -173,7 +173,7 @@ final class PanelDashboardTest extends End2EndTestCase
 			$html,
 		);
 		$editor = HTMLDocument::createFromString('<!doctype html>' . $html);
-		$back = $editor->querySelector('.breadcrumb a');
+		$back = $editor->querySelector('.cms-page-breadcrumb a');
 		$this->assertNotNull($back);
 		$this->assertSame('Dashboard', trim($back->textContent));
 		$this->assertSame('#frame', $back->getAttribute('hx-target'));

@@ -632,7 +632,7 @@ button.cms-status-dots > .tooltip {
 	}
 }
 
-.cms-node > .head .apply {
+.cms-node > .cms-page-head .apply {
 	display: contents;
 
 	& [hidden] {

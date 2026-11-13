@@ -8,8 +8,8 @@ $cards = (array) u($cards ?? []);
 $recent = (array) u($recent ?? []);
 ?>
 
-<div class="page cms-dashboard">
-	<header class="head">
+<div class="cms-page cms-dashboard">
+	<header class="cms-page-head">
 		<h1><?= escape(__('nav:dashboard')) ?></h1>
 	</header>
 

@@ -15,13 +15,13 @@ $tokensUrl = (string) $tokensUrl;
 $profileUrl = (string) $profileUrl;
 ?>
 
-<div class="page cms-collection cms-tokens">
-	<header class="head">
-		<div class="titles">
-			<div class="line">
-				<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
+<div class="cms-page cms-collection cms-tokens">
+	<header class="cms-page-head">
+		<div class="cms-page-titles">
+			<div class="cms-page-line">
+				<nav class="cms-page-breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
 					<a href="<?= escape($profileUrl) ?>"><?= escape(__('user:profile')) ?></a>
-					<span class="sep" aria-hidden="true">/</span>
+					<span class="cms-page-sep" aria-hidden="true">/</span>
 				</nav>
 				<h1><?= escape(__('tokens:title')) ?></h1>
 			</div>
@@ -43,7 +43,7 @@ $profileUrl = (string) $profileUrl;
 			<?php endif ?>
 		</div>
 
-		<form class="toolbar" method="post" action="<?= escape($tokensUrl) ?>">
+		<form class="cms-page-toolbar" method="post" action="<?= escape($tokensUrl) ?>">
 			<?php $this->include('component/csrf') ?>
 			<label class="cms-sr-only" for="token-name"><?= escape(__('tokens:name')) ?></label>
 			<input

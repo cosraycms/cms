@@ -22,19 +22,19 @@ $panelBase = (string) u($panelBase);
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
 
-<div class="page cms-node cms-user">
-	<header class="head">
-		<div class="titles">
-			<div class="line">
-				<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
+<div class="cms-page cms-node cms-user">
+	<header class="cms-page-head">
+		<div class="cms-page-titles">
+			<div class="cms-page-line">
+				<nav class="cms-page-breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
 					<?php if ($profile): ?>
 						<span><?= escape(__('user:profile')) ?></span>
 					<?php else: ?>
 						<a href="<?= escape((string) $listUrl) ?>"><?= escape(__('user:users')) ?></a>
-						<span class="sep" aria-hidden="true">/</span>
+						<span class="cms-page-sep" aria-hidden="true">/</span>
 						<span><?= escape((string) $typeLabel) ?></span>
 					<?php endif ?>
-					<span class="sep" aria-hidden="true">/</span>
+					<span class="cms-page-sep" aria-hidden="true">/</span>
 				</nav>
 				<h1><?= escape((string) $title) ?></h1>
 				<?php if ($exists && !$user->active): ?>
@@ -46,7 +46,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			</div>
 		</div>
 
-		<div class="actions">
+		<div class="cms-page-actions">
 			<output id="editor-status" class="status" role="status"></output>
 			<?php if ($profile): ?>
 				<a class="cms-button cms-button-secondary" href="<?= escape((string) $panelPath . '/profile/tokens') ?>">

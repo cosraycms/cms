@@ -46,7 +46,7 @@ final class PanelLayersTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeExists('//*[@id="frame"]', $html);
 		$this->assertHtmlNodeExists(
-			'//*[contains(concat(" ", normalize-space(@class), " "), " page ") and contains(concat(" ", normalize-space(@class), " "), " cms-collection ")]',
+			'//*[contains(concat(" ", normalize-space(@class), " "), " cms-page ") and contains(concat(" ", normalize-space(@class), " "), " cms-collection ")]',
 			$html,
 		);
 		$this->assertHtmlNodeExists('//*[@id="verba-catalog"]', $html);
@@ -97,7 +97,7 @@ final class PanelLayersTest extends End2EndTestCase
 		]);
 
 		$this->assertHtmlNodeExists(
-			'//*[contains(concat(" ", normalize-space(@class), " "), " page ") and contains(concat(" ", normalize-space(@class), " "), " cms-collection ")]',
+			'//*[contains(concat(" ", normalize-space(@class), " "), " cms-page ") and contains(concat(" ", normalize-space(@class), " "), " cms-collection ")]',
 			$html,
 		);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
@@ -176,7 +176,7 @@ final class PanelLayersTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeExists('//*[@id="frame"]', $html);
 		$this->assertHtmlNodeExists(
-			'//*[contains(concat(" ", normalize-space(@class), " "), " page ") and contains(concat(" ", normalize-space(@class), " "), " cms-collection ")]',
+			'//*[contains(concat(" ", normalize-space(@class), " "), " cms-page ") and contains(concat(" ", normalize-space(@class), " "), " cms-collection ")]',
 			$html,
 		);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);

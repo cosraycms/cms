@@ -69,7 +69,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('class="page cms-node"', $html);
+		$this->assertStringContainsString('class="cms-page cms-node"', $html);
 		$this->assertStringNotContainsString('Back to list', $html);
 		$this->assertStringNotContainsString('topbar-editor', $html);
 		$this->assertCreateAssetStateIsRendered($html);
@@ -219,7 +219,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$editor = $this->makeRequest('GET', (string) parse_url($location, PHP_URL_PATH), ['query' => $params]);
 		$this->assertResponseOk($editor);
 		$this->assertHtmlNodeExists(
-			'//nav[@class="breadcrumb"]/a[@href="/panel/collection/test-hierarchy?q=Find%20me&offset=50&parent=list-parent"]',
+			'//nav[@class="cms-page-breadcrumb"]/a[@href="/panel/collection/test-hierarchy?q=Find%20me&offset=50&parent=list-parent"]',
 			$this->getHtmlResponse($editor),
 		);
 	}
@@ -388,7 +388,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('name="content[title][value][en]"', $html);
 		// The title lives in the header beside the status pill, outside the
 		// scrolling panes.
-		$this->assertStringContainsString('<div class="line">', $html);
+		$this->assertStringContainsString('<div class="cms-page-line">', $html);
 		$this->assertStringNotContainsString('id="cosray-node-editor"', $html);
 		$this->assertStringNotContainsString('Panel bundle missing', $html);
 	}

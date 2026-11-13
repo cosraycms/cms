@@ -8,16 +8,16 @@
 	min-height: 0;
 
 	/* The titles give way before the actions wrap; the title then truncates. */
-	& > .head {
-		& .titles {
+	& > .cms-page-head {
+		& .cms-page-titles {
 			flex: 1 1 16rem;
 		}
 
-		& .line {
+		& .cms-page-line {
 			flex-wrap: nowrap;
 		}
 
-		& .breadcrumb,
+		& .cms-page-breadcrumb,
 		& .cms-status-dots {
 			flex: none;
 		}
@@ -306,8 +306,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.cms-node > .head::before,
-	.cms-node > .head::after {
+	.cms-node > .cms-page-head::before,
+	.cms-node > .cms-page-head::after {
 		transition: none;
 	}
 }

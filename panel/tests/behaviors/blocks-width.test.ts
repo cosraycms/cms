@@ -5,7 +5,7 @@ let uninstall: () => void = () => {};
 
 function editor(wide = false): void {
 	document.body.innerHTML = `
-		<div class="page cms-node" ${wide ? 'data-wide-blocks' : ''}>
+		<div class="cms-page cms-node" ${wide ? 'data-wide-blocks' : ''}>
 			<button type="button" data-blocks-width aria-pressed="false">Full width</button>
 			<button type="button" data-blocks-width aria-pressed="false">Full width</button>
 		</div>`;

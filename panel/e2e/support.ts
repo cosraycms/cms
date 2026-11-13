@@ -23,7 +23,7 @@ export async function signIn(page: Page): Promise<void> {
 
 /** The editor's head, whose buttons the status tab repeats as its steps. */
 export function head(page: Page): Locator {
-	return page.locator('.cms-node > .head');
+	return page.locator('.cms-node > .cms-page-head');
 }
 
 export async function openNode(page: Page, name: string): Promise<void> {

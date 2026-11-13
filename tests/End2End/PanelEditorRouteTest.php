@@ -437,7 +437,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'<style>@layer tokens, reset, panel, plugin, theme;</style>',
 			$html,
 		);
-		$this->assertStringContainsString('class="page cms-node"', $html);
+		$this->assertStringContainsString('class="cms-page cms-node"', $html);
 		$this->assertStringNotContainsString('Back to list', $html);
 		$this->assertStringNotContainsString('topbar-editor', $html);
 		$this->assertPanelAssetsAreRendered($html);
@@ -611,7 +611,10 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			$this->assertResponseOk($response);
 			$html = $this->getHtmlResponse($response);
 			$this->assertHtmlNodeExists('//form[@id="node-editor-form"][@action="/panel/node/direct-node"]', $html);
-			$this->assertHtmlNodeExists('//nav[@class="breadcrumb"]/a[@href="/panel"][@hx-target="#frame"]', $html);
+			$this->assertHtmlNodeExists(
+				'//nav[@class="cms-page-breadcrumb"]/a[@href="/panel"][@hx-target="#frame"]',
+				$html,
+			);
 			$this->assertStringNotContainsString(
 				'aria-current="page"',
 				$this->navLink($html, '/panel/collection/test-articles'),
@@ -874,7 +877,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('class="page cms-node"', $html);
+		$this->assertStringContainsString('class="cms-page cms-node"', $html);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
 		$this->assertStringNotContainsString('class="panel"', $html);
 	}
@@ -913,7 +916,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertHtmlNodeExists('//form[@id="node-editor-form"][@action="/panel/node/panel-editor-stale"]', $html);
-		$this->assertHtmlNodeExists('//nav[@class="breadcrumb"]/a[@href="/panel"]', $html);
+		$this->assertHtmlNodeExists('//nav[@class="cms-page-breadcrumb"]/a[@href="/panel"]', $html);
 	}
 
 	public function testEditorReturnStateRejectsUnknownCollectionSorts(): void
@@ -970,7 +973,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//form[@id="node-editor-form" and @novalidate]', $html);
 		// The title lives in the header beside the status pill, outside the
 		// scrolling panes.
-		$this->assertStringContainsString('<div class="line">', $html);
+		$this->assertStringContainsString('<div class="cms-page-line">', $html);
 		$this->assertStringNotContainsString('id="cosray-node-editor"', $html);
 		$this->assertStringNotContainsString('cosray-node-editor-data', $html);
 		$this->assertStringNotContainsString('Panel bundle missing', $html);

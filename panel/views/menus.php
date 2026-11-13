@@ -12,14 +12,14 @@ $notice = u($notice ?? null);
 $createUrl = (string) $menuCreateUrl;
 ?>
 
-<div class="page cms-menus">
-	<header class="head">
-		<div class="line">
+<div class="cms-page cms-menus">
+	<header class="cms-page-head">
+		<div class="cms-page-line">
 			<h1><?= escape(__('menu:menus')) ?></h1>
 		</div>
 
 		<?php if ($manages): ?>
-			<div class="actions">
+			<div class="cms-page-actions">
 				<a class="cms-button cms-button-primary" href="<?= escape($createUrl) ?>"><?= escape(
 					__('menu:new'),
 				) ?></a>

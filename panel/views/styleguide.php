@@ -75,8 +75,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 	</script>
 <?php endif ?>
 
-<div class="page cms-styleguide">
-	<header class="head">
+<div class="cms-page cms-styleguide">
+	<header class="cms-page-head">
 			<h1>Styleguide</h1>
 			<?php
 
@@ -682,30 +682,30 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			<section class="section" data-section="page-head">
 				<h2>Page head</h2>
 				<p class="note">
-					Every part is optional and the order is fixed. <code>cms-page-head.css</code>
+					Every part is optional and the order is fixed. <code>cms-page.css</code>
 					styles all of them; a screen adds only what is its own. The toolbar is a row of
 					the content column, outside its scroller, so it stays put while the content
 					moves.
 				</p>
-				<div class="page sample-page">
-					<header class="head">
-						<div class="titles">
-							<div class="line">
-								<nav class="breadcrumb" aria-label="Breadcrumb">
+				<div class="cms-page sample-page">
+					<header class="cms-page-head">
+						<div class="cms-page-titles">
+							<div class="cms-page-line">
+								<nav class="cms-page-breadcrumb" aria-label="Breadcrumb">
 									<a href="#">Pages</a>
-									<span class="sep" aria-hidden="true">/</span>
+									<span class="cms-page-sep" aria-hidden="true">/</span>
 								</nav>
 								<h1>A page with a rather long title</h1>
 								<span class="cms-count">42 entries</span>
 								<span class="cms-status is-published">Published</span>
 							</div>
 						</div>
-						<div class="actions">
+						<div class="cms-page-actions">
 							<button type="button" class="cms-button cms-button-secondary">Preview</button>
 							<button type="button" class="cms-button cms-button-primary">Save</button>
 						</div>
 					</header>
-					<div class="toolbar">
+					<div class="cms-page-toolbar">
 						<input class="cms-input" type="search" aria-label="Search" placeholder="Search entries …" />
 					</div>
 				</div>

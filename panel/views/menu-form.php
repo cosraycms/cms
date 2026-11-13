@@ -18,11 +18,11 @@ $maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 ?>
 
 <div
-	class="page cms-menus"
+	class="cms-page cms-menus"
 	data-content-locale-scope
 	data-content-locale="<?= escape($defaultLocale) ?>">
-	<header class="head">
-		<div class="line">
+	<header class="cms-page-head">
+		<div class="cms-page-line">
 			<h1><?= escape(__('menu:create-title')) ?></h1>
 		</div>
 		<?php $this->include('component/content-locales', [

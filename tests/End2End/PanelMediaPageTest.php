@@ -71,12 +71,12 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//input[@name="kind[]"][@value="image"][@checked]', $images);
 		// The search form carries the filters along; the reset clears them.
 		$this->assertHtmlNodeExists(
-			'//form[@class="search"]/input[@type="hidden"][@name="kind"][@value="image"]',
+			'//form[@class="cms-page-search"]/input[@type="hidden"][@name="kind"][@value="image"]',
 			$images,
 		);
 		$this->assertHtmlNodeExists('//a[@class="cms-media-reset"][@href="/panel/media"]', $images);
 		// Both take the selected file from the URL at request time (behaviors/media.js).
-		$this->assertHtmlNodeExists('//form[@class="search"][@data-media-keep-file]', $images);
+		$this->assertHtmlNodeExists('//form[@class="cms-page-search"][@data-media-keep-file]', $images);
 		$this->assertHtmlNodeExists('//*[@data-media-rail]/form[@data-media-keep-file]', $images);
 
 		$search = $this->html('/panel/media', ['q' => 'notes']);

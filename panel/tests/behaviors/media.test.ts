@@ -19,7 +19,7 @@ function screen(detail = ''): HTMLElement {
 		<div data-media>
 			<button type="button" data-media-upload><span data-media-upload-label>Upload</span></button>
 			<input type="file" multiple hidden data-media-upload-input />
-			<form class="search" method="get" action="/panel/media" data-media-keep-file>
+			<form class="cms-page-search" method="get" action="/panel/media" data-media-keep-file>
 				<input type="hidden" name="kind" value="image" />
 				<input type="hidden" name="file" value="a" />
 				<input type="search" name="q" value="" />
@@ -106,7 +106,7 @@ describe('screen requests', () => {
 	it('carries the file the URL holds now, not the one the page rendered with', () => {
 		screen('b');
 		history.replaceState(null, '', '/panel/media?kind=image&file=b');
-		const form = document.querySelector<HTMLFormElement>('form.search')!;
+		const form = document.querySelector<HTMLFormElement>('form.cms-page-search')!;
 
 		const request = configure(form, '/panel/media', new FormData(form));
 

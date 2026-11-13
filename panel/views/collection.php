@@ -41,16 +41,16 @@ $columns = ltrim($columns);
 $columns .= $hasRowActions ? ' max-content' : '';
 ?>
 
-<div class="page cms-collection">
-	<header class="head">
-		<div class="titles">
-			<div class="line">
+<div class="cms-page cms-collection">
+	<header class="cms-page-head">
+		<div class="cms-page-titles">
+			<div class="cms-page-line">
 				<?php if ($page->parent !== null): ?>
-					<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
+					<nav class="cms-page-breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
 						<a href="<?= escape($page->parent->rootUrl) ?>"><?= escape($page->name) ?></a>
-						<span class="sep" aria-hidden="true">/</span>
+						<span class="cms-page-sep" aria-hidden="true">/</span>
 						<span><?= escape($page->parent->title ?? $page->parent->uid) ?></span>
-						<span class="sep" aria-hidden="true">/</span>
+						<span class="cms-page-sep" aria-hidden="true">/</span>
 					</nav>
 				<?php endif ?>
 				<h1><?= escape($page->title) ?></h1>
@@ -62,7 +62,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 			</div>
 		</div>
 
-		<div class="actions">
+		<div class="cms-page-actions">
 			<?php if (count($page->viewLinks) > 0): ?>
 				<nav class="view-toggle" aria-label="<?= escape(__('collection:view')) ?>">
 					<?php foreach ($page->viewLinks as $link): ?>
@@ -105,15 +105,15 @@ $columns .= $hasRowActions ? ' max-content' : '';
 			<?php $this->include('component/toast', (array) u($toast)) ?>
 		<?php endforeach ?>
 
-		<div class="toolbar">
+		<div class="cms-page-toolbar">
 			<form
-				class="search"
+				class="cms-page-search"
 				method="get"
 				action="<?= escape($page->search->action) ?>">
 				<label class="cms-sr-only" for="collection-search"><?= escape(
 					__('collection:search', ['name' => $page->name]),
 				) ?></label>
-				<span class="icon" aria-hidden="true">⌕</span>
+				<span class="cms-page-search-icon" aria-hidden="true">⌕</span>
 				<input
 					id="collection-search"
 					class="cms-input"

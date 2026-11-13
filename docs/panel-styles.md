@@ -139,7 +139,7 @@ Markup that changes place keeps one form. A block of the blocks canvas renders t
 
 ## Layout and scrolling
 
-The current shell uses bounded, independently scrolling regions on larger screens and document scrolling on small or short viewports. See [cms-shell.css](../panel/styles/cms-shell.css), [cms-page-head.css](../panel/styles/cms-page-head.css), and each screen stylesheet for actual breakpoints and pane geometry rather than maintaining another numeric specification here.
+The current shell uses bounded, independently scrolling regions on larger screens and document scrolling on small or short viewports. See [cms-shell.css](../panel/styles/cms-shell.css), [cms-page.css](../panel/styles/cms-page.css), and each screen stylesheet for actual breakpoints and pane geometry rather than maintaining another numeric specification here.
 
 Constraints to consider when trying another layout:
 

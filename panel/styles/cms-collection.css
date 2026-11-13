@@ -351,12 +351,12 @@
 		color: var(--cms-color-danger-text);
 	}
 
-	& .toolbar .name {
+	& .cms-page-toolbar .name {
 		flex: 1 1 18rem;
 		max-width: 32rem;
 	}
 
-	& .toolbar .expires {
+	& .cms-page-toolbar .expires {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-3);

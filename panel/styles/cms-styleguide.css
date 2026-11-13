@@ -4,7 +4,7 @@
 	min-height: 0;
 
 	/* No pane inset on this page, so a line separates the head. */
-	& > .head {
+	& > .cms-page-head {
 		border-bottom: 1px solid var(--cms-color-border);
 	}
 

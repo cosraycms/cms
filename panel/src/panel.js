@@ -71,7 +71,7 @@ function focusSearch(event) {
 		return;
 	}
 
-	const search = document.querySelector('.search input[type="search"]');
+	const search = document.querySelector('.cms-page-search input[type="search"]');
 
 	if (search instanceof HTMLInputElement) {
 		event.preventDefault();

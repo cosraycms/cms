@@ -104,7 +104,7 @@ final class PanelNavigationTest extends TestCase
 		$html = new Renderer(self::root() . '/panel/views')->render('editor', $data);
 
 		$this->assertHtmlNodeExists(
-			'//nav[@class="breadcrumb"]/a[text()="Artikel & Seiten"]',
+			'//nav[@class="cms-page-breadcrumb"]/a[text()="Artikel & Seiten"]',
 			$html,
 		);
 		$container->add(Navigation::class, new Navigation());
