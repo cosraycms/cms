@@ -223,18 +223,18 @@ export function metaFields({
 
 	for (const name of keys) {
 		const entry = document.createElement('div');
-		entry.className = 'entry';
+		entry.className = 'cms-media-meta-entry';
 		const label = document.createElement('label');
-		label.className = 'caption';
+		label.className = 'cms-media-meta-caption';
 		label.htmlFor = `${id}-${name}`;
 		const remark = document.createElement('span');
-		remark.className = 'remark';
+		remark.className = 'cms-media-meta-remark';
 		remark.textContent = notes[name];
 		const demanded = name !== 'title' && required.includes(name);
 
 		if (demanded) {
 			const requirement = document.createElement('span');
-			requirement.className = 'requirement';
+			requirement.className = 'cms-media-meta-requirement';
 			requirement.textContent = __('field:required');
 			label.append(labels[name], ' ', ...(name === 'alt' ? [remark, ' '] : []), requirement);
 		} else {
@@ -246,7 +246,7 @@ export function metaFields({
 				? captionControl(name, `${id}-${name}`, label)
 				: textControl(name, `${id}-${name}`);
 		const note = document.createElement('span');
-		note.className = 'fallback';
+		note.className = 'cms-media-meta-fallback';
 		entry.append(label, control.node);
 		element.append(entry);
 		parts.set(name, { set: control.set, hint: control.hint, entry, note });

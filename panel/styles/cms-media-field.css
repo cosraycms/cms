@@ -867,88 +867,10 @@
 	}
 }
 
-/* The per-use texts of an item: alt text and caption, or a title. */
-.cms-media-meta {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-	gap: var(--cms-space-3);
-
-	& .entry {
-		display: flex;
-		flex-direction: column;
-		gap: var(--cms-space-1-5);
-		min-width: 0;
-	}
-
-	& .caption {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: baseline;
-		gap: 0 var(--cms-space-1-5);
-		color: var(--cms-color-text-label);
-		font-size: var(--cms-font-size-sm);
-		font-weight: 600;
-		line-height: 1.25rem;
-	}
-
-	& .remark {
-		color: var(--cms-color-text-subtle);
-		font-size: var(--cms-font-size-xs);
-		font-weight: 400;
-	}
-
-	& .requirement {
-		color: var(--cms-color-text-requirement);
-		font-size: var(--cms-font-size-xs);
-		font-weight: 400;
-	}
-
-	/* One line, level with the input beside it, growing with its text
-	   where the browser can size a field to its content. */
-	& .cms-textarea {
-		min-height: var(--cms-control-height);
-		resize: vertical;
-
-		@supports (field-sizing: content) {
-			field-sizing: content;
-			resize: none;
-		}
-	}
-
-	& .fallback {
-		color: var(--cms-color-text-subtle);
-		font-size: var(--cms-font-size-xs);
-		font-style: italic;
-		line-height: 1.45;
-	}
-}
-
 .cms-media-missing {
 	margin: var(--cms-space-1) 0 0;
 	color: var(--cms-color-warning-text);
 	font-size: var(--cms-font-size-xs);
-}
-
-/* A video's poster image. */
-.cms-video-poster {
-	& .target {
-		display: flex;
-		align-items: center;
-		flex-wrap: wrap;
-		gap: var(--cms-space-2);
-	}
-
-	& img {
-		width: 4rem;
-		height: 2.5rem;
-		border-radius: var(--cms-radius-sm);
-		object-fit: cover;
-	}
-
-	& .name {
-		min-width: 0;
-		overflow-wrap: anywhere;
-	}
 }
 
 /* The details dialog of an image. Its header holds two lines. */
@@ -1431,14 +1353,6 @@
 		width: 0.625rem;
 		height: 0.625rem;
 	}
-}
-
-.cms-modal-edit-image-fields {
-	margin-bottom: var(--cms-space-8);
-}
-
-.cms-modal-edit-image-locales {
-	margin-bottom: var(--cms-space-4);
 }
 
 /* A crop's part of an image, whatever box it is shown in. */

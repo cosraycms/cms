@@ -89,12 +89,12 @@ export function editDialog({
 	const handle = cosray().modal.open(
 		(host) => {
 			const fields = document.createElement('div');
-			fields.className = 'cms-modal-edit-image-fields';
+			fields.className = 'cms-media-details-fields';
 
 			if (translate && locales && locales.all.length > 1) {
 				const mirror = contentLocales(locales.all, contentLocale);
 				const wrap = document.createElement('div');
-				wrap.className = 'cms-modal-edit-image-locales';
+				wrap.className = 'cms-media-details-locales';
 				wrap.append(mirror.element);
 				fields.append(wrap);
 				followers.push(mirror.setLocale);
@@ -126,7 +126,7 @@ export function editDialog({
 				);
 			}
 
-			frame(
+			const body = frame(
 				host,
 				kind === 'video' ? __('media:video-details') : __('media:file-details'),
 				[fields],
@@ -138,6 +138,7 @@ export function editDialog({
 					}),
 				],
 			);
+			body.classList.add('cms-media-details');
 			/** @type {HTMLElement | null} */ (
 				form.element.querySelector('input, textarea, [contenteditable]')
 			)?.setAttribute('data-dialog-focus', '');

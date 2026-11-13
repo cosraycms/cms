@@ -547,7 +547,8 @@ describe('image details', () => {
 
 	describe('required parts', () => {
 		const requirement = (name: string) =>
-			document.querySelector(`.cms-modal label[for$="-${name}"] .requirement`)?.textContent;
+			document.querySelector(`.cms-modal label[for$="-${name}"] .cms-media-meta-requirement`)
+				?.textContent;
 
 		it('marks them in the dialog instead of calling them optional', async () => {
 			await details({ uid: 'cover' }, { requiredItems: ['alt', 'caption'], attribution: true });
@@ -555,13 +556,15 @@ describe('image details', () => {
 			expect(requirement('alt')).toBe('field:required');
 			expect(requirement('caption')).toBe('field:required');
 			expect(requirement('attribution')).toBeUndefined();
-			expect(document.querySelector('.cms-modal label[for$="-caption"] .remark')).toBeNull();
+			expect(
+				document.querySelector('.cms-modal label[for$="-caption"] .cms-media-meta-remark'),
+			).toBeNull();
 		});
 
 		it('marks a required link', async () => {
 			await details({ uid: 'cover' }, { link: true, requiredItems: ['link'] });
 
-			expect(document.querySelector('.cms-link-row .requirement')?.textContent).toBe(
+			expect(document.querySelector('.cms-link-row-requirement')?.textContent).toBe(
 				'field:required',
 			);
 		});
@@ -711,7 +714,9 @@ describe('image details', () => {
 		const input = document.querySelector<HTMLInputElement>('.cms-modal input[id$="-attribution"]')!;
 
 		expect(input.placeholder).toBe('© Studio');
-		expect(input.parentElement?.querySelector('.fallback')?.textContent).toBe('image:from-library');
+		expect(input.parentElement?.querySelector('.cms-media-meta-fallback')?.textContent).toBe(
+			'image:from-library',
+		);
 	});
 
 	it('applies the texts, keeps other meta and leaves the catalog alone', async () => {

@@ -19,7 +19,7 @@ test('a poster chosen for a video reaches the page', async ({ page }) => {
 	const library = page.locator('dialog[open]').last();
 	await library.locator('[data-pick]').filter({ hasText: 'still.jpg' }).click();
 	dialog = page.locator('dialog[open]').last();
-	await expect(dialog.locator('.cms-video-poster .name')).toHaveText('still.jpg');
+	await expect(dialog.locator('.cms-poster-row-name')).toHaveText('still.jpg');
 	await dialog.getByRole('button', { name: 'Apply' }).click();
 	await publish(page);
 

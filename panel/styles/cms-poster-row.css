@@ -1,0 +1,21 @@
+/* A video's poster image in its details dialog. */
+.cms-poster-row {
+	& .cms-poster-row-target {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: var(--cms-space-2);
+	}
+
+	& img {
+		width: 4rem;
+		height: 2.5rem;
+		border-radius: var(--cms-radius-sm);
+		object-fit: cover;
+	}
+
+	& .cms-poster-row-name {
+		min-width: 0;
+		overflow-wrap: anywhere;
+	}
+}

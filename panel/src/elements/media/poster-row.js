@@ -16,10 +16,10 @@ import { button, create } from './views.js';
  * @returns {HTMLElement}
  */
 export function posterRow({ poster, asset, picked, browse, change }) {
-	const element = create('div', 'cms-media-meta cms-video-poster');
-	const entry = create('div', 'entry');
-	const target = create('div', 'target');
-	entry.append(create('span', 'caption', __('video:poster')), target);
+	const element = create('div', 'cms-media-meta cms-poster-row');
+	const entry = create('div', 'cms-media-meta-entry');
+	const target = create('div', 'cms-poster-row-target');
+	entry.append(create('span', 'cms-media-meta-caption', __('video:poster')), target);
 	element.append(entry);
 	let current = poster;
 
@@ -59,7 +59,7 @@ export function posterRow({ poster, asset, picked, browse, change }) {
 
 		target.replaceChildren(
 			...parts,
-			create('span', 'name', info?.filename ?? current),
+			create('span', 'cms-poster-row-name', info?.filename ?? current),
 			button('cms-button cms-button-secondary cms-button-small', __('media:replace'), choose),
 			button('cms-button cms-button-secondary cms-button-small', __('common:remove'), () =>
 				set(undefined),

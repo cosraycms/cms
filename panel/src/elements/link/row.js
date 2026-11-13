@@ -63,16 +63,16 @@ export function linkRow({
 	warning,
 }) {
 	const element = create('div', 'cms-link-row');
-	const entry = create('div', 'entry');
+	const entry = create('div', 'cms-link-row-entry');
 	const target = create('div', 'cms-link-row-target');
 	const notice = create('p', 'cms-link-row-warning', warning ?? '');
 
 	if (caption !== undefined) {
-		const heading = create('span', 'caption', `${caption} `);
+		const heading = create('span', 'cms-link-row-caption', `${caption} `);
 		heading.append(
 			required
-				? create('span', 'requirement', __('field:required'))
-				: create('span', 'remark', __('field:optional')),
+				? create('span', 'cms-link-row-requirement', __('field:required'))
+				: create('span', 'cms-link-row-remark', __('field:optional')),
 		);
 		entry.append(heading);
 	}

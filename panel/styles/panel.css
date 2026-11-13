@@ -45,6 +45,9 @@
 @import './cms-link.css' layer(panel);
 @import './cms-dropzone.css' layer(panel);
 @import './cms-media-field.css' layer(panel);
+@import './cms-media-meta.css' layer(panel);
+@import './cms-poster-row.css' layer(panel);
+@import './cms-media-details.css' layer(panel);
 @import './cms-inline-editor.css' layer(panel);
 @import './cms-entries.css' layer(panel);
 @import './cms-blocks-editor.css' layer(panel);
