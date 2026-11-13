@@ -99,7 +99,10 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertStringStartsWith('<div id="media-detail"', trim($html));
 		$this->assertStringNotContainsString('cms-masthead', $html);
 		$this->assertHtmlNodeExists("//form[@hx-post='/panel/media/{$uid}?file={$uid}']", $html);
-		$this->assertHtmlNodeExists('//div[@class="cms-locale-variant"][@data-locale="en"]//input[@name="meta[alt][en]"]', $html);
+		$this->assertHtmlNodeExists(
+			'//div[@class="cms-locale-variant"][@data-locale="en"]//input[@name="meta[alt][en]"]',
+			$html,
+		);
 		$this->assertHtmlNodeExists(
 			'//div[@class="cms-locale-variant"][@data-locale="de"][@hidden]//input[@name="meta[alt][de]"]',
 			$html,
