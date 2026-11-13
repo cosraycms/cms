@@ -1,0 +1,6 @@
+/* A crop's part of an image, whatever box it is shown in. */
+.cms-crop-window {
+	position: relative;
+	width: 100%;
+	aspect-ratio: var(--crop-ratio);
+}

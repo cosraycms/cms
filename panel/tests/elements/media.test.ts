@@ -90,7 +90,7 @@ function file() {
 }
 
 async function edit(element: HTMLElement): Promise<HTMLInputElement> {
-	element.querySelector<HTMLButtonElement>('.cms-file-row .edit')!.click();
+	element.querySelector<HTMLButtonElement>('.cms-file-list-edit')!.click();
 	await tick();
 	const input = document.querySelector<HTMLInputElement>('.cms-modal input[type="text"]');
 	expect(input).not.toBeNull();
@@ -168,17 +168,17 @@ describe('the frame', () => {
 
 	it('opens the picker and the library from the bar and counts against the limit', async () => {
 		const { element } = await files(5);
-		const bar = element.querySelector<HTMLElement>('.cms-media-field > .bar')!;
+		const bar = element.querySelector<HTMLElement>('.cms-media-field > .cms-media-field-bar')!;
 		const picker = element.querySelector<HTMLInputElement>('input[type="file"]')!;
 		const click = vi.spyOn(picker, 'click').mockImplementation(() => {});
 
-		expect(bar.querySelector('.tally')?.textContent).toBe('2 / 5');
-		expect(bar.querySelector('.choose')?.textContent).toBe('upload:choose-files');
+		expect(bar.querySelector('.cms-media-field-tally')?.textContent).toBe('2 / 5');
+		expect(bar.querySelector('.cms-media-field-choose')?.textContent).toBe('upload:choose-files');
 
-		bar.querySelector<HTMLButtonElement>('.choose')!.click();
+		bar.querySelector<HTMLButtonElement>('.cms-media-field-choose')!.click();
 		expect(click).toHaveBeenCalledOnce();
 
-		bar.querySelector<HTMLButtonElement>('.browse')!.click();
+		bar.querySelector<HTMLButtonElement>('.cms-media-field-browse')!.click();
 		await tick();
 		expect(document.querySelector('.cms-modal')).not.toBeNull();
 		expect(ajax).toHaveBeenCalledWith('GET', '/panel/media/picker', expect.anything());
@@ -187,17 +187,25 @@ describe('the frame', () => {
 	it('is the bar alone while empty', async () => {
 		const { element } = await files(1, 0);
 
-		expect(element.querySelector('.cms-media-field.is-empty > .bar')).not.toBeNull();
-		expect(element.querySelector('.cms-media-field > .body')).toBeNull();
-		expect(element.querySelector('.choose')?.textContent).toBe('upload:choose-file');
-		expect(element.querySelector('.tally')).toBeNull();
+		expect(
+			element.querySelector('.cms-media-field.is-empty > .cms-media-field-bar'),
+		).not.toBeNull();
+		expect(element.querySelector('.cms-media-field > .cms-media-field-body')).toBeNull();
+		expect(element.querySelector('.cms-media-field-choose')?.textContent).toBe(
+			'upload:choose-file',
+		);
+		expect(element.querySelector('.cms-media-field-tally')).toBeNull();
 	});
 
 	it('closes the bar actions once the field is full', async () => {
 		const { element } = await files(2);
 
-		expect(element.querySelector<HTMLButtonElement>('.choose')!.disabled).toBe(true);
-		expect(element.querySelector<HTMLButtonElement>('.browse')!.disabled).toBe(true);
+		expect(element.querySelector<HTMLButtonElement>('.cms-media-field-choose')!.disabled).toBe(
+			true,
+		);
+		expect(element.querySelector<HTMLButtonElement>('.cms-media-field-browse')!.disabled).toBe(
+			true,
+		);
 	});
 
 	it('becomes the drop zone while files hover and uploads what lands', async () => {
@@ -206,7 +214,7 @@ describe('the frame', () => {
 			.mockResolvedValue({ ok: true, uid: 'dropped', filename: 'dropped.pdf' });
 		const { element, changes } = await files(5);
 		const frame = element.querySelector<HTMLElement>('.cms-media-field')!;
-		const bar = frame.querySelector<HTMLElement>('.bar')!;
+		const bar = frame.querySelector<HTMLElement>('.cms-media-field-bar')!;
 		const dropped = new File(['x'], 'dropped.pdf', { type: 'application/pdf' });
 
 		drag(frame, 'dragenter', ['text/plain']);
@@ -256,13 +264,15 @@ describe('the frame', () => {
 		const { element } = await files(5, 2, { immutable: true });
 		const frame = element.querySelector<HTMLElement>('.cms-media-field.is-readonly')!;
 
-		expect(frame.querySelector('.bar')).toBeNull();
+		expect(frame.querySelector('.cms-media-field-bar')).toBeNull();
 		expect(frame.querySelector('input[type="file"]')).toBeNull();
-		expect(frame.querySelector('.body')).not.toBeNull();
+		expect(frame.querySelector('.cms-media-field-body')).not.toBeNull();
 
 		const { element: blank } = await files(5, 0, { immutable: true });
 
-		expect(blank.querySelector('.cms-media-field > .none')?.textContent).toBe('media:empty-many');
+		expect(blank.querySelector('.cms-media-field > .cms-media-field-none')?.textContent).toBe(
+			'media:empty-many',
+		);
 	});
 });
 
@@ -288,10 +298,10 @@ describe('filled single field', () => {
 		const picker = element.querySelector<HTMLInputElement>('input[type="file"]')!;
 		const click = vi.spyOn(picker, 'click').mockImplementation(() => {});
 		const [library, device] = element.querySelectorAll<HTMLButtonElement>(
-			'.cms-replace-menu button',
+			'.cms-media-replace-menu button',
 		);
 
-		expect(element.querySelector('.cms-media-field > .bar')).toBeNull();
+		expect(element.querySelector('.cms-media-field > .cms-media-field-bar')).toBeNull();
 
 		device.click();
 		expect(click).toHaveBeenCalledOnce();
@@ -313,12 +323,14 @@ describe('single image', () => {
 		});
 		const card = element.querySelector<HTMLElement>('.cms-image-card')!;
 
-		card.querySelector<HTMLButtonElement>('.discard')!.click();
+		card.querySelector<HTMLButtonElement>('.cms-image-card-discard')!.click();
 		await tick();
 
 		expect(changes).toHaveBeenCalledExactlyOnceWith({ zxx: [] });
 		expect(element.querySelector('.cms-image-card')).toBeNull();
-		expect(element.querySelector('.cms-media-field.is-empty > .bar')).not.toBeNull();
+		expect(
+			element.querySelector('.cms-media-field.is-empty > .cms-media-field-bar'),
+		).not.toBeNull();
 	});
 
 	it('keeps the picture on a read-only card and shows its texts read-only', async () => {
@@ -330,15 +342,17 @@ describe('single image', () => {
 		const card = element.querySelector<HTMLElement>('.cms-image-card')!;
 
 		expect(card.querySelector('img')?.getAttribute('src')).toBe('/media/cover.jpg');
-		expect(card.querySelector('.discard, .replace, .edit')).toBeNull();
+		expect(
+			card.querySelector('.cms-image-card-discard, .cms-media-replace, .cms-image-card-edit'),
+		).toBeNull();
 
-		card.querySelector<HTMLButtonElement>('.controls button')!.click();
+		card.querySelector<HTMLButtonElement>('.cms-image-card-controls button')!.click();
 		await tick();
 		const alt = document.querySelector<HTMLTextAreaElement>('.cms-modal textarea[id$="-alt"]')!;
 
 		expect(alt.value).toBe('A kettle');
 		expect(alt.readOnly).toBe(true);
-		expect(document.querySelector('.cms-modal .replace')).toBeNull();
+		expect(document.querySelector('.cms-modal .cms-media-replace')).toBeNull();
 		expect(document.activeElement?.textContent).toBe('common:close');
 	});
 });
@@ -363,7 +377,7 @@ describe('image details', () => {
 			field: { name: 'cover', limit: { min: 0, max: 1 }, caption: true, ...extra },
 			assets,
 		});
-		opened.element.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+		opened.element.querySelector<HTMLButtonElement>('.cms-image-card-edit')!.click();
 		await tick();
 
 		return opened;
@@ -380,7 +394,7 @@ describe('image details', () => {
 			assets,
 		});
 
-		element.querySelector<HTMLElement>('.cms-image-card .thumb')!.click();
+		element.querySelector<HTMLElement>('.cms-image-card-thumb')!.click();
 		await tick();
 
 		expect(document.activeElement).toBe(field('alt'));
@@ -389,13 +403,12 @@ describe('image details', () => {
 	it('shows the image with its facts next to the texts', async () => {
 		await details();
 		const modal = document.querySelector<HTMLElement>('.cms-modal')!;
-		const facts = Array.from(modal.querySelectorAll('.facts > div')).map((row) => [
-			row.querySelector('dt')?.textContent,
-			row.querySelector('dd')?.textContent,
-		]);
+		const facts = Array.from(modal.querySelectorAll('.cms-image-details-facts > div')).map(
+			(row) => [row.querySelector('dt')?.textContent, row.querySelector('dd')?.textContent],
+		);
 
-		expect(modal.querySelector('.cms-modal-header .filename')?.textContent).toBe('cover.jpg');
-		expect(modal.querySelector('.preview img')?.getAttribute('src')).toBe(
+		expect(modal.querySelector('.cms-image-details-filename')?.textContent).toBe('cover.jpg');
+		expect(modal.querySelector('.cms-image-details-preview img')?.getAttribute('src')).toBe(
 			'/media/cover-preview.jpg',
 		);
 		expect(facts.slice(0, 3)).toEqual([
@@ -403,7 +416,7 @@ describe('image details', () => {
 			['media:dimensions', '2400 × 1600 px'],
 			['media:format', 'JPG'],
 		]);
-		expect(modal.querySelector<HTMLInputElement>('.address input')?.value).toBe(
+		expect(modal.querySelector<HTMLInputElement>('.cms-image-details-address input')?.value).toBe(
 			new URL('/media/cover.jpg', location.href).href,
 		);
 		expect(modal.querySelector('[id$="-title"]')).toBeNull();
@@ -539,7 +552,7 @@ describe('image details', () => {
 				assets,
 			});
 
-			const texts = [...opened.element.querySelectorAll('.cms-image-card .texts > div')];
+			const texts = [...opened.element.querySelectorAll('.cms-image-card-texts > div')];
 
 			expect(texts.at(-1)?.textContent).toBe('image:link:/about');
 		});
@@ -581,7 +594,7 @@ describe('image details', () => {
 				},
 				assets: { cover: { ...assets.cover, meta: {} } },
 			});
-			const rows = [...element.querySelectorAll('.cms-image-card .texts > div')].map(
+			const rows = [...element.querySelectorAll('.cms-image-card-texts > div')].map(
 				(row) => row.textContent,
 			);
 
@@ -609,14 +622,12 @@ describe('image details', () => {
 				},
 				locales: { all: [{ id: 'en', title: 'English' }], default: 'en' },
 			} as HostPayload);
-			const tiles = [...element.querySelectorAll('.tile')];
+			const tiles = [...element.querySelectorAll('.cms-gallery-tile')];
 
-			expect(tiles.map((tile) => tile.querySelector('.tile-missing') !== null)).toEqual([
-				false,
-				true,
-				false,
-			]);
-			expect(tiles[1]?.querySelector('.tile-missing')?.getAttribute('aria-label')).toBe(
+			expect(tiles.map((tile) => tile.querySelector('.cms-gallery-tile-missing') !== null)).toEqual(
+				[false, true, false],
+			);
+			expect(tiles[1]?.querySelector('.cms-gallery-tile-missing')?.getAttribute('aria-label')).toBe(
 				'image:missing image:alt-text',
 			);
 		});
@@ -633,7 +644,7 @@ describe('image details', () => {
 				assets: { cover: { ...assets.cover, meta: {} } },
 			});
 
-			expect(element.querySelector('.cms-media-missing')?.textContent).toBe(
+			expect(element.querySelector('.cms-media-field-missing')?.textContent).toBe(
 				'image:missing image:alt-text',
 			);
 		});
@@ -661,7 +672,7 @@ describe('image details', () => {
 				'de',
 			);
 
-			expect(element.querySelector('.tile-missing')).toBeNull();
+			expect(element.querySelector('.cms-gallery-tile-missing')).toBeNull();
 		});
 	});
 
@@ -694,7 +705,7 @@ describe('image details', () => {
 		await action('common:apply');
 		expect(changes.mock.lastCall?.[0].zxx[0]).toEqual({ uid: 'cover' });
 
-		document.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+		document.querySelector<HTMLButtonElement>('.cms-image-card-edit')!.click();
 		await tick();
 		input().value = '© Jane Doe';
 		input().dispatchEvent(new Event('input', { bubbles: true }));
@@ -709,7 +720,7 @@ describe('image details', () => {
 			field: { name: 'cover', limit: { min: 0, max: 1 }, attribution: true },
 			assets: { cover: { ...assets.cover, meta: { attribution: '© Studio' } } },
 		});
-		document.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+		document.querySelector<HTMLButtonElement>('.cms-image-card-edit')!.click();
 		await tick();
 		const input = document.querySelector<HTMLInputElement>('.cms-modal input[id$="-attribution"]')!;
 
@@ -761,7 +772,7 @@ describe('image details', () => {
 		await enter(field('alt'), 'Discarded');
 		await action('common:cancel');
 
-		element.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+		element.querySelector<HTMLButtonElement>('.cms-image-card-edit')!.click();
 		await tick();
 		expect(field('alt').value).toBe('');
 		await action('common:apply');
@@ -857,7 +868,7 @@ describe('image details', () => {
 					cover: { ...assets.cover, meta: { caption: { en: marked('From the media', 'bold') } } },
 				},
 			});
-			document.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+			document.querySelector<HTMLButtonElement>('.cms-image-card-edit')!.click();
 			await tick();
 
 			expect(captionHint(document)).toBe('From the media');
@@ -870,7 +881,7 @@ describe('image details', () => {
 				assets,
 			});
 
-			expect(element.querySelector('.cms-image-card .texts em')?.textContent).toBe('Sudhaus');
+			expect(element.querySelector('.cms-image-card-texts em')?.textContent).toBe('Sudhaus');
 		});
 
 		it('is read-only in a read-only field', async () => {
@@ -879,7 +890,7 @@ describe('image details', () => {
 				field: { name: 'cover', limit: { min: 0, max: 1 }, caption: true, immutable: true },
 				assets,
 			});
-			element.querySelector<HTMLElement>('.cms-image-card .thumb')!.click();
+			element.querySelector<HTMLElement>('.cms-image-card-thumb')!.click();
 			await tick();
 
 			expect(
@@ -890,9 +901,12 @@ describe('image details', () => {
 	});
 
 	describe('focal point', () => {
-		const status = () => document.querySelector('.cms-modal .focus-status .text')?.textContent;
-		const marker = () => document.querySelector<HTMLElement>('.cms-modal .marker')!;
-		const reset = () => document.querySelector<HTMLButtonElement>('.cms-modal .reset')!;
+		const status = () =>
+			document.querySelector('.cms-modal .cms-image-details-focus-text')?.textContent;
+		const marker = () =>
+			document.querySelector<HTMLElement>('.cms-modal .cms-image-details-marker')!;
+		const reset = () =>
+			document.querySelector<HTMLButtonElement>('.cms-modal .cms-image-details-reset')!;
 		const key = (name: string, shiftKey = false) =>
 			marker().dispatchEvent(new KeyboardEvent('keydown', { key: name, shiftKey, bubbles: true }));
 		const catalog = { ...assets, cover: { ...assets.cover, meta: { focal: { x: 0.3, y: 0.4 } } } };
@@ -903,7 +917,7 @@ describe('image details', () => {
 				field: { name: 'cover', limit: { min: 0, max: 1 }, caption: true },
 				assets: catalog,
 			});
-			opened.element.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+			opened.element.querySelector<HTMLButtonElement>('.cms-image-card-edit')!.click();
 			await tick();
 
 			return opened;
@@ -928,7 +942,7 @@ describe('image details', () => {
 
 		it('places the point where the pointer lands', async () => {
 			const { changes } = await details();
-			const frame = document.querySelector<HTMLElement>('.cms-modal .frame')!;
+			const frame = document.querySelector<HTMLElement>('.cms-modal .cms-image-details-frame')!;
 			frame.getBoundingClientRect = () =>
 				({ left: 100, top: 50, width: 200, height: 100 }) as DOMRect;
 
@@ -992,17 +1006,19 @@ describe('image details', () => {
 				field: { name: 'cover', limit: { min: 0, max: 1 }, immutable: true },
 				assets,
 			});
-			element.querySelector<HTMLElement>('.cms-image-card .thumb')!.click();
+			element.querySelector<HTMLElement>('.cms-image-card-thumb')!.click();
 			await tick();
 
 			expect(marker().hasAttribute('role')).toBe(false);
-			expect(document.querySelector('.cms-modal .reset')).toBeNull();
+			expect(document.querySelector('.cms-modal .cms-image-details-reset')).toBeNull();
 			expect(status()).toBe('image:focus: 30 % / 40 %');
 		});
 
 		it('shows the same cut in the previews as the site', async () => {
 			await details({ uid: 'cover', meta: { focal: { x: 1, y: 0 } } });
-			const square = document.querySelectorAll<HTMLElement>('.cms-modal .shot .box')[1];
+			const square = document.querySelectorAll<HTMLElement>(
+				'.cms-modal .cms-image-details-shot-box',
+			)[1];
 			const image = square.querySelector('img')!;
 
 			// The 2400 by 1600 image at its right edge: a third of its width lies to the left.
@@ -1012,10 +1028,13 @@ describe('image details', () => {
 	});
 
 	describe('crop', () => {
-		const box = () => document.querySelector<HTMLElement>('.cms-modal .crop-box')!;
-		const frame = () => document.querySelector<HTMLElement>('.cms-modal .frame')!;
-		const status = () => document.querySelector('.cms-modal .focus-status .text')?.textContent;
-		const removal = () => document.querySelector<HTMLButtonElement>('.cms-modal .reset')!;
+		const box = () =>
+			document.querySelector<HTMLElement>('.cms-modal .cms-image-details-crop-box')!;
+		const frame = () => document.querySelector<HTMLElement>('.cms-modal .cms-image-details-frame')!;
+		const status = () =>
+			document.querySelector('.cms-modal .cms-image-details-focus-text')?.textContent;
+		const removal = () =>
+			document.querySelector<HTMLButtonElement>('.cms-modal .cms-image-details-reset')!;
 		const jpeg = { ...assets, cover: { ...assets.cover, mime: 'image/jpeg' } };
 
 		async function cropping(item: FileItem = { uid: 'cover' }, extra: object = {}) {
@@ -1024,7 +1043,7 @@ describe('image details', () => {
 				field: { name: 'cover', limit: { min: 0, max: 1 }, cropping: true, ...extra },
 				assets: jpeg,
 			});
-			opened.element.querySelector<HTMLButtonElement>('.cms-image-card .edit')?.click();
+			opened.element.querySelector<HTMLButtonElement>('.cms-image-card-edit')?.click();
 			await tick();
 			document.querySelector<HTMLButtonElement>('.cms-modal [data-mode="crop"]')?.click();
 
@@ -1057,7 +1076,7 @@ describe('image details', () => {
 				field: { name: 'cover', limit: { min: 0, max: 1 }, cropping: true },
 				assets: { gif: { ...assets.cover, mime: 'image/gif' } },
 			});
-			document.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+			document.querySelector<HTMLButtonElement>('.cms-image-card-edit')!.click();
 			await tick();
 			expect(document.querySelector('.cms-modal [data-mode="crop"]')).toBeNull();
 		});
@@ -1091,9 +1110,9 @@ describe('image details', () => {
 			});
 
 			drag(box(), [30, 30], [40, 30]);
-			drag(box().querySelector('.se')!, [70, 60], [80, 70]);
+			drag(box().querySelector('[data-handle="se"]')!, [70, 60], [80, 70]);
 			box()
-				.querySelector('.nw')!
+				.querySelector('[data-handle="nw"]')!
 				.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
 			box().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
 			await action('common:apply');
@@ -1105,7 +1124,9 @@ describe('image details', () => {
 
 		it('fits the crop to a chosen shape and keeps to it', async () => {
 			const { changes } = await cropping();
-			const select = document.querySelector<HTMLSelectElement>('.cms-modal .ratio select')!;
+			const select = document.querySelector<HTMLSelectElement>(
+				'.cms-modal .cms-image-details-ratio select',
+			)!;
 
 			select.value = '1/1';
 			select.dispatchEvent(new Event('change'));
@@ -1135,15 +1156,15 @@ describe('image details', () => {
 				field: { name: 'gallery', cropping: true },
 				assets: { one: jpeg.cover, two: jpeg.cover },
 			});
-			element.querySelector<HTMLButtonElement>('.cms-gallery .edit')!.click();
+			element.querySelector<HTMLButtonElement>('.cms-gallery-edit')!.click();
 			await tick();
 			document.querySelector<HTMLButtonElement>('.cms-modal [data-mode="crop"]')!.click();
 			drag(frame(), [0, 0], [50, 50]);
-			document.querySelector<HTMLButtonElement>('.cms-modal .step.next')!.click();
+			document.querySelector<HTMLButtonElement>('.cms-modal .cms-image-details-next')!.click();
 
 			expect(status()).toBe('image:crop-hint');
 
-			document.querySelector<HTMLButtonElement>('.cms-modal .step.prev')!.click();
+			document.querySelector<HTMLButtonElement>('.cms-modal .cms-image-details-prev')!.click();
 
 			expect(status()).toBe('1200 × 800 px');
 
@@ -1158,7 +1179,7 @@ describe('image details', () => {
 				field: { name: 'cover', limit: { min: 0, max: 1 } },
 				assets,
 			});
-			const thumb = element.querySelector<HTMLElement>('.cms-image-card .thumb')!;
+			const thumb = element.querySelector<HTMLElement>('.cms-image-card-thumb')!;
 			const image = thumb.querySelector<HTMLImageElement>('.cms-crop-window img')!;
 
 			// Half of a 3:2 image is 3:4.
@@ -1170,7 +1191,7 @@ describe('image details', () => {
 
 	describe('card texts', () => {
 		const texts = (element: HTMLElement) =>
-			[...element.querySelectorAll('.cms-image-card .texts div')].map(
+			[...element.querySelectorAll('.cms-image-card-texts div')].map(
 				(row) => `${row.querySelector('dt')?.textContent} ${row.querySelector('dd')?.textContent}`,
 			);
 		const card = (item: FileItem, extra: Record<string, unknown> = {}) =>
@@ -1217,7 +1238,7 @@ describe('image details', () => {
 
 		it('adds the alt text through the details dialog and keeps focus nearby', async () => {
 			const { element } = await card({ uid: 'cover' });
-			const add = element.querySelector<HTMLButtonElement>('.cms-image-card .add')!;
+			const add = element.querySelector<HTMLButtonElement>('.cms-image-card-add')!;
 			add.focus();
 			add.click();
 			await tick();
@@ -1228,7 +1249,7 @@ describe('image details', () => {
 			await action('common:apply');
 
 			expect(texts(element)).toEqual(['image:alt-text: A kettle']);
-			expect(document.activeElement).toBe(element.querySelector('.cms-image-card .edit'));
+			expect(document.activeElement).toBe(element.querySelector('.cms-image-card-edit'));
 		});
 
 		it('leaves out a missing alt text when read-only', async () => {
@@ -1263,7 +1284,9 @@ describe('image details', () => {
 
 	it('falls back to the original when the preview cannot be generated', async () => {
 		await details();
-		const image = document.querySelector<HTMLImageElement>('.cms-modal .preview img')!;
+		const image = document.querySelector<HTMLImageElement>(
+			'.cms-modal .cms-image-details-preview img',
+		)!;
 
 		image.dispatchEvent(new Event('error'));
 
@@ -1276,14 +1299,14 @@ describe('image details', () => {
 			field: { name: 'cover', limit: { min: 0, max: 1 } },
 			assets,
 		});
-		const edit = element.querySelector<HTMLButtonElement>('.cms-image-card .edit')!;
+		const edit = element.querySelector<HTMLButtonElement>('.cms-image-card-edit')!;
 		edit.focus();
 		edit.click();
 		await tick();
 		await enter(field('alt'), 'A kettle');
 		await action('common:apply');
 
-		expect(document.activeElement).toBe(element.querySelector('.cms-image-card .edit'));
+		expect(document.activeElement).toBe(element.querySelector('.cms-image-card-edit'));
 	});
 
 	it('follows the content language and writes to the shown one', async () => {
@@ -1315,7 +1338,7 @@ describe('image details', () => {
 			field: { name: 'cover', limit: { min: 0, max: 1 } },
 			assets: { cover: { ...assets.cover, meta: { alt: { en: 'From the catalog' } } } },
 		}).then(({ element }) =>
-			element.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click(),
+			element.querySelector<HTMLButtonElement>('.cms-image-card-edit')!.click(),
 		);
 		await tick();
 		field('alt').blur();
@@ -1337,7 +1360,9 @@ describe('image details', () => {
 		const picker = document.querySelector<HTMLInputElement>('.cms-modal input[type="file"]')!;
 		const click = vi.spyOn(picker, 'click').mockImplementation(() => {});
 
-		document.querySelectorAll<HTMLButtonElement>('.cms-modal .cms-replace-menu button')[1].click();
+		document
+			.querySelectorAll<HTMLButtonElement>('.cms-modal .cms-media-replace-menu button')[1]
+			.click();
 		expect(click).toHaveBeenCalledOnce();
 
 		Object.defineProperty(picker, 'files', {
@@ -1347,18 +1372,18 @@ describe('image details', () => {
 		picker.dispatchEvent(new Event('input', { bubbles: true }));
 
 		await vi.waitFor(() => {
-			expect(document.querySelector('.cms-modal .preview img')?.getAttribute('src')).toBe(
-				'/media/fresh.png',
-			);
+			expect(
+				document.querySelector('.cms-modal .cms-image-details-preview img')?.getAttribute('src'),
+			).toBe('/media/fresh.png');
 		});
 		expect(field('alt').value).toBe('');
 		expect(changes).not.toHaveBeenCalled();
-		expect(element.querySelector('.cms-image-card .filename')?.textContent).toBe('cover.jpg');
+		expect(element.querySelector('.cms-image-card-filename')?.textContent).toBe('cover.jpg');
 
 		await action('common:apply');
 
 		expect(changes).toHaveBeenCalledExactlyOnceWith({ zxx: [{ uid: 'fresh' }] });
-		expect(element.querySelector('.cms-image-card .filename')?.textContent).toBe('fresh.png');
+		expect(element.querySelector('.cms-image-card-filename')?.textContent).toBe('fresh.png');
 	});
 
 	it('keeps the image and says why when an upload fails', async () => {
@@ -1381,9 +1406,9 @@ describe('image details', () => {
 			expect(alert?.querySelector('.cms-modal-title')?.textContent).toBe('common:error');
 			expect(alert?.querySelector('.cms-modal-body')?.textContent).toBe('upload:file-error');
 		});
-		expect(document.querySelector('.cms-modal .preview img')?.getAttribute('src')).toBe(
-			'/media/cover-preview.jpg',
-		);
+		expect(
+			document.querySelector('.cms-modal .cms-image-details-preview img')?.getAttribute('src'),
+		).toBe('/media/cover-preview.jpg');
 	});
 });
 
@@ -1399,7 +1424,7 @@ describe('file rows', () => {
 		await tick();
 
 		expect(
-			Array.from(element.querySelectorAll('.cms-file-row .filename')).map((n) => n.textContent),
+			Array.from(element.querySelectorAll('.cms-file-list-filename')).map((n) => n.textContent),
 		).toEqual(['other.pdf']);
 		expect(changes).not.toHaveBeenCalled();
 	});
@@ -1432,19 +1457,25 @@ describe('file rows', () => {
 				notes: { filename: 'notes', url: '/media/notes', kind: 'file' },
 			},
 		});
-		const rows = element.querySelectorAll<HTMLElement>('.cms-file-row');
+		const rows = element.querySelectorAll<HTMLElement>('.cms-file-list-row');
 
 		expect(rows).toHaveLength(3);
-		expect(rows[0].querySelector('.icon use')?.getAttribute('href')).toMatch(/#file-earmark-word$/);
-		expect(rows[0].querySelector<HTMLAnchorElement>('a.filename')?.getAttribute('href')).toBe(
-			'/media/terms.docx',
+		expect(rows[0].querySelector('.cms-file-list-icon use')?.getAttribute('href')).toMatch(
+			/#file-earmark-word$/,
 		);
-		expect(rows[0].querySelector('.title')?.textContent).toBe('Terms of delivery');
-		expect(rows[0].querySelector('.size')?.textContent).toBe('45.4 KB');
-		expect(rows[1].querySelector('.icon img')?.getAttribute('src')).toBe('/media/photo-thumb.jpg');
-		expect(rows[2].querySelector('.icon use')?.getAttribute('href')).toMatch(/#file-earmark$/);
-		expect(rows[2].querySelector('.title')).toBeNull();
-		expect(rows[2].querySelector('.size')?.textContent).toBe('');
+		expect(
+			rows[0].querySelector<HTMLAnchorElement>('a.cms-file-list-filename')?.getAttribute('href'),
+		).toBe('/media/terms.docx');
+		expect(rows[0].querySelector('.cms-file-list-title')?.textContent).toBe('Terms of delivery');
+		expect(rows[0].querySelector('.cms-file-list-size')?.textContent).toBe('45.4 KB');
+		expect(rows[1].querySelector('.cms-file-list-icon img')?.getAttribute('src')).toBe(
+			'/media/photo-thumb.jpg',
+		);
+		expect(rows[2].querySelector('.cms-file-list-icon use')?.getAttribute('href')).toMatch(
+			/#file-earmark$/,
+		);
+		expect(rows[2].querySelector('.cms-file-list-title')).toBeNull();
+		expect(rows[2].querySelector('.cms-file-list-size')?.textContent).toBe('');
 	});
 
 	it('persists a reorder of the rows', async () => {
@@ -1477,11 +1508,11 @@ describe('file rows', () => {
 			},
 		});
 
-		element.querySelector<HTMLButtonElement>('.cms-file-row .remove')!.click();
+		element.querySelector<HTMLButtonElement>('.cms-file-list-remove')!.click();
 		await tick();
 
 		expect(changes).toHaveBeenCalledExactlyOnceWith({ zxx: [{ uid: 'b' }] });
-		expect(element.querySelectorAll('.cms-file-row')).toHaveLength(1);
+		expect(element.querySelectorAll('.cms-file-list-row')).toHaveLength(1);
 	});
 });
 
@@ -1544,19 +1575,19 @@ describe('file metadata', () => {
 describe('file dialog focus', () => {
 	it('returns to the row after the language changed while the dialog was open', async () => {
 		const { element } = await file();
-		const pencil = element.querySelector<HTMLButtonElement>('.cms-file-row .edit')!;
+		const pencil = element.querySelector<HTMLButtonElement>('.cms-file-list-edit')!;
 		pencil.focus();
 		pencil.click();
 		await tick();
 
 		element.locale = 'en';
-		expect(element.querySelector('.cms-file-row .title')?.textContent).toBe('English title');
+		expect(element.querySelector('.cms-file-list-title')?.textContent).toBe('English title');
 
 		await enter(document.querySelector<HTMLInputElement>('.cms-modal input')!, 'Retitled');
 		await action('common:apply');
 
-		expect(element.querySelector('.cms-file-row .title')?.textContent).toBe('Retitled');
-		expect(document.activeElement).toBe(element.querySelector('.cms-file-row .edit'));
+		expect(element.querySelector('.cms-file-list-title')?.textContent).toBe('Retitled');
+		expect(document.activeElement).toBe(element.querySelector('.cms-file-list-edit'));
 	});
 });
 
@@ -1599,7 +1630,7 @@ describe('media uploads', () => {
 					de: [german],
 				});
 			});
-			expect(element.querySelector('.cms-file-row .filename')?.textContent?.trim()).toBe('german');
+			expect(element.querySelector('.cms-file-list-filename')?.textContent?.trim()).toBe('german');
 
 			element.locale = 'en';
 			await tick();
@@ -1630,7 +1661,7 @@ describe('media uploads', () => {
 			);
 		});
 		expect(
-			element.querySelector('.cms-image-card .facts')?.textContent?.replace(/\s+/g, ' ').trim(),
+			element.querySelector('.cms-image-card-facts')?.textContent?.replace(/\s+/g, ' ').trim(),
 		).toBe('2400 × 1600 px · 842.0 KB');
 	});
 
@@ -1680,7 +1711,7 @@ describe('gallery ordering', () => {
 		await tick();
 		expect(changes).not.toHaveBeenCalled();
 
-		const grid = element.querySelector<HTMLElement>('.cms-gallery .tiles')!;
+		const grid = element.querySelector<HTMLElement>('.cms-gallery-tiles')!;
 		const sorter = Sortable.get(grid);
 		expect(sorter).toBeDefined();
 
@@ -1709,31 +1740,31 @@ describe('gallery details', () => {
 	}
 
 	const alt = () => document.querySelector<HTMLTextAreaElement>('.cms-modal textarea[id$="-alt"]')!;
-	const shown = () => document.querySelector('.cms-modal .cms-modal-header .filename')?.textContent;
+	const shown = () => document.querySelector('.cms-modal .cms-image-details-filename')?.textContent;
 
 	it('opens an image from its tile, by the button or the picture', async () => {
 		const { element } = await gallery();
-		const tiles = element.querySelectorAll<HTMLElement>('.tile');
+		const tiles = element.querySelectorAll<HTMLElement>('.cms-gallery-tile');
 
-		tiles[1].querySelector<HTMLButtonElement>('.edit')!.click();
+		tiles[1].querySelector<HTMLButtonElement>('.cms-gallery-edit')!.click();
 		await tick();
 		expect(shown()).toBe('b.jpg');
 		await action('common:cancel');
 
-		tiles[2].querySelector<HTMLElement>('.picture')!.click();
+		tiles[2].querySelector<HTMLElement>('.cms-gallery-picture')!.click();
 		await tick();
 		expect(shown()).toBe('c.jpg');
 	});
 
 	it('opens the image a drag moved', async () => {
 		const { element, changes } = await gallery();
-		const grid = element.querySelector<HTMLElement>('.tiles')!;
+		const grid = element.querySelector<HTMLElement>('.cms-gallery-tiles')!;
 		const sorter = Sortable.get(grid)!;
 		const first = grid.firstElementChild as HTMLElement;
 
 		grid.append(first);
 		sorter.option('onUpdate')!.call(sorter, { oldIndex: 0, newIndex: 2 } as SortableEvent);
-		first.querySelector<HTMLButtonElement>('.edit')!.click();
+		first.querySelector<HTMLButtonElement>('.cms-gallery-edit')!.click();
 		await tick();
 
 		expect(changes).toHaveBeenCalledExactlyOnceWith({
@@ -1745,19 +1776,19 @@ describe('gallery details', () => {
 	it('removes an image from its tile', async () => {
 		const { element, changes } = await gallery();
 
-		element.querySelectorAll<HTMLButtonElement>('.tile .discard')[1].click();
+		element.querySelectorAll<HTMLButtonElement>('.cms-gallery-discard')[1].click();
 		await tick();
 
 		expect(changes).toHaveBeenCalledExactlyOnceWith({ zxx: [{ uid: 'a' }, { uid: 'c' }] });
-		expect(element.querySelectorAll('.tile')).toHaveLength(2);
+		expect(element.querySelectorAll('.cms-gallery-tile')).toHaveLength(2);
 	});
 
 	it('steps through the images and applies all drafts together', async () => {
 		const { element, changes } = await gallery();
-		element.querySelector<HTMLButtonElement>('.tile .edit')!.click();
+		element.querySelector<HTMLButtonElement>('.cms-gallery-edit')!.click();
 		await tick();
-		const next = document.querySelector<HTMLButtonElement>('.cms-modal .step.next')!;
-		const place = document.querySelector('.cms-modal .position');
+		const next = document.querySelector<HTMLButtonElement>('.cms-modal .cms-image-details-next')!;
+		const place = document.querySelector('.cms-modal .cms-image-details-position');
 
 		expect(place?.textContent).toBe('1 / 3');
 		await enter(alt(), 'First');
@@ -1789,11 +1820,11 @@ describe('gallery details', () => {
 
 	it('discards the drafts of every image on cancel', async () => {
 		const { element, changes } = await gallery();
-		element.querySelector<HTMLButtonElement>('.tile .edit')!.click();
+		element.querySelector<HTMLButtonElement>('.cms-gallery-edit')!.click();
 		await tick();
 
 		await enter(alt(), 'First');
-		document.querySelector<HTMLButtonElement>('.cms-modal .step.prev')!.click();
+		document.querySelector<HTMLButtonElement>('.cms-modal .cms-image-details-prev')!.click();
 		expect(shown()).toBe('c.jpg');
 		await enter(alt(), 'Last');
 		await action('common:cancel');
@@ -1803,10 +1834,10 @@ describe('gallery details', () => {
 
 	it('replaces the shown image only', async () => {
 		const { element, changes } = await gallery();
-		element.querySelectorAll<HTMLButtonElement>('.tile .edit')[1].click();
+		element.querySelectorAll<HTMLButtonElement>('.cms-gallery-edit')[1].click();
 		await tick();
 
-		document.querySelector<HTMLButtonElement>('.cms-modal .cms-replace-menu button')!.click();
+		document.querySelector<HTMLButtonElement>('.cms-modal .cms-media-replace-menu button')!.click();
 		await tick();
 		expect(ajax).toHaveBeenCalledWith('GET', '/panel/media/picker?kind=image', expect.anything());
 		const library = Array.from(document.querySelectorAll<HTMLDialogElement>('dialog')).at(-1)!;
@@ -1830,21 +1861,21 @@ describe('gallery details', () => {
 		expect(changes).toHaveBeenCalledExactlyOnceWith({
 			zxx: [{ uid: 'a' }, { uid: 'd' }, { uid: 'c' }],
 		});
-		expect(element.querySelectorAll('.tile')[1].getAttribute('title')).toBe('d.jpg');
+		expect(element.querySelectorAll('.cms-gallery-tile')[1].getAttribute('title')).toBe('d.jpg');
 	});
 
 	it('shows the texts of a read-only gallery without the actions', async () => {
 		const { element } = await gallery({ immutable: true });
-		const tile = element.querySelector<HTMLElement>('.tile')!;
+		const tile = element.querySelector<HTMLElement>('.cms-gallery-tile')!;
 
-		expect(tile.querySelector('.discard')).toBeNull();
+		expect(tile.querySelector('.cms-gallery-discard')).toBeNull();
 
-		tile.querySelector<HTMLButtonElement>('.edit')!.click();
+		tile.querySelector<HTMLButtonElement>('.cms-gallery-edit')!.click();
 		await tick();
 
 		expect(alt().readOnly).toBe(true);
-		expect(document.querySelector('.cms-modal .replace')).toBeNull();
-		expect(document.querySelector('.cms-modal .step.next')).not.toBeNull();
+		expect(document.querySelector('.cms-modal .cms-media-replace')).toBeNull();
+		expect(document.querySelector('.cms-modal .cms-image-details-next')).not.toBeNull();
 	});
 
 	it('hides the stepper of a lone image', async () => {
@@ -1854,10 +1885,10 @@ describe('gallery details', () => {
 			assets,
 		});
 
-		element.querySelector<HTMLButtonElement>('.tile .edit')!.click();
+		element.querySelector<HTMLButtonElement>('.cms-gallery-edit')!.click();
 		await tick();
 
-		expect(document.querySelector('.cms-modal .stepper')).toBeNull();
+		expect(document.querySelector('.cms-modal .cms-image-details-stepper')).toBeNull();
 	});
 });
 
@@ -1870,7 +1901,7 @@ describe('per-use meta', () => {
 			field: { name: 'clip', translate: true, caption: true, limit: { min: 0, max: 1 } },
 			assets: { clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' } },
 		});
-		element.querySelector<HTMLButtonElement>('.cms-file-row .edit')!.click();
+		element.querySelector<HTMLButtonElement>('.cms-file-list-edit')!.click();
 		await tick();
 		const mirror = document.querySelector<HTMLElement>('.cms-modal .cms-content-locales')!;
 
@@ -1901,7 +1932,7 @@ describe('per-use meta', () => {
 			assets: { clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' } },
 		});
 
-		expect(element.querySelector('.cms-file-row .edit')).not.toBeNull();
+		expect(element.querySelector('.cms-file-list-edit')).not.toBeNull();
 	});
 
 	it('edits the caption of a video through its modal', async () => {
@@ -1911,7 +1942,7 @@ describe('per-use meta', () => {
 			assets: { clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' } },
 		});
 		expect(element.querySelector('.cms-video video')?.getAttribute('src')).toBe('/media/clip.mp4');
-		element.querySelector<HTMLButtonElement>('.cms-file-row .edit')!.click();
+		element.querySelector<HTMLButtonElement>('.cms-file-list-edit')!.click();
 		await tick();
 		expect(document.querySelector('.cms-modal [id$="-caption"]')).not.toBeNull();
 		expect(document.querySelector('.cms-modal [id$="-alt"], .cms-modal [id$="-title"]')).toBeNull();
@@ -1945,14 +1976,14 @@ describe('block presentation', () => {
 
 		expect(element.querySelector('.cms-image-card')).toBeNull();
 		expect(element.querySelector('.cms-media-meta')).toBeNull();
-		expect(element.querySelector('.cms-image-figure img')?.getAttribute('src')).toBe(
+		expect(element.querySelector('.cms-media-figure-image img')?.getAttribute('src')).toBe(
 			'/media/cover.jpg',
 		);
-		expect(element.querySelector('.cms-image-figure figcaption')?.textContent).toBe(
+		expect(element.querySelector('.cms-media-figure-image figcaption')?.textContent).toBe(
 			'Under the image',
 		);
 
-		element.querySelector<HTMLButtonElement>('.cms-image-figure .edit')!.click();
+		element.querySelector<HTMLButtonElement>('.cms-media-figure-edit')!.click();
 		await tick();
 		writeCaption(document, 'Changed');
 		await action('common:apply');
@@ -1960,7 +1991,9 @@ describe('block presentation', () => {
 		expect(changes).toHaveBeenCalledExactlyOnceWith({
 			zxx: [{ uid: 'cover', meta: { caption: { zxx: captionDoc('Changed') } } }],
 		});
-		expect(element.querySelector('.cms-image-figure figcaption')?.textContent).toBe('Changed');
+		expect(element.querySelector('.cms-media-figure-image figcaption')?.textContent).toBe(
+			'Changed',
+		);
 	});
 
 	it("shows a neutral image's catalog texts in the site's default locale", async () => {
@@ -1978,11 +2011,11 @@ describe('block presentation', () => {
 			},
 		});
 
-		expect(element.querySelector('.cms-image-figure figcaption')?.textContent).toBe(
+		expect(element.querySelector('.cms-media-figure-image figcaption')?.textContent).toBe(
 			'From the catalog',
 		);
 
-		element.querySelector<HTMLButtonElement>('.cms-image-figure .edit')!.click();
+		element.querySelector<HTMLButtonElement>('.cms-media-figure-edit')!.click();
 		await tick();
 		const alt = document.querySelector<HTMLTextAreaElement>('.cms-modal textarea[id$="-alt"]')!;
 		alt.blur();
@@ -1998,7 +2031,7 @@ describe('block presentation', () => {
 		});
 
 		expect(element.querySelector('.cms-image-card')).not.toBeNull();
-		expect(element.querySelector('.cms-image-figure')).toBeNull();
+		expect(element.querySelector('.cms-media-figure-image')).toBeNull();
 	});
 
 	it('leaves the settings slot alone', async () => {
@@ -2023,18 +2056,18 @@ describe('block presentation', () => {
 
 		upload(element);
 		await vi.waitFor(() => {
-			expect(element.querySelector('.cms-image-figure img')?.getAttribute('src')).toBe(
+			expect(element.querySelector('.cms-media-figure-image img')?.getAttribute('src')).toBe(
 				'/media/fresh.png',
 			);
 		});
 		expect(changes).toHaveBeenLastCalledWith({ zxx: [{ uid: 'fresh' }] });
 
-		element.querySelector<HTMLButtonElement>('.cms-image-figure .discard')!.click();
+		element.querySelector<HTMLButtonElement>('.cms-media-figure-discard')!.click();
 		await tick();
 
 		expect(changes).toHaveBeenLastCalledWith({ zxx: [] });
-		expect(element.querySelector('.cms-image-figure')).toBeNull();
-		expect(element.querySelector('.cms-media-field > .bar')).not.toBeNull();
+		expect(element.querySelector('.cms-media-figure-image')).toBeNull();
+		expect(element.querySelector('.cms-media-field > .cms-media-field-bar')).not.toBeNull();
 	});
 
 	it('renders a video as a player with its caption form in the slot', async () => {
@@ -2047,7 +2080,7 @@ describe('block presentation', () => {
 			settings: slot,
 		} as HostPayload);
 
-		expect(element.querySelector('.cms-video-figure video')?.getAttribute('src')).toBe(
+		expect(element.querySelector('.cms-media-figure-video video')?.getAttribute('src')).toBe(
 			'/media/clip.mp4',
 		);
 		expect(slot.querySelector('[id$="-caption"]')).not.toBeNull();
@@ -2076,9 +2109,9 @@ describe('gallery block', () => {
 	it('shows the tiles alone and keeps the settings in the slot', async () => {
 		const slot = document.createElement('div');
 		const { element } = await gallery(slot, { ratio: { zxx: '4/3' } });
-		const tiles = element.querySelector<HTMLElement>('.cms-gallery.is-block .tiles')!;
+		const tiles = element.querySelector<HTMLElement>('.cms-gallery.is-block .cms-gallery-tiles')!;
 
-		expect(tiles.querySelectorAll('.tile')).toHaveLength(2);
+		expect(tiles.querySelectorAll('.cms-gallery-tile')).toHaveLength(2);
 		expect(tiles.style.getPropertyValue('--ratio')).toBe('4/3');
 		expect(element.querySelector('.cms-media-meta')).toBeNull();
 		expect(slot.querySelector<HTMLSelectElement>('select')!.value).toBe('4/3');
@@ -2088,7 +2121,7 @@ describe('gallery block', () => {
 	it('follows ratio and crop live and reports them as the field meta', async () => {
 		const slot = document.createElement('div');
 		const { element, details } = await gallery(slot);
-		const tiles = element.querySelector<HTMLElement>('.cms-gallery .tiles')!;
+		const tiles = element.querySelector<HTMLElement>('.cms-gallery-tiles')!;
 		const select = slot.querySelector<HTMLSelectElement>('select')!;
 		const crop = slot.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
 		const value = { zxx: [{ uid: 'a' }, { uid: 'b' }] };
@@ -2120,7 +2153,7 @@ describe('gallery block', () => {
 		const slot = document.createElement('div');
 		const { element, changes } = await gallery(slot);
 
-		element.querySelectorAll<HTMLButtonElement>('.tile .edit')[1].click();
+		element.querySelectorAll<HTMLButtonElement>('.cms-gallery-edit')[1].click();
 		await tick();
 		await enter(
 			document.querySelector<HTMLTextAreaElement>('.cms-modal textarea[id$="-alt"]')!,

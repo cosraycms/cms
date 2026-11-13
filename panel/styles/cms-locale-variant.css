@@ -35,13 +35,12 @@
 		& .cms-blocks-editor-block > dialog,
 		& .cms-richtext-toolbar,
 		& .cms-code-toolbar,
-		& .cms-media-field > .bar,
-		& .cms-image-card .controls,
-		& .cms-image-figure .overlay,
-		& .cms-video-figure .overlay,
-		& .cms-gallery .tile-tools,
+		& .cms-media-field > .cms-media-field-bar,
+		& .cms-image-card .cms-image-card-controls,
+		& .cms-media-figure .cms-media-figure-overlay,
+		& .cms-gallery .cms-gallery-tile-tools,
 		& .cms-media-meta,
-		& .cms-file-row :is(.tool, .replace) {
+		& .cms-file-list :is(.cms-file-list-tool, .cms-media-replace) {
 			display: none;
 		}
 	}

@@ -448,7 +448,11 @@ class MediaControl extends HTMLElement {
 
 		if (readonly && empty) {
 			frame.append(
-				create('div', 'none', multiple ? __('media:empty-many') : __('media:empty-one')),
+				create(
+					'div',
+					'cms-media-field-none',
+					multiple ? __('media:empty-many') : __('media:empty-one'),
+				),
 			);
 		}
 
@@ -481,7 +485,7 @@ class MediaControl extends HTMLElement {
 
 		// A block gallery mounts while empty too: its settings live in the slot.
 		if (!empty || (block && multiple && type === 'image')) {
-			const body = create('div', 'body');
+			const body = create('div', 'cms-media-field-body');
 			frame.append(body);
 
 			if (type === 'image' && multiple) {
@@ -575,13 +579,17 @@ class MediaControl extends HTMLElement {
 	 */
 	#bar(count, { multiple, empty, full, loading, library, upload }) {
 		const max = this.#max;
-		const bar = create('div', 'bar');
-		const browse = button('browse cms-button cms-button-secondary cms-button-small', '', library);
+		const bar = create('div', 'cms-media-field-bar');
+		const browse = button(
+			'cms-media-field-browse cms-button cms-button-secondary cms-button-small',
+			'',
+			library,
+		);
 		browse.append(svg('folder2-open'), ' ', __('media:browse'));
 		browse.disabled = full;
 		const allowed = cosray().system().allowedFiles[this.#type];
 		const choose = button(
-			'choose',
+			'cms-media-field-choose',
 			multiple ? __('upload:choose-files') : __('upload:choose-file'),
 			upload,
 		);
@@ -590,7 +598,7 @@ class MediaControl extends HTMLElement {
 		const text = create('span');
 		const [before, after = ''] = __('upload:drop-here').split(':choose');
 		text.append(before, choose, after);
-		const hint = create('span', 'hint');
+		const hint = create('span', 'cms-media-field-hint');
 		hint.append(svg('cloud-upload'), text);
 		bar.append(browse, hint);
 		let tally = '';
@@ -607,7 +615,7 @@ class MediaControl extends HTMLElement {
 		}
 
 		if (tally) {
-			bar.append(create('span', 'tally', tally));
+			bar.append(create('span', 'cms-media-field-tally', tally));
 		}
 
 		return bar;
@@ -674,7 +682,9 @@ class MediaControl extends HTMLElement {
 		const gaps = this.#missing(item, this.#identity(this.#locale));
 
 		if (gaps.length > 0) {
-			body.append(create('p', 'cms-media-missing', `${__('image:missing')} ${gaps.join(', ')}`));
+			body.append(
+				create('p', 'cms-media-field-missing', `${__('image:missing')} ${gaps.join(', ')}`),
+			);
 		}
 
 		if (type === 'image') {
@@ -705,7 +715,7 @@ class MediaControl extends HTMLElement {
 			readonly,
 		});
 		this.#followers.push(form.setLocale);
-		const settings = create('div', 'cms-figure-settings');
+		const settings = create('div', 'cms-media-figure-settings');
 
 		if (this.settings && translate && locales && locales.all.length > 1) {
 			const mirror = contentLocales(locales.all, this.#locale);
@@ -762,6 +772,9 @@ class MediaControl extends HTMLElement {
 		if (!readonly) {
 			const sorter = Sortable.create(list, {
 				animation: 200,
+				ghostClass: 'is-dragging',
+				chosenClass: 'is-chosen',
+				dragClass: 'is-lifted',
 				onUpdate(event) {
 					if (event.oldIndex !== undefined && event.newIndex !== undefined) {
 						move(event.oldIndex, event.newIndex);

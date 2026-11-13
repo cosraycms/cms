@@ -45,14 +45,14 @@ import { button, contentLocales, create, effectiveText, replaceMenu, svg } from 
  * @returns {HTMLElement}
  */
 function address(url) {
-	const row = create('div', 'address');
+	const row = create('div', 'cms-image-details-address');
 	const input = document.createElement('input');
 	input.className = 'cms-input';
 	input.readOnly = true;
 	input.value = url;
 	input.setAttribute('aria-label', __('media:url'));
 	const copy = button(
-		'copy',
+		'cms-image-details-copy',
 		__('common:copy'),
 		() => {
 			void (async () => {
@@ -112,7 +112,13 @@ function facts(info) {
 			: []),
 		...(format ? [fact(__('media:format'), format)] : []),
 		...(info.url
-			? [fact(__('media:url'), address(new URL(info.url, location.href).href), 'wide')]
+			? [
+					fact(
+						__('media:url'),
+						address(new URL(info.url, location.href).href),
+						'cms-image-details-wide',
+					),
+				]
 			: []),
 	];
 }
@@ -175,14 +181,14 @@ export function imageDialog({
 
 	const handle = cosray().modal.open(
 		(host) => {
-			const header = create('header', 'cms-modal-header cms-image-head');
-			const heading = create('div', 'heading');
+			const header = create('header', 'cms-modal-header cms-image-details-head');
+			const heading = create('div', 'cms-image-details-heading');
 			const title = create('h2', 'cms-modal-title', __('image:details'));
 			title.dataset.dialogTitle = '';
-			const filename = create('p', 'filename');
+			const filename = create('p', 'cms-image-details-filename');
 			heading.append(title, filename);
 			header.append(heading);
-			const place = create('span', 'position');
+			const place = create('span', 'cms-image-details-position');
 
 			/** @param {number} delta */
 			const step = (delta) => {
@@ -191,19 +197,29 @@ export function imageDialog({
 			};
 
 			if (items.length > 1) {
-				const stepper = create('div', 'stepper');
+				const stepper = create('div', 'cms-image-details-stepper');
 				stepper.append(
 					place,
-					button('step prev', __('image:previous'), () => step(-1), 'chevron-left'),
-					button('step next', __('image:next'), () => step(1), 'chevron-right'),
+					button(
+						'cms-image-details-step cms-image-details-prev',
+						__('image:previous'),
+						() => step(-1),
+						'chevron-left',
+					),
+					button(
+						'cms-image-details-step cms-image-details-next',
+						__('image:next'),
+						() => step(1),
+						'chevron-right',
+					),
 				);
 				header.append(stepper);
 			}
 
-			const body = create('div', 'cms-modal-body cms-image-details');
-			const stage = create('div', 'stage');
-			const fields = create('div', 'fields');
-			const list = create('dl', 'facts');
+			const body = create('div', 'cms-modal-body cms-image-details-body');
+			const stage = create('div', 'cms-image-details-stage');
+			const fields = create('div', 'cms-image-details-fields');
+			const list = create('dl', 'cms-image-details-facts');
 			/** @type {ReturnType<typeof linkRow> | null} */
 			let row = null;
 			body.append(stage, fields);
@@ -237,8 +253,8 @@ export function imageDialog({
 					});
 					stage.replaceChildren(...shown.nodes);
 				} else {
-					const preview = create('div', 'preview');
-					preview.append(create('span', 'plate', extension(name)));
+					const preview = create('div', 'cms-image-details-preview');
+					preview.append(create('span', 'cms-image-details-plate', extension(name)));
 					stage.replaceChildren(preview);
 				}
 
@@ -327,10 +343,9 @@ export function imageDialog({
 							picked(item);
 							swap({ uid: item.uid });
 						}),
-					false,
+					'cms-button cms-button-secondary',
 					'start',
 				);
-				trigger.classList.remove('cms-button-small');
 				const cancel = button('cms-button cms-button-secondary', __('common:cancel'), () =>
 					handle.close(),
 				);
@@ -363,6 +378,7 @@ export function imageDialog({
 				footer.append(trigger, menu, picker, cancel, confirm);
 			}
 
+			host.classList.add('cms-image-details');
 			host.append(header, body, footer);
 			show();
 

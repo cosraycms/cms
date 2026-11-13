@@ -1,0 +1,237 @@
+/* The images of a field that takes several: tiles to open, drag and remove. */
+.cms-gallery {
+	--fold-height: 2rem;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+
+	& .cms-gallery-viewport {
+		padding: var(--cms-space-3-5);
+
+		&.is-clipped {
+			overflow: hidden;
+		}
+	}
+
+	& .cms-gallery-fold {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--cms-space-1-5);
+		height: var(--fold-height);
+		padding: 0;
+		border: 0;
+		border-top: 1px solid var(--cms-color-border);
+		background: none;
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-xs);
+		cursor: pointer;
+
+		&[hidden] {
+			display: none;
+		}
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: calc(-1 * var(--cms-focus-offset));
+		}
+
+		& svg {
+			width: 0.75rem;
+			height: 0.75rem;
+		}
+	}
+
+	& .cms-gallery-tiles {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+		gap: var(--cms-space-3);
+	}
+
+	& .cms-gallery-tile {
+		position: relative;
+		aspect-ratio: 1;
+		padding: var(--cms-space-1);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface);
+
+		&:hover .cms-gallery-tile-tools,
+		&:focus-within .cms-gallery-tile-tools {
+			opacity: 1;
+		}
+	}
+
+	& .cms-gallery-picture {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
+		container-type: size;
+		cursor: pointer;
+
+		& img {
+			max-width: 100%;
+			max-height: 100%;
+			border-radius: var(--cms-radius);
+		}
+
+		& .cms-crop-window {
+			width: min(100cqw, 100cqh * var(--crop-ratio));
+			border-radius: var(--cms-radius);
+		}
+	}
+
+	& .cms-gallery-plate {
+		font-size: 0.625rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--cms-color-text-subtle);
+	}
+
+	& .cms-gallery-tile-missing {
+		position: absolute;
+		top: var(--cms-space-1-5);
+		left: var(--cms-space-1-5);
+		display: flex;
+		padding: var(--cms-space-1);
+		border-radius: var(--cms-radius-sm);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-warning-text);
+
+		& svg {
+			width: 0.875rem;
+			height: 0.875rem;
+		}
+	}
+
+	& .cms-gallery-tile-tools {
+		position: absolute;
+		top: var(--cms-space-1-5);
+		right: var(--cms-space-1-5);
+		display: flex;
+		gap: var(--cms-space-1);
+		opacity: 0;
+		transition: opacity 0.12s ease;
+
+		@media (hover: none) {
+			opacity: 1;
+		}
+
+		& button {
+			display: grid;
+			place-items: center;
+			width: 1.5rem;
+			height: 1.5rem;
+			padding: 0;
+			border: 1px solid var(--cms-color-border);
+			border-radius: var(--cms-radius);
+			background: var(--cms-color-surface);
+			box-shadow: var(--cms-shadow-sm);
+			color: var(--cms-color-text-muted);
+			cursor: pointer;
+
+			&:hover {
+				color: var(--cms-color-text);
+				background: var(--cms-color-hover);
+			}
+
+			&:focus-visible {
+				outline: var(--cms-focus-outline);
+				outline-offset: var(--cms-focus-offset);
+			}
+
+			&.cms-gallery-discard:hover {
+				color: var(--cms-color-danger);
+			}
+		}
+
+		& svg {
+			width: 0.75rem;
+			height: 0.75rem;
+		}
+	}
+
+	/*
+	 * The block presentation: the tiles at block width and nothing else at
+	 * rest. Add and library sit on a bar along the bottom edge that appears
+	 * on hover; the tiles preview the ratio and crop chosen in the settings
+	 * dialog.
+	 */
+	&.is-block {
+		position: relative;
+
+		& .cms-gallery-viewport {
+			padding: 0;
+		}
+
+		&:has(> .cms-gallery-fold:not([hidden])) .cms-gallery-bar {
+			inset-block-end: var(--fold-height);
+		}
+
+		& .cms-gallery-tiles.has-ratio .cms-gallery-tile {
+			aspect-ratio: var(--ratio);
+		}
+
+		& .cms-gallery-tiles.has-ratio .cms-gallery-picture img {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+		}
+
+		& .cms-gallery-tiles.is-cropped .cms-gallery-picture img {
+			object-fit: cover;
+		}
+
+		& .cms-gallery-bar {
+			position: absolute;
+			inset-inline: 0;
+			inset-block-end: 0;
+			display: flex;
+			align-items: center;
+			gap: var(--cms-space-0-5);
+			padding: var(--cms-space-1-5) var(--cms-space-2);
+			border-radius: 0 0 var(--cms-radius-sm) var(--cms-radius-sm);
+			background: color-mix(in srgb, var(--cms-color-surface) 88%, transparent);
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 120ms ease;
+		}
+
+		&:hover .cms-gallery-bar,
+		&:focus-within .cms-gallery-bar {
+			opacity: 1;
+			pointer-events: auto;
+		}
+
+		& .cms-gallery-status {
+			flex: 1 1 auto;
+			font-size: var(--cms-font-size-xs);
+			color: var(--cms-color-text-muted);
+			font-variant-numeric: tabular-nums;
+		}
+
+		& .cms-gallery-button {
+			flex-shrink: 0;
+			padding: var(--cms-space-0-5) var(--cms-space-1-5);
+			border: 0;
+			border-radius: var(--cms-radius-md);
+			background: transparent;
+			font-size: var(--cms-font-size-xs);
+			font-weight: 500;
+			color: var(--cms-color-text-muted);
+			cursor: pointer;
+
+			&:hover {
+				background: var(--cms-color-hover);
+				color: var(--cms-color-text);
+			}
+		}
+	}
+}

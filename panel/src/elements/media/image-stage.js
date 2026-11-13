@@ -92,24 +92,24 @@ export function imageStage({ item, info, source, readonly, cropping, mode, modeC
 	/** @type {{ ratio: number, box: HTMLElement, image: HTMLImageElement }[]} */
 	const shots = [];
 
-	const element = create('div', 'preview');
-	const frame = create('div', 'frame');
+	const element = create('div', 'cms-image-details-preview');
+	const frame = create('div', 'cms-image-details-frame');
 	const image = rendition(source, info?.url);
 	image.draggable = false;
-	const marker = create('div', 'marker');
+	const marker = create('div', 'cms-image-details-marker');
 	marker.setAttribute('aria-label', __('image:focus'));
-	const shade = create('div', 'shade');
-	const hole = create('div', 'hole');
+	const shade = create('div', 'cms-image-details-shade');
+	const hole = create('div', 'cms-image-details-hole');
 	shade.append(hole);
-	const box = create('div', 'crop-box');
+	const box = create('div', 'cms-image-details-crop-box');
 	frame.append(image, shade, marker);
 	element.append(frame);
 
-	const bar = create('div', 'focus-bar');
-	const status = create('div', 'focus-status');
-	const text = create('span', 'text');
+	const bar = create('div', 'cms-image-details-focus-bar');
+	const status = create('div', 'cms-image-details-focus-status');
+	const text = create('span', 'cms-image-details-focus-text');
 	status.append(text);
-	const reset = button('reset', __('image:focus-reset'), () => {
+	const reset = button('cms-image-details-reset', __('image:focus-reset'), () => {
 		if (tool === 'crop') {
 			store(undefined);
 		} else {
@@ -125,12 +125,12 @@ export function imageStage({ item, info, source, readonly, cropping, mode, modeC
 		status.append(reset);
 	}
 
-	const previews = create('div', 'shots');
+	const previews = create('div', 'cms-image-details-shots');
 	previews.setAttribute('aria-hidden', 'true');
 
 	for (const { ratio, label } of SHAPES) {
-		const shot = create('figure', 'shot');
-		const cut = create('div', 'box');
+		const shot = create('figure', 'cms-image-details-shot');
+		const cut = create('div', 'cms-image-details-shot-box');
 		cut.style.aspectRatio = String(ratio);
 		const copy = rendition(source, info?.url);
 		copy.draggable = false;
@@ -151,7 +151,7 @@ export function imageStage({ item, info, source, readonly, cropping, mode, modeC
 	let ratios = null;
 
 	if (cropping) {
-		const tools = create('div', 'stage-tools');
+		const tools = create('div', 'cms-image-details-stage-tools');
 		const group = create('div', 'cms-content-locales');
 		group.setAttribute('role', 'group');
 
@@ -182,7 +182,7 @@ export function imageStage({ item, info, source, readonly, cropping, mode, modeC
 			if (lock) store(fitCrop(crop ?? WHOLE, lock));
 		});
 		ratios = document.createElement('label');
-		ratios.className = 'ratio';
+		ratios.className = 'cms-image-details-ratio';
 		ratios.append(create('span', undefined, __('image:ratio')), select);
 		tools.append(group, ratios);
 		nodes.unshift(tools);
@@ -328,7 +328,7 @@ export function imageStage({ item, info, source, readonly, cropping, mode, modeC
 		box.dataset.handle = 'move';
 
 		for (const name of HANDLES) {
-			const handle = create('div', `handle ${name}`);
+			const handle = create('div', 'cms-image-details-handle');
 			handle.dataset.handle = name;
 
 			if (CORNERS.has(name)) {

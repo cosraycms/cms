@@ -37,7 +37,7 @@ export function galleryFold({ viewport, tiles, expanded, changed, columns = colu
 	/** @type {Animation | null} */
 	let motion = null;
 
-	const toggle = button('fold', '', () => {
+	const toggle = button('cms-gallery-fold', '', () => {
 		expanded = !expanded;
 		changed(expanded);
 		const from = viewport.getBoundingClientRect().height;

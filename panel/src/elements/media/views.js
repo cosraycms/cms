@@ -135,7 +135,7 @@ function labelled(className, label, onclick, iconName) {
  */
 export function contentLocales(locales, locale) {
 	const id = `cms-media-locales-${++ids}`;
-	const element = create('div', 'cms-content-language');
+	const element = create('div', 'cms-media-locales');
 	/** @param {string} chosen */
 	const choose = (chosen) =>
 		control.dispatchEvent(
@@ -198,21 +198,23 @@ export function contentLocales(locales, locale) {
  *
  * @param {() => void} upload
  * @param {() => void} library
- * @param {boolean} [quiet] A figure's hover bar draws its own quiet trigger.
+ * @param {string} [look] The trigger's look; a figure's hover bar draws its own quiet one.
  * @param {'start' | 'end'} [align]
  * @returns {HTMLElement[]}
  */
-export function replaceMenu(upload, library, quiet = false, align = 'end') {
+export function replaceMenu(
+	upload,
+	library,
+	look = 'cms-button cms-button-secondary cms-button-small',
+	align = 'end',
+) {
 	const id = `cms-replace-${++ids}`;
-	const trigger = create(
-		'button',
-		quiet ? 'replace quiet' : 'replace cms-button cms-button-secondary cms-button-small',
-	);
+	const trigger = create('button', `cms-media-replace ${look}`);
 	trigger.setAttribute('type', 'button');
 	trigger.setAttribute('popovertarget', id);
 	trigger.setAttribute('aria-haspopup', 'menu');
 	trigger.append(__('media:replace'), ' ', svg('chevron-down'));
-	const menu = create('div', 'cms-action-menu cms-replace-menu');
+	const menu = create('div', 'cms-action-menu cms-media-replace-menu');
 	menu.id = id;
 	menu.setAttribute('popover', 'auto');
 	menu.dataset.actionMenu = '';
@@ -227,7 +229,7 @@ export function replaceMenu(upload, library, quiet = false, align = 'end') {
 	const choice = (name, label, hint, onclick) => {
 		const entry = document.createElement('button');
 		entry.type = 'button';
-		const text = create('span', 'choice');
+		const text = create('span', 'cms-media-replace-choice');
 		text.append(label, ' ', create('small', undefined, hint));
 		entry.append(svg(name), ' ', text);
 		entry.addEventListener('click', onclick);
@@ -269,10 +271,10 @@ export function fileRow({
 	remove,
 	replace,
 }) {
-	const row = create('div', 'cms-file-row');
+	const row = create('div', 'cms-file-list-row');
 	const filename = info?.filename ?? item.uid ?? '';
 	const thumb = info?.kind === 'image' ? (info.thumbUrl ?? info.url) : '';
-	const iconBox = create('span', 'icon');
+	const iconBox = create('span', 'cms-file-list-icon');
 
 	if (thumb) {
 		const image = rendition(thumb, info?.url);
@@ -282,11 +284,11 @@ export function fileRow({
 		iconBox.append(svg(fileIcon({ filename, mime: info?.mime })));
 	}
 
-	const name = create('span', 'name');
+	const name = create('span', 'cms-file-list-name');
 
 	if (info?.url) {
 		const link = document.createElement('a');
-		link.className = 'filename';
+		link.className = 'cms-file-list-filename';
 		link.href = info.url;
 		link.target = '_blank';
 		link.rel = 'noopener';
@@ -294,27 +296,37 @@ export function fileRow({
 		link.textContent = filename;
 		name.append(link);
 	} else {
-		const label = create('span', 'filename', filename);
+		const label = create('span', 'cms-file-list-filename', filename);
 		label.title = filename;
 		name.append(label);
 	}
 
 	const size = create(
 		'span',
-		'size',
+		'cms-file-list-size',
 		loading ? __('upload:uploading') : typeof info?.bytes === 'number' ? humanSize(info.bytes) : '',
 	);
 	row.append(iconBox, name, size);
 	retitle(row, item, translate, contentLocale);
 
 	if (!inert) {
-		if (edit) row.append(button('tool edit', __('common:edit'), edit, 'pencil'));
+		if (edit)
+			row.append(
+				button('cms-file-list-tool cms-file-list-edit', __('common:edit'), edit, 'pencil'),
+			);
 
 		if (replace) {
 			row.append(...replaceMenu(replace.upload, replace.library));
 		}
 
-		row.append(button('tool remove', __('common:remove'), () => remove?.(), 'x-lg'));
+		row.append(
+			button(
+				'cms-file-list-tool cms-file-list-remove',
+				__('common:remove'),
+				() => remove?.(),
+				'x-lg',
+			),
+		);
 	}
 
 	return row;
@@ -331,11 +343,11 @@ export function fileRow({
  * @param {string} contentLocale
  */
 export function retitle(row, item, translate, contentLocale) {
-	const name = row.querySelector('.name');
+	const name = row.querySelector('.cms-file-list-name');
 	/** @type {LocaleMap<string> | undefined} */
 	const titles = item.meta?.title;
 	const title = titles?.[translate ? contentLocale : ZXX] || titles?.[ZXX] || '';
-	let shown = name?.querySelector('.title');
+	let shown = name?.querySelector('.cms-file-list-title');
 
 	if (!title) {
 		shown?.remove();
@@ -344,7 +356,7 @@ export function retitle(row, item, translate, contentLocale) {
 	}
 
 	if (!shown) {
-		shown = create('span', 'title');
+		shown = create('span', 'cms-file-list-title');
 		name?.append(shown);
 	}
 
@@ -366,16 +378,16 @@ export function retitle(row, item, translate, contentLocale) {
 export function fallbackMedia(items, type, label, asset, translate, contentLocale) {
 	const root = create('div', 'cms-media-fallback');
 	root.setAttribute('aria-label', label);
-	root.append(create('div', 'label', label));
+	root.append(create('div', 'cms-media-fallback-label', label));
 
 	if (type === 'image') {
-		const images = create('div', 'images');
+		const images = create('div', 'cms-media-fallback-images');
 
 		for (const item of items) {
 			const info = asset(item.uid ?? '');
 			const filename = info?.filename ?? item.uid ?? '';
 			const source = info?.thumbUrl ?? info?.url ?? '';
-			const box = create('div', 'image');
+			const box = create('div', 'cms-media-fallback-image');
 			box.title = filename;
 
 			if (source) {
@@ -403,7 +415,7 @@ export function fallbackMedia(items, type, label, asset, translate, contentLocal
 			root.append(video);
 		}
 	} else {
-		const files = create('div', 'files');
+		const files = create('div', 'cms-file-list');
 
 		for (const item of items) {
 			files.append(
@@ -478,7 +490,7 @@ export function imageCard({
 	const thumb = info?.thumbUrl ?? info?.url ?? '';
 	const facts = info ? assetLine(info).split(' · ') : [];
 	// A pointer shortcut; the edit button is the way there for the keyboard.
-	const picture = create('div', 'thumb');
+	const picture = create('div', 'cms-image-card-thumb');
 	picture.addEventListener('click', edit);
 
 	if (info?.width && info.height) {
@@ -492,13 +504,13 @@ export function imageCard({
 	if (thumb) {
 		picture.append(cropped(rendition(thumb, info?.url), item, info));
 	} else {
-		picture.append(create('span', 'plate', extension(filename)));
+		picture.append(create('span', 'cms-image-card-plate', extension(filename)));
 	}
 
-	const details = create('div', 'details');
-	const name = create('span', 'filename', filename);
+	const details = create('div', 'cms-image-card-details');
+	const name = create('span', 'cms-image-card-filename', filename);
 	name.title = filename;
-	const factLine = create('span', 'facts');
+	const factLine = create('span', 'cms-image-card-facts');
 
 	if (loading) {
 		factLine.textContent = __('upload:uploading');
@@ -511,8 +523,8 @@ export function imageCard({
 		}
 	}
 
-	const texts = create('dl', 'texts');
-	const controls = create('div', 'controls');
+	const texts = create('dl', 'cms-image-card-texts');
+	const controls = create('div', 'cms-image-card-controls');
 
 	/**
 	 * @param {string} label
@@ -541,9 +553,9 @@ export function imageCard({
 		const attribution = offered.includes('attribution') ? effectiveAttribution(item, info) : '';
 
 		const add = () =>
-			button('add', __('image:alt-text-add'), () => {
+			button('cms-image-card-add', __('image:alt-text-add'), () => {
 				// The link is gone once the text is there, so the dialog returns focus to the edit button.
-				/** @type {HTMLElement | null} */ (controls.querySelector('.edit'))?.focus();
+				/** @type {HTMLElement | null} */ (controls.querySelector('.cms-image-card-edit'))?.focus();
 				edit();
 			});
 
@@ -585,15 +597,15 @@ export function imageCard({
 		);
 	} else {
 		controls.append(
-			...replaceMenu(upload, library, false, 'start'),
+			...replaceMenu(upload, library, undefined, 'start'),
 			labelled(
-				'edit cms-button cms-button-secondary cms-button-small',
+				'cms-image-card-edit cms-button cms-button-secondary cms-button-small',
 				__('common:edit'),
 				edit,
 				'pencil',
 			),
 			labelled(
-				'discard cms-button cms-button-secondary cms-button-small',
+				'cms-image-card-discard cms-button cms-button-secondary cms-button-small',
 				__('common:remove'),
 				remove,
 				'x-lg',
@@ -719,9 +731,14 @@ export function figure({
 	upload,
 	library,
 }) {
-	const root = create('div', type === 'image' ? 'cms-image-figure' : 'cms-video-figure');
+	const root = create(
+		'div',
+		type === 'image'
+			? 'cms-media-figure cms-media-figure-image'
+			: 'cms-media-figure cms-media-figure-video',
+	);
 	const shape = document.createElement('figure');
-	const frame = create('div', 'frame');
+	const frame = create('div', 'cms-media-figure-frame');
 
 	if (type === 'video') {
 		const video = document.createElement('video');
@@ -735,26 +752,38 @@ export function figure({
 		if (src) {
 			frame.append(cropped(rendition(src, info?.url), item, info));
 		} else {
-			frame.append(create('span', 'plate', extension(filename)));
+			frame.append(create('span', 'cms-media-figure-plate', extension(filename)));
 		}
 	}
 
 	// Along the top edge: a player's own controls own the bottom.
-	const overlay = create('div', 'overlay');
-	const name = create('span', 'filename', loading ? __('upload:uploading') : filename);
+	const overlay = create('div', 'cms-media-figure-overlay');
+	const name = create(
+		'span',
+		'cms-media-figure-filename',
+		loading ? __('upload:uploading') : filename,
+	);
 	name.title = filename;
 	overlay.append(name);
 
 	if (!readonly) {
-		overlay.append(...replaceMenu(upload, library, true));
+		overlay.append(...replaceMenu(upload, library, 'cms-media-figure-button'));
 	}
 
 	if (edit) {
-		overlay.append(button('quiet edit', readonly ? __('image:details') : __('common:edit'), edit));
+		overlay.append(
+			button(
+				'cms-media-figure-button cms-media-figure-edit',
+				readonly ? __('image:details') : __('common:edit'),
+				edit,
+			),
+		);
 	}
 
 	if (!readonly) {
-		overlay.append(button('quiet discard', __('common:remove'), remove));
+		overlay.append(
+			button('cms-media-figure-button cms-media-figure-discard', __('common:remove'), remove),
+		);
 	}
 
 	frame.append(overlay);

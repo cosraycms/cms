@@ -48,7 +48,7 @@
 		grid-template-columns: minmax(0, 1fr);
 	}
 
-	& .cms-settings-slot .cms-content-language {
+	& .cms-settings-slot .cms-media-locales {
 		margin-block: var(--cms-space-3);
 	}
 }

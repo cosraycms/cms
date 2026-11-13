@@ -45,9 +45,18 @@
 @import './cms-link.css' layer(panel);
 @import './cms-dropzone.css' layer(panel);
 @import './cms-media-field.css' layer(panel);
+@import './cms-file-list.css' layer(panel);
+@import './cms-video.css' layer(panel);
+@import './cms-image-card.css' layer(panel);
+@import './cms-media-figure.css' layer(panel);
+@import './cms-media-replace.css' layer(panel);
+@import './cms-gallery.css' layer(panel);
+@import './cms-gallery-settings.css' layer(panel);
+@import './cms-media-fallback.css' layer(panel);
 @import './cms-media-meta.css' layer(panel);
 @import './cms-poster-row.css' layer(panel);
 @import './cms-media-details.css' layer(panel);
+@import './cms-crop-window.css' layer(panel);
 @import './cms-inline-editor.css' layer(panel);
 @import './cms-entries.css' layer(panel);
 @import './cms-blocks-editor.css' layer(panel);
@@ -58,6 +67,7 @@
 @import './cms-inspector.css' layer(panel);
 @import './cms-tabs.css' layer(panel);
 @import './cms-modal.css' layer(panel);
+@import './cms-image-details.css' layer(panel);
 @import './cms-layout-preview.css' layer(panel);
 @import './cms-blocks-catalog.css' layer(panel);
 @import './cms-settings.css' layer(panel);

@@ -56,7 +56,7 @@ export function galleryView(options) {
 	let crop = meta?.crop?.[ZXX] === true;
 
 	const root = create('div', block ? 'cms-gallery is-block' : 'cms-gallery');
-	const tiles = create('div', 'tiles');
+	const tiles = create('div', 'cms-gallery-tiles');
 	const slot = block ? create('div', 'cms-gallery-settings') : null;
 	/** @type {Sortable | null} */
 	let sorter = null;
@@ -74,11 +74,11 @@ export function galleryView(options) {
 		const info = asset(item.uid ?? '');
 		const filename = info?.filename ?? item.uid ?? '';
 		const source = info?.thumbUrl ?? info?.url ?? '';
-		const tile = create('div', 'tile');
+		const tile = create('div', 'cms-gallery-tile');
 		tile.title = filename;
 		const edit = () => options.edit(position(tile));
 		// A pointer shortcut; the edit button is the way there for the keyboard.
-		const picture = create('div', 'picture');
+		const picture = create('div', 'cms-gallery-picture');
 		picture.addEventListener('click', edit);
 
 		if (source) {
@@ -93,14 +93,14 @@ export function galleryView(options) {
 
 			picture.append(cropped(image, item, info));
 		} else {
-			picture.append(create('span', 'plate', extension(filename)));
+			picture.append(create('span', 'cms-gallery-plate', extension(filename)));
 		}
 
 		const gaps = options.missing(item);
 
 		if (gaps.length > 0) {
 			const text = `${__('image:missing')} ${gaps.join(', ')}`;
-			const badge = create('span', 'tile-missing');
+			const badge = create('span', 'cms-gallery-tile-missing');
 			badge.setAttribute('role', 'img');
 			badge.setAttribute('aria-label', text);
 			badge.append(svg('exclamation-triangle'));
@@ -108,10 +108,10 @@ export function galleryView(options) {
 			tile.append(badge);
 		}
 
-		const tools = create('div', 'tile-tools');
+		const tools = create('div', 'cms-gallery-tile-tools');
 		tools.append(
 			button(
-				'edit',
+				'cms-gallery-edit',
 				`${readonly ? __('image:details') : __('common:edit')}: ${filename}`,
 				edit,
 				readonly ? 'eye' : 'pencil',
@@ -121,7 +121,7 @@ export function galleryView(options) {
 		if (!readonly) {
 			tools.append(
 				button(
-					'discard',
+					'cms-gallery-discard',
 					`${__('common:remove')}: ${filename}`,
 					() => options.remove(position(tile)),
 					'x-lg',
@@ -144,7 +144,7 @@ export function galleryView(options) {
 	layout();
 
 	if (items.length > 0) {
-		const viewport = create('div', 'viewport');
+		const viewport = create('div', 'cms-gallery-viewport');
 		viewport.append(tiles);
 		root.append(viewport);
 		fold = galleryFold({
@@ -156,12 +156,12 @@ export function galleryView(options) {
 		fold.element.setAttribute('aria-controls', (tiles.id = `${id}-tiles`));
 
 		if (block && options.open && !readonly) {
-			const bar = create('div', 'bar');
+			const bar = create('div', 'cms-gallery-bar');
 			const count = __n('image:count', 'image:count-plural', items.length);
 			bar.append(
-				create('span', 'status', options.loading ? __('upload:uploading') : count),
-				button('quiet', __('media:choose-from-library'), options.library),
-				button('quiet', __('image:add'), options.upload),
+				create('span', 'cms-gallery-status', options.loading ? __('upload:uploading') : count),
+				button('cms-gallery-button', __('media:choose-from-library'), options.library),
+				button('cms-gallery-button', __('image:add'), options.upload),
 			);
 			root.append(bar);
 		}
@@ -172,6 +172,9 @@ export function galleryView(options) {
 	if (!readonly) {
 		sorter = Sortable.create(tiles, {
 			animation: 200,
+			ghostClass: 'is-dragging',
+			chosenClass: 'is-chosen',
+			dragClass: 'is-lifted',
 			onUpdate(event) {
 				if (event.oldIndex !== undefined && event.newIndex !== undefined) {
 					// Sortable has moved the tile already; the list follows.
@@ -184,7 +187,7 @@ export function galleryView(options) {
 
 	if (slot) {
 		const label = document.createElement('label');
-		label.className = 'option';
+		label.className = 'cms-gallery-settings-option';
 		label.htmlFor = `${id}-ratio`;
 		const select = document.createElement('select');
 		select.className = 'cms-select';
@@ -198,7 +201,7 @@ export function galleryView(options) {
 		select.value = ratio;
 		label.append(create('span', undefined, __('image:ratio')), select);
 		const check = document.createElement('label');
-		check.className = 'check';
+		check.className = 'cms-gallery-settings-check';
 		const box = document.createElement('input');
 		box.type = 'checkbox';
 		box.checked = crop;

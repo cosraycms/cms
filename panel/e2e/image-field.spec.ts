@@ -17,7 +17,7 @@ test('a tall image shows whole in its details', async ({ page }) => {
 	await openNode(page, 'focal');
 	await upload(field(page, COVER), 'portrait.jpg');
 	const dialog = await openDetails(field(page, COVER), page);
-	const picture = dialog.locator('.stage .frame img').first();
+	const picture = dialog.locator('.cms-image-details-frame img').first();
 	await expect(picture).toBeVisible();
 
 	const box = await picture.boundingBox();
@@ -29,17 +29,17 @@ test('a focal point set on the image comes back after saving', async ({ page }) 
 	await openNode(page, 'focal');
 	await upload(field(page, COVER), 'landscape.jpg');
 	let dialog = await openDetails(field(page, COVER), page);
-	const frame = dialog.locator('.stage .frame');
+	const frame = dialog.locator('.cms-image-details-frame');
 	const box = await frame.boundingBox();
 	await frame.click({ position: { x: (box?.width ?? 0) * 0.25, y: (box?.height ?? 0) * 0.75 } });
-	await expect(dialog.locator('.focus-status')).toContainText('25');
+	await expect(dialog.locator('.cms-image-details-focus-status')).toContainText('25');
 	await dialog.getByRole('button', { name: 'Apply' }).click();
 	await save(page);
 
 	await page.reload();
 	dialog = await openDetails(field(page, COVER), page);
-	await expect(dialog.locator('.focus-status')).toContainText('25');
-	await expect(dialog.locator('.focus-status')).toContainText('75');
+	await expect(dialog.locator('.cms-image-details-focus-status')).toContainText('25');
+	await expect(dialog.locator('.cms-image-details-focus-status')).toContainText('75');
 });
 
 test('a crop drawn on the image reaches the page', async ({ page }) => {
@@ -47,7 +47,7 @@ test('a crop drawn on the image reaches the page', async ({ page }) => {
 	await upload(field(page, COVER), 'landscape.jpg');
 	const dialog = await openDetails(field(page, COVER), page);
 	await dialog.getByRole('button', { name: 'Crop', exact: true }).click();
-	const frame = dialog.locator('.stage .frame');
+	const frame = dialog.locator('.cms-image-details-frame');
 	const box = await frame.boundingBox();
 	const left = box?.x ?? 0;
 	const top = box?.y ?? 0;
@@ -146,10 +146,10 @@ test('a long gallery folds to full rows and unfolds', async ({ page }) => {
 	await openNode(page, 'gallery');
 	const gallery = field(page, GALLERY);
 	await upload(gallery, ...Array.from({ length: 12 }, (_, i) => `tile-${i + 1}.jpg`));
-	const tiles = gallery.locator('.tile');
+	const tiles = gallery.locator('.cms-gallery-tile');
 	await expect(tiles).toHaveCount(12);
-	const viewport = gallery.locator('.viewport');
-	const fold = gallery.locator('button.fold');
+	const viewport = gallery.locator('.cms-gallery-viewport');
+	const fold = gallery.locator('button.cms-gallery-fold');
 
 	// New tiles stay in view until the editor folds them away.
 	await expect(fold).toHaveText(/Show fewer/);
@@ -185,7 +185,7 @@ test('a long gallery folds to full rows and unfolds', async ({ page }) => {
 test('gallery order follows a drag and survives saving', async ({ page }) => {
 	await openNode(page, 'gallery');
 	const gallery = field(page, GALLERY);
-	const tiles = gallery.locator('.tile');
+	const tiles = gallery.locator('.cms-gallery-tile');
 	if ((await tiles.count()) === 0) {
 		await upload(gallery, ...[1, 2, 3].map((i) => `tile-${i}.jpg`));
 		await expect(tiles).toHaveCount(3);

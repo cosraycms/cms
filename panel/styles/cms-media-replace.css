@@ -1,0 +1,39 @@
+/* The trigger a filled single media field replaces its file through, and
+   its menu. The menu is a popover beside the trigger, not inside it. */
+.cms-media-replace {
+	flex-shrink: 0;
+
+	/* Loaded after the image card, whose controls size their icons alike. */
+	& > svg:last-child {
+		width: 0.625rem;
+		height: 0.625rem;
+	}
+}
+
+.cms-media-replace-menu {
+	--width: max-content;
+
+	& button {
+		align-items: flex-start;
+		padding-block: var(--cms-space-2);
+	}
+
+	& svg {
+		flex-shrink: 0;
+		width: 1rem;
+		height: 1rem;
+		margin-top: 0.125rem;
+		color: var(--cms-color-text-muted);
+	}
+
+	& .cms-media-replace-choice {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-0-5);
+	}
+
+	& small {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+	}
+}
