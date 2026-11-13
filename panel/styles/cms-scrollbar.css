@@ -4,9 +4,9 @@
 		scrollbar-color: var(--cms-scrollbar-thumb) var(--cms-scrollbar-gutter, transparent);
 	}
 
+	/* A rail's scrollbar shows only while the pointer is over it. */
 	@media (hover: hover) {
-		.cms-sidebar:not(:hover) .scroll,
-		.cms-inspector:not(:hover) :is(.scroll, .strip) {
+		.cms-scrollbar-quiet:not(:hover) {
 			scrollbar-color: transparent transparent;
 		}
 	}

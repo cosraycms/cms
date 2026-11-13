@@ -994,7 +994,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 	 * picks the region: the masthead's content area and the rail entry for the
 	 * first collection share an href, so the href alone is ambiguous.
 	 */
-	private function navLink(string $html, string $href, string $class = 'link'): string
+	private function navLink(string $html, string $href, string $class = 'cms-sidebar-link'): string
 	{
 		$found = preg_match(
 			'/<a\s[^>]*class="'

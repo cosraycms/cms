@@ -7,7 +7,7 @@
 	min-height: 0;
 	background: var(--cms-color-rail);
 
-	& .scroll {
+	& .cms-sidebar-scroll {
 		flex: 1 1 auto;
 		min-height: 0;
 		padding: var(--cms-space-5) var(--cms-space-3);
@@ -15,17 +15,17 @@
 		overscroll-behavior: contain;
 	}
 
-	& .list {
+	& .cms-sidebar-list {
 		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
 
-	& .item + .item {
+	& .cms-sidebar-item + .cms-sidebar-item {
 		margin-top: var(--cms-space-px);
 	}
 
-	& .link {
+	& .cms-sidebar-link {
 		display: flex;
 		align-items: flex-start;
 		gap: var(--cms-space-3);
@@ -55,7 +55,7 @@
 		}
 	}
 
-	& .label {
+	& .cms-sidebar-label {
 		display: inline-flex;
 		align-items: flex-start;
 		gap: var(--cms-space-2);
@@ -67,7 +67,7 @@
 		}
 	}
 
-	& .icon {
+	& :is(.cms-sidebar-icon, .cms-collection-icon) {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -84,7 +84,7 @@
 		}
 	}
 
-	& .badge {
+	& .cms-sidebar-badge {
 		margin-left: auto;
 		flex-shrink: 0;
 		line-height: 1.25rem;
@@ -94,7 +94,7 @@
 		font-weight: 500;
 	}
 
-	& .create {
+	& .cms-sidebar-create {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-2);
@@ -111,15 +111,15 @@
 		}
 	}
 
-	& .section {
+	& .cms-sidebar-section {
 		margin-top: var(--cms-space-5);
 	}
 
-	& #collection-nav > .list > .item:first-child > .section {
+	& #collection-nav > .cms-sidebar-list > .cms-sidebar-item:first-child > .cms-sidebar-section {
 		margin-top: 0;
 	}
 
-	& .title {
+	& .cms-sidebar-title {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-2);
@@ -138,12 +138,12 @@
 		height: auto;
 		border-bottom: 1px solid var(--cms-color-border);
 
-		& .scroll {
+		& .cms-sidebar-scroll {
 			padding: var(--cms-space-3);
 			overflow-x: auto;
 		}
 
-		& .list {
+		& .cms-sidebar-list {
 			display: flex;
 			gap: var(--cms-space-2);
 			white-space: nowrap;
@@ -155,16 +155,16 @@
 			gap: var(--cms-space-2);
 		}
 
-		& .create {
+		& .cms-sidebar-create {
 			margin-top: 0;
 			white-space: nowrap;
 		}
 
-		& .section {
+		& .cms-sidebar-section {
 			margin-top: 0;
 		}
 
-		& .title {
+		& .cms-sidebar-title {
 			display: none;
 		}
 	}

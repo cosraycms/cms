@@ -363,7 +363,7 @@ final class PanelMenusTest extends End2EndTestCase
 			'//a[@href="/panel/menus/main-nav" and @aria-current="page"]',
 			$html,
 		);
-		$this->assertStringContainsString('<span class="badge">2</span>', $html);
+		$this->assertStringContainsString('<span class="cms-sidebar-badge">2</span>', $html);
 	}
 
 	public function testAnEmptyAreaRendersTheEmptyStateWithoutARail(): void

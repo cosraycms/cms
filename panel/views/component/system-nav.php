@@ -15,15 +15,15 @@ if (!$rail) {
 $entries = (array) u($systemNav);
 ?>
 <div id="system-nav"<?= $oob ? ' hx-swap-oob="true"' : '' ?>>
-	<ul class="list">
+	<ul class="cms-sidebar-list">
 		<?php foreach ($entries as $entry): ?>
-			<li class="item">
+			<li class="cms-sidebar-item">
 				<a
-					class="link"
+					class="cms-sidebar-link"
 					href="<?= escape((string) $entry['url']) ?>"
 					<?= $entry['active'] ? 'aria-current="page"' : '' ?>>
-					<span class="label">
-						<span class="icon"><?= \Cosray\Panel\Icon::render((string) $entry['icon']) ?></span>
+					<span class="cms-sidebar-label">
+						<span class="cms-sidebar-icon"><?= \Cosray\Panel\Icon::render((string) $entry['icon']) ?></span>
 						<span><?= escape((string) $entry['label']) ?></span>
 					</span>
 				</a>

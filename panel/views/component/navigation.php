@@ -14,11 +14,11 @@ $filters = (string) $area === 'media';
 	<?= $filters ? 'aria-label="' . escape(__('common:filter')) . '"' : '' ?>>
 	<?php // The media rail holds filters, which are not navigation. ?>
 	<?php if ($filters): ?>
-		<div class="scroll">
+		<div class="cms-sidebar-scroll cms-scrollbar-quiet">
 			<?php $this->include('component/rail-nav') ?>
 		</div>
 	<?php else: ?>
-		<nav class="scroll" aria-label="<?= escape(__('panel:navigation')) ?>">
+		<nav class="cms-sidebar-scroll cms-scrollbar-quiet" aria-label="<?= escape(__('panel:navigation')) ?>">
 			<?php $this->include('component/rail-nav') ?>
 		</nav>
 	<?php endif ?>

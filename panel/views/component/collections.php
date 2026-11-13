@@ -4,10 +4,10 @@ use function Cosray\escape;
 
 ?>
 <?php if (count($collections) > 0): ?>
-<ul class="list level-<?= $level ?>">
+<ul class="cms-sidebar-list">
 <?php foreach ($collections as $item): ?>
 	<?php $label = escape(__((string) u($item->meta->label))) ?>
-	<li class="item">
+	<li class="cms-sidebar-item">
 	<?php if (u($item) instanceof \Cosray\NavLink): ?>
 		<?php
 
@@ -15,11 +15,11 @@ use function Cosray\escape;
 		$iconMeta = u($item->meta->icon);
 		?>
 		<a
-			class="link"
+			class="cms-sidebar-link"
 			style="--depth: <?= $level ?>"
 			href="<?= $link->url ?>"
 			<?= $link->active((string) u($currentPath)) ? 'aria-current="page"' : '' ?>>
-			<span class="label">
+			<span class="cms-sidebar-label">
 				<?php $this->include('component/collection-icon', [
 					'iconMeta' => $iconMeta,
 					'default' => true,
@@ -27,7 +27,7 @@ use function Cosray\escape;
 				<span><?= $label ?></span>
 			</span>
 			<?php if (trim((string) $item->meta->badge) !== ''): ?>
-				<span class="badge"><?= $item->meta->badge ?></span>
+				<span class="cms-sidebar-badge"><?= $item->meta->badge ?></span>
 			<?php endif ?>
 		</a>
 	<?php elseif ($item->slug() !== null): ?>
@@ -40,11 +40,11 @@ use function Cosray\escape;
 		$iconMeta = u($item->meta->icon);
 		?>
 		<a
-			class="link"
+			class="cms-sidebar-link"
 			style="--depth: <?= $level ?>"
 			href="<?= $href ?>"
 			<?= $active ? 'aria-current="page"' : '' ?>>
-			<span class="label">
+			<span class="cms-sidebar-label">
 				<?php $this->include('component/collection-icon', [
 					'iconMeta' => $iconMeta,
 					'default' => true,
@@ -52,7 +52,7 @@ use function Cosray\escape;
 				<span><?= $label ?></span>
 			</span>
 			<?php if (trim((string) $item->meta->badge) !== ''): ?>
-				<span class="badge"><?= $item->meta->badge ?></span>
+				<span class="cms-sidebar-badge"><?= $item->meta->badge ?></span>
 			<?php endif ?>
 		</a>
 	<?php else: ?>
@@ -61,9 +61,9 @@ use function Cosray\escape;
 		$iconMeta = u($item->meta->icon);
 		?>
 		<div
-			class="section"
+			class="cms-sidebar-section"
 			style="--depth: <?= $level ?>">
-			<span class="title">
+			<span class="cms-sidebar-title">
 				<?php $this->include('component/collection-icon', ['iconMeta' => $iconMeta]) ?>
 				<span><?= $label ?></span>
 			</span>

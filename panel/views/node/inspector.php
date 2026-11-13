@@ -70,7 +70,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 	data-tabs
 	data-inspector
 	<?= $collapsed ? 'data-collapsed' : '' ?>>
-	<div class="strip">
+	<div class="strip cms-scrollbar-quiet">
 		<button
 			type="button"
 			class="tool"
@@ -141,7 +141,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 				<?= Icon::render('layout-sidebar-inset-reverse') ?>
 			</button>
 		</div>
-		<div class="scroll">
+		<div class="scroll cms-scrollbar-quiet">
 			<?php if (isset($tabs['status'])): ?>
 				<div
 					id="cms-inspector-panel-status"

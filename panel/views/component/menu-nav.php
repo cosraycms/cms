@@ -18,7 +18,7 @@ $locales = (array) u($menuLocales);
 $defaultLocale = (string) u($menuDefaultLocale);
 ?>
 <div id="menu-nav"<?= $oob ? ' hx-swap-oob="true"' : '' ?>>
-	<ul class="list">
+	<ul class="cms-sidebar-list">
 		<?php foreach ($menus as $entry): ?>
 			<?php
 
@@ -27,15 +27,15 @@ $defaultLocale = (string) u($menuDefaultLocale);
 			// entry stays marked while the user works inside the menu.
 			$active = $currentPath === $url || str_starts_with($currentPath, $url . '/');
 			?>
-			<li class="item">
+			<li class="cms-sidebar-item">
 				<a
-					class="link"
+					class="cms-sidebar-link"
 					href="<?= escape($url) ?>"
 					title="<?= escape((string) $entry['label']) ?> · <?= escape(
 						(string) $entry['menu'],
 					) ?>"
 					<?= $active ? 'aria-current="page"' : '' ?>>
-					<span class="label">
+					<span class="cms-sidebar-label">
 						<?php if (count($locales) < 2): ?>
 							<span><?= escape((string) $entry['label']) ?></span>
 						<?php else: ?>
@@ -50,14 +50,16 @@ $defaultLocale = (string) u($menuDefaultLocale);
 							<?php endforeach ?>
 						<?php endif ?>
 					</span>
-					<span class="badge"><?= escape((string) $entry['items']) ?></span>
+					<span class="cms-sidebar-badge"><?= escape((string) $entry['items']) ?></span>
 				</a>
 			</li>
 		<?php endforeach ?>
 	</ul>
 
 	<?php if ($manages): ?>
-		<a class="create" href="<?= escape((string) $menuCreateUrl) ?>"><?= \Cosray\Panel\Icon::render('plus') ?><?= escape(
+		<a class="cms-sidebar-create" href="<?= escape((string) $menuCreateUrl) ?>"><?= \Cosray\Panel\Icon::render(
+			'plus',
+		) ?><?= escape(
 			__('menu:new'),
 		) ?></a>
 	<?php endif ?>
