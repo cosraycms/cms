@@ -26,7 +26,7 @@ function page(locale = 'de'): void {
 					<div>Content</div>
 					<button type="button" class="cms-field-button cms-field-layout-preview" data-layout-preview="content">Layout preview</button>
 				</label>
-				<div class="cms-blocks-editor"><div class="grid"><div class="block"></div></div></div>
+				<div class="cms-blocks-editor"><div class="cms-blocks-editor-grid"><div class="cms-blocks-editor-block"></div></div></div>
 				<input name="content[content][value][zxx][0][uid]" value="abc" />
 				<input name="content[content][value][zxx][0][fields][text][value][zxx]" value="Hello" />
 				<input type="file" name="upload" />

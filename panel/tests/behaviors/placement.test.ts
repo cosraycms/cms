@@ -241,7 +241,9 @@ function editor(rows: Layout[]): {
 	document.body.innerHTML = `<form id="node-editor-form" data-content-locale-scope data-content-locale="en">${view(rows)}</form>`;
 
 	const form = document.querySelector('form')!;
-	const grid = form.querySelector<HTMLElement>('.cms-blocks-editor.is-grid > .grid')!;
+	const grid = form.querySelector<HTMLElement>(
+		'.cms-blocks-editor.is-grid > .cms-blocks-editor-grid',
+	)!;
 	const stops = [installMenus(), installRepeater(), installBlocks(), install()];
 
 	uninstall = () => stops.reverse().forEach((stop) => stop());
@@ -265,7 +267,7 @@ function uid(row: HTMLElement): string {
 }
 
 function menuItem(row: HTMLElement, selector: string): HTMLElement {
-	return row.querySelector<HTMLElement>(`:scope > .chrome ${selector}`)!;
+	return row.querySelector<HTMLElement>(`:scope > .cms-blocks-editor-chrome ${selector}`)!;
 }
 
 describe('placement on the canvas', () => {
@@ -402,14 +404,14 @@ describe('placement on the canvas', () => {
 			pointer(document, 'pointermove', 950, 150);
 
 			// Lifted out of the grid, with a slot where it would land.
-			const slot = grid.querySelector<HTMLElement>(':scope > .landing')!;
+			const slot = grid.querySelector<HTMLElement>(':scope > .cms-blocks-editor-landing')!;
 
 			expect(rows()[2].classList.contains('is-lifted')).toBe(true);
 			expect([slot.style.gridColumn, slot.style.gridRow]).toEqual(['10 / span 3', '2 / span 1']);
 
 			pointer(document, 'pointerup', 950, 150);
 
-			expect(grid.querySelector('.landing')).toBeNull();
+			expect(grid.querySelector('.cms-blocks-editor-landing')).toBeNull();
 			expect(grid.querySelector('.is-lifted')).toBeNull();
 			expect(rows().map(spot)).toEqual(['1/1 5×1', '6/1 4×1', '1/2 6×1', '10/2 3×1', '7/3 6×1']);
 		});

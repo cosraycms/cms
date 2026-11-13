@@ -29,10 +29,10 @@
 			box-shadow: none;
 		}
 
-		& .cms-blocks-editor > .adders,
-		& .block > .chrome,
-		& .block > .resize,
-		& .block > dialog,
+		& .cms-blocks-editor > .cms-blocks-editor-adders,
+		& .cms-blocks-editor-block > .cms-blocks-editor-chrome,
+		& .cms-blocks-editor-block > .cms-blocks-editor-resize,
+		& .cms-blocks-editor-block > dialog,
 		& .cms-richtext-toolbar,
 		& .cms-code-toolbar,
 		& .cms-media-field > .bar,

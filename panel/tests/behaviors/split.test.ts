@@ -103,12 +103,16 @@ function editor(rows: Row[], types = [TEXT], common?: string[]): { rows: () => H
 	uninstall = () => stops.reverse().forEach((stop) => stop());
 
 	return {
-		rows: () => [...document.querySelectorAll<HTMLElement>('.grid > [data-repeater-row]')],
+		rows: () => [
+			...document.querySelectorAll<HTMLElement>('.cms-blocks-editor-grid > [data-repeater-row]'),
+		],
 	};
 }
 
 function parts(row: HTMLElement): HTMLElement[] {
-	return [...row.querySelectorAll<HTMLElement>(':scope > .parts > [data-repeater-row]')];
+	return [
+		...row.querySelectorAll<HTMLElement>(':scope > .cms-blocks-editor-parts > [data-repeater-row]'),
+	];
 }
 
 function layout(row: HTMLElement): Layout {
@@ -137,10 +141,14 @@ function type(row: HTMLElement): string | undefined {
 
 /** The row's kebab opened, then its entry for this place clicked. */
 function act(row: HTMLElement, selector: string): HTMLButtonElement {
-	row.querySelector<HTMLButtonElement>(':scope > .chrome .kebab')!.click();
+	row
+		.querySelector<HTMLButtonElement>(
+			':scope > .cms-blocks-editor-chrome .cms-blocks-editor-kebab',
+		)!
+		.click();
 
 	const entry = row.querySelector<HTMLButtonElement>(
-		`:scope > .chrome [data-action-menu] > ${selector}`,
+		`:scope > .cms-blocks-editor-chrome [data-action-menu] > ${selector}`,
 	)!;
 
 	entry.click();
@@ -174,7 +182,9 @@ describe('splitting a block', () => {
 
 		act(block, COLUMNS);
 
-		const picker = document.querySelector<HTMLElement>('.adders [data-action-menu]')!;
+		const picker = document.querySelector<HTMLElement>(
+			'.cms-blocks-editor-adders [data-action-menu]',
+		)!;
 
 		expect(picker.matches(':popover-open')).toBe(true);
 
@@ -194,7 +204,9 @@ describe('splitting a block', () => {
 		expect(layout(added)).toEqual(area(2, 2));
 		expect(type(added)).toBe(QUOTE);
 		expect(uid(added).value).not.toBe('');
-		expect(container.querySelector<HTMLElement>(':scope > .parts')!.dataset).toMatchObject({
+		expect(
+			container.querySelector<HTMLElement>(':scope > .cms-blocks-editor-parts')!.dataset,
+		).toMatchObject({
 			name: `${BASE}[0][blocks]`,
 			columns: '5',
 		});
@@ -239,7 +251,9 @@ describe('splitting a block', () => {
 		const { rows } = editor([text('a', area(6))], [TEXT, QUOTE], [TEXT]);
 
 		act(rows()[0], COLUMNS);
-		document.querySelector<HTMLElement>('.adders [data-block-catalog-open]')!.click();
+		document
+			.querySelector<HTMLElement>('.cms-blocks-editor-adders [data-block-catalog-open]')!
+			.click();
 
 		const dialog = document.querySelector<HTMLDialogElement>('dialog[open]')!;
 
@@ -339,7 +353,9 @@ describe('resizing a split', () => {
 		number(container, 'colspan', '9');
 
 		expect(parts(container).map(layout)).toEqual([area(3), area(6)]);
-		expect(container.querySelector<HTMLElement>(':scope > .parts')!.dataset.columns).toBe('9');
+		expect(
+			container.querySelector<HTMLElement>(':scope > .cms-blocks-editor-parts')!.dataset.columns,
+		).toBe('9');
 
 		number(container, 'rowspan', '2');
 
@@ -355,7 +371,9 @@ describe('resizing a split', () => {
 	it('keeps a stacked split as tall as its parts and as wide as they are', () => {
 		const { rows } = editor([split('s1', area(6, 2), text('a', area(6)), text('b', area(6)))]);
 		const [container] = rows();
-		const grip = container.querySelector<HTMLElement>(':scope > .chrome [data-repeater-grip]')!;
+		const grip = container.querySelector<HTMLElement>(
+			':scope > .cms-blocks-editor-chrome [data-repeater-grip]',
+		)!;
 
 		grip.dispatchEvent(
 			new KeyboardEvent('keydown', {
@@ -408,14 +426,16 @@ describe('resizing a split', () => {
 		).toBe('6');
 
 		// The last part trades with the one before it.
-		last.querySelector<HTMLElement>(':scope > .chrome [data-repeater-grip]')!.dispatchEvent(
-			new KeyboardEvent('keydown', {
-				key: 'ArrowRight',
-				altKey: true,
-				bubbles: true,
-				cancelable: true,
-			}),
-		);
+		last
+			.querySelector<HTMLElement>(':scope > .cms-blocks-editor-chrome [data-repeater-grip]')!
+			.dispatchEvent(
+				new KeyboardEvent('keydown', {
+					key: 'ArrowRight',
+					altKey: true,
+					bubbles: true,
+					cancelable: true,
+				}),
+			);
 
 		expect(parts(container).map(layout)).toEqual([area(5), area(3)]);
 		expect(layout(container)).toEqual(area(8));

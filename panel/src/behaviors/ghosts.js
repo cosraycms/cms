@@ -104,7 +104,7 @@ function render(grid, container, adder, fills) {
 	for (const fill of fills) {
 		const slot = document.createElement('div');
 
-		slot.className = 'ghost-slot';
+		slot.className = 'cms-blocks-editor-ghost-slot';
 		slot.dataset.ghostSlot = '';
 		slot.setAttribute('aria-hidden', 'true');
 		slot.style.gridRow = `${fill.row} / span ${fill.rowspan}`;
@@ -117,7 +117,7 @@ function render(grid, container, adder, fills) {
 		const name = `${label}, ${fill.colspan} × ${fill.rowspan}`;
 
 		ghost.type = 'button';
-		ghost.className = 'ghost';
+		ghost.className = 'cms-blocks-editor-ghost';
 		ghost.dataset.ghost = '';
 		ghost.dataset.colspan = String(fill.colspan);
 		ghost.dataset.rowspan = String(fill.rowspan);
@@ -311,7 +311,7 @@ export function install() {
 		}
 
 		/** @type {NodeListOf<HTMLElement>} */ (
-			document.querySelectorAll('.cms-blocks-editor.is-grid > .grid')
+			document.querySelectorAll('.cms-blocks-editor.is-grid > .cms-blocks-editor-grid')
 		).forEach((grid) => {
 			const container = grid.parentElement;
 			const how = container && adder(container);
@@ -332,8 +332,12 @@ export function install() {
 		const grid = !(target instanceof Element)
 			? null
 			: target.matches('.cms-blocks-editor')
-				? /** @type {HTMLElement | null} */ (target.querySelector(':scope > .grid'))
-				: /** @type {HTMLElement | null} */ (target.closest('.cms-blocks-editor > .grid'));
+				? /** @type {HTMLElement | null} */ (
+						target.querySelector(':scope > .cms-blocks-editor-grid')
+					)
+				: /** @type {HTMLElement | null} */ (
+						target.closest('.cms-blocks-editor > .cms-blocks-editor-grid')
+					);
 
 		if (grid) {
 			grids.get(grid)?.refresh();

@@ -5,7 +5,7 @@ $more = (bool) u($more);
 $id = (string) u($id);
 $places = u($places ?? null);
 ?>
-<button type="button" class="inserter" popovertarget="<?= $this->escape($id) ?>"
+<button type="button" class="cms-blocks-editor-inserter" popovertarget="<?= $this->escape($id) ?>"
 	<?= is_string($places) ? 'data-places="' . $this->escape($places) . '"' : '' ?>
 	aria-haspopup="menu" aria-label="<?= $this->escape(__('field:add-block')) ?>" title="<?= $this->escape(__(
 		'field:add-block',

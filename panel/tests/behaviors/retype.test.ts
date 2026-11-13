@@ -132,12 +132,16 @@ function editor(rows: Row[], types = [TEXT, QUOTE]): { rows: () => HTMLElement[]
 	uninstall = () => stops.reverse().forEach((stop) => stop());
 
 	return {
-		rows: () => [...document.querySelectorAll<HTMLElement>('.grid > [data-repeater-row]')],
+		rows: () => [
+			...document.querySelectorAll<HTMLElement>('.cms-blocks-editor-grid > [data-repeater-row]'),
+		],
 	};
 }
 
 function parts(row: HTMLElement): HTMLElement[] {
-	return [...row.querySelectorAll<HTMLElement>(':scope > .parts > [data-repeater-row]')];
+	return [
+		...row.querySelectorAll<HTMLElement>(':scope > .cms-blocks-editor-parts > [data-repeater-row]'),
+	];
 }
 
 /** A control of the row by the end of its name; none of these rows nest others. */
@@ -171,12 +175,20 @@ function content(row: HTMLElement): string {
 
 /** The block's kebab opened, its type entry clicked, then the picker's choice for `to`. */
 function retype(row: HTMLElement, to: string): void {
-	row.querySelector<HTMLButtonElement>(':scope > .chrome .kebab')!.click();
 	row
-		.querySelector<HTMLButtonElement>(':scope > .chrome [data-action-menu] > [data-retype]')!
+		.querySelector<HTMLButtonElement>(
+			':scope > .cms-blocks-editor-chrome .cms-blocks-editor-kebab',
+		)!
+		.click();
+	row
+		.querySelector<HTMLButtonElement>(
+			':scope > .cms-blocks-editor-chrome [data-action-menu] > [data-retype]',
+		)!
 		.click();
 
-	const picker = document.querySelector<HTMLElement>('.adders [data-action-menu]')!;
+	const picker = document.querySelector<HTMLElement>(
+		'.cms-blocks-editor-adders [data-action-menu]',
+	)!;
 
 	expect(picker.matches(':popover-open')).toBe(true);
 

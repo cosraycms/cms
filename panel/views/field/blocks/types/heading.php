@@ -8,20 +8,20 @@ $level = (string) ($fieldsData['level']['value']['zxx'] ?? '1');
 $levelId = (string) u($rowId) . '-level-zxx';
 $disabled = (bool) (u($readonly ?? null) ?? false) || ($subs['level']['immutable'] ?? false);
 ?>
-<div class="heading" data-heading>
+<div class="cms-blocks-editor-heading" data-heading>
 	<?php if (isset($subs['text'])): ?>
-		<div class="text">
+		<div class="cms-blocks-editor-heading-text">
 			<?php $this->include('field/row-fields/field', ['sub' => $subs['text'], 'labels' => false]) ?>
 		</div>
 	<?php endif ?>
 	<?php if (isset($subs['level'])): ?>
-		<div class="level">
+		<div class="cms-blocks-editor-heading-level">
 			<div hidden>
 				<?php $this->include('field/row-fields/field', ['sub' => $subs['level'], 'labels' => false]) ?>
 			</div>
 			<button
 				type="button"
-				class="level-button"
+				class="cms-blocks-editor-heading-button"
 				popovertarget="<?= $this->escape($levelId . '-menu') ?>"
 				aria-haspopup="menu"
 				aria-expanded="false"

@@ -62,7 +62,7 @@ $readonly = (bool) ($field['immutable'] ?? false);
 	<?= $spacing('rowGap') !== '' ? 'data-row-gap="' . $this->escape($spacing('rowGap')) . '"' : '' ?>
 	<?= $spacing('columnGap') !== '' ? 'data-column-gap="' . $this->escape($spacing('columnGap')) . '"' : '' ?>
 	style="--columns: <?= $columns ?>">
-	<div class="grid" data-repeater-list>
+	<div class="cms-blocks-editor-grid" data-repeater-list>
 		<?php foreach ($rows as $index => $rowData) {
 			if (!is_array($rowData)) {
 				continue;
@@ -147,13 +147,13 @@ $readonly = (bool) ($field['immutable'] ?? false);
 	<?php if ($more) {
 		$this->include('field/blocks/catalog', ['choices' => $choices->all]);
 	} ?>
-	<div class="adders" data-repeater-footer>
+	<div class="cms-blocks-editor-adders" data-repeater-footer>
 		<?php if ($blockTypes === []): ?>
 			<span><?= $this->escape(__('field:no-block-types')) ?></span>
 		<?php elseif ($single !== null): ?>
 			<button
 				type="button"
-				class="adder"
+				class="cms-blocks-editor-adder"
 				data-repeater-add="<?= $this->escape($single) ?>"
 				data-repeater-insert="append">
 				<?= \Cosray\Panel\Icon::render('plus-circle') ?>
@@ -164,7 +164,7 @@ $readonly = (bool) ($field['immutable'] ?? false);
 		<?php else: ?>
 			<button
 				type="button"
-				class="adder"
+				class="cms-blocks-editor-adder"
 				id="<?= $this->escape($id . '-picker-trigger') ?>"
 				popovertarget="<?= $this->escape($id . '-picker') ?>"
 				aria-haspopup="menu"

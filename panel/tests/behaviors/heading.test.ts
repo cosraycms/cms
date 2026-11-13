@@ -82,7 +82,7 @@ function headings(): HTMLElement[] {
 }
 
 function trigger(heading: HTMLElement): HTMLButtonElement {
-	return heading.querySelector<HTMLButtonElement>('.level-button')!;
+	return heading.querySelector<HTMLButtonElement>('.cms-blocks-editor-heading-button')!;
 }
 
 function menu(heading: HTMLElement): HTMLElement {
@@ -188,7 +188,7 @@ it('keeps copied levels and independent menu targets when rows are duplicated or
 	expect(value(form, 2)).toBe('1');
 	expect(trigger(added).textContent?.trim()).toBe('H1');
 	expect(choice(added, '1').getAttribute('aria-checked')).toBe('true');
-	expect(document.activeElement).toBe(added.querySelector('.text input'));
+	expect(document.activeElement).toBe(added.querySelector('.cms-blocks-editor-heading-text input'));
 });
 
 it('locks the level of a read-only blocks field', () => {

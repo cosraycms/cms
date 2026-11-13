@@ -49,7 +49,7 @@ import { changed, focusRow, renumber } from './repeater.js';
 
 export const MAX_ROWSPAN = 6;
 
-const GRID = '.cms-blocks-editor.is-grid > .grid';
+const GRID = '.cms-blocks-editor.is-grid > .cms-blocks-editor-grid';
 
 /**
  * @param {number} value
@@ -773,7 +773,9 @@ function onChange(event) {
 	const container = event.target;
 	const grid =
 		container instanceof HTMLElement && container.matches('.cms-blocks-editor.is-grid')
-			? /** @type {HTMLElement | null} */ (container.querySelector(':scope > .grid'))
+			? /** @type {HTMLElement | null} */ (
+					container.querySelector(':scope > .cms-blocks-editor-grid')
+				)
 			: null;
 
 	if (!grid || rowsOf(grid).some((row) => number(row, 'col') === 0)) {
@@ -1189,7 +1191,7 @@ function begin(current) {
 	};
 	current.hold = { x: current.x - rect.left, y: current.y - rect.top };
 	freeze(current, box);
-	slot.className = 'landing';
+	slot.className = 'cms-blocks-editor-landing';
 	slot.setAttribute('aria-hidden', 'true');
 	slot.style.minHeight = `${rect.height}px`;
 	fit(slot, box);

@@ -17,7 +17,7 @@ import { gaps } from './placement.js';
 function cell(grid, box, kind) {
 	const guide = document.createElement('div');
 
-	guide.className = `guide is-${kind}`;
+	guide.className = `cms-blocks-editor-guide is-${kind}`;
 	guide.dataset.guide = '';
 	guide.setAttribute('aria-hidden', 'true');
 	guide.style.gridRow = `${box.row} / span ${box.rowspan}`;
@@ -93,11 +93,13 @@ export function draw(grid, row, boxes, columns, across) {
  * @param {number} y
  */
 export function label(grid, text, x, y) {
-	let tag = /** @type {HTMLElement | null} */ (grid.querySelector(':scope > .guide-label'));
+	let tag = /** @type {HTMLElement | null} */ (
+		grid.querySelector(':scope > .cms-blocks-editor-guide-label')
+	);
 
 	if (!tag) {
 		tag = document.createElement('div');
-		tag.className = 'guide-label';
+		tag.className = 'cms-blocks-editor-guide-label';
 		tag.dataset.guide = '';
 		tag.setAttribute('aria-hidden', 'true');
 		grid.append(tag);

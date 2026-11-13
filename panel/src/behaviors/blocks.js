@@ -260,7 +260,7 @@ export function gridOf(container) {
 export function splitOf(row) {
 	const list = row.parentElement;
 
-	return list?.matches('.parts')
+	return list?.matches('.cms-blocks-editor-parts')
 		? /** @type {HTMLElement | null} */ (list.closest('[data-repeater-row]'))
 		: null;
 }
@@ -272,7 +272,7 @@ export function splitOf(row) {
 export function partsOf(split) {
 	return [
 		.../** @type {NodeListOf<HTMLElement>} */ (
-			split.querySelectorAll(':scope > .parts > [data-repeater-row]')
+			split.querySelectorAll(':scope > .cms-blocks-editor-parts > [data-repeater-row]')
 		),
 	];
 }
@@ -396,7 +396,9 @@ function widthsOf(split) {
  * @param {number[]} [widths]
  */
 function apply(row, layout, grid, widths = widthsOf(row)) {
-	const parts = /** @type {HTMLElement | null} */ (row.querySelector(':scope > .parts'));
+	const parts = /** @type {HTMLElement | null} */ (
+		row.querySelector(':scope > .cms-blocks-editor-parts')
+	);
 
 	write(row, layout, grid);
 
@@ -659,7 +661,7 @@ function pitchOf(container, columns) {
 	const list = listOf(container);
 	const style = getComputedStyle(list);
 	const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
-	const gap = getComputedStyle(list.closest('.grid') ?? list).columnGap;
+	const gap = getComputedStyle(list.closest('.cms-blocks-editor-grid') ?? list).columnGap;
 
 	return pitch(list.clientWidth - padding, columns, parseFloat(gap) || 0);
 }
@@ -919,7 +921,7 @@ function end() {
 		commit(/** @type {HTMLElement} */ (canvas));
 	} else if (moved) {
 		(input(row, dimensionOf(edge)) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
-	} else if (handle.matches('.resize')) {
+	} else if (handle.matches('.cms-blocks-editor-resize')) {
 		// A press on an edge that changed nothing was one on the block's
 		// ground, which the edges take much of in a block of one line. A
 		// seam lies between two parts, so it is no one's ground.
@@ -1265,7 +1267,7 @@ function textOf(row) {
 		[.../** @type {NodeListOf<HTMLElement>} */ (row.querySelectorAll(TEXT))].find(
 			(control) =>
 				control.closest('[data-repeater-row]') === row &&
-				!control.closest('dialog, .chrome') &&
+				!control.closest('dialog, .cms-blocks-editor-chrome') &&
 				!(
 					(control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement) &&
 					(control.readOnly || control.disabled)

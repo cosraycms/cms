@@ -66,8 +66,8 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		// block is what makes its content mandatory. Top-level fields still do,
 		// and so does a field out of sight in the block's settings dialog.
 		$this->assertHtmlNodeMissing(
-			'//div[contains(concat(" ", normalize-space(@class), " "), " block ")][@data-repeater-row]'
-				. '/div[@class="body"]//div[@data-required="true"]',
+			'//div[contains(concat(" ", normalize-space(@class), " "), " cms-blocks-editor-block ")][@data-repeater-row]'
+				. '/div[@class="cms-blocks-editor-body"]//div[@data-required="true"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
@@ -75,7 +75,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeMissing(
-			'//div[contains(concat(" ", normalize-space(@class), " "), " block ")][@data-repeater-row]//textarea[@required]',
+			'//div[contains(concat(" ", normalize-space(@class), " "), " cms-blocks-editor-block ")][@data-repeater-row]//textarea[@required]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(

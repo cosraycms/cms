@@ -53,7 +53,7 @@ function fixture(boxes: Box[], width = 400, height = 204) {
 	const editor = document.createElement('div');
 	editor.className = 'cms-blocks-editor';
 	const grid = document.createElement('div');
-	grid.className = 'grid';
+	grid.className = 'cms-blocks-editor-grid';
 	const size = { width, height };
 	Object.defineProperties(grid, {
 		clientWidth: { get: () => size.width },
@@ -61,7 +61,7 @@ function fixture(boxes: Box[], width = 400, height = 204) {
 	});
 	const rows = boxes.map((box) => {
 		const row = document.createElement('div');
-		row.className = 'block';
+		row.className = 'cms-blocks-editor-block';
 		measure(row, box);
 		grid.append(row);
 		return row;

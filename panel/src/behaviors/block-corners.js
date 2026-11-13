@@ -85,7 +85,7 @@ export function install() {
 		}
 
 		/** @type {NodeListOf<HTMLElement>} */ (
-			document.querySelectorAll('.cms-blocks-editor > .grid')
+			document.querySelectorAll('.cms-blocks-editor > .cms-blocks-editor-grid')
 		).forEach((grid) => {
 			if (!grids.has(grid)) grids.set(grid, watch(grid));
 		});

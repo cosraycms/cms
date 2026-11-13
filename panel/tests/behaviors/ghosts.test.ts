@@ -79,17 +79,17 @@ function canvas(
 		data-min="${options.min ?? 1}"
 		data-ghost-label="Add block here"
 		style="--columns: ${columns}">
-		<div class="grid" data-repeater-list></div>
-		<div class="adders" data-repeater-footer>
-			<button type="button" class="adder" data-repeater-add="Acme\\Text" data-repeater-insert="append">Add block</button>
+		<div class="cms-blocks-editor-grid" data-repeater-list></div>
+		<div class="cms-blocks-editor-adders" data-repeater-footer>
+			<button type="button" class="cms-blocks-editor-adder" data-repeater-add="Acme\\Text" data-repeater-insert="append">Add block</button>
 		</div>
 	</div>`;
 
-	const grid = field.querySelector<HTMLElement>('.grid')!;
+	const grid = field.querySelector<HTMLElement>('.cms-blocks-editor-grid')!;
 	const elements = boxes.map((box) => {
 		const row = document.createElement('div');
 
-		row.className = 'block';
+		row.className = 'cms-blocks-editor-block';
 		row.setAttribute('data-repeater-row', '');
 		position(row, box);
 		grid.append(row);
@@ -99,7 +99,11 @@ function canvas(
 
 	document.body.append(field);
 
-	return { grid, rows: elements, adder: field.querySelector<HTMLElement>('.adder')! };
+	return {
+		grid,
+		rows: elements,
+		adder: field.querySelector<HTMLElement>('.cms-blocks-editor-adder')!,
+	};
 }
 
 function ghosts(grid: HTMLElement): HTMLElement[] {
@@ -299,7 +303,9 @@ async function editor(
 	document.body.innerHTML = `<form id="node-editor-form" data-content-locale-scope data-content-locale="en">${view(boxes, options)}</form>`;
 
 	const form = document.querySelector('form')!;
-	const grid = form.querySelector<HTMLElement>('.cms-blocks-editor.is-grid > .grid')!;
+	const grid = form.querySelector<HTMLElement>(
+		'.cms-blocks-editor.is-grid > .cms-blocks-editor-grid',
+	)!;
 	const list = () => [...grid.querySelectorAll<HTMLElement>(':scope > [data-repeater-row]')];
 	const stops = [
 		installMenus(),

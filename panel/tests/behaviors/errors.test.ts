@@ -70,9 +70,9 @@ function editor(): void {
 			<div class="cms-field" data-field="blocks">
 				<div class="cms-field-control">
 					<div data-repeater>
-						<div class="block" data-repeater-row data-meta-owner data-field="block">
-							<button type="button" class="gear" data-dialog-open="meta">Settings</button>
-							<div class="body">
+						<div class="cms-blocks-editor-block" data-repeater-row data-meta-owner data-field="block">
+							<button type="button" class="cms-blocks-editor-settings" data-dialog-open="meta">Settings</button>
+							<div class="cms-blocks-editor-body">
 								<div class="cms-field" data-field="video">
 									<div class="cms-field-control">
 										<input name="content[blocks][value][zxx][0][fields][video][value][zxx]" type="text" />
@@ -331,7 +331,9 @@ describe('errors behavior', () => {
 			},
 		]);
 
-		expect(field('block').querySelector('.gear')?.classList.contains('has-error')).toBe(true);
+		expect(
+			field('block').querySelector('.cms-blocks-editor-settings')?.classList.contains('has-error'),
+		).toBe(true);
 		expect(field('block').getAttribute('data-invalid')).toBe('true');
 		expect(field('blocks').getAttribute('data-invalid')).toBeNull();
 		expect(field('video').getAttribute('data-invalid')).toBeNull();
@@ -341,7 +343,7 @@ describe('errors behavior', () => {
 		const dialog = field('block').querySelector('dialog')!;
 		let opened = 0;
 		const listener = (event: Event): void => {
-			if (event.target instanceof Element && event.target.closest('.gear')) {
+			if (event.target instanceof Element && event.target.closest('.cms-blocks-editor-settings')) {
 				opened++;
 			}
 		};
@@ -354,7 +356,9 @@ describe('errors behavior', () => {
 			},
 		]);
 
-		expect(field('block').querySelector('.gear')?.classList.contains('has-error')).toBe(true);
+		expect(
+			field('block').querySelector('.cms-blocks-editor-settings')?.classList.contains('has-error'),
+		).toBe(true);
 		expect(dialog.querySelector('select')?.getAttribute('aria-invalid')).toBe('true');
 
 		box.querySelector<HTMLElement>('[data-error-jump]')?.click();

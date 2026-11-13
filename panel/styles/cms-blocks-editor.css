@@ -3,7 +3,7 @@
 	/* Just under a block of one line, so rows with text keep their height. */
 	--blocks-row-min: 3.5rem;
 
-	& .grid {
+	& .cms-blocks-editor-grid {
 		position: relative;
 		display: grid;
 		grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr));
@@ -47,24 +47,24 @@
 	}
 
 	/* An empty field is the canvas with its add bar alone. */
-	& .grid:not(:has(*)) {
+	& .cms-blocks-editor-grid:not(:has(*)) {
 		display: none;
 	}
 
 	/* Empty and editable, the add bar is the whole control, level with
 	   the inputs beside it, like an empty media field. */
-	&:not(:has(> .grid > *)):has(> .adders) {
+	&:not(:has(> .cms-blocks-editor-grid > *)):has(> .cms-blocks-editor-adders) {
 		border: 1px solid var(--cms-color-border-control);
 		border-radius: var(--cms-control-radius);
 		background: var(--cms-color-surface);
 		box-shadow: var(--cms-shadow-raised);
 
-		& > .adders,
-		& > .adders > .adder {
+		& > .cms-blocks-editor-adders,
+		& > .cms-blocks-editor-adders > .cms-blocks-editor-adder {
 			border-radius: calc(var(--cms-control-radius) - 1px);
 		}
 
-		& > .adders > .adder {
+		& > .cms-blocks-editor-adders > .cms-blocks-editor-adder {
 			min-height: calc(var(--cms-control-height) - 2px);
 			padding-block: var(--cms-space-1);
 		}
@@ -74,7 +74,7 @@
 		grid-column: 1 / -1;
 	}
 
-	& .block {
+	& .cms-blocks-editor-block {
 		position: relative;
 		/* The parts of a split follow each other; a block on the grid is placed. */
 		grid-column: span var(--colspan, 1);
@@ -110,13 +110,13 @@
 		}
 	}
 
-	& .grid > .block[data-placed] {
+	& .cms-blocks-editor-grid > .cms-blocks-editor-block[data-placed] {
 		grid-column: var(--col) / span var(--colspan, 1);
 		grid-row: var(--row) / span var(--rowspan, 1);
 	}
 
 	/* The dragged block leaves the grid and follows the pointer above it. */
-	& .grid > .block.is-lifted[data-placed] {
+	& .cms-blocks-editor-grid > .cms-blocks-editor-block.is-lifted[data-placed] {
 		position: absolute;
 		z-index: 20;
 		inset: 0 auto auto 0;
@@ -128,7 +128,7 @@
 	}
 
 	/* Where the dragged block lands: its size, among the blocks it moves. */
-	& .grid > .landing {
+	& .cms-blocks-editor-grid > .cms-blocks-editor-landing {
 		border: 1px dashed var(--cms-color-border-strong);
 		border-radius: var(--cms-radius-md);
 		background: var(--cms-color-surface-sunken);
@@ -145,12 +145,12 @@
 	 * own, its tools sit inside its bottom end corner, and a dashed seam
 	 * in the gap separates it from the next.
 	 */
-	& .block.is-split {
+	& .cms-blocks-editor-block.is-split {
 		display: grid;
 		grid-template-columns: subgrid;
 		grid-template-rows: subgrid;
 
-		& > .parts {
+		& > .cms-blocks-editor-parts {
 			display: grid;
 			grid-template-columns: subgrid;
 			grid-template-rows: subgrid;
@@ -161,20 +161,20 @@
 
 	/* A lifted split has left the grid and takes its tracks along
 	   (placement.ts); without a subgrid it has no gap of the grid's. */
-	& .grid > .block.is-split.is-lifted {
+	& .cms-blocks-editor-grid > .cms-blocks-editor-block.is-split.is-lifted {
 		gap: var(--blocks-gap);
 	}
 
-	& .parts > .block {
+	& .cms-blocks-editor-parts > .cms-blocks-editor-block {
 		border: 0;
 		background: none;
 
-		& > .chrome {
+		& > .cms-blocks-editor-chrome {
 			inset-block: auto var(--cms-space-2);
 		}
 	}
 
-	& .seam {
+	& .cms-blocks-editor-seam {
 		position: absolute;
 		z-index: 5;
 
@@ -201,7 +201,7 @@
 
 			/* A ring on the line with a triangle to either side. Wider than
 			   the seam, it takes the pointer too, so its whole face grabs. */
-			& > .knob {
+			& > .cms-blocks-editor-knob {
 				position: absolute;
 				inset-block-start: 50%;
 				/* The line's centre: its 1px border starts at 50%. */
@@ -256,7 +256,7 @@
 					border-style: solid;
 				}
 
-				& > .knob {
+				& > .cms-blocks-editor-knob {
 					opacity: 1;
 				}
 			}
@@ -277,14 +277,14 @@
 		}
 	}
 
-	& .parts > .block:last-child > .seam {
+	& .cms-blocks-editor-parts > .cms-blocks-editor-block:last-child > .cms-blocks-editor-seam {
 		display: none;
 	}
 
 	/* A seam overhangs the next part, which may be the active one. The
 	   hover would lift the seam's part to 3, below that neighbour, which
 	   then covers the seam and ends the hover again: a flicker. */
-	& .parts > .block:has(> .seam:hover) {
+	& .cms-blocks-editor-parts > .cms-blocks-editor-block:has(> .cms-blocks-editor-seam:hover) {
 		z-index: 5;
 	}
 
@@ -293,22 +293,33 @@
 	 * or in a split, whose direction decides. Each such control lists its
 	 * places; a split's own chrome has none.
 	 */
-	& .grid > .block:not(.is-split) [data-places]:not([data-places~='block']),
-	& [data-split='columns'] > .parts > .block [data-places]:not([data-places~='columns']),
-	& [data-split='rows'] > .parts > .block [data-places]:not([data-places~='rows']) {
+	&
+		.cms-blocks-editor-grid
+		> .cms-blocks-editor-block:not(.is-split)
+		[data-places]:not([data-places~='block']),
+	&
+		[data-split='columns']
+		> .cms-blocks-editor-parts
+		> .cms-blocks-editor-block
+		[data-places]:not([data-places~='columns']),
+	&
+		[data-split='rows']
+		> .cms-blocks-editor-parts
+		> .cms-blocks-editor-block
+		[data-places]:not([data-places~='rows']) {
 		display: none;
 	}
 
 	/* A split into rows is as tall as its parts: no row edges of its own. */
-	& [data-split='rows'] > .resize:is(.is-top, .is-bottom),
-	& [data-split='rows'] > dialog .dimension:has([data-layout-input='rowspan']) {
+	& [data-split='rows'] > .cms-blocks-editor-resize:is(.is-top, .is-bottom),
+	& [data-split='rows'] > dialog .cms-blocks-editor-dimension:has([data-layout-input='rowspan']) {
 		display: none;
 	}
 
 	/* An empty run of cells: a button that inserts a block filling it
 	   exactly, drawn as a dotted box inset from its cells. Hidden until the
 	   pointer is over those cells. */
-	& .ghost {
+	& .cms-blocks-editor-ghost {
 		--cms-icon-size: min(1.75rem, 50cqmin);
 
 		position: absolute;
@@ -340,9 +351,9 @@
 		}
 	}
 
-	& .ghost:hover,
-	& .ghost:focus-visible,
-	& .ghost[aria-expanded='true'] {
+	& .cms-blocks-editor-ghost:hover,
+	& .cms-blocks-editor-ghost:focus-visible,
+	& .cms-blocks-editor-ghost[aria-expanded='true'] {
 		color: var(--cms-color-text-subtle);
 		opacity: 1;
 
@@ -353,17 +364,17 @@
 
 	/* The fade in waits a moment, so a pointer only passing over a gap on
 	   its way to a block does not flash its ghost. */
-	& .ghost:hover {
+	& .cms-blocks-editor-ghost:hover {
 		transition: opacity 240ms cubic-bezier(0.2, 0, 0, 1) 80ms;
 	}
 
 	/* An armed ghost is visible at once: the menu library closes a menu
 	   whose trigger is still fading in. */
-	& .ghost[aria-expanded='true'] {
+	& .cms-blocks-editor-ghost[aria-expanded='true'] {
 		transition: none;
 	}
 
-	& .ghost:focus-visible {
+	& .cms-blocks-editor-ghost:focus-visible {
 		outline: none;
 
 		&::before {
@@ -374,7 +385,7 @@
 
 	/* Every ghost's run of free cells, drawn like the free cells of the
 	   resize guides while one ghost is pointed at: the space there is to fill. */
-	& .ghost-slot {
+	& .cms-blocks-editor-ghost-slot {
 		position: absolute;
 		inset: var(--cms-space-1);
 		border: 1px dashed var(--cms-color-border-strong);
@@ -385,17 +396,21 @@
 		transition: opacity 160ms ease-out;
 	}
 
-	& .grid:has(> .ghost:is(:hover, :focus-visible, [aria-expanded='true'])) > .ghost-slot {
+	&
+		.cms-blocks-editor-grid:has(
+			> .cms-blocks-editor-ghost:is(:hover, :focus-visible, [aria-expanded='true'])
+		)
+		> .cms-blocks-editor-ghost-slot {
 		opacity: 1;
 	}
 
-	& .grid:has(> .ghost:hover) > .ghost-slot {
+	& .cms-blocks-editor-grid:has(> .cms-blocks-editor-ghost:hover) > .cms-blocks-editor-ghost-slot {
 		transition: opacity 240ms cubic-bezier(0.2, 0, 0, 1) 80ms;
 	}
 
 	/* Over the slots, the ghost outlines its own instead of drawing a box. */
 	@media (hover: hover) {
-		& .ghost::before {
+		& .cms-blocks-editor-ghost::before {
 			inset: var(--cms-space-1);
 			border-style: solid;
 			background: none;
@@ -404,20 +419,22 @@
 
 	/* Without hover there is no reveal; an invisible button must not take taps. */
 	@media (hover: none) {
-		& .ghost {
+		& .cms-blocks-editor-ghost {
 			opacity: 0.5;
 		}
 	}
 
 	/* A gesture in progress has no gaps worth showing yet. */
-	& .grid:has(> .is-dragging) > :is(.ghost, .ghost-slot),
-	&.is-resizing :is(.ghost, .ghost-slot),
-	&.is-moving :is(.ghost, .ghost-slot) {
+	&
+		.cms-blocks-editor-grid:has(> .is-dragging)
+		> :is(.cms-blocks-editor-ghost, .cms-blocks-editor-ghost-slot),
+	&.is-resizing :is(.cms-blocks-editor-ghost, .cms-blocks-editor-ghost-slot),
+	&.is-moving :is(.cms-blocks-editor-ghost, .cms-blocks-editor-ghost-slot) {
 		display: none;
 	}
 
 	/* Keep the full edge draggable around the visible grip. */
-	& .resize {
+	& .cms-blocks-editor-resize {
 		position: absolute;
 		z-index: 3;
 		/* Pointer capture needs the browser to keep the gesture. */
@@ -470,7 +487,7 @@
 	}
 
 	/* The top edge where it can move: into free rows above, or down while taller than a row. */
-	& .block:not([data-top-edge]) > .resize.is-top {
+	& .cms-blocks-editor-block:not([data-top-edge]) > .cms-blocks-editor-resize.is-top {
 		display: none;
 	}
 
@@ -479,34 +496,35 @@
 	 * blocks' controls at once. An open menu counts as focus, since a click
 	 * inside it may have taken the focus elsewhere.
 	 */
-	& .block:focus-within,
-	& .block:has(:popover-open),
-	&:not(:has(.block:focus-within, .block :popover-open)) .block:hover {
+	& .cms-blocks-editor-block:focus-within,
+	& .cms-blocks-editor-block:has(:popover-open),
+	&:not(:has(.cms-blocks-editor-block:focus-within, .cms-blocks-editor-block :popover-open))
+		.cms-blocks-editor-block:hover {
 		border-color: var(--cms-color-border-strong);
 		border-style: solid;
 
-		& > .chrome > .tools {
+		& > .cms-blocks-editor-chrome > .cms-blocks-editor-tools {
 			opacity: 1;
 			pointer-events: auto;
 		}
 	}
 
-	& .block:focus-within,
-	& .block:has(:popover-open) {
+	& .cms-blocks-editor-block:focus-within,
+	& .cms-blocks-editor-block:has(:popover-open) {
 		border-color: var(--cms-color-accent);
 		/* Forced colours paint this outline when the accent border is flattened. */
 		outline: 1px solid transparent;
 
-		& > .resize > .cms-icon {
+		& > .cms-blocks-editor-resize > .cms-icon {
 			color: var(--cms-color-accent);
 		}
 	}
 
-	& .resize:hover {
+	& .cms-blocks-editor-resize:hover {
 		background: var(--cms-color-canvas);
 	}
-	& .resize:hover > .cms-icon,
-	& .resize.is-active > .cms-icon {
+	& .cms-blocks-editor-resize:hover > .cms-icon,
+	& .cms-blocks-editor-resize.is-active > .cms-icon {
 		color: var(--cms-color-accent);
 		opacity: 1;
 	}
@@ -520,7 +538,7 @@
 	 * running through it, and the free cells around. Over the blocks, so
 	 * a line crossing the block shows; the chrome stays on top.
 	 */
-	& .guide {
+	& .cms-blocks-editor-guide {
 		position: absolute;
 		z-index: 5;
 		inset: 0;
@@ -539,7 +557,7 @@
 		}
 	}
 
-	& .guide-label {
+	& .cms-blocks-editor-guide-label {
 		position: absolute;
 		z-index: 16;
 		padding: 0.125rem var(--cms-space-2);
@@ -554,7 +572,7 @@
 	}
 
 	/* The other blocks the gesture changed, until it ends. */
-	& .grid > .block[data-affected]::after {
+	& .cms-blocks-editor-grid > .cms-blocks-editor-block[data-affected]::after {
 		content: '';
 		position: absolute;
 		z-index: 5;
@@ -567,7 +585,7 @@
 	 * Hangs half over the block's top edge, right-aligned, so it needs no
 	 * gutter of its own — at rest it is as wide as what stays visible.
 	 */
-	& .chrome {
+	& .cms-blocks-editor-chrome {
 		position: absolute;
 		z-index: 15;
 		inset-block-start: -0.875rem;
@@ -579,7 +597,7 @@
 
 	/* The controls: hidden means unclickable, or the invisible group would
 	   swallow clicks meant for the block underneath it. */
-	& .tools {
+	& .cms-blocks-editor-tools {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-1);
@@ -595,11 +613,11 @@
 	}
 
 	/* Opening a menu must not leave its anchor at zero opacity during a fade. */
-	& .tools:has(:popover-open) {
+	& .cms-blocks-editor-tools:has(:popover-open) {
 		transition: none;
 	}
 
-	& .grip {
+	& .cms-blocks-editor-grip {
 		display: grid;
 		flex-shrink: 0;
 		place-items: center;
@@ -614,9 +632,9 @@
 		}
 	}
 
-	& .inserter,
-	& .gear,
-	& .kebab {
+	& .cms-blocks-editor-inserter,
+	& .cms-blocks-editor-settings,
+	& .cms-blocks-editor-kebab {
 		display: inline-flex;
 		flex-shrink: 0;
 		align-items: center;
@@ -637,26 +655,26 @@
 		}
 	}
 
-	& .inserter {
+	& .cms-blocks-editor-inserter {
 		--cms-icon-size: 1.5em;
 	}
 
-	& .gear {
+	& .cms-blocks-editor-settings {
 		--cms-icon-size: 0.9em;
 	}
 
-	& .gear.has-error {
+	& .cms-blocks-editor-settings.has-error {
 		color: var(--cms-color-danger);
 	}
 
-	& .inserter[aria-expanded='true'],
-	& .kebab[aria-expanded='true'] {
+	& .cms-blocks-editor-inserter[aria-expanded='true'],
+	& .cms-blocks-editor-kebab[aria-expanded='true'] {
 		background: var(--cms-color-surface-sunken);
 		color: var(--cms-color-text);
 	}
 
 	/* The layout numbers in the settings dialog: three short inputs abreast. */
-	& .layout {
+	& .cms-blocks-editor-layout {
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: var(--cms-space-3);
@@ -667,21 +685,21 @@
 		}
 	}
 
-	& .layout + .fields {
+	& .cms-blocks-editor-layout + .cms-settings-fields {
 		margin-top: var(--cms-space-4);
 	}
 
-	& .body {
+	& .cms-blocks-editor-body {
 		padding: var(--cms-space-4);
 	}
 
 	/* An editor view of its own inside the hundred-column field grid. */
-	& .body > .cms-fields > .view {
+	& .cms-blocks-editor-body > .cms-fields > .cms-blocks-editor-view {
 		grid-column: 1 / -1;
 	}
 
 	/* A block that edits every field in its dialog: its name opens it. */
-	& .body .summary {
+	& .cms-blocks-editor-body .cms-blocks-editor-summary {
 		display: inline-flex;
 		grid-column: 1 / -1;
 		justify-self: start;
@@ -726,7 +744,7 @@
 	}
 
 	/* A block grows with its text: no inner scrollbar on the canvas. */
-	& .block .ProseMirror {
+	& .cms-blocks-editor-block .ProseMirror {
 		padding: 0;
 		max-height: none;
 		overflow-y: visible;
@@ -734,7 +752,7 @@
 
 	/* The negative margin puts bare text where the control's edge was.
 	   The card carries focus, including the forced-colours outline. */
-	& .block.is-bare > .body {
+	& .cms-blocks-editor-block.is-bare > .cms-blocks-editor-body {
 		& :is(.cms-input, .cms-textarea):not(cosray-host *) {
 			width: calc(100% + 2 * var(--cms-space-2));
 			margin-inline: calc(-1 * var(--cms-space-2));
@@ -769,28 +787,28 @@
 			}
 		}
 
-		& .heading {
+		& .cms-blocks-editor-heading {
 			display: flex;
 			gap: var(--cms-space-3);
 			align-items: center;
 
-			& .text {
+			& .cms-blocks-editor-heading-text {
 				flex: 1 1 auto;
 				min-width: 0;
 			}
 
-			& .text .cms-input {
+			& .cms-blocks-editor-heading-text .cms-input {
 				font-weight: 600;
 				letter-spacing: -0.01em;
 				line-height: 1.25;
 				padding-block: 0;
 			}
 
-			& .level {
+			& .cms-blocks-editor-heading-level {
 				flex: 0 0 auto;
 			}
 
-			& .level-button {
+			& .cms-blocks-editor-heading-button {
 				padding: var(--cms-space-1) var(--cms-space-2);
 				border: 0;
 				border-radius: var(--cms-radius-sm);
@@ -825,23 +843,33 @@
 				}
 			}
 
-			&:has(.level option[value='1']:checked) .text .cms-input {
+			&:has(.cms-blocks-editor-heading-level option[value='1']:checked)
+				.cms-blocks-editor-heading-text
+				.cms-input {
 				font-size: var(--cms-font-size-3xl);
 			}
 
-			&:has(.level option[value='2']:checked) .text .cms-input {
+			&:has(.cms-blocks-editor-heading-level option[value='2']:checked)
+				.cms-blocks-editor-heading-text
+				.cms-input {
 				font-size: var(--cms-font-size-2xl);
 			}
 
-			&:has(.level option[value='3']:checked) .text .cms-input {
+			&:has(.cms-blocks-editor-heading-level option[value='3']:checked)
+				.cms-blocks-editor-heading-text
+				.cms-input {
 				font-size: var(--cms-font-size-xl);
 			}
 
-			&:has(.level option[value='4']:checked) .text .cms-input {
+			&:has(.cms-blocks-editor-heading-level option[value='4']:checked)
+				.cms-blocks-editor-heading-text
+				.cms-input {
 				font-size: var(--cms-font-size-lg);
 			}
 
-			&:has(.level option[value='6']:checked) .text .cms-input {
+			&:has(.cms-blocks-editor-heading-level option[value='6']:checked)
+				.cms-blocks-editor-heading-text
+				.cms-input {
 				font-size: var(--cms-font-size-sm);
 			}
 		}
@@ -855,14 +883,14 @@
 		}
 	}
 
-	& .adders {
+	& .cms-blocks-editor-adders {
 		display: flex;
 	}
 
 	/* The quick picker is as wide as its labels; a long one wraps. The
 	   cap sits on the choices because the menu's own max-width is set
 	   inline to the room in the viewport. */
-	& .adders > .cms-action-menu {
+	& .cms-blocks-editor-adders > .cms-action-menu {
 		--width: max-content;
 
 		& > button {
@@ -871,7 +899,7 @@
 		}
 	}
 
-	& .adder {
+	& .cms-blocks-editor-adder {
 		display: flex;
 		flex: 1 1 0;
 		align-items: center;

@@ -43,7 +43,10 @@ final class PanelBlockSettingsTest extends End2EndTestCase
 
 		// The caption stays on the canvas, a bare single field.
 		$this->assertHtmlNodeExists(
-			$block . '/div[@class="body"]//input[@name="' . self::ROW . '[fields][caption][value][zxx]"]',
+			$block
+				. '/div[@class="cms-blocks-editor-body"]//input[@name="'
+				. self::ROW
+				. '[fields][caption][value][zxx]"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists($block . '[contains(@class, "is-bare")]', $html);
@@ -65,8 +68,14 @@ final class PanelBlockSettingsTest extends End2EndTestCase
 			$dialog . '//label[not(contains(@class, "cms-sr-only"))][contains(., "Target")]',
 			$html,
 		);
-		$this->assertHtmlNodeMissing($block . '/div[@class="body"]//*[contains(@name, "[fields][target]")]', $html);
-		$this->assertHtmlNodeExists($block . '//button[@class="gear"][@data-dialog-open="meta"]', $html);
+		$this->assertHtmlNodeMissing(
+			$block . '/div[@class="cms-blocks-editor-body"]//*[contains(@name, "[fields][target]")]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			$block . '//button[@class="cms-blocks-editor-settings"][@data-dialog-open="meta"]',
+			$html,
+		);
 	}
 
 	public function testABlockWithEveryFieldInItsDialogOffersToOpenIt(): void
@@ -79,7 +88,7 @@ final class PanelBlockSettingsTest extends End2EndTestCase
 		$block = '//div[@data-repeater-row][input[@value="spacer"]]';
 
 		$this->assertHtmlNodeExists(
-			$block . '/div[@class="body"]//button[@data-dialog-open="meta"][contains(., "Spacer")]',
+			$block . '/div[@class="cms-blocks-editor-body"]//button[@data-dialog-open="meta"][contains(., "Spacer")]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
@@ -101,7 +110,10 @@ final class PanelBlockSettingsTest extends End2EndTestCase
 		);
 		$block = '//div[@data-repeater-row][input[@value="action"]]';
 
-		$this->assertHtmlNodeExists($block . '/div[@class="chrome"]//button[@data-dialog-open="meta"]', $html);
+		$this->assertHtmlNodeExists(
+			$block . '/div[@class="cms-blocks-editor-chrome"]//button[@data-dialog-open="meta"]',
+			$html,
+		);
 		$this->assertHtmlNodeMissing($block . '//*[@data-repeater-remove]', $html);
 		$this->assertHtmlNodeExists(
 			$block
@@ -127,7 +139,7 @@ final class PanelBlockSettingsTest extends End2EndTestCase
 		$this->assertHtmlNodeExists($block . '[contains(@class, "is-bare")]', $html);
 		$this->assertHtmlNodeExists(
 			$block
-				. '/div[@class="body"]//div[@class="test-callout"]'
+				. '/div[@class="cms-blocks-editor-body"]//div[@class="test-callout"]'
 				. '//input[@name="'
 				. self::ROW
 				. '[fields][text][value][zxx]"][@value="Mind the gap"]',
@@ -140,7 +152,7 @@ final class PanelBlockSettingsTest extends End2EndTestCase
 		// The view's CSS can follow the neutral values, kept current by the panel.
 		$this->assertHtmlNodeExists(
 			$block
-				. '/div[@class="body"][@data-block-values="text tone"][@data-value-tone="loud"]'
+				. '/div[@class="cms-blocks-editor-body"][@data-block-values="text tone"][@data-value-tone="loud"]'
 				. '[contains(@style, "--value-tone: loud")]',
 			$html,
 		);

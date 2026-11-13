@@ -702,7 +702,10 @@ export async function initDrag() {
 	// A multi-column canvas drags by position, through the placement behavior.
 	const lists = [
 		.../** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('[data-repeater-list]')),
-	].filter((list) => !enhanced.has(list) && !list.matches('.cms-blocks-editor.is-grid > .grid'));
+	].filter(
+		(list) =>
+			!enhanced.has(list) && !list.matches('.cms-blocks-editor.is-grid > .cms-blocks-editor-grid'),
+	);
 
 	if (lists.length === 0) {
 		return;

@@ -39,7 +39,7 @@ $style .= $layout->placed() ? "; --col: {$layout->col}; --row: {$layout->row}" :
 $label = __('field:split-block');
 ?>
 <div
-	class="block is-split"
+	class="cms-blocks-editor-block is-split"
 	data-repeater-row
 	data-meta-owner
 	data-split="<?= $direction ?>"
@@ -59,10 +59,10 @@ $label = __('field:split-block');
 			data-layout="<?= $dimension ?>" />
 	<?php endforeach ?>
 	<?php if (!$readonly): ?>
-	<div class="chrome">
-		<span class="tools">
+	<div class="cms-blocks-editor-chrome">
+		<span class="cms-blocks-editor-tools">
 			<span
-				class="grip"
+				class="cms-blocks-editor-grip"
 				data-repeater-grip
 				tabindex="0"
 				title="<?= $this->escape(__('field:drag-block')) ?>"
@@ -72,13 +72,13 @@ $label = __('field:split-block');
 			</span>
 			<button
 				type="button"
-				class="gear"
+				class="cms-blocks-editor-settings"
 				data-dialog-open="meta"
 				aria-label="<?= $this->escape(__('field:block-settings')) ?>"
 				title="<?= $this->escape(__('field:block-settings')) ?>">
 				<?= \Cosray\Panel\Icon::render('pencil') ?>
 			</button>
-			<button type="button" class="kebab"
+			<button type="button" class="cms-blocks-editor-kebab"
 				popovertarget="<?= $this->escape("{$rowId}-actions") ?>"
 				aria-haspopup="menu" aria-label="<?= $this->escape(__('field:block-actions')) ?>">
 				<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
@@ -104,7 +104,7 @@ $label = __('field:split-block');
 		'end' => __('field:colspan'),
 	] as $edge => $title): ?>
 		<span
-			class="resize is-<?= $edge ?>"
+			class="cms-blocks-editor-resize is-<?= $edge ?>"
 			data-layout-resize="<?= $edge ?>"
 			aria-hidden="true"
 			title="<?= $this->escape($title) ?>">
@@ -113,7 +113,7 @@ $label = __('field:split-block');
 	<?php endforeach ?>
 	<?php endif ?>
 	<div
-		class="parts"
+		class="cms-blocks-editor-parts"
 		data-repeater
 		data-repeater-list
 		data-name="<?= $this->escape("{$rowName}[blocks]") ?>"

@@ -62,7 +62,7 @@
 	}
 
 	/* Nothing to lay out yet: the preview waits for the first block. */
-	&:not(:has(.cms-blocks-editor > .grid > *)) .cms-field-layout-preview {
+	&:not(:has(.cms-blocks-editor > .cms-blocks-editor-grid > *)) .cms-field-layout-preview {
 		display: none;
 	}
 

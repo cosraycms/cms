@@ -66,7 +66,7 @@ describe('dialog triggers', () => {
 			<div data-meta-owner>
 				<button type="button" class="cms-field-button" data-dialog-open="meta">Field meta</button>
 				<div data-meta-owner>
-					<button type="button" class="gear" data-dialog-open="meta">Block meta</button>
+					<button type="button" class="cms-blocks-editor-settings" data-dialog-open="meta">Block meta</button>
 					<div data-meta-owner><dialog data-dialog="meta" id="sub"></dialog></div>
 					<dialog data-dialog="meta" id="block"></dialog>
 				</div>
@@ -75,7 +75,7 @@ describe('dialog triggers', () => {
 		`;
 		const block = document.querySelector<HTMLDialogElement>('#block')!;
 		const field = document.querySelector<HTMLDialogElement>('#field')!;
-		document.querySelector<HTMLElement>('.gear')!.click();
+		document.querySelector<HTMLElement>('.cms-blocks-editor-settings')!.click();
 		expect(block.open).toBe(true);
 		expect(field.open).toBe(false);
 		closeDialog(block);

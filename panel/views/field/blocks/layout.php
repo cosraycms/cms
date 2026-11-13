@@ -24,9 +24,9 @@ $dimensions = [
 	'row' => [__('field:row'), (int) ($layout['row'] ?? 0), 1, 999, 'block'],
 ];
 ?>
-<div class="layout">
+<div class="cms-blocks-editor-layout">
 	<?php foreach ($dimensions as $dimension => [$label, $value, $low, $high, $places]): ?>
-		<div class="dimension" data-places="<?= $places ?>">
+		<div class="cms-blocks-editor-dimension" data-places="<?= $places ?>">
 			<label class="cms-sub-label" for="<?= $this->escape("{$id}-{$dimension}") ?>">
 				<?= $this->escape($label) ?>
 			</label>

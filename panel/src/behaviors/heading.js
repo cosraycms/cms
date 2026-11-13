@@ -2,7 +2,9 @@
  * @param {Element} heading
  */
 function refresh(heading) {
-	const select = /** @type {HTMLSelectElement | null} */ (heading.querySelector('.level select'));
+	const select = /** @type {HTMLSelectElement | null} */ (
+		heading.querySelector('.cms-blocks-editor-heading-level select')
+	);
 	const caption = heading.querySelector('[data-heading-caption]');
 	if (!select || !caption) return;
 
@@ -27,7 +29,9 @@ function click(event) {
 		target.closest('button[data-heading-level]')
 	);
 	const heading = choice?.closest('[data-heading]');
-	const select = /** @type {HTMLSelectElement | null} */ (heading?.querySelector('.level select'));
+	const select = /** @type {HTMLSelectElement | null} */ (
+		heading?.querySelector('.cms-blocks-editor-heading-level select')
+	);
 	if (!choice || !heading || !select || choice.disabled || select.disabled) return;
 	if (heading.closest('[inert], [data-readonly="true"]')) return;
 
