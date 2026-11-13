@@ -83,7 +83,7 @@ final class PanelMenusTest extends End2EndTestCase
 	{
 		$admin = $this->getHtmlResponse($this->makeRequest('GET', '/panel'));
 		$this->assertHtmlNodeExists(
-			'//a[@href="/panel/menus" and contains(concat(" ", normalize-space(@class), " "), " area ") and normalize-space(.)="Menus"]',
+			'//a[@href="/panel/menus" and contains(concat(" ", normalize-space(@class), " "), " cms-masthead-area ") and normalize-space(.)="Menus"]',
 			$admin,
 		);
 

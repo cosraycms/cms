@@ -138,7 +138,7 @@ final class PanelLayersTest extends End2EndTestCase
 			'HX-Target' => 'div#frame',
 		]);
 
-		$swapped = '<div id="frame" class="frame">' . $html . '</div>';
+		$swapped = '<div id="frame" class="cms-shell-frame">' . $html . '</div>';
 		$this->assertHtmlNodeExists(
 			'/html/body/div[@id="frame"]/aside[contains(concat(" ", normalize-space(@class), " "), " cms-sidebar ")]',
 			$swapped,

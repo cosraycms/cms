@@ -42,13 +42,13 @@ if (is_string($systemUrl)) {
 ?>
 <nav
 	id="area-nav"
-	class="areas"
+	class="cms-masthead-areas"
 	aria-label="<?= escape(__('panel:navigation')) ?>"
 	hx-target:inherited="#frame"
 	<?= $oob ? 'hx-swap-oob="true"' : '' ?>>
 	<?php foreach ($areas as $entry): ?>
 		<a
-			class="area"
+			class="cms-masthead-area"
 			href="<?= escape($entry['url']) ?>"
 			<?= $entry['area'] === $currentArea ? 'aria-current="page"' : '' ?>>
 			<?= \Cosray\Panel\Icon::render($entry['icon']) ?>

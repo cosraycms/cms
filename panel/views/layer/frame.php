@@ -11,11 +11,11 @@ if ($layer !== 'frame') {
 
 ?>
 <?php if ($layer !== 'frame'): ?>
-<div id="frame" class="frame">
+<div id="frame" class="cms-shell-frame">
 <?php endif ?>
 	<?php $this->include('component/navigation') ?>
 
-	<main id="main" class="main" hx-target:inherited="#main">
+	<main id="main" class="cms-shell-main" hx-target:inherited="#main">
 		<?= $this->slot() ?>
 	</main>
 <?php if ($layer !== 'frame'): ?>

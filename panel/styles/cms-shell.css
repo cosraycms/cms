@@ -15,7 +15,7 @@
 	background: var(--cms-color-canvas);
 	overflow: hidden;
 
-	& > .frame {
+	& .cms-shell-frame {
 		display: flex;
 		flex: 1 1 auto;
 		align-items: stretch;
@@ -28,272 +28,54 @@
 		background: var(--cms-color-surface);
 		box-shadow: none;
 		overflow: hidden;
+
+		/*
+		 * The pane is a box inside the white frame, and its corner and edge only
+		 * read as one where a white column carries on beside it: the rail on the
+		 * left, the inspector on the right. A side without one meets the frame's
+		 * own edge, where a curve leaves a white tip standing alone and a border
+		 * doubles the frame's, so the pane squares and opens that side instead.
+		 */
+		&:not(:has(> .cms-sidebar)) {
+			--cms-pane-radius-start: 0;
+			--cms-pane-border-start: 0;
+		}
 	}
 
-	& > .frame > .main {
+	& .cms-shell-main {
 		display: flex;
 		flex: 1 1 auto;
 		flex-direction: column;
 		min-width: 0;
 		min-height: 0;
-	}
-}
 
-/*
- * The pane is a box inside the white frame, and its corner and edge only read
- * as one where a white column carries on beside it: the rail on the left, the
- * inspector on the right. A side without one meets the frame's own edge, where
- * a curve leaves a white tip standing alone and a border doubles the frame's,
- * so the pane squares and opens that side instead.
- */
-.cms-shell > .frame:not(:has(> .cms-sidebar)) {
-	--cms-pane-radius-start: 0;
-	--cms-pane-border-start: 0;
-}
-
-.cms-shell > .frame > .main:not(:has(.cms-inspector)) {
-	--cms-pane-radius-end: 0;
-	--cms-pane-border-end: 0;
-}
-
-/* An embedded editor fills its frame, which another application provides. */
-.cms-embed {
-	--cms-pane-radius-start: 0;
-	--cms-pane-border-start: 0;
-	--cms-pane-radius-end: 0;
-	--cms-pane-border-end: 0;
-
-	display: flex;
-	flex-direction: column;
-	height: 100dvh;
-	min-height: 0;
-	background: var(--cms-color-surface);
-	overflow: hidden;
-}
-
-.cms-embed-locales {
-	margin-block-end: var(--cms-space-4);
-}
-
-.cms-masthead {
-	--hover-bg: var(--cms-color-hover);
-	--current-bg: var(--cms-button-secondary-bg);
-
-	display: flex;
-	align-items: center;
-	gap: clamp(var(--cms-space-3), 2vw, var(--cms-space-8));
-	flex: 0 0 auto;
-	flex-wrap: wrap;
-	width: 100%;
-	max-width: var(--cms-content-max-width);
-	margin-inline: auto;
-	padding: var(--cms-space-2) var(--cms-space-6);
-	background-color: var(--cms-masthead-bg);
-
-	& .logo {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-3);
-		flex-shrink: 0;
-		min-width: 0;
-		color: inherit;
-		text-decoration: none;
-
-		& .image {
-			width: auto;
-			max-height: 1.875rem;
-		}
-
-		& .mark {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			width: 2.125rem;
-			height: 2.125rem;
-			border-radius: var(--cms-radius-md);
-			background: linear-gradient(135deg, var(--cms-color-accent), var(--cms-color-accent-hover));
-			box-shadow: var(--cms-shadow-sm);
-			color: var(--cms-color-text-on-accent);
-			font-weight: 700;
-			letter-spacing: -0.03em;
-		}
-
-		& .wordmark {
-			font-size: var(--cms-font-size-sm);
-			font-weight: 700;
-			letter-spacing: -0.01em;
+		&:not(:has(.cms-inspector)) {
+			--cms-pane-radius-end: 0;
+			--cms-pane-border-end: 0;
 		}
 	}
 
-	& .areas {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-1);
-		flex: 1 1 auto;
-		min-width: 0;
-	}
+	@media (width > 120rem) {
+		& .cms-shell-frame {
+			border: var(--cms-border);
+			border-radius: var(--cms-radius-2xl) var(--cms-radius-2xl) 0 0;
+			box-shadow: var(--cms-shadow-frame);
 
-	& .area {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--cms-space-2);
-		padding: var(--cms-space-1) var(--cms-space-2-5);
-		border: 1px solid transparent;
-		border-radius: var(--cms-radius-lg);
-		color: var(--cms-color-text-muted);
-		font-size: var(--cms-font-size-sm);
-		font-weight: 500;
-		white-space: nowrap;
-		text-decoration: none;
-		transition:
-			background 0.14s ease,
-			color 0.14s ease,
-			border-color 0.14s ease;
-
-		& .cms-icon {
-			--cms-icon-size: 1rem;
-
-			color: var(--cms-color-text-subtle);
-			transition: color 0.14s ease;
-		}
-
-		&:hover {
-			background: var(--hover-bg);
-			color: var(--cms-color-text);
-
-			& .cms-icon {
-				color: currentColor;
+			&:has(.cms-dashboard) {
+				flex: 0 1 auto;
+				margin-bottom: var(--cms-space-6);
+				border-radius: var(--cms-radius-2xl);
 			}
 		}
 
-		&[aria-current='page'] {
-			border-color: var(--cms-color-border-strong);
-			background: var(--current-bg);
-			color: var(--cms-color-text);
-
-			& .cms-icon {
-				color: currentColor;
-			}
+		& .cms-shell-main:not(:has(.cms-inspector)) {
+			--cms-pane-radius-end: var(--cms-pane-radius);
+			--cms-pane-border-end: var(--cms-pane-border);
+			--cms-pane-gap-end: var(--cms-space-2);
 		}
 	}
 
-	& .account {
-		flex-shrink: 0;
-		min-width: 0;
-		margin-left: auto;
-	}
-
-	& .account-trigger {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-2);
-		max-width: 16rem;
-		padding: var(--cms-space-0-5);
-		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius-full);
-		background: var(--cms-gradient-raised), var(--cms-color-surface);
-		box-shadow: var(--cms-shadow-raised);
-		font-size: var(--cms-font-size-sm);
-		transition: border-color 0.14s ease;
-
-		&:has(.name) {
-			padding-inline-end: var(--cms-space-3);
-		}
-
-		&:hover,
-		&[aria-expanded='true'] {
-			border-color: var(--cms-color-border-strong);
-		}
-	}
-
-	& .avatar {
-		display: grid;
-		place-items: center;
-		flex-shrink: 0;
-		width: 1.75rem;
-		height: 1.75rem;
-		border-radius: var(--cms-radius-full);
-		background: var(--cms-color-accent);
-		color: var(--cms-color-text-on-accent);
-		font-size: var(--cms-font-size-xs);
-		font-weight: 600;
-		letter-spacing: 0.02em;
-	}
-
-	& .name {
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	& .account-menu {
-		--width: 16rem;
-
-		& .identity {
-			display: flex;
-			flex-direction: column;
-			gap: var(--cms-space-0-5);
-			padding: var(--cms-space-1-5) var(--cms-space-2-5);
-			overflow-wrap: anywhere;
-		}
-
-		& .title {
-			font-size: var(--cms-font-size-sm);
-			font-weight: 500;
-		}
-
-		& .detail,
-		& .group-label {
-			color: var(--cms-color-text-subtle);
-			font-size: var(--cms-font-size-xs);
-		}
-
-		& .group-label {
-			display: block;
-			padding: var(--cms-space-1) var(--cms-space-2-5) 0;
-		}
-
-		& [aria-checked='true'] {
-			font-weight: 500;
-
-			&::after {
-				content: '✓' / '';
-				margin-inline-start: auto;
-			}
-		}
-	}
-}
-
-@media (width > 120rem) {
-	.cms-shell > .frame {
-		border: var(--cms-border);
-		border-radius: var(--cms-radius-2xl) var(--cms-radius-2xl) 0 0;
-		box-shadow: var(--cms-shadow-frame);
-	}
-
-	.cms-shell > .frame > .main:not(:has(.cms-inspector)) {
-		--cms-pane-radius-end: var(--cms-pane-radius);
-		--cms-pane-border-end: var(--cms-pane-border);
-		--cms-pane-gap-end: var(--cms-space-2);
-	}
-
-	.cms-shell > .frame:has(.cms-dashboard) {
-		flex: 0 1 auto;
-		margin-bottom: var(--cms-space-6);
-		border-radius: var(--cms-radius-2xl);
-	}
-
-	/* On the canvas beside the floating frame, items lift to the surface. */
-	.cms-masthead {
-		--hover-bg: var(--cms-color-surface);
-		--current-bg: var(--cms-color-surface);
-
-		padding: var(--cms-space-3) var(--cms-space-1) var(--cms-space-4);
-	}
-}
-
-@media (width < 40rem), (height < 30rem) {
-	.cms-shell {
+	@media (width < 40rem), (height < 30rem) {
 		/* Stacked, no column sits beside a pane and every side is an edge. */
 		--cms-pane-border-start: 0;
 		--cms-pane-border-end: 0;
@@ -302,16 +84,8 @@
 		min-height: 100dvh;
 		overflow: visible;
 
-		& > .frame {
+		& .cms-shell-frame {
 			flex-direction: column;
 		}
-
-		& > .frame > .main {
-			min-height: 0;
-		}
-	}
-
-	.cms-masthead {
-		padding-inline: var(--cms-space-4);
 	}
 }

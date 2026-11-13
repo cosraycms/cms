@@ -136,11 +136,11 @@ final class PanelAuthTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('class="cms-shell"', $html);
 		$this->assertStringContainsString('class="cms-masthead"', $html);
-		$this->assertStringContainsString('class="main"', $html);
+		$this->assertStringContainsString('class="cms-shell-main"', $html);
 		// The rail carries collections, and this app registers none, so it is
 		// left out rather than rendered empty.
 		$this->assertStringNotContainsString('class="cms-sidebar"', $html);
-		$this->assertStringContainsString('class="logo"', $html);
+		$this->assertStringContainsString('class="cms-masthead-logo"', $html);
 		$this->assertStringContainsString('action="/panel/logout"', $html);
 		// A user without a stored name is identified by their login.
 		$this->assertMatchesRegularExpression(
@@ -148,7 +148,7 @@ final class PanelAuthTest extends End2EndTestCase
 			$html,
 		);
 		// Dashboard and media are areas in the masthead, not rail entries.
-		$this->assertStringContainsString('class="areas"', $html);
+		$this->assertStringContainsString('class="cms-masthead-areas"', $html);
 		$this->assertStringContainsString('Dashboard', $html);
 	}
 

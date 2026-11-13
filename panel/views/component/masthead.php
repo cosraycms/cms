@@ -20,40 +20,39 @@ $label = is_array($account) && $account['name'] === null
 	<?php $this->include('component/area-nav') ?>
 
 	<?php if (is_array($account)): ?>
-		<div class="account">
+		<div class="cms-masthead-account">
 			<button
 				type="button"
-				class="account-trigger"
+				class="cms-masthead-account-trigger"
 				popovertarget="cms-account-menu"
 				aria-haspopup="menu"<?php if ($label !== null): ?> aria-label="<?= escape($label) ?>"<?php endif ?>>
-				<span class="avatar" aria-hidden="true"><?= escape($account['initials']) ?></span>
+				<span class="cms-masthead-avatar" aria-hidden="true"><?= escape($account['initials']) ?></span>
 				<?php if ($account['name'] !== null): ?>
-					<span class="name"><?= escape($account['name']) ?></span>
+					<span class="cms-masthead-name"><?= escape($account['name']) ?></span>
 				<?php endif ?>
 			</button>
-			<div id="cms-account-menu" class="cms-action-menu account-menu" popover="auto" data-action-menu data-align="end">
+			<div id="cms-account-menu" class="cms-action-menu cms-masthead-account-menu" popover="auto" data-action-menu data-align="end">
 				<?php
 
 				// The trigger already names the menu; menus may only hold items,
 				// groups and separators, so the identity is visual only.
 				?>
-				<div class="identity" aria-hidden="true">
-					<span class="title"><?= escape($account['title']) ?></span>
+				<div class="cms-masthead-identity" aria-hidden="true">
+					<span class="cms-masthead-identity-title"><?= escape($account['title']) ?></span>
 					<?php if ($account['detail'] !== ''): ?>
-						<span class="detail"><?= escape($account['detail']) ?></span>
+						<span class="cms-masthead-identity-detail"><?= escape($account['detail']) ?></span>
 					<?php endif ?>
 				</div>
 				<hr />
 				<?php if (count($panelLocales) > 1): ?>
 					<form
-						class="panel-locale"
 						method="post"
 						action="<?= $panelPath ?>/locale"
 						hx-boost="false"
 						role="group"
 						aria-label="<?= escape(__('nav:language')) ?>">
 						<?php $this->include('component/csrf') ?>
-						<span class="group-label" aria-hidden="true"><?= escape(__('nav:language')) ?></span>
+						<span class="cms-masthead-group-label" aria-hidden="true"><?= escape(__('nav:language')) ?></span>
 						<?php foreach ($panelLocales as $id => $title): ?>
 							<button
 								type="submit"

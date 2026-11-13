@@ -76,11 +76,11 @@ final class PanelAreasTest extends End2EndTestCase
 
 		$this->assertHtmlNodeCount(
 			3,
-			'//a[contains(concat(" ", normalize-space(@class), " "), " area ")]',
+			'//a[contains(concat(" ", normalize-space(@class), " "), " cms-masthead-area ")]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//a[@href="/panel/collection/all-content" and contains(concat(" ", normalize-space(@class), " "), " area ") and normalize-space(.)="Content"]',
+			'//a[@href="/panel/collection/all-content" and contains(concat(" ", normalize-space(@class), " "), " cms-masthead-area ") and normalize-space(.)="Content"]',
 			$html,
 		);
 
@@ -124,7 +124,7 @@ final class PanelAreasTest extends End2EndTestCase
 	private function area(string $html, string $href): string
 	{
 		$found = preg_match(
-			'/<a\s[^>]*class="area"[^>]*href="' . preg_quote($href, '/') . '"[^>]*>/',
+			'/<a\s[^>]*class="cms-masthead-area"[^>]*href="' . preg_quote($href, '/') . '"[^>]*>/',
 			$html,
 			$matches,
 		);

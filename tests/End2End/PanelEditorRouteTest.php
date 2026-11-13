@@ -585,14 +585,14 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('aria-current="page"', $link);
 		$this->assertStringNotContainsString(
 			'aria-current="page"',
-			$this->navLink($node, '/panel', 'area'),
+			$this->navLink($node, '/panel', 'cms-masthead-area'),
 		);
 
 		// The editor belongs to content, so the masthead says so while the
 		// node is open — the rail entry alone is not the whole answer.
 		$this->assertStringContainsString(
 			'aria-current="page"',
-			$this->navLink($node, '/panel/collection/all-content', 'area'),
+			$this->navLink($node, '/panel/collection/all-content', 'cms-masthead-area'),
 		);
 	}
 

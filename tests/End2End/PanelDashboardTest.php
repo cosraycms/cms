@@ -208,7 +208,7 @@ final class PanelDashboardTest extends End2EndTestCase
 
 		$this->assertHtmlNodeMissing('//*[@id="area-nav"]/a[@href="/panel"]', $html);
 		$this->assertHtmlNodeExists(
-			'//a[contains(concat(" ", normalize-space(@class), " "), " logo ") and @href="/panel/collection/all-content"]',
+			'//a[contains(concat(" ", normalize-space(@class), " "), " cms-masthead-logo ") and @href="/panel/collection/all-content"]',
 			$html,
 		);
 	}
