@@ -726,6 +726,8 @@ export async function initDrag() {
 			fallbackOnBody: true,
 			ghostClass: 'is-dragging',
 			chosenClass: 'is-chosen',
+			// Not is-lifted: list-mode blocks carry data-placed, and the grid lifts those.
+			dragClass: 'is-drag-image',
 			onEnd: (/** @type {SortableEvent} */ event) => {
 				const container = /** @type {HTMLElement | null} */ (list.closest('[data-repeater]'));
 
