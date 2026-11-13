@@ -28,9 +28,9 @@ $profileUrl = (string) $profileUrl;
 		</div>
 	</header>
 
-	<div class="body">
-		<div class="lead">
-			<p class="intro"><?= escape(__('tokens:intro')) ?></p>
+	<div class="cms-collection-body">
+		<div class="cms-tokens-lead">
+			<p class="cms-tokens-intro"><?= escape(__('tokens:intro')) ?></p>
 
 			<?php if (is_string($created)): ?>
 				<div class="cms-notice" role="status">
@@ -48,24 +48,24 @@ $profileUrl = (string) $profileUrl;
 			<label class="cms-sr-only" for="token-name"><?= escape(__('tokens:name')) ?></label>
 			<input
 				id="token-name"
-				class="cms-input name"
+				class="cms-input cms-tokens-name"
 				name="name"
 				required
 				maxlength="255"
 				value="<?= escape($name) ?>"
 				placeholder="<?= escape(__('tokens:name')) ?>" />
-			<span class="expires">
+			<span class="cms-tokens-expires">
 				<label for="token-expires"><?= escape(__('tokens:expires')) ?></label>
 				<input id="token-expires" class="cms-input" name="expires" type="date" />
 			</span>
 			<button class="cms-button cms-button-primary" type="submit"><?= escape(__('tokens:create')) ?></button>
 		</form>
 
-		<div class="listing">
+		<div class="cms-collection-listing">
 			<?php if ($tokens === []): ?>
-				<div class="empty"><strong><?= escape(__('tokens:none')) ?></strong></div>
+				<div class="cms-collection-empty"><strong><?= escape(__('tokens:none')) ?></strong></div>
 			<?php else: ?>
-				<div class="scroll">
+				<div class="cms-collection-scroll">
 					<table
 						class="cms-list"
 						role="table"

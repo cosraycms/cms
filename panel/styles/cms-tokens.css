@@ -1,0 +1,35 @@
+.cms-tokens {
+	& .cms-tokens-lead {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-3);
+		padding: var(--cms-space-4) var(--cms-space-6) 0;
+	}
+
+	& .cms-tokens-intro {
+		margin: 0;
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	& .cms-notice .cms-input {
+		margin-top: var(--cms-space-2);
+	}
+
+	& .cms-tokens-name {
+		flex: 1 1 18rem;
+		max-width: 32rem;
+	}
+
+	& .cms-tokens-expires {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-3);
+	}
+}
+
+@media (width < 40rem), (height < 30rem) {
+	.cms-tokens .cms-tokens-lead {
+		padding-inline: var(--cms-space-4);
+	}
+}

@@ -34,7 +34,7 @@ function remember(event) {
 	}
 
 	const list = /** @type {HTMLElement | null} */ (
-		source.closest('.cms-collection')?.querySelector('.scroll')
+		source.closest('.cms-collection')?.querySelector('.cms-collection-scroll')
 	);
 
 	if (list) {
@@ -57,9 +57,7 @@ function restore(event) {
 
 	positions.delete(ctx);
 
-	const list = /** @type {HTMLElement | null} */ (
-		document.querySelector('.cms-collection .scroll')
-	);
+	const list = /** @type {HTMLElement | null} */ (document.querySelector('.cms-collection-scroll'));
 
 	if (list) {
 		list.scrollLeft = position.left;

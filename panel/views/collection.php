@@ -64,10 +64,10 @@ $columns .= $hasRowActions ? ' max-content' : '';
 
 		<div class="cms-page-actions">
 			<?php if (count($page->viewLinks) > 0): ?>
-				<nav class="view-toggle" aria-label="<?= escape(__('collection:view')) ?>">
+				<nav class="cms-collection-view-toggle" aria-label="<?= escape(__('collection:view')) ?>">
 					<?php foreach ($page->viewLinks as $link): ?>
 						<a
-							class="view-toggle-link<?= $link['active'] ? ' is-active' : '' ?>"
+							class="cms-collection-view-toggle-link<?= $link['active'] ? ' is-active' : '' ?>"
 							href="<?= escape($link['url']) ?>">
 							<?= escape($link['label']) ?>
 						</a>
@@ -100,7 +100,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 		</div>
 	</header>
 
-	<div class="body">
+	<div class="cms-collection-body">
 		<?php foreach ($notice as $toast): ?>
 			<?php $this->include('component/toast', (array) u($toast)) ?>
 		<?php endforeach ?>
@@ -136,9 +136,9 @@ $columns .= $hasRowActions ? ' max-content' : '';
 			<?php endif ?>
 
 			<?php if ($page->parent !== null): ?>
-				<div class="parent-context">
+				<div class="cms-collection-parent-context">
 					<?php if ($page->parent->type !== null): ?>
-						<span class="type-pill"><?= escape($page->parent->type) ?></span>
+						<span class="cms-collection-type-pill"><?= escape($page->parent->type) ?></span>
 					<?php endif ?>
 					<?php if ($page->parent->dots !== null): ?>
 						<?php $this->include('component/status-dots', ['status' => $page->parent->dots, 'size' => 'sm']) ?>
@@ -185,26 +185,26 @@ $columns .= $hasRowActions ? ' max-content' : '';
 			// their endpoint as formaction; without one a submit has nowhere
 			// valid to go, which is the intended dead end. ?>
 			<form id="collection-bulk" method="post" hidden><?php $this->include('component/csrf') ?></form>
-			<div class="bulk-bar" data-bulk-bar hidden>
-				<div class="info">
-					<output class="count" data-bulk-count></output>
-					<button type="button" class="clear" data-bulk-clear><?= escape(
+			<div class="cms-collection-bulk" data-bulk-bar hidden>
+				<div class="cms-collection-bulk-info">
+					<output class="cms-collection-bulk-count" data-bulk-count></output>
+					<button type="button" class="cms-collection-bulk-clear" data-bulk-clear><?= escape(
 						__('bulk:clear'),
 					) ?></button>
 				</div>
-				<div class="actions">
+				<div class="cms-collection-bulk-actions">
 					<?php if ($page->bulk['publishable']): ?>
-						<button type="button" class="action" data-bulk-open="publish">
+						<button type="button" class="cms-collection-bulk-action" data-bulk-open="publish">
 							<?= escape(__('bulk:publish')) ?>
 						</button>
-						<button type="button" class="action" data-bulk-open="unpublished">
+						<button type="button" class="cms-collection-bulk-action" data-bulk-open="unpublished">
 							<?= escape(__('bulk:unpublish')) ?>
 						</button>
 					<?php endif ?>
-					<button type="button" class="action" data-bulk-open="duplicate">
+					<button type="button" class="cms-collection-bulk-action" data-bulk-open="duplicate">
 						<?= escape(__('bulk:duplicate')) ?>
 					</button>
-					<button type="button" class="action" data-bulk-open="delete">
+					<button type="button" class="cms-collection-bulk-action" data-bulk-open="delete">
 						<?= escape(__('bulk:delete')) ?>
 					</button>
 				</div>
@@ -222,10 +222,10 @@ $columns .= $hasRowActions ? ' max-content' : '';
 			</form>
 		<?php endif ?>
 
-		<div class="listing">
+		<div class="cms-collection-listing">
 			<?php if (count($page->table->rows) === 0): ?>
-				<div class="empty">
-					<div class="icon" aria-hidden="true">⌁</div>
+				<div class="cms-collection-empty">
+					<div class="cms-collection-empty-icon" aria-hidden="true">⌁</div>
 					<strong><?= escape(__('collection:empty')) ?></strong>
 					<?php if ($page->search->value !== ''): ?>
 						<p><?= escape(__('collection:empty-filter-help')) ?></p>
@@ -234,7 +234,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 					<?php endif ?>
 				</div>
 			<?php else: ?>
-				<div class="scroll">
+				<div class="cms-collection-scroll">
 					<?php // Laid out as a grid, so the implicit table roles are gone and
 
 					// have to be spelled out for assistive technology. ?>
@@ -291,32 +291,32 @@ $columns .= $hasRowActions ? ' max-content' : '';
 				</div>
 			<?php endif ?>
 
-			<footer class="foot">
-				<span class="range"><?= escape(__('collection:showing', [
+			<footer class="cms-collection-foot">
+				<span class="cms-collection-range"><?= escape(__('collection:showing', [
 					'start' => $page->pager->rangeStart,
 					'end' => $page->pager->rangeEnd,
 					'total' => $page->pager->total,
 				])) ?></span>
-				<nav class="pagination" aria-label="<?= escape(__('collection:pagination')) ?>">
+				<nav class="cms-collection-pagination" aria-label="<?= escape(__('collection:pagination')) ?>">
 					<?php if ($page->pager->previousUrl !== null): ?>
-						<a class="page-link" href="<?= escape($page->pager->previousUrl) ?>"><?= escape(
+						<a class="cms-collection-page-link" href="<?= escape($page->pager->previousUrl) ?>"><?= escape(
 							__('collection:previous'),
 						) ?></a>
 					<?php else: ?>
-						<span class="page-link is-disabled"><?= escape(__('collection:previous')) ?></span>
+						<span class="cms-collection-page-link is-disabled"><?= escape(__('collection:previous')) ?></span>
 					<?php endif ?>
 
-					<span class="pages"><?= escape(__('collection:page', [
+					<span class="cms-collection-pages"><?= escape(__('collection:page', [
 						'page' => $page->pager->currentPage,
 						'pages' => $page->pager->pageCount,
 					])) ?></span>
 
 					<?php if ($page->pager->nextUrl !== null): ?>
-						<a class="page-link" href="<?= escape($page->pager->nextUrl) ?>"><?= escape(
+						<a class="cms-collection-page-link" href="<?= escape($page->pager->nextUrl) ?>"><?= escape(
 							__('collection:next'),
 						) ?></a>
 					<?php else: ?>
-						<span class="page-link is-disabled"><?= escape(__('collection:next')) ?></span>
+						<span class="cms-collection-page-link is-disabled"><?= escape(__('collection:next')) ?></span>
 					<?php endif ?>
 				</nav>
 			</footer>

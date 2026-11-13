@@ -26,13 +26,13 @@ $listUrl = (string) $listUrl;
 
 		<div class="cms-page-actions">
 			<?php if (count($types) > 1): ?>
-				<nav class="view-toggle" aria-label="<?= escape(__('user:type')) ?>">
-					<a class="view-toggle-link<?= $type === null ? ' is-active' : '' ?>" href="<?= escape($listUrl) ?>">
+				<nav class="cms-collection-view-toggle" aria-label="<?= escape(__('user:type')) ?>">
+					<a class="cms-collection-view-toggle-link<?= $type === null ? ' is-active' : '' ?>" href="<?= escape($listUrl) ?>">
 						<?= escape(__('user:all-types')) ?>
 					</a>
 					<?php foreach ($types as $link): ?>
 						<a
-							class="view-toggle-link<?= $link['active'] ? ' is-active' : '' ?>"
+							class="cms-collection-view-toggle-link<?= $link['active'] ? ' is-active' : '' ?>"
 							href="<?= escape((string) $link['filterUrl']) ?>">
 							<?= escape((string) $link['label']) ?>
 						</a>
@@ -57,7 +57,7 @@ $listUrl = (string) $listUrl;
 		</div>
 	</header>
 
-	<div class="body">
+	<div class="cms-collection-body">
 		<?php if (is_string($notice)): ?>
 			<?php $this->include('component/toast', ['kind' => 'success', 'message' => $notice]) ?>
 		<?php endif ?>
@@ -79,13 +79,13 @@ $listUrl = (string) $listUrl;
 			</form>
 		</div>
 
-		<div class="listing">
+		<div class="cms-collection-listing">
 			<?php if ($rows === []): ?>
-				<div class="empty">
+				<div class="cms-collection-empty">
 					<strong><?= escape(__('user:empty')) ?></strong>
 				</div>
 			<?php else: ?>
-				<div class="scroll">
+				<div class="cms-collection-scroll">
 					<?php // Laid out as a grid, so the table roles have to be spelled out. ?>
 					<table
 						class="cms-list"
@@ -125,22 +125,22 @@ $listUrl = (string) $listUrl;
 				</div>
 			<?php endif ?>
 
-			<footer class="foot">
-				<span class="range"><?= escape(__('collection:showing', [
+			<footer class="cms-collection-foot">
+				<span class="cms-collection-range"><?= escape(__('collection:showing', [
 					'start' => (int) $rangeStart,
 					'end' => (int) $rangeEnd,
 					'total' => $total,
 				])) ?></span>
-				<nav class="pagination" aria-label="<?= escape(__('collection:pagination')) ?>">
+				<nav class="cms-collection-pagination" aria-label="<?= escape(__('collection:pagination')) ?>">
 					<?php if (is_string($previousUrl)): ?>
-						<a class="page-link" href="<?= escape($previousUrl) ?>"><?= escape(__('collection:previous')) ?></a>
+						<a class="cms-collection-page-link" href="<?= escape($previousUrl) ?>"><?= escape(__('collection:previous')) ?></a>
 					<?php else: ?>
-						<span class="page-link is-disabled"><?= escape(__('collection:previous')) ?></span>
+						<span class="cms-collection-page-link is-disabled"><?= escape(__('collection:previous')) ?></span>
 					<?php endif ?>
 					<?php if (is_string($nextUrl)): ?>
-						<a class="page-link" href="<?= escape($nextUrl) ?>"><?= escape(__('collection:next')) ?></a>
+						<a class="cms-collection-page-link" href="<?= escape($nextUrl) ?>"><?= escape(__('collection:next')) ?></a>
 					<?php else: ?>
-						<span class="page-link is-disabled"><?= escape(__('collection:next')) ?></span>
+						<span class="cms-collection-page-link is-disabled"><?= escape(__('collection:next')) ?></span>
 					<?php endif ?>
 				</nav>
 			</footer>

@@ -10,9 +10,11 @@
 @import './cms-scrollbar.css' layer(panel);
 @import './cms-sidebar.css' layer(panel);
 @import './cms-page.css' layer(panel);
+@import './cms-notice.css' layer(panel);
 @import './cms-media.css' layer(panel);
 @import './cms-dashboard.css' layer(panel);
 @import './cms-collection.css' layer(panel);
+@import './cms-tokens.css' layer(panel);
 @import './cms-menus.css' layer(panel);
 @import './cms-list.css' layer(panel);
 @import './cms-status.css' layer(panel);

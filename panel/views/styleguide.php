@@ -718,8 +718,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					actions and every status badge at once, which a real collection rarely shows.
 				</p>
 				<div class="cms-collection">
-					<div class="listing">
-						<div class="scroll">
+					<div class="cms-collection-listing">
+						<div class="cms-collection-scroll">
 							<table
 								class="cms-list"
 								role="table"
@@ -756,9 +756,9 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			<section class="section" data-section="empty">
 				<h2>Empty state</h2>
 				<div class="cms-collection">
-					<div class="listing">
-						<div class="empty">
-							<div class="icon" aria-hidden="true">⌁</div>
+					<div class="cms-collection-listing">
+						<div class="cms-collection-empty">
+							<div class="cms-collection-empty-icon" aria-hidden="true">⌁</div>
 							<strong>No entries yet</strong>
 							<p>Create the first entry to get started.</p>
 						</div>
