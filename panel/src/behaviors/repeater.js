@@ -721,6 +721,8 @@ export async function initDrag() {
 			draggable: '[data-repeater-row]',
 			animation: 150,
 			fallbackOnBody: true,
+			ghostClass: 'is-dragging',
+			chosenClass: 'is-chosen',
 			onEnd: (/** @type {SortableEvent} */ event) => {
 				const container = /** @type {HTMLElement | null} */ (list.closest('[data-repeater]'));
 

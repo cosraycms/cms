@@ -36,10 +36,10 @@ $single = count($entryTypes) === 1;
 	data-name="<?= $this->escape($name) ?>"
 	data-id="<?= $this->escape($id) ?>"
 	<?= is_int($max) ? 'data-max="' . $max . '"' : '' ?>>
-	<div class="tally" data-repeater-count><?= $this->escape(
+	<div class="cms-entries-tally" data-repeater-count><?= $this->escape(
 		__n('field:item-count', 'field:item-count-plural', $count),
 	) ?></div>
-	<div class="rows" data-repeater-list>
+	<div data-repeater-list>
 		<?php foreach ($rows as $index => $rowData) {
 			if (!is_array($rowData)) {
 				continue;
@@ -76,7 +76,7 @@ $single = count($entryTypes) === 1;
 				]) ?>
 			</template>
 		<?php endforeach ?>
-		<div class="adders" data-repeater-footer>
+		<div class="cms-entries-adders" data-repeater-footer>
 			<?php foreach ($entryTypes as $entryType): ?>
 				<?php $this->include('field/entries/adder', [
 					'entryType' => $entryType,

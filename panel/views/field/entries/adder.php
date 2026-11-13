@@ -11,7 +11,7 @@ $label = $single
 ?>
 <button
 	type="button"
-	class="adder"
+	class="cms-entries-adder"
 	data-repeater-add="<?= $this->escape((string) $entryType['type']) ?>"
 	<?= $full ? 'hidden' : '' ?>>
 	<?= \Cosray\Panel\Icon::render('plus-circle') ?>

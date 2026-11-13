@@ -1,4 +1,3 @@
-/* Part names avoid collisions with the surrounding field and node styles. */
 .cms-entries {
 	--entries-x: var(--cms-space-4);
 
@@ -6,21 +5,21 @@
 	border-radius: var(--cms-radius-md);
 	background: var(--cms-color-surface);
 
-	& .tally {
+	& .cms-entries-tally {
 		padding: var(--cms-space-2) var(--entries-x);
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-xs);
 		font-variant-numeric: tabular-nums;
 	}
 
-	& .entry {
+	& .cms-entries-row {
 		border-top: 1px solid var(--cms-color-border-soft);
 
-		&.sortable-ghost {
+		&.is-dragging {
 			opacity: 0.4;
 		}
 
-		&.sortable-chosen > .summary {
+		&.is-chosen > .cms-entries-summary {
 			background: var(--cms-color-hover);
 		}
 	}
@@ -29,7 +28,7 @@
 		margin: var(--cms-space-2) var(--entries-x);
 	}
 
-	& .summary {
+	& .cms-entries-summary {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-3);
@@ -40,7 +39,7 @@
 		}
 	}
 
-	& .grip {
+	& .cms-entries-grip {
 		display: grid;
 		flex-shrink: 0;
 		place-items: center;
@@ -49,7 +48,7 @@
 		touch-action: none;
 	}
 
-	& .opener {
+	& .cms-entries-opener {
 		display: flex;
 		flex: 1 1 auto;
 		align-items: center;
@@ -70,7 +69,7 @@
 		}
 	}
 
-	& .thumb {
+	& .cms-entries-thumb {
 		display: grid;
 		flex-shrink: 0;
 		place-items: center;
@@ -88,7 +87,7 @@
 		}
 	}
 
-	& .texts {
+	& .cms-entries-texts {
 		display: flex;
 		flex: 1 1 auto;
 		flex-direction: column;
@@ -96,7 +95,7 @@
 		min-width: 0;
 	}
 
-	& .primary {
+	& .cms-entries-title {
 		overflow: hidden;
 		font-size: var(--cms-font-size-sm);
 		font-weight: 500;
@@ -104,7 +103,7 @@
 		white-space: nowrap;
 	}
 
-	& .secondary {
+	& .cms-entries-subtitle {
 		overflow: hidden;
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-xs);
@@ -116,7 +115,7 @@
 		}
 	}
 
-	& .kebab {
+	& .cms-entries-kebab {
 		display: inline-flex;
 		flex-shrink: 0;
 		align-items: center;
@@ -138,7 +137,7 @@
 		}
 	}
 
-	& .form {
+	& .cms-entries-form {
 		padding: var(--cms-space-4) var(--entries-x) var(--cms-space-5);
 		border-top: 1px solid var(--cms-color-border-soft);
 		background: var(--cms-color-surface-sunken);
@@ -148,11 +147,11 @@
 		}
 	}
 
-	& .adders {
+	& .cms-entries-adders {
 		display: flex;
 	}
 
-	& .adder {
+	& .cms-entries-adder {
 		display: flex;
 		flex: 1 1 0;
 		align-items: center;
@@ -168,7 +167,7 @@
 		font-weight: 500;
 		cursor: pointer;
 
-		& + .adder {
+		& + .cms-entries-adder {
 			border-left: 1px dashed var(--cms-color-border);
 		}
 

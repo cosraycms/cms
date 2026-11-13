@@ -22,45 +22,45 @@ $summary = EntrySummary::of($entryType, $fieldsData, $assets, $defaultLocale);
 $open = $rowData === null;
 $readonly = (bool) (u($readonly ?? null) ?? false);
 ?>
-<div class="entry" data-repeater-row>
-	<div class="summary">
+<div class="cms-entries-row" data-repeater-row>
+	<div class="cms-entries-summary">
 		<?php if (!$readonly): ?>
-			<span class="grip" data-repeater-grip title="<?= $this->escape(__('field:drag-item')) ?>">
+			<span class="cms-entries-grip" data-repeater-grip title="<?= $this->escape(__('field:drag-item')) ?>">
 				<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
 			</span>
 		<?php endif ?>
 		<button
 			type="button"
-			class="opener"
+			class="cms-entries-opener"
 			data-repeater-collapse
 			aria-expanded="<?= $open ? 'true' : 'false' ?>"
 			aria-controls="<?= $this->escape("{$rowId}-form") ?>">
 			<?php if ($summary->hasImage): ?>
-				<span class="thumb">
+				<span class="cms-entries-thumb">
 					<?php if ($summary->thumb !== null): ?>
 						<img src="<?= $this->escape($summary->thumb) ?>" alt="" />
 					<?php endif ?>
 				</span>
 			<?php endif ?>
-			<span class="texts">
+			<span class="cms-entries-texts">
 				<?php // Each line names the sub-field it came from, so the
 
 				// behavior refreshes only that line while its input changes. ?>
 				<span
-					class="primary"
+					class="cms-entries-title"
 					data-repeater-title="<?= $this->escape((string) $summary->primaryField) ?>"
 					data-fallback="<?= $this->escape($label) ?>"><?= $this->escape(
 						$summary->primary ?? $label,
 					) ?></span>
 				<span
-					class="secondary"
+					class="cms-entries-subtitle"
 					data-repeater-subtitle="<?= $this->escape((string) $summary->secondaryField) ?>"><?= $this->escape(
 						(string) $summary->secondary,
 					) ?></span>
 			</span>
 		</button>
 		<?php if (!$readonly): ?>
-			<button type="button" class="kebab"
+			<button type="button" class="cms-entries-kebab"
 				popovertarget="<?= $this->escape("{$rowId}-actions") ?>"
 				aria-haspopup="menu" aria-label="<?= $this->escape(__('field:item-actions')) ?>">
 				<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
@@ -89,7 +89,7 @@ $readonly = (bool) (u($readonly ?? null) ?? false);
 		name="<?= $this->escape("{$rowName}[type]") ?>"
 		value="<?= $this->escape((string) $entryType['type']) ?>" />
 	<div
-		class="form"
+		class="cms-entries-form"
 		id="<?= $this->escape("{$rowId}-form") ?>"
 		data-repeater-body
 		<?= $open ? '' : 'hidden' ?>>

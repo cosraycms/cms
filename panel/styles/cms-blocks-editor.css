@@ -88,7 +88,7 @@
 			box-shadow: var(--cms-shadow-recessed);
 		}
 
-		&.sortable-ghost {
+		&.is-dragging {
 			opacity: 0.4;
 		}
 
@@ -410,7 +410,7 @@
 	}
 
 	/* A gesture in progress has no gaps worth showing yet. */
-	& .grid:has(> .sortable-ghost) > :is(.ghost, .ghost-slot),
+	& .grid:has(> .is-dragging) > :is(.ghost, .ghost-slot),
 	&.is-resizing :is(.ghost, .ghost-slot),
 	&.is-moving :is(.ghost, .ghost-slot) {
 		display: none;
