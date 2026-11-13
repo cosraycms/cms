@@ -125,8 +125,8 @@ export class CosrayReference extends HTMLElement {
 	#root = create('div', 'cms-reference');
 	#search = create('div', 'cms-reference-search');
 	#input = document.createElement('input');
-	#wrap = create('div', 'control-wrap');
-	#tools = create('div', 'single-tools');
+	#wrap = create('div', 'cms-reference-box');
+	#tools = create('div', 'cms-reference-tools');
 	#clear = document.createElement('button');
 	#toggleButton = document.createElement('button');
 	#popup = create('div', 'cms-reference-popup');
@@ -519,7 +519,7 @@ export class CosrayReference extends HTMLElement {
 		place(this.#root, this.#search, single || (!full && !immutable));
 
 		const input = this.#input;
-		input.classList.toggle('single-input', single);
+		input.classList.toggle('cms-reference-single', single);
 		input.classList.toggle('has-selection', single && this.#items.length > 0);
 		input.setAttribute('aria-label', label);
 		input.readOnly = immutable;
