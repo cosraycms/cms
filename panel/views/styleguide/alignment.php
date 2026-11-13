@@ -10,7 +10,7 @@ $alignmentFields = (array) u($alignmentFields);
 					<div class="sample">
 						<button
 							type="button"
-							class="cms-button secondary"
+							class="cms-button cms-button-secondary"
 							onclick="document.getElementById('editor-errors').replaceWith(document.getElementById('alignment-errors').content.cloneNode(true)); document.dispatchEvent(new CustomEvent('htmx:after:swap'))">
 							Show validation errors
 						</button>

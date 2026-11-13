@@ -76,14 +76,17 @@ export function openModal(render, options = {}) {
  * when it destroys something; dismissing is `secondary`.
  *
  * @param {string} label
- * @param {string} variant
+ * @param {string} variant Space-separated variant names without their prefix.
  * @param {() => void} [onclick]
  * @returns {HTMLButtonElement}
  */
 export function button(label, variant, onclick) {
 	const element = document.createElement('button');
 	element.type = 'button';
-	element.className = `cms-button ${variant}`;
+	element.className = [
+		'cms-button',
+		...variant.split(' ').map((name) => `cms-button-${name}`),
+	].join(' ');
 	element.textContent = label;
 	if (onclick) element.addEventListener('click', onclick);
 

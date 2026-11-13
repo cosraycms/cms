@@ -26,7 +26,7 @@ $closeUrl = $screen->url(['file' => null]);
 	<div class="cms-detail">
 		<div class="cms-detail-status"><?= escape(__('media:file-load-failed')) ?></div>
 		<a
-			class="cms-button secondary"
+			class="cms-button cms-button-secondary"
 			href="<?= escape($closeUrl) ?>"
 			hx-get="<?= escape($closeUrl) ?>"
 			hx-target="#media-detail"
@@ -126,7 +126,7 @@ $closeUrl = $screen->url(['file' => null]);
 					) ?></span>
 					<button
 						type="button"
-						class="cms-button secondary small"
+						class="cms-button cms-button-secondary cms-button-small"
 						<?= $focal ? '' : 'hidden' ?>
 						data-media-focal-clear><?= escape(__('image:focus-remove')) ?></button>
 					<input type="hidden" name="meta[focal][x]" value="<?= escape((string) ($focal['x'] ?? '')) ?>" data-media-focal-x />
@@ -193,11 +193,11 @@ $closeUrl = $screen->url(['file' => null]);
 		</div>
 
 		<footer class="cms-detail-foot">
-			<button type="submit" class="cms-button danger" form="media-detail-delete">
+			<button type="submit" class="cms-button cms-button-danger" form="media-detail-delete">
 				<?= Icon::render('trash3') ?>
 				<?= escape(__('common:delete')) ?>
 			</button>
-			<button type="button" class="cms-button secondary" data-media-replace>
+			<button type="button" class="cms-button cms-button-secondary" data-media-replace>
 				<?= Icon::render('arrow-counterclockwise') ?>
 				<?= escape(__('media:replace-file')) ?>
 			</button>
@@ -211,7 +211,7 @@ $closeUrl = $screen->url(['file' => null]);
 				<?php if ($saved): ?>
 					<span class="cms-detail-saved" role="status"><?= escape(__('common:saved')) ?></span>
 				<?php endif ?>
-				<button type="submit" class="cms-button primary">
+				<button type="submit" class="cms-button cms-button-primary">
 					<?= Icon::render('floppy') ?>
 					<?= escape(__('common:save')) ?>
 				</button>

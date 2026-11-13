@@ -85,7 +85,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			?>
 			<button
 				type="button"
-				class="cms-button secondary"
+				class="cms-button cms-button-secondary"
 				onclick="const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'">
 				Toggle theme
 			</button>
@@ -130,41 +130,41 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			<section class="section" data-section="buttons">
 				<h2>Buttons</h2>
 				<div class="sample">
-					<button type="button" class="cms-button primary"><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
-					<button type="button" class="cms-button secondary"><?= \Cosray\Panel\Icon::render('eye') ?> Preview</button>
-					<button type="button" class="cms-button danger"><?= \Cosray\Panel\Icon::render('trash3') ?> Delete</button>
-					<a class="cms-button secondary" href="#">Link</a>
+					<button type="button" class="cms-button cms-button-primary"><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
+					<button type="button" class="cms-button cms-button-secondary"><?= \Cosray\Panel\Icon::render('eye') ?> Preview</button>
+					<button type="button" class="cms-button cms-button-danger"><?= \Cosray\Panel\Icon::render('trash3') ?> Delete</button>
+					<a class="cms-button cms-button-secondary" href="#">Link</a>
 				</div>
 				<div class="sample">
-					<button type="button" class="cms-button primary" disabled><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
-					<button type="button" class="cms-button secondary" disabled><?= \Cosray\Panel\Icon::render(
+					<button type="button" class="cms-button cms-button-primary" disabled><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
+					<button type="button" class="cms-button cms-button-secondary" disabled><?= \Cosray\Panel\Icon::render(
 						'eye',
 					) ?> Preview</button>
-					<button type="button" class="cms-button danger" disabled><?= \Cosray\Panel\Icon::render('trash3') ?> Delete</button>
+					<button type="button" class="cms-button cms-button-danger" disabled><?= \Cosray\Panel\Icon::render('trash3') ?> Delete</button>
 				</div>
 				<div class="sample" data-sample="button:danger-solid">
-					<button type="button" class="cms-button secondary">Cancel</button>
-					<button type="button" class="cms-button danger solid">Delete</button>
-					<button type="button" class="cms-button danger solid" disabled>Delete</button>
+					<button type="button" class="cms-button cms-button-secondary">Cancel</button>
+					<button type="button" class="cms-button cms-button-danger cms-button-solid">Delete</button>
+					<button type="button" class="cms-button cms-button-danger cms-button-solid" disabled>Delete</button>
 				</div>
 				<div class="sample" data-sample="button:small">
-					<button type="button" class="cms-button primary small">Save</button>
-					<button type="button" class="cms-button secondary small">Edit</button>
-					<button type="button" class="cms-button danger small">Delete</button>
-					<button type="button" class="cms-button secondary small" disabled>Use</button>
+					<button type="button" class="cms-button cms-button-primary cms-button-small">Save</button>
+					<button type="button" class="cms-button cms-button-secondary cms-button-small">Edit</button>
+					<button type="button" class="cms-button cms-button-danger cms-button-small">Delete</button>
+					<button type="button" class="cms-button cms-button-secondary cms-button-small" disabled>Use</button>
 				</div>
 				<div class="sample" data-sample="button:split">
 					<div class="cms-split-button">
-						<button type="button" class="cms-button primary"><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
-						<button type="button" class="cms-button primary toggle" popovertarget="sample-save-options"
+						<button type="button" class="cms-button cms-button-primary"><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
+						<button type="button" class="cms-button cms-button-primary toggle" popovertarget="sample-save-options"
 							aria-haspopup="menu" aria-label="More save options"><?= \Cosray\Panel\Icon::render('chevron-down') ?></button>
 						<div id="sample-save-options" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
 							<button type="button"><?= \Cosray\Panel\Icon::render('floppy') ?> Save and publish</button>
 						</div>
 					</div>
 					<div class="cms-split-button">
-						<button type="button" class="cms-button secondary">Export</button>
-						<button type="button" class="cms-button secondary toggle" popovertarget="sample-export-options"
+						<button type="button" class="cms-button cms-button-secondary">Export</button>
+						<button type="button" class="cms-button cms-button-secondary toggle" popovertarget="sample-export-options"
 							aria-haspopup="menu" aria-label="More export options"><?= \Cosray\Panel\Icon::render('chevron-down') ?></button>
 						<div id="sample-export-options" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
 							<button type="button">Export as CSV</button>
@@ -173,7 +173,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					</div>
 				</div>
 				<div class="sample" data-sample="button:menu">
-					<button type="button" class="cms-button primary" popovertarget="sample-create-options"
+					<button type="button" class="cms-button cms-button-primary" popovertarget="sample-create-options"
 						aria-haspopup="menu">New entry <?= \Cosray\Panel\Icon::render('chevron-down') ?></button>
 					<div id="sample-create-options" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
 						<a href="#">Page</a>
@@ -189,7 +189,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				<form data-meta-owner onsubmit="event.preventDefault()">
 					<div class="sample">
 						<?php foreach (['start', 'center', 'end'] as $align): ?>
-							<button type="button" class="cms-button secondary"
+							<button type="button" class="cms-button cms-button-secondary"
 								popovertarget="sample-actions-<?= $align ?>" aria-haspopup="menu">Actions (<?= $align ?>)</button>
 							<div id="sample-actions-<?= $align ?>" class="cms-action-menu" popover="auto" data-action-menu data-align="<?= $align ?>">
 								<button type="button" data-dialog-open="meta"><?= \Cosray\Panel\Icon::render('gear') ?> Open dialog</button>
@@ -205,34 +205,34 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 							<label for="sample-dialog-name">Name</label>
 							<input id="sample-dialog-name" class="cms-input" data-dialog-focus value="Live setting" />
 							<div data-meta-owner>
-								<button type="button" class="cms-button secondary" popovertarget="sample-nested-actions" aria-haspopup="menu">Nested actions</button>
+								<button type="button" class="cms-button cms-button-secondary" popovertarget="sample-nested-actions" aria-haspopup="menu">Nested actions</button>
 								<div id="sample-nested-actions" class="cms-action-menu" popover="auto" data-action-menu>
 									<button type="button" data-dialog-open="meta">Open nested dialog</button>
 									<button type="button" disabled>Unavailable action</button>
 								</div>
 								<?php $this->component('component/dialog', ['name' => 'meta', 'size' => 'compact', 'title' => 'Nested dialog']) ?>
 									<div class="modal-body">Escape returns to the underlying dialog.</div>
-									<div class="modal-footer"><button type="button" class="cms-button secondary" data-dialog-close>Close</button></div>
+									<div class="modal-footer"><button type="button" class="cms-button cms-button-secondary" data-dialog-close>Close</button></div>
 								<?php $this->end() ?>
 							</div>
 						</div>
-						<div class="modal-footer"><button type="button" class="cms-button secondary" data-dialog-close>Close</button></div>
+						<div class="modal-footer"><button type="button" class="cms-button cms-button-secondary" data-dialog-close>Close</button></div>
 					<?php $this->end() ?>
 				</form>
 				<div class="sample" data-sample="questions">
-					<button type="button" class="cms-button danger" data-dialog-open="sample-confirm">Destructive question</button>
-					<button type="button" class="cms-button secondary" data-dialog-open="sample-alert">Notice</button>
+					<button type="button" class="cms-button cms-button-danger" data-dialog-open="sample-confirm">Destructive question</button>
+					<button type="button" class="cms-button cms-button-secondary" data-dialog-open="sample-alert">Notice</button>
 					<?php $this->component('component/dialog', ['name' => 'sample-confirm', 'size' => 'compact', 'title' => 'Delete file']) ?>
 						<div class="modal-body cms-confirm"><p class="question">Delete the file "report.pdf"?</p></div>
 						<footer class="modal-footer">
-							<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus>Cancel</button>
-							<button type="button" class="cms-button danger solid" data-dialog-close>Delete file</button>
+							<button type="button" class="cms-button cms-button-secondary" data-dialog-close data-dialog-focus>Cancel</button>
+							<button type="button" class="cms-button cms-button-danger cms-button-solid" data-dialog-close>Delete file</button>
 						</footer>
 					<?php $this->end() ?>
 					<?php $this->component('component/dialog', ['name' => 'sample-alert', 'size' => 'compact', 'title' => 'Error']) ?>
 						<div class="modal-body"><p>Only one file can be added here.</p></div>
 						<footer class="modal-footer">
-							<button type="button" class="cms-button primary" data-dialog-close data-dialog-focus>OK</button>
+							<button type="button" class="cms-button cms-button-primary" data-dialog-close data-dialog-focus>OK</button>
 						</footer>
 					<?php $this->end() ?>
 				</div>
@@ -562,7 +562,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				<?php // A synthetic drag: the controls answer dragenter and dragleave alone. ?>
 				<button
 					type="button"
-					class="cms-button secondary small"
+					class="cms-button cms-button-secondary cms-button-small"
 					aria-pressed="false"
 					onclick="const on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', String(on)); const transfer = new DataTransfer(); transfer.items.add(new File(['x'], 'drop.png', { type: 'image/png' })); for (const root of this.closest('[data-section]').querySelectorAll('.cms-dropzone')) { root.dispatchEvent(new DragEvent(on ? 'dragenter' : 'dragleave', { bubbles: true, cancelable: true, dataTransfer: transfer })); }">
 					Show drop state
@@ -701,8 +701,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 							</div>
 						</div>
 						<div class="actions">
-							<button type="button" class="cms-button secondary">Preview</button>
-							<button type="button" class="cms-button primary">Save</button>
+							<button type="button" class="cms-button cms-button-secondary">Preview</button>
+							<button type="button" class="cms-button cms-button-primary">Save</button>
 						</div>
 					</header>
 					<div class="toolbar">

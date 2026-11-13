@@ -115,7 +115,9 @@ export function linkRow({
 	function show() {
 		if (!current) {
 			target.replaceChildren(
-				...(readonly ? [] : [button('cms-button secondary small', __('link:add'), open)]),
+				...(readonly
+					? []
+					: [button('cms-button cms-button-secondary cms-button-small', __('link:add'), open)]),
 			);
 
 			return;
@@ -125,8 +127,18 @@ export function linkRow({
 
 		if (!readonly) {
 			target.append(
-				button('cms-button secondary small', __('common:edit'), open, 'pencil'),
-				button('cms-button secondary small', __('common:remove'), () => set(undefined), 'x-lg'),
+				button(
+					'cms-button cms-button-secondary cms-button-small',
+					__('common:edit'),
+					open,
+					'pencil',
+				),
+				button(
+					'cms-button cms-button-secondary cms-button-small',
+					__('common:remove'),
+					() => set(undefined),
+					'x-lg',
+				),
 			);
 		}
 	}

@@ -204,7 +204,10 @@ export function contentLocales(locales, locale) {
  */
 export function replaceMenu(upload, library, quiet = false, align = 'end') {
 	const id = `cms-replace-${++ids}`;
-	const trigger = create('button', quiet ? 'replace quiet' : 'replace cms-button secondary small');
+	const trigger = create(
+		'button',
+		quiet ? 'replace quiet' : 'replace cms-button cms-button-secondary cms-button-small',
+	);
 	trigger.setAttribute('type', 'button');
 	trigger.setAttribute('popovertarget', id);
 	trigger.setAttribute('aria-haspopup', 'menu');
@@ -572,12 +575,29 @@ export function imageCard({
 	showTexts(contentLocale);
 
 	if (readonly) {
-		controls.append(labelled('cms-button secondary small', __('image:details'), edit, 'eye'));
+		controls.append(
+			labelled(
+				'cms-button cms-button-secondary cms-button-small',
+				__('image:details'),
+				edit,
+				'eye',
+			),
+		);
 	} else {
 		controls.append(
 			...replaceMenu(upload, library, false, 'start'),
-			labelled('edit cms-button secondary small', __('common:edit'), edit, 'pencil'),
-			labelled('discard cms-button secondary small', __('common:remove'), remove, 'x-lg'),
+			labelled(
+				'edit cms-button cms-button-secondary cms-button-small',
+				__('common:edit'),
+				edit,
+				'pencil',
+			),
+			labelled(
+				'discard cms-button cms-button-secondary cms-button-small',
+				__('common:remove'),
+				remove,
+				'x-lg',
+			),
 		);
 	}
 

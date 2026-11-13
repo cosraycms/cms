@@ -24,7 +24,7 @@ $places = u($places ?? null);
 				<span class="cms-block-actions">
 					<?php foreach (['before' => __('field:before'), 'after' => __('field:after')] as $position => $label): ?>
 						<?php $buttonId = "{$choiceId}-{$position}"; ?>
-						<button type="button" class="cms-button secondary small"
+						<button type="button" class="cms-button cms-button-secondary cms-button-small"
 							id="<?= $this->escape($buttonId) ?>"
 							aria-labelledby="<?= $this->escape("{$buttonId} {$choiceId}") ?>"
 							data-repeater-add="<?= $this->escape($choice['type']) ?>"

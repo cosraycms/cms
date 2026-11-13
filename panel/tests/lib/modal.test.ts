@@ -13,7 +13,7 @@ function open(): HTMLDialogElement {
 }
 
 function footer(variant: string): HTMLButtonElement {
-	return open().querySelector<HTMLButtonElement>(`.modal-footer .${variant}`)!;
+	return open().querySelector<HTMLButtonElement>(`.modal-footer .cms-button-${variant}`)!;
 }
 
 describe('confirm', () => {
@@ -33,7 +33,7 @@ describe('confirm', () => {
 	it('starts a destructive question on Cancel and answers no to every dismissal', async () => {
 		const cancelled = confirm({ message: 'Delete?', title: 'Delete file', tone: 'danger' });
 		expect(open().querySelector('.modal-title')!.textContent).toBe('Delete file');
-		expect(footer('danger').classList.contains('solid')).toBe(true);
+		expect(footer('danger').classList.contains('cms-button-solid')).toBe(true);
 		expect(document.activeElement).toBe(footer('secondary'));
 		footer('secondary').click();
 

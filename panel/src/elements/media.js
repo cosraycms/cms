@@ -576,7 +576,7 @@ class MediaControl extends HTMLElement {
 	#bar(count, { multiple, empty, full, loading, library, upload }) {
 		const max = this.#max;
 		const bar = create('div', 'bar');
-		const browse = button('browse cms-button secondary small', '', library);
+		const browse = button('browse cms-button cms-button-secondary cms-button-small', '', library);
 		browse.append(svg('folder2-open'), ' ', __('media:browse'));
 		browse.disabled = full;
 		const allowed = cosray().system().allowedFiles[this.#type];

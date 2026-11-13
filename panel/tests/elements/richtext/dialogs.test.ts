@@ -182,7 +182,7 @@ describe('richtext dialogs', () => {
 
 		await action('image:insert');
 		document.querySelector<HTMLElement>('dialog [data-pick]')!.click();
-		document.querySelector<HTMLButtonElement>('dialog .modal-footer .primary')!.click();
+		document.querySelector<HTMLButtonElement>('dialog .modal-footer .cms-button-primary')!.click();
 		await tick();
 
 		const image = content.querySelector<HTMLImageElement>('img[data-uid="pic"]');
@@ -202,7 +202,8 @@ describe('richtext dialogs', () => {
 
 		await action('richtext:add-page-link');
 		expect(
-			document.querySelector<HTMLButtonElement>('dialog .modal-footer .primary')!.disabled,
+			document.querySelector<HTMLButtonElement>('dialog .modal-footer .cms-button-primary')!
+				.disabled,
 		).toBe(true);
 		[...document.querySelectorAll<HTMLElement>('dialog [role="tab"]')]
 			.find((tab) => tab.textContent?.includes('media:files-documents'))!

@@ -36,7 +36,7 @@ $step = u($step);
 						required />
 				</div>
 
-				<button class="cms-button primary submit" type="submit"><?= escape(__('auth:reset-send')) ?></button>
+				<button class="cms-button cms-button-primary submit" type="submit"><?= escape(__('auth:reset-send')) ?></button>
 			</form>
 		<?php elseif ($step === 'choose'): ?>
 			<form method="post" action="<?= escape($panelPath) ?>/password/<?= escape($token) ?>" hx-boost="false" novalidate>
@@ -70,7 +70,7 @@ $step = u($step);
 						required />
 				</div>
 
-				<button class="cms-button primary submit" type="submit"><?= escape(__('auth:reset-save')) ?></button>
+				<button class="cms-button cms-button-primary submit" type="submit"><?= escape(__('auth:reset-save')) ?></button>
 			</form>
 		<?php else: ?>
 			<p class="intro" role="status"><?= escape(match ($step) {
@@ -80,7 +80,7 @@ $step = u($step);
 			}) ?></p>
 
 			<?php if ($step === 'invalid'): ?>
-				<a class="cms-button primary submit" href="<?= escape($panelPath) ?>/password" hx-boost="false"><?= escape(__('auth:reset-request-new')) ?></a>
+				<a class="cms-button cms-button-primary submit" href="<?= escape($panelPath) ?>/password" hx-boost="false"><?= escape(__('auth:reset-request-new')) ?></a>
 			<?php endif ?>
 		<?php endif ?>
 

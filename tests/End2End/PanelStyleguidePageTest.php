@@ -32,7 +32,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		$this->assertStringContainsString('--cms-color-accent', $html);
 		$this->assertStringContainsString('background: var(--cms-color-canvas)', $html);
 		// Components render through the same partials the editor uses.
-		$this->assertStringContainsString('class="cms-button primary"', $html);
+		$this->assertStringContainsString('class="cms-button cms-button-primary"', $html);
 		$this->assertStringContainsString('class="cms-field required"', $html);
 		$this->assertHtmlNodeExists(
 			'//div[@data-content-locale-scope][@data-content-locale="de"]'

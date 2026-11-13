@@ -96,10 +96,10 @@ $maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 				</div>
 
 				<footer class="form-actions">
-					<a class="cms-button secondary" href="<?= escape($backUrl) ?>"><?= escape(
+					<a class="cms-button cms-button-secondary" href="<?= escape($backUrl) ?>"><?= escape(
 						__('menu:cancel'),
 					) ?></a>
-					<button type="submit" class="cms-button primary"><?= escape(
+					<button type="submit" class="cms-button cms-button-primary"><?= escape(
 						__('menu:create'),
 					) ?></button>
 				</footer>

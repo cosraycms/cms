@@ -75,19 +75,19 @@ $columns .= $hasRowActions ? ' max-content' : '';
 				</nav>
 			<?php endif ?>
 			<?php if ($page->parent !== null): ?>
-				<a class="cms-button secondary" href="<?= escape($page->parent->editUrl) ?>"><?= escape(
+				<a class="cms-button cms-button-secondary" href="<?= escape($page->parent->editUrl) ?>"><?= escape(
 					__('collection:edit-parent'),
 				) ?></a>
-				<a class="cms-button secondary" href="<?= escape($page->parent->treeUrl) ?>"><?= escape(
+				<a class="cms-button cms-button-secondary" href="<?= escape($page->parent->treeUrl) ?>"><?= escape(
 					__('collection:show-in-tree'),
 				) ?></a>
 			<?php endif ?>
 			<?php if (count($page->createLinks) === 1): ?>
-				<a class="cms-button primary" href="<?= escape($page->createLinks[0]['url']) ?>" data-create-dialog hx-boost="false">
+				<a class="cms-button cms-button-primary" href="<?= escape($page->createLinks[0]['url']) ?>" data-create-dialog hx-boost="false">
 					<?= escape(__('collection:new-entry')) ?>
 				</a>
 			<?php elseif (count($page->createLinks) > 1): ?>
-				<button type="button" class="cms-button primary" popovertarget="collection-create" aria-haspopup="menu">
+				<button type="button" class="cms-button cms-button-primary" popovertarget="collection-create" aria-haspopup="menu">
 					<?= escape(__('collection:new-entry')) ?>
 					<?= \Cosray\Panel\Icon::render('chevron-down') ?>
 				</button>
@@ -130,7 +130,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 			</form>
 
 			<?php if ($page->search->clearUrl !== null): ?>
-				<a class="cms-button secondary" href="<?= escape($page->search->clearUrl) ?>"><?= escape(
+				<a class="cms-button cms-button-secondary" href="<?= escape($page->search->clearUrl) ?>"><?= escape(
 					__('collection:clear-search'),
 				) ?></a>
 			<?php endif ?>
@@ -337,12 +337,12 @@ $columns .= $hasRowActions ? ' max-content' : '';
 			</label>
 			</div>
 			<footer class="modal-footer">
-				<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus><?= escape(
+				<button type="button" class="cms-button cms-button-secondary" data-dialog-close data-dialog-focus><?= escape(
 					__('bulk:cancel'),
 				) ?></button>
 				<button
 					type="submit"
-					class="cms-button danger solid"
+					class="cms-button cms-button-danger cms-button-solid"
 					form="collection-bulk"
 					formaction="<?= escape($page->bulk['deleteUrl']) ?>"
 					data-bulk-confirm>
@@ -363,12 +363,12 @@ $columns .= $hasRowActions ? ' max-content' : '';
 			</label>
 			</div>
 			<footer class="modal-footer">
-				<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus><?= escape(
+				<button type="button" class="cms-button cms-button-secondary" data-dialog-close data-dialog-focus><?= escape(
 					__('bulk:cancel'),
 				) ?></button>
 				<button
 					type="submit"
-					class="cms-button primary"
+					class="cms-button cms-button-primary"
 					form="collection-bulk"
 					formaction="<?= escape($page->bulk['duplicateUrl']) ?>"
 					data-bulk-confirm>
@@ -391,12 +391,12 @@ $columns .= $hasRowActions ? ' max-content' : '';
 				</label>
 				</div>
 				<footer class="modal-footer">
-					<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus><?= escape(
+					<button type="button" class="cms-button cms-button-secondary" data-dialog-close data-dialog-focus><?= escape(
 						__('bulk:cancel'),
 					) ?></button>
 					<button
 						type="submit"
-						class="cms-button primary"
+						class="cms-button cms-button-primary"
 						form="collection-bulk"
 						formaction="<?= escape($page->bulk['publishUrl']) ?>"
 						name="state"
@@ -416,12 +416,12 @@ $columns .= $hasRowActions ? ' max-content' : '';
 				</label>
 				</div>
 				<footer class="modal-footer">
-					<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus><?= escape(
+					<button type="button" class="cms-button cms-button-secondary" data-dialog-close data-dialog-focus><?= escape(
 						__('bulk:cancel'),
 					) ?></button>
 					<button
 						type="submit"
-						class="cms-button primary"
+						class="cms-button cms-button-primary"
 						form="collection-bulk"
 						formaction="<?= escape($page->bulk['publishUrl']) ?>"
 						name="state"

@@ -82,7 +82,7 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 						<div class="body">
 							<button
 								type="button"
-								class="cms-button secondary small"
+								class="cms-button cms-button-secondary cms-button-small"
 								popovertarget="editor-apply-confirm"
 								<?= $mine === 'conflict' ? 'disabled' : '' ?>>
 								<?= Icon::render('arrow-bar-up') ?>
@@ -106,7 +106,7 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 						<div class="body">
 							<button
 								type="submit"
-								class="cms-button secondary small"
+								class="cms-button cms-button-secondary cms-button-small"
 								form="node-editor-form"
 								data-editor-submit
 								data-needs="mine">

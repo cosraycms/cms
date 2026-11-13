@@ -272,10 +272,10 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 		</div>
 
 		<footer class="form-actions">
-			<a class="cms-button secondary" href="<?= escape($cancelUrl) ?>"><?= escape(
+			<a class="cms-button cms-button-secondary" href="<?= escape($cancelUrl) ?>"><?= escape(
 				__('menu:cancel'),
 			) ?></a>
-			<button type="submit" class="cms-button primary">
+			<button type="submit" class="cms-button cms-button-primary">
 				<?php if ($mode !== 'create'): ?>
 					<?= \Cosray\Panel\Icon::render('floppy') ?>
 				<?php endif ?>

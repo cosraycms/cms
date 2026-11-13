@@ -20,7 +20,7 @@ $createUrl = (string) $menuCreateUrl;
 
 		<?php if ($manages): ?>
 			<div class="actions">
-				<a class="cms-button primary" href="<?= escape($createUrl) ?>"><?= escape(
+				<a class="cms-button cms-button-primary" href="<?= escape($createUrl) ?>"><?= escape(
 					__('menu:new'),
 				) ?></a>
 			</div>

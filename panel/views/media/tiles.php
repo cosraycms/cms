@@ -69,7 +69,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<?php $next = $screen->url(['file' => $screen->file, 'page' => $listing->page + 1]) ?>
 	<a
 		id="media-more"
-		class="cms-button secondary cms-media-more"
+		class="cms-button cms-button-secondary cms-media-more"
 		href="<?= escape($next) ?>"
 		hx-get="<?= escape($next) ?>"
 		hx-target="this"

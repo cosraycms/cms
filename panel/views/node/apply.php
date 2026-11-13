@@ -29,7 +29,7 @@ $items = ['draft' => 'people', 'mine' => 'person'];
 	<?= $oob ? 'hx-swap-oob="true"' : '' ?>>
 	<?php if (!$published): ?>
 		<button
-			class="cms-button primary"
+			class="cms-button cms-button-primary"
 			type="submit"
 			form="node-editor-visibility"
 			name="publish"
@@ -45,7 +45,7 @@ $items = ['draft' => 'people', 'mine' => 'person'];
 		data-apply-when="pending"
 		<?= !$pending && !$published ? 'hidden' : '' ?>>
 		<button
-			class="cms-button primary"
+			class="cms-button cms-button-primary"
 			type="button"
 			popovertarget="editor-apply-confirm"
 			data-apply-button
@@ -55,7 +55,7 @@ $items = ['draft' => 'people', 'mine' => 'person'];
 		</button>
 		<?php if (!$published): ?>
 			<button
-				class="cms-button primary toggle"
+				class="cms-button cms-button-primary toggle"
 				type="button"
 				popovertarget="editor-apply-menu"
 				aria-haspopup="menu"
@@ -108,12 +108,12 @@ $items = ['draft' => 'people', 'mine' => 'person'];
 			<span><?= escape(__($published ? 'editor:apply-online' : 'editor:apply-offline')) ?></span>
 		</p>
 		<div class="buttons">
-			<button type="button" class="cms-button secondary" data-confirm-cancel>
+			<button type="button" class="cms-button cms-button-secondary" data-confirm-cancel>
 				<?= escape(__('editor:cancel')) ?>
 			</button>
 			<button
 				type="submit"
-				class="cms-button primary"
+				class="cms-button cms-button-primary"
 				form="node-editor-form"
 				name="apply"
 				value="1"

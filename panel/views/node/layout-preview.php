@@ -56,7 +56,7 @@ $presets = [
 		</div>
 		<button
 			type="button"
-			class="cms-button secondary small reload"
+			class="cms-button cms-button-secondary cms-button-small reload"
 			data-layout-preview-reload
 			aria-label="<?= escape(__('editor:layout-preview-reload')) ?>"
 			title="<?= escape(__('editor:layout-preview-reload')) ?>">

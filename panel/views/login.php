@@ -62,7 +62,7 @@ $this->layout('layer/document');
 				<?php endif ?>
 			</div>
 
-			<button class="cms-button primary submit" type="submit"><?= escape(__('auth:sign-in')) ?></button>
+			<button class="cms-button cms-button-primary submit" type="submit"><?= escape(__('auth:sign-in')) ?></button>
 		</form>
 
 		<?php $this->include('component/auth-locale') ?>

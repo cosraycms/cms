@@ -32,7 +32,7 @@
 		opacity 120ms ease,
 		transform 120ms ease;
 
-	&.primary {
+	&.cms-button-primary {
 		--button-bg: var(--cms-button-primary-bg);
 		--button-text: var(--cms-button-primary-text);
 		--button-border: var(--cms-button-primary-border);
@@ -43,7 +43,7 @@
 		--button-shadow: var(--cms-button-primary-shadow);
 	}
 
-	&.secondary {
+	&.cms-button-secondary {
 		--button-bg: var(--cms-button-secondary-bg);
 		--button-text: var(--cms-button-secondary-text);
 		--button-border: var(--cms-button-secondary-border);
@@ -54,7 +54,7 @@
 		--button-shadow: var(--cms-button-secondary-shadow);
 	}
 
-	&.danger {
+	&.cms-button-danger {
 		--button-bg: var(--cms-button-danger-bg);
 		--button-text: var(--cms-button-danger-text);
 		--button-border: var(--cms-button-danger-border);
@@ -64,7 +64,7 @@
 		--button-ring: var(--cms-button-danger-ring);
 		--button-shadow: var(--cms-button-danger-shadow);
 
-		&.solid {
+		&.cms-button-solid {
 			--button-bg: var(--cms-button-danger-solid-bg);
 			--button-text: var(--cms-button-danger-solid-text);
 			--button-border: var(--cms-button-danger-solid-border);
@@ -76,29 +76,17 @@
 		}
 	}
 
-	&.small {
+	&.cms-button-small {
 		--height: var(--cms-control-height-sm);
 		--line-height: 1rem;
 
 		gap: var(--cms-space-1-5);
 		padding-inline: 0.625rem;
 		font-size: var(--cms-font-size-xs);
-
-		& .icon {
-			width: 1rem;
-			height: 1rem;
-		}
-	}
-
-	.icon {
-		display: inline-flex;
-		height: 1.25rem;
-		width: 1.25rem;
-		flex: 0 0 auto;
 	}
 
 	/* An icon-only action, as wide as it is high; name it with aria-label. */
-	&.square {
+	&.cms-button-square {
 		padding-inline: calc((var(--height) - var(--line-height) - 2px) / 2);
 	}
 

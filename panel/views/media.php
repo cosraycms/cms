@@ -54,7 +54,7 @@ unset($search['page']);
 		</div>
 		<div class="actions">
 			<div class="cms-media-toolbar">
-				<button type="button" class="cms-button primary" data-media-upload>
+				<button type="button" class="cms-button cms-button-primary" data-media-upload>
 					<?= Icon::render('cloud-upload') ?>
 					<span data-media-upload-label><?= escape(__('common:upload')) ?></span>
 				</button>
@@ -81,7 +81,7 @@ unset($search['page']);
 							placeholder="<?= escape(__('media:search')) ?>" />
 					</form>
 					<?php if ($screen->q !== ''): ?>
-						<a class="cms-button secondary" href="<?= escape($screen->url(['q' => ''])) ?>" data-media-keep-file><?= escape(
+						<a class="cms-button cms-button-secondary" href="<?= escape($screen->url(['q' => ''])) ?>" data-media-keep-file><?= escape(
 							__('common:reset'),
 						) ?></a>
 					<?php endif ?>
@@ -91,7 +91,7 @@ unset($search['page']);
 					<span role="status" data-media-selection-count></span>
 					<button
 						type="button"
-						class="cms-button danger small"
+						class="cms-button cms-button-danger cms-button-small"
 						data-media-delete-selected
 						data-url="<?= escape($screen->path . '/delete-many') ?>"
 						data-confirm-title="<?= escape(__('media:delete-selected')) ?>"
@@ -100,7 +100,7 @@ unset($search['page']);
 						<?= Icon::render('trash3') ?>
 						<?= escape(__('media:delete-selected')) ?>
 					</button>
-					<button type="button" class="cms-button secondary small" data-media-selection-clear>
+					<button type="button" class="cms-button cms-button-secondary cms-button-small" data-media-selection-clear>
 						<?= escape(__('media:clear-selection')) ?>
 					</button>
 				</div>

@@ -58,7 +58,7 @@ $profileUrl = (string) $profileUrl;
 				<label for="token-expires"><?= escape(__('tokens:expires')) ?></label>
 				<input id="token-expires" class="cms-input" name="expires" type="date" />
 			</span>
-			<button class="cms-button primary" type="submit"><?= escape(__('tokens:create')) ?></button>
+			<button class="cms-button cms-button-primary" type="submit"><?= escape(__('tokens:create')) ?></button>
 		</form>
 
 		<div class="listing">
@@ -94,7 +94,7 @@ $profileUrl = (string) $profileUrl;
 											data-confirm-action="<?= escape(__('tokens:revoke')) ?>"
 											data-confirm-tone="danger">
 											<?php $this->include('component/csrf') ?>
-											<button class="cms-button danger" type="submit"><?= escape(__('tokens:revoke')) ?></button>
+											<button class="cms-button cms-button-danger" type="submit"><?= escape(__('tokens:revoke')) ?></button>
 										</form>
 									</td>
 								</tr>

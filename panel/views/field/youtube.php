@@ -48,7 +48,7 @@ $ratio = $side('aspectRatioX', 16) . ' / ' . $side('aspectRatioY', 9);
 			spellcheck="false"
 			<?= $readonly ? 'readonly' : '' ?> />
 		<?php if (!$readonly): ?>
-			<button type="button" class="cms-button secondary small" data-youtube-add <?= trim($value) === '' ? 'hidden' : '' ?>>
+			<button type="button" class="cms-button cms-button-secondary cms-button-small" data-youtube-add <?= trim($value) === '' ? 'hidden' : '' ?>>
 				<?= escape(__('youtube:add')) ?>
 			</button>
 		<?php endif ?>
@@ -57,7 +57,7 @@ $ratio = $side('aspectRatioX', 16) . ' / ' . $side('aspectRatioY', 9);
 		<?= escape(__('youtube:invalid')) ?>
 	</p>
 	<?php if (!$readonly): ?>
-		<button type="button" class="cms-button quiet small replace" data-youtube-replace <?= $video === '' ? 'hidden' : '' ?>>
+		<button type="button" class="cms-button quiet cms-button-small replace" data-youtube-replace <?= $video === '' ? 'hidden' : '' ?>>
 			<?= escape(__('youtube:replace')) ?>
 		</button>
 	<?php endif ?>

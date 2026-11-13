@@ -29,7 +29,7 @@ $title = __('field:add-block') . ($label !== '' ? ' — ' . $label : '');
 					<span class="cms-block-actions" hidden>
 						<?php foreach (['before' => __('field:before'), 'after' => __('field:after')] as $position => $label): ?>
 							<?php $buttonId = "{$choiceId}-{$position}"; ?>
-							<button type="button" class="cms-button secondary small"
+							<button type="button" class="cms-button cms-button-secondary cms-button-small"
 								id="<?= $this->escape($buttonId) ?>"
 								aria-labelledby="<?= $this->escape("{$buttonId} {$choiceId}") ?>"
 								data-block-insert="<?= $this->escape($position) ?>"

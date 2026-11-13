@@ -24,7 +24,7 @@ $conflict = is_array($status['conflict'] ?? null) ? $status['conflict'] : null;
 				'time' => $conflict['time'],
 			])) ?></p>
 		</div>
-		<button type="button" class="cms-button secondary small" popovertarget="editor-discard-mine">
+		<button type="button" class="cms-button cms-button-secondary cms-button-small" popovertarget="editor-discard-mine">
 			<?= escape(__('editor:mine-discard')) ?>
 		</button>
 	<?php endif ?>

@@ -104,17 +104,17 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 				</div>
 			</div>
 			<?php if ($embed !== null): ?>
-				<button class="cms-button secondary" type="button" data-embed-cancel>
+				<button class="cms-button cms-button-secondary" type="button" data-embed-cancel>
 					<?= escape(__('editor:cancel')) ?>
 				</button>
-				<button class="cms-button primary" type="submit" form="node-editor-form" data-editor-submit>
+				<button class="cms-button cms-button-primary" type="submit" form="node-editor-form" data-editor-submit>
 					<?= Icon::render('floppy') ?>
 					<?= escape(__('editor:save')) ?>
 				</button>
 			<?php else: ?>
 				<?php if ($edit): ?>
 					<button
-						class="cms-button secondary square"
+						class="cms-button cms-button-secondary cms-button-square"
 						type="button"
 						popovertarget="editor-more"
 						aria-haspopup="menu"
@@ -141,7 +141,7 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 
 						// shows them on top of the working state. ?>
 						<button
-							class="cms-button secondary square"
+							class="cms-button cms-button-secondary cms-button-square"
 							type="submit"
 							form="node-editor-form"
 							formaction="<?= escape($links->preview($uid)) ?>"
@@ -151,7 +151,7 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 							<?= Icon::render('eye') ?>
 						</button>
 						<button
-							class="cms-button secondary toggle"
+							class="cms-button cms-button-secondary toggle"
 							type="button"
 							popovertarget="editor-preview-options"
 							aria-haspopup="menu"
@@ -194,7 +194,7 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 				?>
 				<?php // A node's save keeps the edits as its draft; a record's saves them. ?>
 				<button
-					class="cms-button <?= $publishable ? 'secondary' : 'primary' ?>"
+					class="cms-button <?= $publishable ? 'cms-button-secondary' : 'cms-button-primary' ?>"
 					type="submit"
 					form="node-editor-form"
 					data-editor-submit

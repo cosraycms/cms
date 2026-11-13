@@ -300,7 +300,9 @@ export function imageDialog({
 			const footer = create('footer', 'modal-footer');
 
 			if (readonly) {
-				const close = button('cms-button secondary', __('common:close'), () => handle.close());
+				const close = button('cms-button cms-button-secondary', __('common:close'), () =>
+					handle.close(),
+				);
 				close.dataset.dialogFocus = '';
 				footer.append(close);
 			} else {
@@ -328,9 +330,11 @@ export function imageDialog({
 					false,
 					'start',
 				);
-				trigger.classList.remove('small');
-				const cancel = button('cms-button secondary', __('common:cancel'), () => handle.close());
-				const confirm = button('cms-button primary', __('common:apply'), () => {
+				trigger.classList.remove('cms-button-small');
+				const cancel = button('cms-button cms-button-secondary', __('common:cancel'), () =>
+					handle.close(),
+				);
+				const confirm = button('cms-button cms-button-primary', __('common:apply'), () => {
 					handle.close();
 
 					if (drafts.size > 0) apply(drafts);

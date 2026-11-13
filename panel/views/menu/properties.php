@@ -73,7 +73,7 @@ $manages = (bool) $manages;
 			<?php endif ?>
 		</div>
 
-		<button type="submit" class="cms-button primary">
+		<button type="submit" class="cms-button cms-button-primary">
 			<?= \Cosray\Panel\Icon::render('floppy') ?>
 			<?= escape(__('menu:save')) ?>
 		</button>
@@ -87,7 +87,7 @@ $manages = (bool) $manages;
 			data-confirm-action="<?= escape(__('menu:delete')) ?>"
 			data-confirm-tone="danger">
 			<?php $this->include('component/csrf') ?>
-			<button type="submit" class="cms-button danger">
+			<button type="submit" class="cms-button cms-button-danger">
 				<?= \Cosray\Panel\Icon::render('trash3') ?>
 				<?= escape(__('menu:delete')) ?>
 			</button>

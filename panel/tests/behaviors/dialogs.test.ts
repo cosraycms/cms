@@ -173,10 +173,12 @@ describe('hx-confirm', () => {
 		const dialog = asking();
 		expect(dialog.querySelector('.modal-title')!.textContent).toBe('Delete');
 		expect(dialog.querySelector('.question')!.textContent).toBe('Delete this entry?');
-		const action = dialog.querySelector<HTMLButtonElement>('.modal-footer .danger')!;
+		const action = dialog.querySelector<HTMLButtonElement>('.modal-footer .cms-button-danger')!;
 		expect(action.textContent).toBe('Delete');
 		// Destructive questions start on Cancel.
-		expect(document.activeElement).toBe(dialog.querySelector('.modal-footer .secondary'));
+		expect(document.activeElement).toBe(
+			dialog.querySelector('.modal-footer .cms-button-secondary'),
+		);
 
 		action.click();
 		await settle();
@@ -190,7 +192,7 @@ describe('hx-confirm', () => {
 		document.body.innerHTML = '<form hx-confirm="Revoke?"></form>';
 		const form = document.querySelector('form')!;
 		const cancelled = request(form, 'Revoke?');
-		asking().querySelector<HTMLButtonElement>('.modal-footer .secondary')!.click();
+		asking().querySelector<HTMLButtonElement>('.modal-footer .cms-button-secondary')!.click();
 		await settle();
 
 		const dismissed = request(form, 'Revoke?');
@@ -226,7 +228,7 @@ describe('hx-confirm', () => {
 
 		expect(ctx.confirm).toBe('Leave?');
 		expect(asking().querySelector('.modal-title')!.textContent).toBe('Unsaved changes');
-		asking().querySelector<HTMLButtonElement>('.modal-footer .danger')!.click();
+		asking().querySelector<HTMLButtonElement>('.modal-footer .cms-button-danger')!.click();
 		await settle();
 
 		expect(detail.issueRequest).toHaveBeenCalledOnce();

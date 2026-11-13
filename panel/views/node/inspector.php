@@ -180,7 +180,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 						data-note-none="<?= escape(__('editor:path-none')) ?>">
 						<div class="bar">
 							<h2 class="heading"><?= escape(__('editor:paths')) ?><?= $mark('paths') ?></h2>
-							<button type="button" class="cms-button secondary small" data-dialog-open="paths">
+							<button type="button" class="cms-button cms-button-secondary cms-button-small" data-dialog-open="paths">
 								<?= escape(__('editor:paths-edit')) ?>
 							</button>
 						</div>
@@ -216,7 +216,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 												<?= escape(__('editor:path-suggestion')) ?>
 												<span data-path-suggestion-value></span>
 											</span>
-											<button type="button" class="cms-button secondary small" data-path-use>
+											<button type="button" class="cms-button cms-button-secondary cms-button-small" data-path-use>
 												<?= escape(__('editor:path-use')) ?>
 											</button>
 										</div>
@@ -224,7 +224,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 								<?php endforeach ?>
 							</div>
 							<footer class="modal-footer">
-								<button type="button" class="cms-button primary" data-dialog-close>
+								<button type="button" class="cms-button cms-button-primary" data-dialog-close>
 									<?= escape(__('editor:paths-done')) ?>
 								</button>
 							</footer>

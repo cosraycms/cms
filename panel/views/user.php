@@ -49,7 +49,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		<div class="actions">
 			<output id="editor-status" class="status" role="status"></output>
 			<?php if ($profile): ?>
-				<a class="cms-button secondary" href="<?= escape((string) $panelPath . '/profile/tokens') ?>">
+				<a class="cms-button cms-button-secondary" href="<?= escape((string) $panelPath . '/profile/tokens') ?>">
 					<?= escape(__('tokens:title')) ?>
 				</a>
 			<?php endif ?>
@@ -66,13 +66,13 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 					data-confirm-tone="danger"
 					data-dirty-bypass>
 					<?php $this->include('component/csrf') ?>
-					<button class="cms-button danger" type="submit">
+					<button class="cms-button cms-button-danger" type="submit">
 						<?= \Cosray\Panel\Icon::render('trash3') ?>
 						<?= escape(__('editor:delete')) ?>
 					</button>
 				</form>
 			<?php endif ?>
-			<button class="cms-button primary" type="submit" form="node-editor-form" data-editor-submit>
+			<button class="cms-button cms-button-primary" type="submit" form="node-editor-form" data-editor-submit>
 				<?= \Cosray\Panel\Icon::render('floppy') ?>
 				<?= escape(__('editor:save')) ?>
 			</button>

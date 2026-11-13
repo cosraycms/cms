@@ -33,10 +33,10 @@ $draft = $stages['draft'] ?? null;
 				</span>
 			</label>
 			<div class="buttons">
-				<button type="button" class="cms-button secondary" data-confirm-cancel data-confirm-focus>
+				<button type="button" class="cms-button cms-button-secondary" data-confirm-cancel data-confirm-focus>
 					<?= escape(__('editor:cancel')) ?>
 				</button>
-				<button type="submit" class="cms-button danger solid" form="node-editor-discard">
+				<button type="submit" class="cms-button cms-button-danger cms-button-solid" form="node-editor-discard">
 					<?= escape(__('editor:discard-draft')) ?>
 				</button>
 			</div>
@@ -53,10 +53,10 @@ $draft = $stages['draft'] ?? null;
 			<h2 id="editor-discard-mine-title" class="title"><?= escape(__('editor:mine-discard-confirm')) ?></h2>
 			<p><?= escape(__('editor:mine-discard-confirm-text')) ?></p>
 			<div class="buttons">
-				<button type="button" class="cms-button secondary" data-confirm-cancel data-confirm-focus>
+				<button type="button" class="cms-button cms-button-secondary" data-confirm-cancel data-confirm-focus>
 					<?= escape(__('editor:cancel')) ?>
 				</button>
-				<button type="submit" class="cms-button danger solid" form="editor-autosave-discard">
+				<button type="submit" class="cms-button cms-button-danger cms-button-solid" form="editor-autosave-discard">
 					<?= escape(__('editor:mine-discard')) ?>
 				</button>
 			</div>

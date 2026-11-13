@@ -184,7 +184,7 @@
 		}
 
 		/* Keep the destructive button off the save button's elbow. */
-		& .danger {
+		& .cms-button-danger {
 			margin-left: var(--cms-space-5);
 		}
 

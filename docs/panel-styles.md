@@ -170,7 +170,7 @@ Every panel dialog is a `.cms-modal`, a native dialog with `.modal-header`, `.mo
 - A question or notice from a script: `confirm()` and `alert()` of [modal.js](../panel/src/lib/modal.js), which resolve with the answer. `question(element, message)` reads the same `data-confirm-*` attributes, so a script-driven action is annotated like an `hx-confirm` one. `frame()` and `button()` build the parts of other script-built dialogs, which `openModal()` mounts.
 - Content rendered on the server, such as settings or a gated bulk action: the [dialog component](../panel/views/component/dialog.php) with a `title`, an optional `size`, and a `name` that becomes `data-dialog`; its slot holds the body and footer. A button with `data-dialog-open` naming it opens the nearest dialog of that name, the first an ancestor holds as a direct child, so a block's settings button reaches its own dialog and not the field's around it.
 
-A footer puts Cancel (`secondary`) first and the action last: `primary`, or `danger solid` when it destroys something. Label the action with what it does, such as Delete or Discard changes, never OK or Yes. A destructive question starts on Cancel, any other on its action; Escape, the backdrop and the close button always cancel.
+A footer puts Cancel (`cms-button-secondary`) first and the action last: `cms-button-primary`, or `cms-button-danger cms-button-solid` when it destroys something. Label the action with what it does, such as Delete or Discard changes, never OK or Yes. A destructive question starts on Cancel, any other on its action; Escape, the backdrop and the close button always cancel.
 
 ## Toasts
 

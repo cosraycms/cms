@@ -41,7 +41,9 @@ export function posterRow({ poster, asset, picked, browse, change }) {
 		const info = current ? asset(current) : undefined;
 
 		if (!current) {
-			target.replaceChildren(button('cms-button secondary small', __('video:poster-add'), choose));
+			target.replaceChildren(
+				button('cms-button cms-button-secondary cms-button-small', __('video:poster-add'), choose),
+			);
 
 			return;
 		}
@@ -58,8 +60,10 @@ export function posterRow({ poster, asset, picked, browse, change }) {
 		target.replaceChildren(
 			...parts,
 			create('span', 'name', info?.filename ?? current),
-			button('cms-button secondary small', __('media:replace'), choose),
-			button('cms-button secondary small', __('common:remove'), () => set(undefined)),
+			button('cms-button cms-button-secondary cms-button-small', __('media:replace'), choose),
+			button('cms-button cms-button-secondary cms-button-small', __('common:remove'), () =>
+				set(undefined),
+			),
 		);
 	}
 

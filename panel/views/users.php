@@ -40,11 +40,11 @@ $listUrl = (string) $listUrl;
 				</nav>
 			<?php endif ?>
 			<?php if (count($types) === 1): ?>
-				<a class="cms-button primary" href="<?= escape((string) $types[0]['createUrl']) ?>">
+				<a class="cms-button cms-button-primary" href="<?= escape((string) $types[0]['createUrl']) ?>">
 					<?= escape(__('user:add')) ?>
 				</a>
 			<?php else: ?>
-				<button type="button" class="cms-button primary" popovertarget="users-create" aria-haspopup="menu">
+				<button type="button" class="cms-button cms-button-primary" popovertarget="users-create" aria-haspopup="menu">
 					<?= escape(__('user:add')) ?>
 					<?= \Cosray\Panel\Icon::render('chevron-down') ?>
 				</button>

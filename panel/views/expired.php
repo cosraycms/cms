@@ -15,6 +15,6 @@ $this->layout('layer/document');
 		</header>
 
 		<p class="intro" role="status"><?= escape(__('auth:expired-text')) ?></p>
-		<a class="cms-button primary submit" href="<?= escape($next) ?>" hx-boost="false"><?= escape(__('auth:expired-back')) ?></a>
+		<a class="cms-button cms-button-primary submit" href="<?= escape($next) ?>" hx-boost="false"><?= escape(__('auth:expired-back')) ?></a>
 	</section>
 </main>
