@@ -22,7 +22,7 @@ describe('confirm', () => {
 
 		expect(open().dataset.size).toBe('compact');
 		expect(open().querySelector('.cms-modal-title')!.textContent).toBe('Publish');
-		expect(open().querySelector('.question')!.textContent).toBe('Publish now?');
+		expect(open().querySelector('.cms-confirm-question')!.textContent).toBe('Publish now?');
 		expect(document.activeElement).toBe(footer('primary'));
 		footer('primary').click();
 

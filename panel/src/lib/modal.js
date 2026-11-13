@@ -147,7 +147,7 @@ export function confirm({ message, title, action, cancel: dismiss, tone = 'prima
 				// A destructive action must not be one Enter away.
 				(tone === 'danger' ? cancel : ok).dataset.dialogFocus = '';
 				const text = document.createElement('p');
-				text.className = 'question';
+				text.className = 'cms-confirm-question';
 				text.textContent = message;
 				frame(host, title ?? label, [text], [cancel, ok]).classList.add('cms-confirm');
 

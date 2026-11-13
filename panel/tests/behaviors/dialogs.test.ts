@@ -172,7 +172,7 @@ describe('hx-confirm', () => {
 		expect(event.defaultPrevented).toBe(true);
 		const dialog = asking();
 		expect(dialog.querySelector('.cms-modal-title')!.textContent).toBe('Delete');
-		expect(dialog.querySelector('.question')!.textContent).toBe('Delete this entry?');
+		expect(dialog.querySelector('.cms-confirm-question')!.textContent).toBe('Delete this entry?');
 		const action = dialog.querySelector<HTMLButtonElement>('.cms-modal-footer .cms-button-danger')!;
 		expect(action.textContent).toBe('Delete');
 		// Destructive questions start on Cancel.

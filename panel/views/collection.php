@@ -326,12 +326,12 @@ $columns .= $hasRowActions ? ' max-content' : '';
 	<?php if ($bulk): ?>
 		<?php $this->component('component/dialog', ['name' => 'bulk-delete', 'size' => 'compact', 'title' => __('bulk:delete')]) ?>
 			<div class="cms-modal-body cms-confirm">
-			<p class="question" data-bulk-question></p>
+			<p class="cms-confirm-question" data-bulk-question></p>
 			<?php // data-bulk-gate: deleting a parent without this opt-in would
 
 			// only be skipped server-side, so the confirm button stays locked
 			// until the box is ticked. ?>
-			<label class="children" data-bulk-children data-bulk-gate hidden>
+			<label class="cms-confirm-option" data-bulk-children data-bulk-gate hidden>
 				<input type="checkbox" name="children" value="1" form="collection-bulk" />
 				<span><?= escape(__('bulk:delete-children')) ?></span>
 			</label>
@@ -353,11 +353,11 @@ $columns .= $hasRowActions ? ' max-content' : '';
 
 		<?php $this->component('component/dialog', ['name' => 'bulk-duplicate', 'size' => 'compact', 'title' => __('bulk:duplicate')]) ?>
 			<div class="cms-modal-body cms-confirm">
-			<p class="question" data-bulk-question></p>
+			<p class="cms-confirm-question" data-bulk-question></p>
 			<?php // No data-bulk-gate: duplicating a parent without its children
 
 			// is a legitimate copy, so the checkbox is a plain option. ?>
-			<label class="children" data-bulk-children hidden>
+			<label class="cms-confirm-option" data-bulk-children hidden>
 				<input type="checkbox" name="children" value="1" form="collection-bulk" />
 				<span><?= escape(__('bulk:duplicate-children')) ?></span>
 			</label>
@@ -380,12 +380,12 @@ $columns .= $hasRowActions ? ' max-content' : '';
 		<?php if ($page->bulk['publishable']): ?>
 			<?php $this->component('component/dialog', ['name' => 'bulk-publish', 'size' => 'compact', 'title' => __('bulk:publish')]) ?>
 				<div class="cms-modal-body cms-confirm">
-				<p class="question" data-bulk-question></p>
-				<label class="children" data-bulk-children hidden>
+				<p class="cms-confirm-question" data-bulk-question></p>
+				<label class="cms-confirm-option" data-bulk-children hidden>
 					<input type="checkbox" name="children" value="1" form="collection-bulk" />
 					<span><?= escape(__('bulk:publish-children')) ?></span>
 				</label>
-				<label class="children" data-bulk-option>
+				<label class="cms-confirm-option" data-bulk-option>
 					<input type="checkbox" name="changes" value="1" form="collection-bulk" />
 					<span><?= escape(__('bulk:publish-changes')) ?></span>
 				</label>
@@ -409,8 +409,8 @@ $columns .= $hasRowActions ? ' max-content' : '';
 
 			<?php $this->component('component/dialog', ['name' => 'bulk-unpublished', 'size' => 'compact', 'title' => __('bulk:unpublish')]) ?>
 				<div class="cms-modal-body cms-confirm">
-				<p class="question" data-bulk-question></p>
-				<label class="children" data-bulk-children hidden>
+				<p class="cms-confirm-question" data-bulk-question></p>
+				<label class="cms-confirm-option" data-bulk-children hidden>
 					<input type="checkbox" name="children" value="1" form="collection-bulk" />
 					<span><?= escape(__('bulk:unpublish-children')) ?></span>
 				</label>

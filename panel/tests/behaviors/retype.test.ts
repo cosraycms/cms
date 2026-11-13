@@ -231,7 +231,7 @@ describe('changing a block’s type', () => {
 
 		retype(rows()[0], QUOTE);
 
-		expect(question()?.querySelector('.question')?.textContent).toBe(
+		expect(question()?.querySelector('.cms-confirm-question')?.textContent).toBe(
 			'Change the block type? Its content will be removed.',
 		);
 		await answer(false);

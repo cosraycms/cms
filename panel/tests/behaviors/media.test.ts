@@ -189,7 +189,7 @@ describe('deleting the selection', () => {
 		const button = root.querySelector<HTMLElement>('[data-media-delete-selected]')!;
 
 		button.click();
-		const question = document.querySelector('dialog[open] .question');
+		const question = document.querySelector('dialog[open] .cms-confirm-question');
 		expect(question?.textContent).toBe('media:confirm-delete-selected-plural');
 		document
 			.querySelector<HTMLElement>('dialog[open] .cms-modal-footer .cms-button-secondary')!

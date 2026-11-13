@@ -223,7 +223,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					<button type="button" class="cms-button cms-button-danger" data-dialog-open="sample-confirm">Destructive question</button>
 					<button type="button" class="cms-button cms-button-secondary" data-dialog-open="sample-alert">Notice</button>
 					<?php $this->component('component/dialog', ['name' => 'sample-confirm', 'size' => 'compact', 'title' => 'Delete file']) ?>
-						<div class="cms-modal-body cms-confirm"><p class="question">Delete the file "report.pdf"?</p></div>
+						<div class="cms-modal-body cms-confirm"><p class="cms-confirm-question">Delete the file "report.pdf"?</p></div>
 						<footer class="cms-modal-footer">
 							<button type="button" class="cms-button cms-button-secondary" data-dialog-close data-dialog-focus>Cancel</button>
 							<button type="button" class="cms-button cms-button-danger cms-button-solid" data-dialog-close>Delete file</button>
