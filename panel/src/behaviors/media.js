@@ -62,7 +62,7 @@ function mark() {
 	const uid = detail?.getAttribute('data-media-detail') ?? '';
 
 	document.querySelectorAll('[data-media-tile]').forEach((tile) => {
-		tile.classList.toggle('active', uid !== '' && tile.getAttribute('data-media-tile') === uid);
+		tile.classList.toggle('is-active', uid !== '' && tile.getAttribute('data-media-tile') === uid);
 	});
 }
 

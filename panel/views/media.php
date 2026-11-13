@@ -63,7 +63,7 @@ unset($search['page']);
 		</div>
 	</header>
 
-	<section class="body">
+	<section class="cms-media-body">
 		<div class="cms-media-workspace">
 			<section class="cms-media-pane cms-dropzone" aria-label="<?= escape(__('media:title')) ?>" data-media-drop>
 				<div class="cms-page-toolbar">
@@ -87,7 +87,7 @@ unset($search['page']);
 					<?php endif ?>
 				</div>
 
-				<div class="selection" data-media-selection hidden>
+				<div class="cms-media-selection" data-media-selection hidden>
 					<span role="status" data-media-selection-count></span>
 					<button
 						type="button"

@@ -17,18 +17,18 @@ $locale = (string) ($localeId ?? 'en');
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
 <?php foreach ($listing->assets as $asset): ?>
-	<?php $active = $asset->uid === $screen->file ? ' active' : '' ?>
+	<?php $active = $asset->uid === $screen->file ? ' is-active' : '' ?>
 	<?php if ($picker): ?>
 	<button
 		type="button"
-		class="cms-asset-tile<?= $active ?>"
+		class="cms-asset-grid-tile<?= $active ?>"
 		title="<?= escape($asset->filename) ?>"
 		data-pick="<?= escape((string) json_encode(Library::item($asset), $jsonFlags)) ?>">
 	<?php else: ?>
 	<?php $url = $screen->url(['file' => $asset->uid]) ?>
-	<div class="cms-asset-cell">
+	<div class="cms-asset-grid-cell">
 	<a
-		class="cms-asset-tile<?= $active ?>"
+		class="cms-asset-grid-tile<?= $active ?>"
 		href="<?= escape($url) ?>"
 		title="<?= escape($asset->filename) ?>"
 		hx-get="<?= escape($url) ?>"
@@ -37,25 +37,25 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		hx-replace-url="true"
 		data-media-tile="<?= escape($asset->uid) ?>">
 	<?php endif ?>
-		<span class="cms-asset-thumb">
+		<span class="cms-asset-grid-thumb">
 			<?php if ($asset->kind === 'image'): ?>
 				<img src="<?= escape($asset->resizable() ? $asset->sizePath('thumb') : $asset->path()) ?>" alt="" loading="lazy" />
 			<?php else: ?>
-				<span class="cms-asset-ext"><?= escape(AssetFacts::extension($asset->filename) ?: $asset->kind) ?></span>
+				<span class="cms-asset-grid-ext"><?= escape(AssetFacts::extension($asset->filename) ?: $asset->kind) ?></span>
 			<?php endif ?>
 		</span>
-		<span class="cms-asset-meta">
-			<span class="cms-asset-name"><?= escape($asset->filename) ?></span>
+		<span class="cms-asset-grid-meta">
+			<span class="cms-asset-grid-name"><?= escape($asset->filename) ?></span>
 			<?php $line = AssetFacts::line($asset, $locale) ?>
 			<?php if ($line !== ''): ?>
-				<span class="cms-asset-line"><?= escape($line) ?></span>
+				<span class="cms-asset-grid-line"><?= escape($line) ?></span>
 			<?php endif ?>
 		</span>
 	<?php if ($picker): ?>
 	</button>
 	<?php else: ?>
 	</a>
-		<label class="cms-asset-pick">
+		<label class="cms-asset-grid-pick">
 			<input
 				type="checkbox"
 				value="<?= escape($asset->uid) ?>"
@@ -69,7 +69,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<?php $next = $screen->url(['file' => $screen->file, 'page' => $listing->page + 1]) ?>
 	<a
 		id="media-more"
-		class="cms-button cms-button-secondary cms-media-more"
+		class="cms-button cms-button-secondary cms-asset-grid-more"
 		href="<?= escape($next) ?>"
 		hx-get="<?= escape($next) ?>"
 		hx-target="this"

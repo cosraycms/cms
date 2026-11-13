@@ -21,10 +21,10 @@ $closeUrl = $screen->url(['file' => null]);
 ?>
 <div id="media-detail" class="cms-media-detail" data-media-detail="<?= escape($asset->uid ?? '') ?>">
 <?php if ($asset === null && $screen->file === null): ?>
-	<div class="cms-media-inspector-empty"><?= escape(__('media:select-hint')) ?></div>
+	<div class="cms-media-detail-empty"><?= escape(__('media:select-hint')) ?></div>
 <?php elseif ($asset === null): ?>
-	<div class="cms-detail">
-		<div class="cms-detail-status"><?= escape(__('media:file-load-failed')) ?></div>
+	<div class="cms-media-detail-sheet">
+		<div class="cms-media-detail-status"><?= escape(__('media:file-load-failed')) ?></div>
 		<a
 			class="cms-button cms-button-secondary"
 			href="<?= escape($closeUrl) ?>"
@@ -51,17 +51,17 @@ $closeUrl = $screen->url(['file' => null]);
 	unset($texts[$image ? 'title' : 'alt']);
 	?>
 	<form
-		class="cms-detail"
+		class="cms-media-detail-sheet"
 		method="post"
 		action="<?= escape($saveUrl) ?>"
 		hx-post="<?= escape($saveUrl) ?>"
 		hx-target="#media-detail"
 		hx-swap="outerHTML">
 		<?php $this->include('component/csrf') ?>
-		<header class="cms-detail-head">
+		<header class="cms-media-detail-head">
 			<h2 title="<?= escape($asset->filename) ?>"><?= escape($asset->filename) ?></h2>
 			<a
-				class="cms-detail-close"
+				class="cms-media-detail-close"
 				href="<?= escape($closeUrl) ?>"
 				hx-get="<?= escape($closeUrl) ?>"
 				hx-target="#media-detail"
@@ -70,28 +70,28 @@ $closeUrl = $screen->url(['file' => null]);
 				aria-label="<?= escape(__('common:close')) ?>"><?= Icon::render('x-lg') ?></a>
 		</header>
 
-		<div class="cms-detail-body">
+		<div class="cms-media-detail-body">
 			<?php if ($image): ?>
 				<?php // A click sets the focal point; keyboard activation has no position and leaves it. ?>
 				<button
 					type="button"
-					class="cms-detail-preview focusable"
+					class="cms-media-detail-preview"
 					title="<?= escape(__('image:set-focus-hint')) ?>"
 					data-media-focal>
 					<img src="<?= escape($asset->resizable() ? $asset->sizePath('preview') : $asset->path()) ?>" alt="<?= escape($asset->filename) ?>" />
 					<span
-						class="cms-detail-focal"
+						class="cms-media-detail-focal"
 						style="left: <?= $focal ? $focal['x'] * 100 : 50 ?>%; top: <?= $focal ? $focal['y'] * 100 : 50 ?>%"
 						<?= $focal ? '' : 'hidden' ?>
 						data-media-focal-marker></span>
 				</button>
 			<?php else: ?>
-				<div class="cms-detail-preview">
-					<span class="cms-detail-preview-icon"><?= Icon::render('file-earmark-richtext') ?></span>
+				<div class="cms-media-detail-preview">
+					<span class="cms-media-detail-preview-icon"><?= Icon::render('file-earmark-richtext') ?></span>
 				</div>
 			<?php endif ?>
 
-			<dl class="cms-detail-meta">
+			<dl class="cms-media-detail-meta">
 				<div>
 					<dt><?= escape(__('common:type')) ?></dt>
 					<dd><?= escape($asset->mime ?? $asset->kind) ?></dd>
@@ -115,7 +115,7 @@ $closeUrl = $screen->url(['file' => null]);
 			</dl>
 
 			<?php if ($image): ?>
-				<div class="cms-detail-focal-controls">
+				<div class="cms-media-detail-focal-controls">
 					<span
 						data-media-focal-text
 						data-label="<?= escape(__('image:focus')) ?>"
@@ -134,10 +134,10 @@ $closeUrl = $screen->url(['file' => null]);
 				</div>
 			<?php endif ?>
 
-			<div class="cms-meta-form">
+			<div class="cms-media-detail-fields">
 				<?php foreach ($texts as $key => $label): ?>
 					<?php $id = "media-meta-{$key}" ?>
-					<div class="cms-meta-field">
+					<div class="cms-media-detail-field">
 						<label for="<?= escape("{$id}-{$defaultLocale}") ?>" data-locale-label-for="<?= escape($id) ?>"><?= escape(
 							$label,
 						) ?></label>
@@ -157,7 +157,7 @@ $closeUrl = $screen->url(['file' => null]);
 						<?php endforeach ?>
 					</div>
 				<?php endforeach ?>
-				<div class="cms-meta-field">
+				<div class="cms-media-detail-field">
 					<label for="media-meta-attribution"><?= escape(__('image:attribution')) ?></label>
 					<input
 						class="cms-input"
@@ -168,16 +168,16 @@ $closeUrl = $screen->url(['file' => null]);
 				</div>
 			</div>
 
-			<section class="cms-detail-usage">
+			<section class="cms-media-detail-usage">
 				<h3><?= escape(__('media:usage')) ?></h3>
 				<?php if ($usage === []): ?>
-					<p class="cms-detail-hint"><?= escape(__('media:unused')) ?></p>
+					<p class="cms-media-detail-hint"><?= escape(__('media:unused')) ?></p>
 				<?php else: ?>
 					<ul>
 						<?php foreach ($usage as $owner): ?>
 							<li>
-								<span class="cms-detail-usage-title"><?= escape($owner['title'] ?: $owner['ownerUid']) ?></span>
-								<span class="cms-detail-usage-kind">
+								<span><?= escape($owner['title'] ?: $owner['ownerUid']) ?></span>
+								<span class="cms-media-detail-usage-kind">
 									<?= escape($owner['nodeType'] ?? $owner['ownerType']) ?>
 									<?php if ($owner['ownerType'] === 'draft'): ?>
 										· <?= escape(__('media:usage-changes')) ?>
@@ -192,7 +192,7 @@ $closeUrl = $screen->url(['file' => null]);
 			</section>
 		</div>
 
-		<footer class="cms-detail-foot">
+		<footer class="cms-media-detail-foot">
 			<button type="submit" class="cms-button cms-button-danger" form="media-detail-delete">
 				<?= Icon::render('trash3') ?>
 				<?= escape(__('common:delete')) ?>
@@ -207,9 +207,9 @@ $closeUrl = $screen->url(['file' => null]);
 				form=""
 				data-media-replace-input
 				data-url="<?= escape($screen->url(below: rawurlencode($asset->uid) . '/replace')) ?>" />
-			<div class="cms-detail-foot-right">
+			<div class="cms-media-detail-foot-right">
 				<?php if ($saved): ?>
-					<span class="cms-detail-saved" role="status"><?= escape(__('common:saved')) ?></span>
+					<span class="cms-media-detail-saved" role="status"><?= escape(__('common:saved')) ?></span>
 				<?php endif ?>
 				<button type="submit" class="cms-button cms-button-primary">
 					<?= Icon::render('floppy') ?>
@@ -219,7 +219,7 @@ $closeUrl = $screen->url(['file' => null]);
 		</footer>
 
 		<?php if (is_array($blocked)): ?>
-			<div class="cms-detail-blocked" role="alert">
+			<div class="cms-media-detail-blocked" role="alert">
 				<p><?= escape(__('media:delete-in-use')) ?></p>
 				<ul>
 					<?php foreach ($blocked as $owner): ?>

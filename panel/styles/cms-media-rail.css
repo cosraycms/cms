@@ -1,0 +1,85 @@
+/* The media screen's filters in the shell's rail. */
+.cms-media-rail {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-3);
+	min-width: 0;
+
+	& .cms-media-rail-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--cms-space-2);
+	}
+
+	& .cms-media-rail-title {
+		font-size: var(--cms-font-size-xs);
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--cms-color-text-subtle);
+	}
+
+	& .cms-media-rail-reset {
+		font-size: var(--cms-font-size-xs);
+		color: var(--cms-color-text-muted);
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+
+		&:hover {
+			color: var(--cms-color-text);
+		}
+	}
+
+	& .cms-media-rail-group {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-2);
+		border: 0;
+		padding: 0;
+		margin: 0;
+
+		& legend {
+			padding: 0;
+			margin-bottom: var(--cms-space-1);
+		}
+	}
+
+	& .cms-media-rail-check {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		font-size: var(--cms-font-size-sm);
+		color: var(--cms-color-text-label);
+		cursor: pointer;
+
+		& input {
+			accent-color: var(--cms-color-text);
+		}
+	}
+
+	& .cms-media-rail-label {
+		flex: 1 1 auto;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& .cms-media-rail-count {
+		font-size: var(--cms-font-size-xs);
+		color: var(--cms-color-text-subtle);
+		font-variant-numeric: tabular-nums;
+	}
+
+	/* No shell: a strip above the content. */
+	@media (width < 40rem), (height < 30rem) {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		column-gap: var(--cms-space-6);
+
+		& .cms-media-rail-head {
+			flex-basis: 100%;
+		}
+	}
+}

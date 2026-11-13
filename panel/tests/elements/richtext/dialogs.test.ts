@@ -224,7 +224,7 @@ describe('richtext dialogs', () => {
 function pickerWith(item: Record<string, string>): void {
 	vi.stubGlobal('htmx', {
 		ajax: vi.fn(async (_verb: string, _path: string, { target }: { target: Element }) => {
-			target.innerHTML = `<button type="button" class="cms-asset-tile" data-pick='${JSON.stringify(item)}'></button>`;
+			target.innerHTML = `<button type="button" class="cms-asset-grid-tile" data-pick='${JSON.stringify(item)}'></button>`;
 		}),
 	});
 }

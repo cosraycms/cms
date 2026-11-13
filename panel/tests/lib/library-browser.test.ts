@@ -14,7 +14,7 @@ function tile(uid: string, active = false): string {
 		kind: 'image',
 	});
 
-	return `<button type="button" class="cms-asset-tile${active ? ' active' : ''}" data-pick='${item}'></button>`;
+	return `<button type="button" class="cms-asset-grid-tile${active ? ' is-active' : ''}" data-pick='${item}'></button>`;
 }
 
 beforeEach(() => {
@@ -58,7 +58,7 @@ describe('library browser', () => {
 
 		expect(pick).toHaveBeenCalledWith(expect.objectContaining({ uid: 'b', filename: 'b.png' }));
 		const marks = [...container.querySelectorAll('[data-pick]')].map((t) =>
-			t.classList.contains('active'),
+			t.classList.contains('is-active'),
 		);
 		expect(marks).toEqual([false, true]);
 

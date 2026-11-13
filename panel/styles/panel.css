@@ -12,6 +12,10 @@
 @import './cms-page.css' layer(panel);
 @import './cms-notice.css' layer(panel);
 @import './cms-media.css' layer(panel);
+@import './cms-media-rail.css' layer(panel);
+@import './cms-asset-grid.css' layer(panel);
+@import './cms-media-detail.css' layer(panel);
+@import './cms-library.css' layer(panel);
 @import './cms-dashboard.css' layer(panel);
 @import './cms-collection.css' layer(panel);
 @import './cms-tokens.css' layer(panel);

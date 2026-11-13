@@ -5,7 +5,7 @@ test('a poster chosen for a video reaches the page', async ({ page }) => {
 	await signIn(page);
 	await page.goto('/panel/media');
 	await page.locator('[data-media-upload-input]').setInputFiles(file('still.jpg'));
-	await expect(page.locator('#media-detail .cms-detail-head h2')).toHaveText('still.jpg');
+	await expect(page.locator('#media-detail .cms-media-detail-head h2')).toHaveText('still.jpg');
 
 	await page.goto('/panel/node/browservideo');
 	const clip = field(page, CLIP);

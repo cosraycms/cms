@@ -45,7 +45,7 @@ export function browseLibrary(container, { kind = null, selected = null, pick })
 		}
 
 		for (const other of container.querySelectorAll('[data-pick]')) {
-			other.classList.toggle('active', other === tile);
+			other.classList.toggle('is-active', other === tile);
 		}
 
 		pick(JSON.parse(tile.dataset.pick ?? '{}'));

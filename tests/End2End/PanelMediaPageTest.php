@@ -44,7 +44,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//div[@data-content-locale-scope][@data-content-locale="en"][@data-media]', $html);
 		$this->assertHtmlNodeExists("//a[@data-media-tile='{$image}'][contains(@href, 'file={$image}')]", $html);
 		$this->assertHtmlNodeExists(
-			"//a[@data-media-tile]//span[@class='cms-asset-name'][text()='e2e-page-notes.pdf']",
+			"//a[@data-media-tile]//span[@class='cms-asset-grid-name'][text()='e2e-page-notes.pdf']",
 			$html,
 		);
 		// The filters render into the shell's rail, with the counts per kind.
@@ -52,7 +52,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 			'//aside[@class="cms-sidebar"]//*[@data-media-rail]//input[@name="kind[]"][@value="image"]',
 			$html,
 		);
-		$this->assertHtmlNodeExists('//div[@id="media-detail"]//*[@class="cms-media-inspector-empty"]', $html);
+		$this->assertHtmlNodeExists('//div[@id="media-detail"]//*[@class="cms-media-detail-empty"]', $html);
 		// Uploads report through the bridge the system payload installs.
 		$this->assertStringContainsString('id="cosray-system-data"', $html);
 		$this->assertStringContainsString('href="/panel/media"', $html);
@@ -74,7 +74,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 			'//form[@class="cms-page-search"]/input[@type="hidden"][@name="kind"][@value="image"]',
 			$images,
 		);
-		$this->assertHtmlNodeExists('//a[@class="cms-media-reset"][@href="/panel/media"]', $images);
+		$this->assertHtmlNodeExists('//a[@class="cms-media-rail-reset"][@href="/panel/media"]', $images);
 		// Both take the selected file from the URL at request time (behaviors/media.js).
 		$this->assertHtmlNodeExists('//form[@class="cms-page-search"][@data-media-keep-file]', $images);
 		$this->assertHtmlNodeExists('//*[@data-media-rail]/form[@data-media-keep-file]', $images);
@@ -126,7 +126,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 		);
 
 		$this->assertHtmlNodeExists(
-			'//section[@class="cms-detail-usage"]//span[@class="cms-detail-usage-title"][text()="e2e-detail-owner"]',
+			'//section[@class="cms-media-detail-usage"]//li/span[text()="e2e-detail-owner"]',
 			$used,
 		);
 	}
@@ -168,7 +168,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertStringNotContainsString('e2e-picker-notes.pdf', $html);
 		$this->assertHtmlNodeExists('//form[@hx-get="/panel/media/picker"]/input[@name="kind"][@value="image"]', $html);
 		$document = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR);
-		$tile = $document->querySelector('button.cms-asset-tile.active[data-pick]');
+		$tile = $document->querySelector('button.cms-asset-grid-tile.is-active[data-pick]');
 		$this->assertNotNull($tile);
 		$item = json_decode((string) $tile->getAttribute('data-pick'), true);
 		$this->assertSame($image, $item['uid']);
@@ -263,7 +263,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertHtmlNodeExists('//span[@class="cms-detail-saved"]', $html);
+		$this->assertHtmlNodeExists('//span[@class="cms-media-detail-saved"]', $html);
 		$this->assertHtmlNodeExists('//input[@name="meta[alt][de]"][@value="Ein Pixel"]', $html);
 		$meta = json_decode(
 			(string) $this->db()->execute(
@@ -462,7 +462,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertResponseOk($blocked);
 		$html = $this->getHtmlResponse($blocked);
 		$this->assertHtmlNodeExists(
-			'//div[@class="cms-detail-blocked"]//li[contains(., "e2e-media-page-owner")]',
+			'//div[@class="cms-media-detail-blocked"]//li[contains(., "e2e-media-page-owner")]',
 			$html,
 		);
 		$this->assertNotEmpty(

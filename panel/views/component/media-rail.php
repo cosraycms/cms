@@ -53,7 +53,7 @@ $listing = u($listing ?? null);
 			<span class="cms-media-rail-title"><?= escape(__('common:filter')) ?></span>
 			<?php if ($screen->filtered()): ?>
 				<a
-					class="cms-media-reset"
+					class="cms-media-rail-reset"
 					href="<?= escape($screen->url(['kind' => [], 'q' => '', 'range' => '', 'status' => ''])) ?>"
 					hx-target="#main"
 					data-media-keep-file><?= escape(__('common:reset')) ?></a>
@@ -63,14 +63,14 @@ $listing = u($listing ?? null);
 		<fieldset class="cms-media-rail-group">
 			<legend class="cms-media-rail-title"><?= escape(__('common:type')) ?></legend>
 			<?php foreach (Library::KINDS as $kind): ?>
-				<label class="cms-media-check">
+				<label class="cms-media-rail-check">
 					<input
 						type="checkbox"
 						name="kind[]"
 						value="<?= escape($kind) ?>"
 						<?= in_array($kind, $screen->kinds, true) ? 'checked' : '' ?> />
-					<span class="cms-media-check-label"><?= escape($kindLabels[$kind]) ?></span>
-					<span class="cms-media-check-count"><?= (int) ($listing->counts[$kind] ?? 0) ?></span>
+					<span class="cms-media-rail-label"><?= escape($kindLabels[$kind]) ?></span>
+					<span class="cms-media-rail-count"><?= (int) ($listing->counts[$kind] ?? 0) ?></span>
 				</label>
 			<?php endforeach ?>
 		</fieldset>
@@ -82,9 +82,9 @@ $listing = u($listing ?? null);
 				'unused' => __('media:status-unused'),
 				'no-alt' => __('media:status-no-alt'),
 			] as $value => $label): ?>
-				<label class="cms-media-check">
+				<label class="cms-media-rail-check">
 					<input type="radio" name="status" value="<?= escape($value) ?>" <?= $screen->status === $value ? 'checked' : '' ?> />
-					<span class="cms-media-check-label"><?= escape($label) ?></span>
+					<span class="cms-media-rail-label"><?= escape($label) ?></span>
 				</label>
 			<?php endforeach ?>
 		</fieldset>
@@ -92,13 +92,13 @@ $listing = u($listing ?? null);
 		<fieldset class="cms-media-rail-group">
 			<legend class="cms-media-rail-title"><?= escape(__('media:uploaded')) ?></legend>
 			<?php foreach ($ranges as $value => $label): ?>
-				<label class="cms-media-check">
+				<label class="cms-media-rail-check">
 					<input
 						type="radio"
 						name="range"
 						value="<?= escape((string) $value) ?>"
 						<?= $screen->range === (string) $value ? 'checked' : '' ?> />
-					<span class="cms-media-check-label"><?= escape($label) ?></span>
+					<span class="cms-media-rail-label"><?= escape($label) ?></span>
 				</label>
 			<?php endforeach ?>
 		</fieldset>

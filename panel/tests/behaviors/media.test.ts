@@ -27,8 +27,8 @@ function screen(detail = ''): HTMLElement {
 			<a href="/panel/media?kind=image&amp;file=a" data-media-keep-file>Reset</a>
 			<section class="cms-dropzone" data-media-drop>
 				<div data-media-grid>
-					<a data-media-tile="a" class="cms-asset-tile active" href="?file=a"></a>
-					<a data-media-tile="b" class="cms-asset-tile" href="?file=b"></a>
+					<a data-media-tile="a" class="cms-asset-grid-tile is-active" href="?file=a"></a>
+					<a data-media-tile="b" class="cms-asset-grid-tile" href="?file=b"></a>
 				</div>
 			</section>
 			<div id="media-detail" data-media-detail="${detail}">
@@ -84,10 +84,10 @@ describe('media tiles', () => {
 
 		document.dispatchEvent(new Event('htmx:after:swap'));
 
-		expect(document.querySelector('[data-media-tile="a"]')!.classList.contains('active')).toBe(
+		expect(document.querySelector('[data-media-tile="a"]')!.classList.contains('is-active')).toBe(
 			false,
 		);
-		expect(document.querySelector('[data-media-tile="b"]')!.classList.contains('active')).toBe(
+		expect(document.querySelector('[data-media-tile="b"]')!.classList.contains('is-active')).toBe(
 			true,
 		);
 	});
