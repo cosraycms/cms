@@ -486,7 +486,7 @@ describe('image details', () => {
 			expect(advanced.open).toBe(false);
 			expect(advanced.querySelectorAll('input:checked')).toHaveLength(0);
 
-			[...document.querySelectorAll<HTMLButtonElement>('.cms-modal .tab')][1]!.click();
+			[...document.querySelectorAll<HTMLButtonElement>('.cms-modal .cms-tabs-tab')][1]!.click();
 
 			expect(advanced.hidden).toBe(true);
 		});

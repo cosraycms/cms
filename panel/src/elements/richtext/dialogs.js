@@ -380,7 +380,7 @@ export function openLinkDialog({ owner, href, node, asset, blank, rel, add }) {
 			for (const [index, entry] of tabs.entries()) {
 				const tab = document.createElement('button');
 				tab.type = 'button';
-				tab.className = 'tab';
+				tab.className = 'cms-tabs-tab';
 				tab.id = `${id}-tab-${entry.id}`;
 				tab.setAttribute('role', 'tab');
 				tab.setAttribute('aria-controls', `${id}-panel`);

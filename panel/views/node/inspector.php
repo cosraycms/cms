@@ -116,7 +116,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 				<?php foreach ($tabs as $key => $label): ?>
 					<button
 						type="button"
-						class="tab"
+						class="cms-tabs-tab"
 						role="tab"
 						id="cms-inspector-tab-<?= $key ?>"
 						aria-controls="cms-inspector-panel-<?= $key ?>"
