@@ -138,7 +138,7 @@ function writeCaption(root: ParentNode, text: string, html = ''): void {
 }
 
 const captionHint = (root: ParentNode) =>
-	root.querySelector('.cms-inline-editor .placeholder')?.textContent;
+	root.querySelector('.cms-inline-editor-placeholder')?.textContent;
 
 const captionShown = (root: ParentNode) =>
 	root.querySelector('.cms-inline-editor .ProseMirror')?.textContent;
@@ -815,7 +815,7 @@ describe('image details', () => {
 				.querySelector('.cms-modal .ProseMirror')!
 				.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', ctrlKey: true, bubbles: true }));
 			document
-				.querySelector<HTMLButtonElement>('.cms-inline-editor .tools button:nth-child(2)')!
+				.querySelector<HTMLButtonElement>('.cms-inline-editor-tools button:nth-child(2)')!
 				.click();
 			await action('common:apply');
 
@@ -880,7 +880,7 @@ describe('image details', () => {
 			expect(
 				document.querySelector('.cms-modal .ProseMirror')?.getAttribute('contenteditable'),
 			).toBe('false');
-			expect(document.querySelector('.cms-inline-editor .tools')).toBeNull();
+			expect(document.querySelector('.cms-inline-editor-tools')).toBeNull();
 		});
 	});
 

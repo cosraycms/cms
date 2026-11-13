@@ -101,9 +101,9 @@ export function inlineEditor({ value, label, readonly = false, change, focus, bl
 	const element = document.createElement('div');
 	element.className = 'cms-inline-editor';
 	const hint = document.createElement('span');
-	hint.className = 'placeholder';
+	hint.className = 'cms-inline-editor-placeholder';
 	const toolbar = document.createElement('div');
-	toolbar.className = 'tools';
+	toolbar.className = 'cms-inline-editor-tools';
 	/** @type {{ button: HTMLButtonElement, mark: import('prosemirror-model').MarkType }[]} */
 	const buttons = [];
 
