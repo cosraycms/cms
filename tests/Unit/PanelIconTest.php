@@ -18,6 +18,15 @@ final class PanelIconTest extends TestCase
 		);
 	}
 
+	public function testCarriesThePanelIconClassAndAPartClass(): void
+	{
+		$this->assertHtmlNodeExists('//svg[@class="cms-icon"]', Icon::render('plus'));
+		$this->assertHtmlNodeExists(
+			'//svg[@class="cms-icon cms-field-width-expand"]',
+			Icon::render('plus', 'cms-field-width-expand'),
+		);
+	}
+
 	#[DataProvider('untrustedNames')]
 	public function testRejectsPathsMarkupAndProviderIds(string $name): void
 	{

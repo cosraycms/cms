@@ -6,7 +6,11 @@ namespace Cosray\Panel;
 
 final class Icon
 {
-	public static function render(string $name): string
+	/**
+	 * @param string $class A part class of the component the icon sits in,
+	 *                      for the rare rule that singles one icon out.
+	 */
+	public static function render(string $name, string $class = ''): string
 	{
 		if (preg_match('/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/', $name) !== 1) {
 			return '';
@@ -24,10 +28,16 @@ final class Icon
 			return '';
 		}
 
-		return str_replace(
-			['<svg ', 'class="bi '],
-			['<svg aria-hidden="true" focusable="false" ', 'class="cms-icon bi '],
-			$svg,
+		$svg = preg_replace('/\A(\s*<svg\b[^>]*?)\s+class="[^"]*"/', '$1', $svg, 1) ?? $svg;
+		$classes = trim('cms-icon ' . htmlspecialchars($class, ENT_QUOTES));
+
+		return (
+			preg_replace(
+				'/<svg\b/',
+				'<svg aria-hidden="true" focusable="false" class="' . $classes . '"',
+				$svg,
+				1,
+			) ?? $svg
 		);
 	}
 }

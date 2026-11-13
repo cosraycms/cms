@@ -14,7 +14,7 @@ export function icon(name) {
 	}
 
 	return (
-		`<svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="cms-icon bi bi-${name}" viewBox="0 0 16 16">` +
+		`<svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="cms-icon" viewBox="0 0 16 16">` +
 		`<use href="${assetsBase()}icons.svg#${name}"></use></svg>`
 	);
 }

@@ -182,8 +182,8 @@
 		}
 	}
 
-	&:not([data-wide-blocks]) .cms-field-width-toggle .bi-arrows-collapse-vertical,
-	&[data-wide-blocks] .cms-field-width-toggle .bi-arrows-expand-vertical {
+	&:not([data-wide-blocks]) .cms-field-width-collapse,
+	&[data-wide-blocks] .cms-field-width-expand {
 		display: none;
 	}
 

@@ -107,8 +107,8 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				aria-pressed="false"
 				aria-label="<?= escape(__('field:full-width')) ?>"
 				title="<?= escape(__('field:full-width')) ?>">
-				<?= \Cosray\Panel\Icon::render('arrows-expand-vertical') ?>
-				<?= \Cosray\Panel\Icon::render('arrows-collapse-vertical') ?>
+				<?= \Cosray\Panel\Icon::render('arrows-expand-vertical', 'cms-field-width-expand') ?>
+				<?= \Cosray\Panel\Icon::render('arrows-collapse-vertical', 'cms-field-width-collapse') ?>
 			</button>
 		<?php endif ?>
 	</label>

@@ -2,7 +2,7 @@
 
 Except for the custom artwork noted below, these unmodified SVG assets are a subset of [Bootstrap Icons 1.13.1](https://github.com/twbs/icons/tree/v1.13.1/icons), licensed under MIT. Copyright (c) 2019–2024 The Bootstrap Authors. See `LICENSES/MIT.txt` and the file-level attribution in `REUSE.toml` at the repository root.
 
-Use regular variants, never `*-fill` artwork. Both `Cosray\Panel\Icon::render()` and `icon()` in `src/lib/icons.js`, through the served sprite, read this collection. Their only argument is a canonical asset name, not a path or arbitrary SVG. Icons are decorative; name icon-only actions on their buttons or links.
+Use regular variants, never `*-fill` artwork. Both `Cosray\Panel\Icon::render()` and `icon()` in `src/lib/icons.js`, through the served sprite, read this collection. Their name argument is a canonical asset name, not a path or arbitrary SVG. An icon carries the class `cms-icon` and none of the artwork's own; where a rule must single out one icon, `Icon::render()` takes a part class of the surrounding component as a second argument. Icons are decorative; name icon-only actions on their buttons or links.
 
 Notable mappings from the former artwork:
 

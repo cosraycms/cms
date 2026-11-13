@@ -1430,16 +1430,14 @@ describe('file rows', () => {
 		const rows = element.querySelectorAll<HTMLElement>('.cms-file-row');
 
 		expect(rows).toHaveLength(3);
-		expect(rows[0].querySelector('.icon svg')?.classList.contains('bi-file-earmark-word')).toBe(
-			true,
-		);
+		expect(rows[0].querySelector('.icon use')?.getAttribute('href')).toMatch(/#file-earmark-word$/);
 		expect(rows[0].querySelector<HTMLAnchorElement>('a.filename')?.getAttribute('href')).toBe(
 			'/media/terms.docx',
 		);
 		expect(rows[0].querySelector('.title')?.textContent).toBe('Terms of delivery');
 		expect(rows[0].querySelector('.size')?.textContent).toBe('45.4 KB');
 		expect(rows[1].querySelector('.icon img')?.getAttribute('src')).toBe('/media/photo-thumb.jpg');
-		expect(rows[2].querySelector('.icon svg')?.classList.contains('bi-file-earmark')).toBe(true);
+		expect(rows[2].querySelector('.icon use')?.getAttribute('href')).toMatch(/#file-earmark$/);
 		expect(rows[2].querySelector('.title')).toBeNull();
 		expect(rows[2].querySelector('.size')?.textContent).toBe('');
 	});
