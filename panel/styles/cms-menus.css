@@ -31,29 +31,6 @@
 		overflow: hidden;
 	}
 
-	& .cms-notice {
-		flex: 0 0 auto;
-		padding: var(--cms-space-2-5) var(--cms-space-4);
-		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-surface);
-		color: var(--cms-color-text);
-		font-size: var(--cms-font-size-sm);
-
-		& p {
-			margin: 0;
-		}
-
-		& p + p {
-			margin-top: var(--cms-space-1);
-		}
-
-		&.is-error {
-			border-color: var(--cms-color-danger-border);
-			color: var(--cms-color-danger-text);
-		}
-	}
-
 	& .card {
 		display: flex;
 		flex-direction: column;
@@ -64,13 +41,6 @@
 		border-radius: var(--cms-radius-lg) var(--cms-radius-lg) 0 0;
 		background: var(--cms-color-surface);
 		overflow: hidden;
-	}
-
-	& .scroll {
-		flex: 1 1 auto;
-		min-height: 0;
-		overflow: auto;
-		overscroll-behavior: contain;
 	}
 
 	& .empty {
@@ -90,28 +60,6 @@
 			margin: 0;
 			font-size: var(--cms-font-size-sm);
 		}
-	}
-
-	& .cms-list .handle {
-		color: var(--cms-color-text);
-		font-size: var(--cms-font-size-sm);
-		font-weight: 600;
-		text-decoration: none;
-
-		&:hover {
-			color: var(--cms-color-accent-text);
-		}
-	}
-
-	& .col-actions {
-		& form {
-			display: inline;
-		}
-
-		display: flex;
-		align-items: center;
-		justify-content: flex-end;
-		gap: var(--cms-space-2);
 	}
 
 	& .form-card {
@@ -136,10 +84,6 @@
 			margin: 0;
 			color: var(--cms-color-text-muted);
 			font-size: var(--cms-font-size-xs);
-
-			&.warning {
-				color: var(--cms-color-danger-text);
-			}
 		}
 
 		& .form-actions {
