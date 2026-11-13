@@ -134,7 +134,7 @@ function nodeSearch(selected, pick) {
 
 			choice.addEventListener('click', () => {
 				for (const other of items.querySelectorAll('.cms-nodesearch-result')) {
-					other.classList.toggle('active', other === choice);
+					other.classList.toggle('is-active', other === choice);
 				}
 
 				showCurrent(node);
@@ -202,11 +202,11 @@ function checkboxRow(input, text) {
 	label.htmlFor = input.id;
 	label.className = 'cms-checkbox-label';
 	label.textContent = text;
-	const inputWrap = create('div', 'cms-modal-link-target-input-wrap');
+	const inputWrap = create('div', 'cms-link-dialog-checkbox');
 	inputWrap.append(input);
-	const labelWrap = create('div', 'cms-modal-link-target-label-wrap');
+	const labelWrap = create('div', 'cms-link-dialog-label');
 	labelWrap.append(label);
-	const row = create('div', 'cms-modal-link-target-row');
+	const row = create('div', 'cms-link-dialog-option');
 	row.append(inputWrap, labelWrap);
 
 	return row;
@@ -250,7 +250,7 @@ export function openLinkDialog({ owner, href, node, asset, blank, rel, add }) {
 			const tablist = create('div', 'cms-tabs');
 			tablist.setAttribute('role', 'tablist');
 			tablist.setAttribute('aria-label', __('common:tabs'));
-			const panel = create('div', 'files cms-modal-link-files');
+			const panel = create('div', 'cms-link-dialog-panel');
 			panel.setAttribute('role', 'tabpanel');
 			panel.id = `${id}-panel`;
 			const target = document.createElement('input');
@@ -275,7 +275,7 @@ export function openLinkDialog({ owner, href, node, asset, blank, rel, add }) {
 				return input;
 			});
 			const advanced = document.createElement('details');
-			advanced.className = 'cms-modal-link-advanced';
+			advanced.className = 'cms-link-dialog-advanced';
 			advanced.open = rels.some((input) => input.checked);
 			advanced.append(create('summary', undefined, __('link:advanced')));
 
@@ -354,10 +354,10 @@ export function openLinkDialog({ owner, href, node, asset, blank, rel, add }) {
 						url = input.value;
 						refresh();
 					});
-					const wrap = create('div', 'cms-modal-link-manual-input-wrap');
+					const wrap = create('div', 'cms-link-dialog-url');
 					wrap.append(input);
 					const manual = create('div');
-					manual.append(create('div', 'cms-modal-link-manual-hint', __('link:invalid-url')), wrap);
+					manual.append(create('div', 'cms-link-dialog-hint', __('link:invalid-url')), wrap);
 					panel.replaceChildren(manual);
 				}
 
@@ -410,9 +410,9 @@ export function openLinkDialog({ owner, href, node, asset, blank, rel, add }) {
 				tablist.append(tab);
 			}
 
-			const bodyWrap = create('div', 'cms-modal-link-body');
+			const bodyWrap = create('div', 'cms-link-dialog-picker');
 			bodyWrap.append(tablist, panel);
-			const targetWrap = create('div', 'cms-modal-link-target-wrap');
+			const targetWrap = create('div', 'cms-link-dialog-target');
 			targetWrap.append(checkboxRow(target, __('link:open-new-window')));
 
 			frame(
@@ -420,7 +420,7 @@ export function openLinkDialog({ owner, href, node, asset, blank, rel, add }) {
 				__('richtext:add-link'),
 				[bodyWrap, targetWrap, advanced],
 				[button(__('common:cancel'), 'secondary', () => handle.close()), confirm],
-			);
+			).classList.add('cms-link-dialog');
 			showPanel();
 
 			return () => stopBrowsing?.();
@@ -449,7 +449,7 @@ export function openImageDialog({ owner, add }) {
 			const file = document.createElement('input');
 			file.type = 'file';
 			file.accept = 'image/*';
-			file.className = 'cms-modal-image-upload-input';
+			file.className = 'cms-image-dialog-file';
 			const upload = button(__('image:upload'), 'primary', () => file.click());
 			const confirm = button(__('image:insert'), 'primary', () => {
 				if (selected) {
@@ -495,14 +495,14 @@ export function openImageDialog({ owner, add }) {
 				});
 			});
 
-			const row = create('div', 'cms-modal-image-upload');
+			const row = create('div', 'cms-image-dialog-upload');
 			row.append(
 				file,
 				upload,
-				create('span', 'cms-modal-image-upload-hint', __('upload:or-from-library')),
+				create('span', 'cms-image-dialog-hint', __('upload:or-from-library')),
 			);
-			const library = create('div', 'cms-modal-image-library');
-			const body = create('div', 'cms-modal-image-body');
+			const library = create('div', 'cms-image-dialog-library');
+			const body = create('div', 'cms-image-dialog');
 			body.append(row, library);
 			frame(
 				host,

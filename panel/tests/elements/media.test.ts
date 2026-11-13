@@ -430,9 +430,7 @@ describe('image details', () => {
 
 			rowButton('link:add').click();
 			await tick();
-			const input = document.querySelector<HTMLInputElement>(
-				'.cms-modal-link-manual-input-wrap input',
-			)!;
+			const input = document.querySelector<HTMLInputElement>('.cms-link-dialog-url input')!;
 			input.value = 'https://example.com';
 			input.dispatchEvent(new Event('input', { bubbles: true }));
 			document.querySelector<HTMLInputElement>('.cms-modal input[type="checkbox"]')!.click();
@@ -462,7 +460,7 @@ describe('image details', () => {
 
 			rowButton('common:edit').click();
 			await tick();
-			const advanced = document.querySelector<HTMLDetailsElement>('.cms-modal-link-advanced')!;
+			const advanced = document.querySelector<HTMLDetailsElement>('.cms-link-dialog-advanced')!;
 
 			expect(advanced.open).toBe(true);
 			expect(advanced.hidden).toBe(false);
@@ -485,7 +483,7 @@ describe('image details', () => {
 
 			rowButton('link:add').click();
 			await tick();
-			const advanced = document.querySelector<HTMLDetailsElement>('.cms-modal-link-advanced')!;
+			const advanced = document.querySelector<HTMLDetailsElement>('.cms-link-dialog-advanced')!;
 
 			expect(advanced.open).toBe(false);
 			expect(advanced.querySelectorAll('input:checked')).toHaveLength(0);
@@ -500,9 +498,7 @@ describe('image details', () => {
 
 			rowButton('link:add').click();
 			await tick();
-			const input = document.querySelector<HTMLInputElement>(
-				'.cms-modal-link-manual-input-wrap input',
-			)!;
+			const input = document.querySelector<HTMLInputElement>('.cms-link-dialog-url input')!;
 			input.value = 'javascript:alert(1)';
 			input.dispatchEvent(new Event('input', { bubbles: true }));
 

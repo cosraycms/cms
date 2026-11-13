@@ -63,9 +63,7 @@ function button(element: HTMLElement, label: string): HTMLButtonElement {
 
 async function enterAddress(address: string, blank = false): Promise<void> {
 	await tick();
-	const input = document.querySelector<HTMLInputElement>(
-		'.cms-modal-link-manual-input-wrap input',
-	)!;
+	const input = document.querySelector<HTMLInputElement>('.cms-link-dialog-url input')!;
 	input.value = address;
 	input.dispatchEvent(new Event('input', { bubbles: true }));
 

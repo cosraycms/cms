@@ -148,7 +148,7 @@ function tool(updates, parent, spec, kind) {
 		text.textContent = spec.label;
 		control.append(' ', text);
 	} else {
-		control.className = 'richtext-toolbar-btn';
+		control.className = 'cms-richtext-toolbar-btn';
 		control.title = spec.label;
 		control.setAttribute('aria-label', spec.label);
 	}
@@ -164,13 +164,9 @@ function tool(updates, parent, spec, kind) {
 	updates.push(() => {
 		const active = spec.active?.() ?? false;
 
-		if (kind === 'menu') {
-			control.classList.toggle('is-active', active);
+		if (kind === 'menu' && spec.active) control.setAttribute('aria-checked', String(active));
 
-			if (spec.active) control.setAttribute('aria-checked', String(active));
-		} else {
-			control.classList.toggle('active', active);
-		}
+		control.classList.toggle('is-active', active);
 
 		const visible = spec.visible?.() ?? true;
 
@@ -228,7 +224,7 @@ function entry(updates, menu, { icon: name, label, run, checked, bubbled = false
  * @returns {{ wrap: HTMLElement, trigger: HTMLButtonElement, menu: HTMLElement }}
  */
 function dropdown(id, face, attributes) {
-	const wrap = create('div', 'cms-richtext-dropdown-wrap');
+	const wrap = create('div', 'cms-richtext-dropdown');
 	const trigger = document.createElement('button');
 	trigger.type = 'button';
 	trigger.setAttribute('popovertarget', id);
@@ -399,15 +395,15 @@ export class CosrayRichtext extends HTMLElement {
 		const tools = new Set(field.tools ?? DEFAULT_TOOLS);
 		const menuId = `cms-richtext-${++ids}`;
 		const map = this.#values();
-		const root = create('div', `richtext richtext-${mode}`);
-		root.classList.toggle('required', field.required ?? false);
-		const stack = create('div', 'cms-richtext-stack');
-		const content = create('div', 'richtext-editor cms-richtext-content cms-richtext-layer-base');
-		content.dataset.name = field.name;
-		const sourceBox = create(
+		const root = create(
 			'div',
-			'richtext-source cms-richtext-source cms-richtext-layer-base hide',
+			mode === 'inline' ? 'cms-richtext cms-richtext-inline' : 'cms-richtext',
 		);
+		const stack = create('div', 'cms-richtext-stack');
+		const content = create('div', 'cms-richtext-content cms-richtext-layer-base');
+		content.dataset.name = field.name;
+		const sourceBox = create('div', 'cms-richtext-source cms-richtext-layer-base');
+		sourceBox.hidden = true;
 		// No name: the host carries the value into the form. A named textarea
 		// would submit a bare key that, for a sub-field called "content"
 		// inside entries, wipes the whole content tree.
@@ -487,7 +483,7 @@ export class CosrayRichtext extends HTMLElement {
 		let bubble;
 
 		if (mode === 'inline' && !readonly) {
-			bubble = create('div', 'richtext-bubble cms-richtext-bubble');
+			bubble = create('div', 'cms-richtext-bubble');
 			root.append(bubble);
 		}
 
@@ -741,7 +737,7 @@ export class CosrayRichtext extends HTMLElement {
 					`${menuId}-block-style`,
 					[svg('paragraph'), svg('chevron-down')],
 					{
-						class: 'richtext-toolbar-btn cms-richtext-block-style',
+						class: 'cms-richtext-toolbar-btn cms-richtext-block-style',
 						title: __('richtext:block-style'),
 						'aria-label': __('richtext:block-style'),
 					},
@@ -844,18 +840,15 @@ export class CosrayRichtext extends HTMLElement {
 	 * @returns {HTMLElement}
 	 */
 	#toolbar({ menuId, specs, tools, updates, run, source, content, sourceBox, onSource }) {
-		const toolbar = create(
-			'div',
-			'richtext-toolbar cms-richtext-toolbar cms-richtext-toolbar-open',
-		);
+		const toolbar = create('div', 'cms-richtext-toolbar is-open');
 		const classes = Object.entries(this.field.richtextClasses ?? {});
 		const styles = Object.entries(this.field.richtextStyles ?? {});
 		/** @type {HTMLElement[]} */
 		const editing = [];
-		const back = create('div', 'richtext-extras cms-richtext-extras-source');
+		const back = create('div', 'cms-richtext-extras cms-richtext-extras-source');
 		const backButton = document.createElement('button');
 		backButton.type = 'button';
-		backButton.className = 'richtext-source-btn cms-richtext-source-btn-compact';
+		backButton.className = 'cms-richtext-source-btn cms-richtext-source-btn-compact';
 		const backLabel = create('span', 'cms-richtext-source-label');
 		backLabel.textContent = __('richtext:show-content');
 		backButton.append(svg('file-earmark-richtext'), backLabel);
@@ -867,9 +860,9 @@ export class CosrayRichtext extends HTMLElement {
 				source.value = this.#editor?.getHTML() ?? '';
 			}
 
-			toolbar.classList.toggle('cms-richtext-toolbar-open', !shown);
-			content.classList.toggle('hide', shown);
-			sourceBox.classList.toggle('hide', !shown);
+			toolbar.classList.toggle('is-open', !shown);
+			content.hidden = shown;
+			sourceBox.hidden = !shown;
 			toolbar.replaceChildren(...(shown ? [back] : editing));
 			onSource(shown);
 		};
@@ -884,7 +877,7 @@ export class CosrayRichtext extends HTMLElement {
 				`${menuId}-paragraph`,
 				[document.createTextNode(__('richtext:paragraph')), svg('chevron-down')],
 				{
-					class: 'richtext-dropdown-button',
+					class: 'cms-richtext-dropdown-button',
 				},
 			);
 			const current = () => this.#currentClass;
@@ -914,7 +907,7 @@ export class CosrayRichtext extends HTMLElement {
 
 		if (styles.length > 0) {
 			const { wrap, menu } = dropdown(`${menuId}-style`, [svg('fonts'), svg('chevron-down')], {
-				class: 'richtext-dropdown-button',
+				class: 'cms-richtext-dropdown-button',
 				'aria-label': __('richtext:text-style'),
 			});
 			const current = () => this.#currentStyle;
@@ -938,16 +931,13 @@ export class CosrayRichtext extends HTMLElement {
 
 		const overflow = dropdown(menuId, [svg('three-dots-vertical')], {
 			id: `${menuId}-trigger`,
-			class: 'richtext-dropdown-button cms-richtext-compact-tools-button',
+			class: 'cms-richtext-dropdown-button cms-richtext-compact-tools-button',
 			title: __('richtext:formatting-tools'),
 			'aria-label': __('richtext:formatting-tools'),
 		});
-		overflow.wrap.classList.add('cms-richtext-toolbar-compact-actions');
+		overflow.wrap.classList.add('cms-richtext-overflow');
 		overflow.menu.style.setProperty('--width', '18rem');
-		const buttons = create(
-			'div',
-			'richtext-toolbar-btns cms-richtext-toolbar-btns-grow cms-richtext-toolbar-main-actions',
-		);
+		const buttons = create('div', 'cms-richtext-toolbar-btns');
 
 		for (const spec of specs) {
 			tool(updates, overflow.menu, spec, 'menu');
@@ -957,10 +947,10 @@ export class CosrayRichtext extends HTMLElement {
 		editing.push(overflow.wrap, buttons);
 
 		if (tools.has('source')) {
-			const extras = create('div', 'richtext-extras');
+			const extras = create('div', 'cms-richtext-extras');
 			const toggle = document.createElement('button');
 			toggle.type = 'button';
-			toggle.className = 'richtext-source-btn cms-richtext-source-btn-offset';
+			toggle.className = 'cms-richtext-source-btn cms-richtext-source-btn-offset';
 			const label = create('span', 'cms-richtext-toolbar-source-label');
 			label.textContent = __('richtext:show-source');
 			toggle.append(svg('code-slash'), label);

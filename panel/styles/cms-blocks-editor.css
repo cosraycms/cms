@@ -846,7 +846,7 @@
 			}
 		}
 
-		& .richtext {
+		& .cms-richtext {
 			border-color: transparent;
 			outline: none;
 			background: none;

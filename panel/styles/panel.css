@@ -47,6 +47,8 @@
 @import './cms-toasts.css' layer(panel);
 @import './cms-util.css' layer(panel);
 @import './cms-code.css' layer(panel);
-@import './richtext.css' layer(panel);
-@import './cms-richtext-dialogs.css' layer(panel);
+@import './cms-richtext.css' layer(panel);
+@import './cms-link-dialog.css' layer(panel);
+@import './cms-image-dialog.css' layer(panel);
+@import './cms-nodesearch.css' layer(panel);
 @import './cms-styleguide.css' layer(panel);

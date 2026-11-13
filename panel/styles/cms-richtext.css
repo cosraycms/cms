@@ -1,4 +1,4 @@
-.richtext {
+.cms-richtext {
 	display: block;
 	container-type: inline-size;
 	width: 100%;
@@ -20,33 +20,18 @@
 		box-shadow: var(--cms-focus-ring);
 	}
 
-	&.embed {
-		border: 0;
-		padding: 0;
-		box-shadow: none;
-		margin-top: 0;
-	}
-
-	button.active {
+	.cms-richtext-toolbar-btn.is-active {
 		background-color: var(--cms-color-accent);
 		color: var(--cms-color-text-on-accent);
 	}
 
 	/* The bubble's offset origin. */
-	&.richtext-inline {
+	&.cms-richtext-inline {
 		position: relative;
 	}
 
 	svg {
 		display: inline-block;
-	}
-
-	.hide {
-		display: none;
-	}
-
-	.richtext-toolbar {
-		margin-bottom: 0;
 	}
 
 	.cms-richtext-toolbar {
@@ -56,14 +41,15 @@
 		border-bottom: 1px solid var(--cms-color-border);
 		border-top-left-radius: calc(var(--cms-control-radius) - 1px);
 		border-top-right-radius: calc(var(--cms-control-radius) - 1px);
+		margin-bottom: 0;
 		background: var(--cms-color-surface);
-	}
 
-	.cms-richtext-toolbar-open {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-0-5);
-		min-width: 0;
+		&.is-open {
+			display: flex;
+			align-items: center;
+			gap: var(--cms-space-0-5);
+			min-width: 0;
+		}
 	}
 
 	/* Inverted on purpose, like the code editor: chrome over the document. */
@@ -80,7 +66,7 @@
 		box-shadow: var(--cms-shadow-md);
 		white-space: nowrap;
 
-		& .richtext-toolbar-btn {
+		& .cms-richtext-toolbar-btn {
 			color: var(--cms-color-white);
 
 			&:hover {
@@ -88,7 +74,7 @@
 				color: var(--cms-color-white);
 			}
 
-			&.active {
+			&.is-active {
 				background-color: var(--cms-color-neutral-900);
 			}
 		}
@@ -115,20 +101,16 @@
 		margin-left: var(--cms-space-1);
 	}
 
-	.cms-richtext-dropdown-wrap {
+	.cms-richtext-dropdown {
 		position: relative;
 		display: inline-block;
 		flex-shrink: 0;
 		text-align: left;
 	}
 
-	.cms-richtext-toolbar-btns-grow {
-		flex-grow: 1;
-		min-width: 0;
-	}
-
-	.richtext-toolbar-btns {
+	.cms-richtext-toolbar-btns {
 		display: flex;
+		flex-grow: 1;
 		align-items: center;
 		flex-wrap: nowrap;
 		min-width: 0;
@@ -136,19 +118,19 @@
 		scrollbar-width: thin;
 		-webkit-overflow-scrolling: touch;
 
-		.richtext-toolbar-btn {
+		.cms-richtext-toolbar-btn {
 			flex: 0 0 auto;
 		}
 	}
 
-	.richtext-extras {
+	.cms-richtext-extras {
 		display: flex;
 		align-items: center;
 		margin-left: auto;
 		flex-shrink: 0;
 		white-space: nowrap;
 
-		.richtext-toolbar-btn {
+		.cms-richtext-toolbar-btn {
 			flex: 0 0 auto;
 		}
 	}
@@ -157,7 +139,7 @@
 		margin-left: var(--cms-space-3);
 	}
 
-	.cms-richtext-toolbar-compact-actions {
+	.cms-richtext-overflow {
 		display: none;
 	}
 
@@ -166,7 +148,7 @@
 		z-index: 0;
 	}
 
-	.richtext-editor {
+	.cms-richtext-content {
 		max-width: 100%;
 	}
 
@@ -210,7 +192,7 @@
 		color: var(--cms-code-text);
 	}
 
-	.richtext-dropdown-button {
+	.cms-richtext-dropdown-button {
 		margin-left: var(--cms-space-px);
 		display: inline-flex;
 		width: 100%;
@@ -223,11 +205,11 @@
 		outline: none;
 	}
 
-	.richtext-dropdown-button:hover {
+	.cms-richtext-dropdown-button:hover {
 		background-color: var(--cms-color-hover);
 	}
 
-	.richtext-dropdown-button:focus-visible {
+	.cms-richtext-dropdown-button:focus-visible {
 		box-shadow: inset 0 0 0 2px var(--cms-color-focus);
 	}
 
@@ -242,7 +224,7 @@
 		}
 	}
 
-	.richtext-toolbar-btn {
+	.cms-richtext-toolbar-btn {
 		position: relative;
 		display: inline-grid;
 		place-items: center;
@@ -261,7 +243,7 @@
 		}
 	}
 
-	.richtext-source-btn {
+	.cms-richtext-source-btn {
 		margin-right: var(--cms-space-4);
 		display: inline-flex;
 		align-items: center;
@@ -274,16 +256,16 @@
 	   editing column, not to the viewport: below it the strip gives way to
 	   the overflow menu; a maximal tool set above it scrolls horizontally. */
 	@container (max-width: 36rem) {
-		.richtext-dropdown-button {
+		.cms-richtext-dropdown-button {
 			padding-left: var(--cms-space-3);
 			padding-right: var(--cms-space-3);
 		}
 
-		.cms-richtext-toolbar-main-actions {
+		.cms-richtext-toolbar-btns {
 			display: none;
 		}
 
-		.cms-richtext-toolbar-compact-actions {
+		.cms-richtext-overflow {
 			display: inline-block;
 		}
 
@@ -431,10 +413,4 @@
 	.ProseMirror-focused .ProseMirror-gapcursor {
 		display: block;
 	}
-}
-
-.blocks-field .richtext {
-	border: 0;
-	border-radius: 0;
-	box-shadow: none;
 }

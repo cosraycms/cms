@@ -1,0 +1,51 @@
+/* The rich text editor's link dialog, on the modal's body. */
+.cms-link-dialog {
+	& .cms-link-dialog-picker {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-4);
+	}
+
+	& .cms-link-dialog-panel {
+		max-height: 60vh;
+		overflow-y: auto;
+	}
+
+	& .cms-link-dialog-hint,
+	& .cms-link-dialog-url,
+	& .cms-link-dialog-target {
+		margin-top: var(--cms-space-4);
+	}
+
+	& .cms-link-dialog-option {
+		position: relative;
+		display: flex;
+		align-items: flex-start;
+	}
+
+	& .cms-link-dialog-checkbox {
+		display: flex;
+		height: var(--cms-space-6);
+		align-items: center;
+	}
+
+	& .cms-link-dialog-label {
+		margin-left: var(--cms-space-3);
+		font-size: var(--cms-font-size-sm);
+		line-height: 1.5rem;
+	}
+
+	& .cms-link-dialog-advanced {
+		margin-top: var(--cms-space-4);
+
+		& > summary {
+			color: var(--cms-color-text-muted);
+			font-size: var(--cms-font-size-sm);
+			cursor: pointer;
+		}
+
+		& > .cms-link-dialog-option {
+			margin-top: var(--cms-space-2);
+		}
+	}
+}

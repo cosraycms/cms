@@ -77,14 +77,14 @@ describe('source view', () => {
 			(button) => button.textContent?.trim() === 'richtext:show-content',
 		);
 
-		expect(source.closest('.hide')).toBeNull();
+		expect(source.closest('[hidden]')).toBeNull();
 		// jsdom runs no implicit submission, so the type is the check.
 		expect(back?.type).toBe('button');
 
 		back!.click();
 		await tick();
 
-		expect(source.closest('.hide')).not.toBeNull();
+		expect(source.closest('[hidden]')).not.toBeNull();
 	});
 });
 
@@ -186,7 +186,7 @@ describe('richtext inside a block', () => {
 		const bubble = element.querySelector('.cms-richtext-bubble')!;
 
 		return Array.from(
-			bubble.querySelectorAll(':scope > button, :scope > .cms-richtext-dropdown-wrap > button'),
+			bubble.querySelectorAll(':scope > button, :scope > .cms-richtext-dropdown > button'),
 		).map((button) => button.getAttribute('aria-label'));
 	}
 

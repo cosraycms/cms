@@ -145,7 +145,6 @@ export default function createEditor(options) {
 		nodeViews: {
 			image(node) {
 				const dom = document.createElement('img');
-				dom.className = 'cms-richtext-image';
 				dom.setAttribute('data-uid', node.attrs.uid);
 				const url = assetUrl?.(node.attrs.uid) ?? null;
 
@@ -153,7 +152,6 @@ export default function createEditor(options) {
 					dom.src = url;
 				} else {
 					dom.alt = `[${node.attrs.uid}]`;
-					dom.classList.add('cms-richtext-image-missing');
 				}
 
 				return { dom };
