@@ -218,12 +218,12 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'//template[@data-repeater-template="'
 				. TextBlock::class
 				. '"]'
-				. '//div[contains(@class, "cms-field")]/label[contains(@class, "sr-only")]',
+				. '//div[contains(@class, "cms-field")]/label[contains(@class, "cms-sr-only")]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
 			'//template[@data-repeater-template="Cosray\\Block\\Youtube"]'
-				. '//div[contains(@class, "cms-field")]/label[contains(@class, "sr-only")]',
+				. '//div[contains(@class, "cms-field")]/label[contains(@class, "cms-sr-only")]',
 			$html,
 		);
 		$this->assertHtmlNodeMissing(
@@ -289,7 +289,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeMissing(
 			'//template[@data-repeater-template="Cosray\\Block\\Heading"]'
-				. '//div[@class="heading"]//label[not(contains(@class, "sr-only"))]',
+				. '//div[@class="heading"]//label[not(contains(@class, "cms-sr-only"))]',
 			$html,
 		);
 		// A block field says what belongs into it while empty.

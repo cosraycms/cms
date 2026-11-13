@@ -110,7 +110,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 				class="search"
 				method="get"
 				action="<?= escape($page->search->action) ?>">
-				<label class="sr-only" for="collection-search"><?= escape(
+				<label class="cms-sr-only" for="collection-search"><?= escape(
 					__('collection:search', ['name' => $page->name]),
 				) ?></label>
 				<span class="icon" aria-hidden="true">⌕</span>
@@ -257,7 +257,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 											aria-sort="<?= escape($header['ariaSort']) ?>"
 										<?php endif ?>>
 										<?php if ($header['label'] === ''): ?>
-											<span class="sr-only"><?= escape($header['name']) ?></span>
+											<span class="cms-sr-only"><?= escape($header['name']) ?></span>
 										<?php elseif ($header['url'] === null): ?>
 											<span class="inner"><?= escape($header['label']) ?></span>
 										<?php else: ?>

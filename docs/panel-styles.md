@@ -129,7 +129,7 @@ Every class the panel defines or looks up starts with `cms-` and names its compo
 <button class="cms-button cms-button-primary cms-button-small">Save</button>
 ```
 
-Panel markup may meet a site's stylesheet, and components nest inside each other, so a short part name such as `.row` or `.title` would match far beyond its own component. A part keeps its component's name however deep it sits; a part that grows parts of its own and appears elsewhere becomes a component with its own root and file. Utilities follow the same prefix, such as `cms-truncate` and `cms-col-span-6`.
+Panel markup may meet a site's stylesheet, and components nest inside each other, so a short part name such as `.row` or `.title` would match far beyond its own component. A part keeps its component's name however deep it sits; a part that grows parts of its own and appears elsewhere becomes a component with its own root and file. Utilities follow the same prefix, such as `cms-sr-only`.
 
 Classes that third-party code sets, such as ProseMirror's and the code editor's syntax tokens, keep their names. Panel components avoid the names the site's block rendering emits with its default prefix: `cms-blocks`, `cms-block`, `cms-blocks-images`, `cms-figure`, and `cms-image-gallery` with its items.
 

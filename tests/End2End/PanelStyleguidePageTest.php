@@ -54,7 +54,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		// block with several keeps them.
 		$this->assertHtmlNodeExists(
 			'//div[@data-repeater-row]//div[contains(@class, "cms-field")]'
-				. '/label[contains(@class, "sr-only")]',
+				. '/label[contains(@class, "cms-sr-only")]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(

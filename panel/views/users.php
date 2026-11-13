@@ -64,7 +64,7 @@ $listUrl = (string) $listUrl;
 
 		<div class="toolbar">
 			<form class="search" method="get" action="<?= escape($listUrl) ?>">
-				<label class="sr-only" for="users-search"><?= escape(__('user:search')) ?></label>
+				<label class="cms-sr-only" for="users-search"><?= escape(__('user:search')) ?></label>
 				<span class="icon" aria-hidden="true">⌕</span>
 				<input
 					id="users-search"

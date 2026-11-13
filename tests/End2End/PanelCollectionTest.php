@@ -82,7 +82,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertHtmlNodeCount(2, "//th[contains(@class, 'col-status')]", $html);
 		$this->assertHtmlNodeExists(
-			"//thead//th[not(contains(@class, 'col-select'))][1][contains(@class, 'col-status')]/span[@class='sr-only' and .='Status']",
+			"//thead//th[not(contains(@class, 'col-select'))][1][contains(@class, 'col-status')]/span[@class='cms-sr-only' and .='Status']",
 			$html,
 		);
 		$this->assertHtmlNodeExists(

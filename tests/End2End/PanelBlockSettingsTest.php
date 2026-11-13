@@ -62,7 +62,7 @@ final class PanelBlockSettingsTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			$dialog . '//label[not(contains(@class, "sr-only"))][contains(., "Target")]',
+			$dialog . '//label[not(contains(@class, "cms-sr-only"))][contains(., "Target")]',
 			$html,
 		);
 		$this->assertHtmlNodeMissing($block . '/div[@class="body"]//*[contains(@name, "[fields][target]")]', $html);

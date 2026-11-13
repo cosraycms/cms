@@ -34,8 +34,7 @@
 @import './cms-settings.css' layer(panel);
 @import './cms-confirm.css' layer(panel);
 @import './cms-toast.css' layer(panel);
-@import './util.css' layer(panel);
-@import './grid.css' layer(panel);
+@import './cms-util.css' layer(panel);
 @import './code.css' layer(panel);
 @import './richtext.css' layer(panel);
 @import './cms-richtext-dialogs.css' layer(panel);

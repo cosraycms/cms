@@ -26,7 +26,7 @@ $value = u($value ?? null);
 			<label class="option">
 				<input
 					type="radio"
-					class="sr-only"
+					class="cms-sr-only"
 					name="<?= escape($name) ?>"
 					value="<?= $choice === null ? '' : ($choice ? '1' : '0') ?>"
 					<?= $value === $choice && !($required && $choice === null) ? 'checked' : '' ?>

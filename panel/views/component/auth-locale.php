@@ -10,7 +10,7 @@ use function Cosray\escape;
 		<?php $this->include('component/csrf') ?>
 		<label for="auth-locale">
 			<?= Icon::render('translate') ?>
-			<span class="sr-only"><?= escape(__('nav:language')) ?></span>
+			<span class="cms-sr-only"><?= escape(__('nav:language')) ?></span>
 		</label>
 		<select class="cms-select" id="auth-locale" name="locale">
 			<?php foreach ($panelLocales as $id => $title): ?>

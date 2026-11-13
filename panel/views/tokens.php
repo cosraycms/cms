@@ -45,7 +45,7 @@ $profileUrl = (string) $profileUrl;
 
 		<form class="toolbar" method="post" action="<?= escape($tokensUrl) ?>">
 			<?php $this->include('component/csrf') ?>
-			<label class="sr-only" for="token-name"><?= escape(__('tokens:name')) ?></label>
+			<label class="cms-sr-only" for="token-name"><?= escape(__('tokens:name')) ?></label>
 			<input
 				id="token-name"
 				class="cms-input name"
@@ -76,7 +76,7 @@ $profileUrl = (string) $profileUrl;
 								<th role="columnheader"><span class="inner"><?= escape(__('tokens:created-at')) ?></span></th>
 								<th role="columnheader"><span class="inner"><?= escape(__('tokens:expires')) ?></span></th>
 								<th role="columnheader"><span class="inner"><?= escape(__('tokens:used')) ?></span></th>
-								<th class="col-actions" role="columnheader"><span class="sr-only"><?= escape(__('tokens:revoke')) ?></span></th>
+								<th class="col-actions" role="columnheader"><span class="cms-sr-only"><?= escape(__('tokens:revoke')) ?></span></th>
 							</tr>
 						</thead>
 						<tbody role="rowgroup">
