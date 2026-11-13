@@ -12,10 +12,10 @@ let uninstall: Array<() => void> = [];
 function head(mine: string, draft = false, published = true): string {
 	return `
 		<button id="editor-status-dots" data-draft="${draft}" data-mine="${mine}">
-			<span class="mark" data-stage="main" data-state="${published ? 'published' : 'unpublished'}"></span>
-			<span class="mark" data-stage="mine" data-state="${mine}"></span>
-			<span class="tooltip">
-				<span class="row" data-stage="mine"><strong>Mine</strong> · <span class="text"></span></span>
+			<span class="cms-stage-mark" data-stage="main" data-state="${published ? 'published' : 'unpublished'}"></span>
+			<span class="cms-stage-mark" data-stage="mine" data-state="${mine}"></span>
+			<span class="cms-status-dots-tooltip">
+				<span class="cms-status-dots-row" data-stage="mine"><strong>Mine</strong> · <span class="cms-status-dots-text"></span></span>
 			</span>
 		</button>
 		<button id="save" data-needs="mine"><span data-save-label data-normal="Save draft" data-conflict="Save anyway">Save draft</span></button>

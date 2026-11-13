@@ -26,28 +26,28 @@ $icons = ['main' => 'globe', 'saved' => 'people', 'draft' => 'people', 'mine' =>
 $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 ?>
 <div id="editor-status-panel" class="cms-status-pipeline" <?= $oob ? 'hx-swap-oob="true"' : '' ?>>
-	<h2 class="heading"><?= escape(__('status:heading')) ?></h2>
-	<ol class="stages">
+	<h2 class="cms-status-pipeline-heading"><?= escape(__('status:heading')) ?></h2>
+	<ol class="cms-status-pipeline-stages">
 		<?php foreach ($stages as $stage): ?>
 			<?php
 			$key = (string) $stage['key'];
 			$state = (string) $stage['state'];
 			$badge = (string) ($stage['badge'] ?? '');
 			?>
-			<li class="stage" data-stage="<?= escape($key) ?>" data-state="<?= escape($state) ?>">
-				<span class="mark" data-stage="<?= escape($key) ?>" data-state="<?= escape($state) ?>">
+			<li class="cms-status-pipeline-stage" data-stage="<?= escape($key) ?>" data-state="<?= escape($state) ?>">
+				<span class="cms-stage-mark" data-stage="<?= escape($key) ?>" data-state="<?= escape($state) ?>">
 					<?= Icon::render($icons[$key] ?? 'person') ?>
 				</span>
-				<div class="body">
-					<p class="title">
-						<span class="name"><?= escape((string) $stage['name']) ?></span>
+				<div class="cms-status-pipeline-body">
+					<p class="cms-status-pipeline-title">
+						<span class="cms-status-pipeline-name"><?= escape((string) $stage['name']) ?></span>
 						<?php if ($badge !== ''): ?>
-							<span class="badge is-<?= escape($state) ?>"><?= escape($badge) ?></span>
+							<span class="cms-status-pipeline-badge is-<?= escape($state) ?>"><?= escape($badge) ?></span>
 						<?php endif ?>
 						<?php if ($key === 'draft' && ($status['discardDraft'] ?? false)): ?>
 							<button
 								type="button"
-								class="discard"
+								class="cms-status-pipeline-discard"
 								popovertarget="editor-discard-draft"
 								aria-label="<?= escape(__('status:discard-draft')) ?>">
 								<?= escape(__('status:discard')) ?>
@@ -55,7 +55,7 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 						<?php elseif ($key === 'mine' && ($status['autosave'] ?? false)): ?>
 							<button
 								type="button"
-								class="discard"
+								class="cms-status-pipeline-discard"
 								popovertarget="editor-discard-mine"
 								aria-label="<?= escape(__('status:discard-mine')) ?>"
 								data-mine-discard
@@ -64,10 +64,10 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 							</button>
 						<?php endif ?>
 					</p>
-					<p class="help"><?= escape((string) $stage['help']) ?></p>
-					<p class="text" data-stage-text><?= escape((string) $stage['text']) ?></p>
+					<p class="cms-status-pipeline-help"><?= escape((string) $stage['help']) ?></p>
+					<p class="cms-status-pipeline-text" data-stage-text><?= escape((string) $stage['text']) ?></p>
 					<?php if ($key === 'mine' && $conflict !== null): ?>
-						<div class="notice">
+						<div class="cms-status-pipeline-notice">
 							<?= Icon::render('exclamation-triangle') ?>
 							<p><?= escape(__('editor:conflict-help', [
 								'editor' => $conflict['editor'] !== '' ? $conflict['editor'] : __('editor:conflict-someone'),
@@ -77,9 +77,9 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 					<?php endif ?>
 				</div>
 				<?php if ($key === 'main'): ?>
-					<div class="step" data-step="apply" <?= $draft || $mine !== 'none' ? '' : 'hidden' ?>>
-						<span class="arrow"><?= Icon::render('arrow-up') ?></span>
-						<div class="body">
+					<div class="cms-status-pipeline-step" data-step="apply" <?= $draft || $mine !== 'none' ? '' : 'hidden' ?>>
+						<span class="cms-status-pipeline-arrow"><?= Icon::render('arrow-up') ?></span>
+						<div class="cms-status-pipeline-body">
 							<button
 								type="button"
 								class="cms-button cms-button-secondary cms-button-small"
@@ -89,7 +89,7 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 								<?= escape(__('status:apply-step')) ?>
 							</button>
 							<p
-								class="help"
+								class="cms-status-pipeline-help"
 								data-step-help
 								data-both="<?= escape(__('status:apply-both')) ?>"
 								data-draft="<?= escape(__('status:apply-draft')) ?>"
@@ -101,9 +101,9 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 						</div>
 					</div>
 				<?php elseif ($key === 'draft' || $key === 'saved'): ?>
-					<div class="step" data-step="save" <?= $mine === 'none' ? 'hidden' : '' ?>>
-						<span class="arrow"><?= Icon::render('arrow-up') ?></span>
-						<div class="body">
+					<div class="cms-status-pipeline-step" data-step="save" <?= $mine === 'none' ? 'hidden' : '' ?>>
+						<span class="cms-status-pipeline-arrow"><?= Icon::render('arrow-up') ?></span>
+						<div class="cms-status-pipeline-body">
 							<button
 								type="submit"
 								class="cms-button cms-button-secondary cms-button-small"
@@ -118,7 +118,7 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 									$mine === 'conflict' ? 'editor:save-anyway' : $saveLabel,
 								)) ?></span>
 							</button>
-							<p class="help"><?= escape(__($record ? 'status:save-record-help' : 'status:save-help')) ?></p>
+							<p class="cms-status-pipeline-help"><?= escape(__($record ? 'status:save-record-help' : 'status:save-help')) ?></p>
 						</div>
 					</div>
 				<?php endif ?>
@@ -126,10 +126,10 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 		<?php endforeach ?>
 	</ol>
 	<?php if ($visibility !== null): ?>
-		<div class="visibility">
-			<div class="bar">
-				<h3 class="heading"><?= escape(__('status:visibility')) ?></h3>
-				<span class="instant"><?= Icon::render('lightning') ?><?= escape(__('status:instant')) ?></span>
+		<div class="cms-status-pipeline-visibility">
+			<div class="cms-status-pipeline-bar">
+				<h3 class="cms-status-pipeline-heading"><?= escape(__('status:visibility')) ?></h3>
+				<span class="cms-status-pipeline-instant"><?= Icon::render('lightning') ?><?= escape(__('status:instant')) ?></span>
 			</div>
 			<label class="cms-inspector-toggle">
 				<span class="cms-inspector-copy">

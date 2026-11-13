@@ -128,11 +128,11 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 		$this->assertHtmlNodeMissing('//tr[@data-uid="filter-new"]', $html);
 		$this->assertHtmlNodeMissing('//tr[@data-uid="filter-clean"]', $html);
 		$this->assertHtmlNodeExists(
-			'//nav[contains(@class, "cms-stage-filters")]/a[@aria-current="true"][contains(., "With draft")]/*[@class="count"][.="1"]',
+			'//nav[contains(@class, "cms-stage-filters")]/a[@aria-current="true"][contains(., "With draft")]/*[@class="cms-stage-filters-count"][.="1"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//nav[contains(@class, "cms-stage-filters")]/a[contains(., "Unpublished")]/*[@class="count"][.="1"]',
+			'//nav[contains(@class, "cms-stage-filters")]/a[contains(., "Unpublished")]/*[@class="cms-stage-filters-count"][.="1"]',
 			$html,
 		);
 		$this->assertResponseStatus(400, $this->makeRequest('GET', '/panel/collection/test-draft-pages', [

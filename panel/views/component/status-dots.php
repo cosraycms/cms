@@ -26,7 +26,7 @@ $marks = static function (array $stages) use ($icons): string {
 
 	foreach ($stages as $stage) {
 		$key = (string) $stage['key'];
-		$html .= '<span class="mark" data-stage="' . escape($key) . '" data-state="'
+		$html .= '<span class="cms-stage-mark" data-stage="' . escape($key) . '" data-state="'
 		. escape((string) $stage['state']) . '">' . Icon::render($icons[$key] ?? 'person') . '</span>';
 	}
 
@@ -36,7 +36,7 @@ $dots = static function (array $stages): string {
 	$html = '';
 
 	foreach ($stages as $stage) {
-		$html .= '<span class="dot" data-stage="' . escape((string) $stage['key']) . '" data-state="'
+		$html .= '<span class="cms-status-dots-dot" data-stage="' . escape((string) $stage['key']) . '" data-state="'
 		. escape((string) $stage['state']) . '"></span>';
 	}
 
@@ -46,7 +46,7 @@ $isMain = static fn(array $stage): bool => in_array($stage['key'], ['main', 'sav
 $main = array_filter($stages, $isMain);
 $look = $look === 'compact' && $main === [] ? 'dots' : $look;
 $content = match ($look) {
-	'compact' => $marks($main) . '<span class="pips">' . $dots(array_filter(
+	'compact' => $marks($main) . '<span class="cms-status-dots-pips">' . $dots(array_filter(
 		$stages,
 		static fn(array $stage): bool => !$isMain($stage) && $stage['state'] !== 'none',
 	)) . '</span>',
@@ -65,14 +65,14 @@ $content = match ($look) {
 		aria-label="<?= escape(__('status:label', ['status' => $sentence])) ?>"
 		<?= $oob ? 'hx-swap-oob="true"' : '' ?>>
 		<?= $marks($stages) ?>
-		<span class="tooltip" aria-hidden="true">
+		<span class="cms-status-dots-tooltip" aria-hidden="true">
 			<?php foreach ($stages as $stage): ?>
-				<span class="row" data-stage="<?= escape((string) $stage['key']) ?>">
+				<span class="cms-status-dots-row" data-stage="<?= escape((string) $stage['key']) ?>">
 					<?= $marks([$stage]) ?>
-					<span><strong><?= escape((string) $stage['name']) ?><?= ($stage['badge'] ?? '') !== '' ? ' (' . escape((string) $stage['badge']) . ')' : '' ?></strong> · <span class="text"><?= escape((string) $stage['text']) ?></span></span>
+					<span><strong><?= escape((string) $stage['name']) ?><?= ($stage['badge'] ?? '') !== '' ? ' (' . escape((string) $stage['badge']) . ')' : '' ?></strong> · <span class="cms-status-dots-text"><?= escape((string) $stage['text']) ?></span></span>
 				</span>
 			<?php endforeach ?>
-			<span class="hint"><?= escape(__('status:details')) ?></span>
+			<span class="cms-status-dots-hint"><?= escape(__('status:details')) ?></span>
 		</span>
 	</button>
 <?php else: ?>

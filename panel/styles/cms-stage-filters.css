@@ -1,0 +1,55 @@
+/* The status filters above a list, each a chip with its stage's icon. */
+.cms-stage-filters {
+	--size: var(--cms-stage-mark-size-sm);
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cms-space-2);
+
+	& .cms-stage-filters-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-height: 2rem;
+		padding: 0 var(--cms-space-3);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+		text-decoration: none;
+
+		&:hover {
+			background: var(--cms-color-hover);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&[aria-current='true'] {
+			border-color: var(--cms-color-text);
+			background: var(--cms-color-text);
+			color: var(--cms-color-surface);
+
+			/* The chip inverts the theme: the mark keeps the page's surface under
+			   its tint so it reads as it does everywhere else. */
+			& .cms-stage-mark {
+				background-color: var(--cms-color-surface);
+				background-image: linear-gradient(var(--fill) 0 0);
+			}
+
+			& .cms-stage-filters-count {
+				color: inherit;
+				opacity: 0.75;
+			}
+		}
+	}
+
+	& .cms-stage-filters-count {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-variant-numeric: tabular-nums;
+	}
+}

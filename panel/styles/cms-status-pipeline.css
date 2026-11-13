@@ -1,0 +1,221 @@
+/* The inspector's status tab: the stages top to bottom on a line, and
+   between two of them the step that takes the lower one into the upper. */
+.cms-status-pipeline {
+	--size: 1.75rem;
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-4);
+
+	& .cms-status-pipeline-heading {
+		margin: 0;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
+	& .cms-status-pipeline-stages {
+		display: flex;
+		flex-direction: column;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	& .cms-status-pipeline-stage {
+		position: relative;
+		display: grid;
+		grid-template-columns: var(--size) minmax(0, 1fr);
+		column-gap: var(--cms-space-3);
+		padding-bottom: var(--cms-space-5);
+
+		&:last-child {
+			padding-bottom: 0;
+		}
+
+		&:not(:last-child)::before {
+			position: absolute;
+			top: calc(var(--size) + var(--cms-space-1));
+			bottom: var(--cms-space-1);
+			left: calc(var(--size) / 2 - 0.5px);
+			width: 1px;
+			background: var(--cms-color-border);
+			content: '';
+		}
+
+		&[data-state='none'] :is(.cms-status-pipeline-name, .cms-status-pipeline-text) {
+			color: var(--cms-color-text-subtle);
+		}
+
+		&[data-stage='mine']:is([data-state='conflict'], [data-state='error'])
+			.cms-status-pipeline-text {
+			color: var(--cms-color-danger-text);
+		}
+	}
+
+	& .cms-status-pipeline-body {
+		min-width: 0;
+	}
+
+	& .cms-status-pipeline-title {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--cms-space-1-5);
+		min-height: var(--size);
+		margin: 0;
+	}
+
+	& .cms-status-pipeline-name {
+		font-size: var(--cms-font-size-sm);
+		font-weight: 600;
+	}
+
+	& .cms-status-pipeline-help,
+	& .cms-status-pipeline-text {
+		margin: 0;
+	}
+
+	& .cms-status-pipeline-help {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.4;
+	}
+
+	& .cms-status-pipeline-text {
+		margin-top: var(--cms-space-0-5);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.4;
+	}
+
+	& .cms-status-pipeline-badge {
+		--tone: var(--cms-color-text-subtle);
+		padding: 0 var(--cms-space-1-5);
+		border-radius: var(--cms-radius-sm);
+		background: color-mix(in oklch, var(--tone), transparent 86%);
+		color: color-mix(in oklch, var(--tone), var(--cms-color-shade) 25%);
+		font-size: 0.6875rem;
+		font-weight: 500;
+		line-height: 1.125rem;
+		white-space: nowrap;
+
+		&.is-published {
+			--tone: var(--cms-color-stage-main);
+		}
+	}
+
+	& .cms-status-pipeline-notice {
+		--cms-icon-size: 1rem;
+		display: flex;
+		gap: var(--cms-space-2);
+		margin-top: var(--cms-space-2);
+		padding: var(--cms-space-2-5) var(--cms-space-3);
+		border: 1px solid color-mix(in oklch, var(--cms-color-warning), transparent 65%);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-warning-surface);
+		color: var(--cms-color-warning-text);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.4;
+
+		& .cms-icon {
+			flex: none;
+			margin-top: 0.0625rem;
+		}
+
+		& p {
+			margin: 0;
+		}
+	}
+
+	& .cms-status-pipeline-stage[data-state='none'] .cms-status-pipeline-notice {
+		display: none;
+	}
+
+	& .cms-status-pipeline-discard {
+		padding: 0 var(--cms-space-1-5);
+		border: 1px solid var(--cms-color-danger-border-soft);
+		border-radius: var(--cms-radius-sm);
+		background: transparent;
+		color: var(--cms-color-danger-text);
+		font: inherit;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		line-height: 1.125rem;
+		white-space: nowrap;
+		cursor: pointer;
+
+		&:hover {
+			background: color-mix(in oklch, var(--cms-color-danger), transparent 92%);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	& .cms-status-pipeline-step {
+		display: grid;
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
+		align-items: start;
+		margin-top: var(--cms-space-5);
+
+		&[hidden] {
+			display: none;
+		}
+
+		& .cms-status-pipeline-arrow {
+			--cms-icon-size: 0.75rem;
+			position: relative;
+			display: inline-grid;
+			place-items: center;
+			justify-self: center;
+			width: 1.25rem;
+			height: 1.25rem;
+			margin-top: var(--cms-space-1);
+			border: 1px solid var(--cms-color-border);
+			border-radius: var(--cms-radius-full);
+			background: var(--cms-inspector-bg);
+			color: var(--cms-color-text-subtle);
+		}
+
+		& .cms-status-pipeline-help {
+			margin-top: var(--cms-space-1);
+		}
+	}
+
+	& .cms-status-pipeline-visibility {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-4);
+		padding-top: var(--cms-space-5);
+		border-top: 1px solid var(--cms-color-border);
+
+		& .cms-status-pipeline-bar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: var(--cms-space-2);
+		}
+	}
+
+	& .cms-status-pipeline-instant {
+		--cms-icon-size: 0.75rem;
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-1);
+		padding: 0 var(--cms-space-2);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-full);
+		color: var(--cms-color-text-muted);
+		font-size: 0.6875rem;
+		line-height: 1.25rem;
+		white-space: nowrap;
+	}
+}

@@ -92,7 +92,7 @@ $items = ['draft' => 'people', 'mine' => 'person'];
 				<?php $stage = $stages[$key] ?? null; ?>
 				<?php if (is_array($stage)): ?>
 					<li data-confirm-stage="<?= $key ?>" <?= $stage['state'] === 'none' ? 'hidden' : '' ?>>
-						<span class="mark" data-stage="<?= $key ?>" data-state="<?= escape((string) $stage['state']) ?>">
+						<span class="cms-stage-mark" data-stage="<?= $key ?>" data-state="<?= escape((string) $stage['state']) ?>">
 							<?= Icon::render($icon) ?>
 						</span>
 						<span class="cms-popconfirm-copy">

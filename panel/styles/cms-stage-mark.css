@@ -1,0 +1,71 @@
+/* A stage's mark: its icon on a tint of the stage's colour, grey while the
+   stage is empty, ringed by the halo while it holds something. Whatever
+   holds the marks sets their --size. */
+.cms-stage-mark {
+	--tone: var(--cms-color-stage-idle);
+	--ink: var(--cms-color-stage-idle-ink);
+	--fill: color-mix(in oklch, var(--tone) var(--cms-stage-tint), transparent);
+	--cms-icon-size: calc(var(--size) / 2);
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	width: var(--size);
+	height: var(--size);
+	border-radius: var(--cms-radius-full);
+	background: var(--fill);
+	color: var(--ink);
+	outline: var(--cms-stage-halo) solid
+		color-mix(
+			in oklch,
+			var(--cms-stage-halo-color, var(--tone)) var(--cms-stage-halo-strength),
+			transparent
+		);
+	outline-offset: var(--cms-stage-halo-gap);
+
+	&[data-state='none'] {
+		outline: none;
+	}
+
+	&[data-stage='main'][data-state='unpublished'] {
+		--tone: var(--cms-color-stage-offline);
+		--ink: var(--cms-color-stage-offline-ink);
+		outline: none;
+	}
+
+	&[data-stage='main'][data-state='published'],
+	&[data-stage='saved'] {
+		--tone: var(--cms-color-stage-main);
+		--ink: var(--cms-color-stage-main-ink);
+	}
+
+	&[data-stage='draft'][data-state='present'] {
+		--tone: var(--cms-color-stage-draft);
+		--ink: var(--cms-color-stage-draft-ink);
+	}
+
+	&[data-stage='mine']:is([data-state='present'], [data-state='saving']) {
+		--tone: var(--cms-color-stage-mine);
+		--ink: var(--cms-color-stage-mine-ink);
+	}
+
+	&[data-stage='mine'][data-state='saving'] {
+		animation: cms-stage-mark-pulse 0.9s ease-in-out infinite;
+	}
+
+	&[data-stage='mine']:is([data-state='conflict'], [data-state='error']) {
+		--tone: var(--cms-color-stage-problem);
+		--ink: var(--cms-color-stage-problem-ink);
+	}
+}
+
+@keyframes cms-stage-mark-pulse {
+	50% {
+		opacity: 0.5;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.cms-stage-mark[data-state='saving'] {
+		animation: none !important;
+	}
+}

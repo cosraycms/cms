@@ -69,7 +69,7 @@ function show(state) {
 		});
 	document
 		.querySelectorAll(
-			`#${DOTS} .row[data-stage="mine"] .text, #${PANEL} [data-stage="mine"] [data-stage-text], #${APPLY} [data-confirm-stage="mine"] [data-stage-text]`,
+			`#${DOTS} .cms-status-dots-row[data-stage="mine"] .cms-status-dots-text, #${PANEL} [data-stage="mine"] [data-stage-text], #${APPLY} [data-confirm-stage="mine"] [data-stage-text]`,
 		)
 		.forEach((element) => {
 			element.textContent = label;
@@ -79,10 +79,10 @@ function show(state) {
 		?.toggleAttribute('hidden', state === 'none');
 
 	if (head) {
-		const rows = Array.from(head.querySelectorAll('.row'), (row) =>
+		const rows = Array.from(head.querySelectorAll('.cms-status-dots-row'), (row) =>
 			[
 				row.querySelector('strong')?.textContent ?? '',
-				row.querySelector('.text')?.textContent ?? '',
+				row.querySelector('.cms-status-dots-text')?.textContent ?? '',
 			].join(' – '),
 		);
 		head.setAttribute('aria-label', __('status:label', { status: rows.join('; ') }));

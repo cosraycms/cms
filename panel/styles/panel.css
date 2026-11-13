@@ -18,6 +18,12 @@
 @import './cms-menus.css' layer(panel);
 @import './cms-list.css' layer(panel);
 @import './cms-status.css' layer(panel);
+@import './cms-count.css' layer(panel);
+@import './cms-changed.css' layer(panel);
+@import './cms-stage-mark.css' layer(panel);
+@import './cms-status-dots.css' layer(panel);
+@import './cms-status-pipeline.css' layer(panel);
+@import './cms-stage-filters.css' layer(panel);
 @import './cms-field.css' layer(panel);
 @import './cms-fieldset.css' layer(panel);
 @import './cms-fields.css' layer(panel);

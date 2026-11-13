@@ -1,0 +1,178 @@
+/* A node's stages as icons, from Panel\NodeStatus, marked like the status
+   tab's. status.js moves the mine stage between saves. Neighbours move
+   apart by the halo's reach so two rings never touch. */
+.cms-status-dots {
+	--size: var(--cms-stage-mark-size);
+	--reach: calc(var(--cms-stage-halo) + var(--cms-stage-halo-gap));
+	display: inline-flex;
+	align-items: center;
+	gap: calc(0.25rem + 2 * var(--reach));
+
+	&.is-sm {
+		--size: var(--cms-stage-mark-size-sm);
+		gap: calc(0.1875rem + 2 * var(--reach));
+	}
+
+	/* Dots instead of icons: colour names the stage, shape a special state (a
+	   ring is an unpublished main version, "!" a problem). */
+	& .cms-status-dots-dot {
+		--color: var(--cms-color-stage-empty);
+		--halo: var(--cms-stage-dot-halo);
+		display: inline-grid;
+		place-items: center;
+		flex: none;
+		box-sizing: border-box;
+		width: var(--dot);
+		height: var(--dot);
+		border: 2px solid var(--color);
+		border-radius: var(--cms-radius-full);
+		background: var(--color);
+		outline: var(--halo) solid
+			color-mix(
+				in oklch,
+				var(--cms-stage-halo-color, var(--color)) var(--cms-stage-halo-strength),
+				transparent
+			);
+		outline-offset: var(--cms-stage-dot-halo-gap);
+
+		&[data-state='none'] {
+			outline: none;
+		}
+
+		&[data-stage='main'][data-state='published'],
+		&[data-stage='saved'] {
+			--color: var(--cms-color-stage-main);
+		}
+
+		&[data-stage='main'][data-state='unpublished'] {
+			--color: var(--cms-color-stage-main);
+			background: transparent;
+			outline: none;
+		}
+
+		&[data-stage='draft'][data-state='present'] {
+			--color: var(--cms-color-stage-draft);
+		}
+
+		&[data-stage='mine'][data-state='present'] {
+			--color: var(--cms-color-stage-mine);
+		}
+
+		&[data-stage='mine'][data-state='conflict'] {
+			--color: var(--cms-color-stage-problem);
+		}
+	}
+}
+
+.cms-status-dots.is-dots {
+	--dot: var(--cms-stage-dot-size);
+	--reach: calc(var(--cms-stage-dot-halo) + var(--cms-stage-dot-halo-gap));
+	gap: calc(0.1875rem + 2 * var(--reach));
+
+	& .cms-status-dots-dot[data-stage='mine'][data-state='conflict'] {
+		width: calc(var(--dot) * 1.5);
+		height: calc(var(--dot) * 1.5);
+
+		&::after {
+			color: var(--cms-color-white);
+			font-size: 0.625rem;
+			font-weight: 700;
+			line-height: 1;
+			content: '!';
+		}
+	}
+}
+
+/* The main version's icon, with a small dot beside it for each further
+   stage that holds something; the dots are too small for a halo. */
+.cms-status-dots.is-compact {
+	gap: calc(0.1875rem + var(--reach));
+
+	& .cms-status-dots-pips {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	& .cms-status-dots-dot {
+		--dot: var(--cms-stage-pip-size);
+		--halo: 0px;
+		border: 0;
+	}
+}
+
+/* In the editor head: opens the inspector's status tab, and says what the
+   dots mean on hover and focus. */
+button.cms-status-dots {
+	position: relative;
+	min-height: 1.75rem;
+	padding: 0 var(--cms-space-2);
+	border: 0;
+	border-radius: var(--cms-radius-md);
+	background: none;
+	font: inherit;
+	cursor: pointer;
+
+	&:hover {
+		background: var(--cms-color-hover);
+	}
+
+	&:focus-visible {
+		outline: var(--cms-focus-outline);
+		outline-offset: var(--cms-focus-offset);
+	}
+
+	& .cms-status-dots-tooltip {
+		--size: 1rem;
+		position: absolute;
+		top: calc(100% + var(--cms-space-2));
+		left: 0;
+		z-index: 30;
+		display: none;
+		flex-direction: column;
+		gap: var(--cms-space-1-5);
+		width: min(20rem, calc(100vw - 2 * var(--cms-space-4)));
+		padding: var(--cms-space-2-5) var(--cms-space-3);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-neutral-900);
+		color: var(--cms-color-white);
+		box-shadow: var(--cms-shadow-lg);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 400;
+		letter-spacing: normal;
+		line-height: 1.4;
+		text-align: start;
+		white-space: normal;
+		pointer-events: none;
+	}
+
+	&:hover .cms-status-dots-tooltip,
+	&:focus-visible .cms-status-dots-tooltip {
+		display: flex;
+	}
+
+	& .cms-status-dots-row {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+
+		& strong {
+			font-weight: 600;
+		}
+	}
+
+	& .cms-status-dots-hint {
+		margin-top: var(--cms-space-1);
+		color: var(--cms-color-neutral-400);
+	}
+}
+
+/* The tooltip is dark in both themes; its marks take the dark theme's
+   stage colours and inks, on a tint strong enough for the small size. */
+button.cms-status-dots .cms-status-dots-tooltip {
+	color-scheme: dark;
+
+	& .cms-stage-mark {
+		--fill: color-mix(in oklch, var(--tone) max(var(--cms-stage-tint), 30%), transparent);
+	}
+}

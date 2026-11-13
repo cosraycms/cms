@@ -164,14 +164,14 @@ $columns .= $hasRowActions ? ' max-content' : '';
 						default => [null, null, null],
 					};
 					?>
-					<a class="chip" href="<?= escape($chip['url']) ?>" <?= $chip['active'] ? 'aria-current="true"' : '' ?>>
+					<a class="cms-stage-filters-chip" href="<?= escape($chip['url']) ?>" <?= $chip['active'] ? 'aria-current="true"' : '' ?>>
 						<?php if ($stage !== null): ?>
-							<span class="mark" data-stage="<?= $stage ?>" data-state="<?= $state ?>" aria-hidden="true">
+							<span class="cms-stage-mark" data-stage="<?= $stage ?>" data-state="<?= $state ?>" aria-hidden="true">
 								<?= Icon::render($icon) ?>
 							</span>
 						<?php endif ?>
-						<span class="label"><?= escape($chip['label']) ?></span>
-						<span class="count"><?= (int) $chip['count'] ?></span>
+						<span><?= escape($chip['label']) ?></span>
+						<span class="cms-stage-filters-count"><?= (int) $chip['count'] ?></span>
 					</a>
 				<?php endforeach ?>
 			</nav>
