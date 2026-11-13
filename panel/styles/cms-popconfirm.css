@@ -22,7 +22,7 @@
 		gap: var(--cms-space-3);
 	}
 
-	& .title {
+	& .cms-popconfirm-title {
 		margin: 0;
 		font-size: var(--cms-font-size-base);
 		font-weight: 600;
@@ -33,7 +33,7 @@
 		line-height: 1.45;
 	}
 
-	& .stages {
+	& .cms-popconfirm-stages {
 		display: flex;
 		flex-direction: column;
 		gap: var(--cms-space-2-5);
@@ -52,23 +52,23 @@
 		}
 	}
 
-	& .copy {
+	& .cms-popconfirm-copy {
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
 	}
 
-	& .name {
+	& .cms-popconfirm-name {
 		font-weight: 500;
 	}
 
-	& .help {
+	& .cms-popconfirm-help {
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-xs);
 		line-height: 1.4;
 	}
 
-	& .note {
+	& .cms-popconfirm-note {
 		--cms-icon-size: 1rem;
 		display: flex;
 		gap: var(--cms-space-2);
@@ -79,7 +79,7 @@
 		color: var(--cms-color-text-muted);
 		font-size: var(--cms-font-size-xs);
 
-		& .icon {
+		& .cms-icon {
 			flex: none;
 			margin-top: 0.0625rem;
 		}
@@ -91,7 +91,7 @@
 		}
 	}
 
-	& .option {
+	& .cms-popconfirm-option {
 		display: flex;
 		align-items: flex-start;
 		gap: var(--cms-space-2-5);
@@ -110,7 +110,7 @@
 		}
 	}
 
-	& .buttons {
+	& .cms-popconfirm-buttons {
 		display: flex;
 		justify-content: flex-end;
 		flex-wrap: wrap;

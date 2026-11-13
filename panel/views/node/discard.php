@@ -23,16 +23,16 @@ $draft = $stages['draft'] ?? null;
 			role="dialog"
 			aria-labelledby="editor-discard-draft-title"
 			data-confirm>
-			<h2 id="editor-discard-draft-title" class="title"><?= escape(__('editor:discard-confirm')) ?></h2>
+			<h2 id="editor-discard-draft-title" class="cms-popconfirm-title"><?= escape(__('editor:discard-confirm')) ?></h2>
 			<p><?= escape(__('editor:discard-confirm-text', ['draft' => (string) $draft['text']])) ?></p>
-			<label class="option" data-discard-mine <?= ($status['mine'] ?? 'none') === 'none' ? 'hidden' : '' ?>>
+			<label class="cms-popconfirm-option" data-discard-mine <?= ($status['mine'] ?? 'none') === 'none' ? 'hidden' : '' ?>>
 				<input type="checkbox" class="cms-checkbox" form="node-editor-discard" name="mine" value="discard" checked />
-				<span class="copy">
-					<span class="name"><?= escape(__('editor:discard-mine-too')) ?></span>
-					<span class="help"><?= escape(__('editor:discard-mine-too-help')) ?></span>
+				<span class="cms-popconfirm-copy">
+					<span class="cms-popconfirm-name"><?= escape(__('editor:discard-mine-too')) ?></span>
+					<span class="cms-popconfirm-help"><?= escape(__('editor:discard-mine-too-help')) ?></span>
 				</span>
 			</label>
-			<div class="buttons">
+			<div class="cms-popconfirm-buttons">
 				<button type="button" class="cms-button cms-button-secondary" data-confirm-cancel data-confirm-focus>
 					<?= escape(__('editor:cancel')) ?>
 				</button>
@@ -50,9 +50,9 @@ $draft = $stages['draft'] ?? null;
 			role="dialog"
 			aria-labelledby="editor-discard-mine-title"
 			data-confirm>
-			<h2 id="editor-discard-mine-title" class="title"><?= escape(__('editor:mine-discard-confirm')) ?></h2>
+			<h2 id="editor-discard-mine-title" class="cms-popconfirm-title"><?= escape(__('editor:mine-discard-confirm')) ?></h2>
 			<p><?= escape(__('editor:mine-discard-confirm-text')) ?></p>
-			<div class="buttons">
+			<div class="cms-popconfirm-buttons">
 				<button type="button" class="cms-button cms-button-secondary" data-confirm-cancel data-confirm-focus>
 					<?= escape(__('editor:cancel')) ?>
 				</button>

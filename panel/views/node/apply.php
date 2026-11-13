@@ -85,9 +85,9 @@ $items = ['draft' => 'people', 'mine' => 'person'];
 		aria-labelledby="editor-apply-confirm-title"
 		data-confirm
 		data-align="end">
-		<h2 id="editor-apply-confirm-title" class="title"><?= escape(__('editor:apply-confirm')) ?></h2>
+		<h2 id="editor-apply-confirm-title" class="cms-popconfirm-title"><?= escape(__('editor:apply-confirm')) ?></h2>
 		<p><?= escape(__('editor:apply-confirm-text')) ?></p>
-		<ul class="stages">
+		<ul class="cms-popconfirm-stages">
 			<?php foreach ($items as $key => $icon): ?>
 				<?php $stage = $stages[$key] ?? null; ?>
 				<?php if (is_array($stage)): ?>
@@ -95,19 +95,19 @@ $items = ['draft' => 'people', 'mine' => 'person'];
 						<span class="mark" data-stage="<?= $key ?>" data-state="<?= escape((string) $stage['state']) ?>">
 							<?= Icon::render($icon) ?>
 						</span>
-						<span class="copy">
-							<span class="name"><?= escape((string) $stage['name']) ?></span>
-							<span class="help" data-stage-text><?= escape((string) $stage['text']) ?></span>
+						<span class="cms-popconfirm-copy">
+							<span class="cms-popconfirm-name"><?= escape((string) $stage['name']) ?></span>
+							<span class="cms-popconfirm-help" data-stage-text><?= escape((string) $stage['text']) ?></span>
 						</span>
 					</li>
 				<?php endif ?>
 			<?php endforeach ?>
 		</ul>
-		<p class="note <?= $published ? 'is-online' : 'is-offline' ?>">
+		<p class="cms-popconfirm-note <?= $published ? 'is-online' : 'is-offline' ?>">
 			<?= Icon::render('globe') ?>
 			<span><?= escape(__($published ? 'editor:apply-online' : 'editor:apply-offline')) ?></span>
 		</p>
-		<div class="buttons">
+		<div class="cms-popconfirm-buttons">
 			<button type="button" class="cms-button cms-button-secondary" data-confirm-cancel>
 				<?= escape(__('editor:cancel')) ?>
 			</button>
