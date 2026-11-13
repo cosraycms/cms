@@ -12,7 +12,7 @@
 	padding: var(--cms-space-4);
 	pointer-events: none;
 
-	& .toast {
+	& .cms-toasts-item {
 		--accent: var(--cms-color-info);
 		display: flex;
 		align-items: flex-start;
@@ -41,14 +41,14 @@
 		}
 	}
 
-	& .message {
+	& .cms-toasts-message {
 		flex: 1 1 auto;
 		min-width: 0;
 		margin: 0;
 		overflow-wrap: anywhere;
 	}
 
-	& .close {
+	& .cms-toasts-close {
 		flex: none;
 		padding: 0 var(--cms-space-1-5);
 		border: 0;

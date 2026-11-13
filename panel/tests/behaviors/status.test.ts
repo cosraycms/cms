@@ -171,7 +171,10 @@ describe('status', () => {
 		request('POST', 409);
 
 		expect(
-			Array.from(document.querySelectorAll('#cms-toasts .toast .message'), (t) => t.textContent),
+			Array.from(
+				document.querySelectorAll('#cms-toasts .cms-toasts-message'),
+				(t) => t.textContent,
+			),
 		).toEqual(['Discarded']);
 	});
 });

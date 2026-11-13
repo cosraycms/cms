@@ -228,9 +228,9 @@ describe('layout preview', () => {
 
 		button().click();
 		await vi.waitFor(() =>
-			expect(document.querySelector('.toast.is-error .message')?.textContent).toBe(
-				'Preview failed',
-			),
+			expect(
+				document.querySelector('.cms-toasts-item.is-error .cms-toasts-message')?.textContent,
+			).toBe('Preview failed'),
 		);
 
 		expect(dialog().open).toBe(false);
@@ -250,7 +250,7 @@ describe('layout preview', () => {
 		button().click();
 		await vi.waitFor(() => expect(refused).toHaveBeenCalled());
 
-		expect(document.querySelector('.toast')).toBeNull();
+		expect(document.querySelector('.cms-toasts-item')).toBeNull();
 		expect(dialog().open).toBe(false);
 	});
 });

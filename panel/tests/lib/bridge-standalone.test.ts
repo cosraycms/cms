@@ -176,7 +176,10 @@ describe('standalone bridge', () => {
 		bridge().toast.error('Failed');
 
 		expect(
-			Array.from(document.querySelectorAll('#cms-toasts .toast .message'), (m) => m.textContent),
+			Array.from(
+				document.querySelectorAll('#cms-toasts .cms-toasts-message'),
+				(m) => m.textContent,
+			),
 		).toEqual(['Saved', 'Failed']);
 	});
 });

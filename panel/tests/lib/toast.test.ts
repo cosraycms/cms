@@ -21,7 +21,7 @@ afterEach(() => {
 });
 
 function toasts(): HTMLElement[] {
-	return Array.from(document.querySelectorAll<HTMLElement>('#cms-toasts .toast'));
+	return Array.from(document.querySelectorAll<HTMLElement>('#cms-toasts .cms-toasts-item'));
 }
 
 describe('toasts', () => {
@@ -29,13 +29,16 @@ describe('toasts', () => {
 		toast('success', 'Uploaded');
 		toast('error', 'Refused');
 
-		expect(toasts().map((item) => item.className)).toEqual(['toast is-success', 'toast is-error']);
+		expect(toasts().map((item) => item.className)).toEqual([
+			'cms-toasts-item is-success',
+			'cms-toasts-item is-error',
+		]);
 		expect(toasts()[1].getAttribute('role')).toBe('alert');
 
 		vi.advanceTimersByTime(60000);
 		expect(toasts().map((item) => item.textContent)).toEqual(['Refused×']);
 
-		toasts()[0].querySelector<HTMLButtonElement>('button.close')!.click();
+		toasts()[0].querySelector<HTMLButtonElement>('button.cms-toasts-close')!.click();
 		expect(toasts()).toHaveLength(0);
 	});
 
@@ -59,8 +62,8 @@ describe('toasts', () => {
 		document.dispatchEvent(new Event('htmx:after:swap'));
 
 		const [item] = toasts();
-		expect(item.querySelector('.message')?.textContent).toBe('Has children');
-		expect(item.querySelector('button.close')?.getAttribute('aria-label')).toBe('Close');
+		expect(item.querySelector('.cms-toasts-message')?.textContent).toBe('Has children');
+		expect(item.querySelector('button.cms-toasts-close')?.getAttribute('aria-label')).toBe('Close');
 		expect(item.hasAttribute('data-toast')).toBe(false);
 	});
 
@@ -72,7 +75,7 @@ describe('toasts', () => {
 		);
 		uninstall = install();
 
-		expect(toasts().map((item) => item.querySelector('.message')?.textContent)).toEqual([
+		expect(toasts().map((item) => item.querySelector('.cms-toasts-message')?.textContent)).toEqual([
 			'Deleted',
 		]);
 		expect(document.querySelector('[hx-swap-oob]')).toBeNull();

@@ -59,17 +59,17 @@ function upgrade(item) {
 		KINDS.includes(item.dataset.toast ?? '') ? item.dataset.toast : 'info'
 	);
 	const message = document.createElement('p');
-	message.className = 'message';
+	message.className = 'cms-toasts-message';
 	message.textContent = (item.textContent ?? '').trim();
 	const close = document.createElement('button');
 	close.type = 'button';
-	close.className = 'close';
+	close.className = 'cms-toasts-close';
 	close.setAttribute('aria-label', __('common:close'));
 	close.textContent = '×';
 	close.addEventListener('click', () => item.remove());
 
 	delete item.dataset.toast;
-	item.className = `toast is-${kind}`;
+	item.className = `cms-toasts-item is-${kind}`;
 	item.replaceChildren(message, close);
 
 	// Errors and warnings stay until closed and interrupt; the rest is polite.
