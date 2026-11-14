@@ -105,7 +105,7 @@ $items = ['draft' => NodeStatus::icon('draft'), 'mine' => NodeStatus::icon('mine
 			<?php endforeach ?>
 		</ul>
 		<p class="cms-popconfirm-note <?= $published ? 'is-online' : 'is-offline' ?>">
-			<?= Icon::render('globe') ?>
+			<?= Icon::render(NodeStatus::icon('main', $published ? 'published' : 'unpublished')) ?>
 			<span><?= escape(__($published ? 'editor:apply-online' : 'editor:apply-offline')) ?></span>
 		</p>
 		<div class="cms-popconfirm-buttons">
