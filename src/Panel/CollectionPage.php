@@ -92,6 +92,7 @@ final class CollectionPage
 				timezone: $timezone,
 				arranged: $arranged,
 				moved: $moved,
+				publishable: $publishable,
 			),
 			pager: CollectionPager::from($total, count($nodes), $urls),
 			bulk: [

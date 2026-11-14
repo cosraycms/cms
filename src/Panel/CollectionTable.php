@@ -59,9 +59,10 @@ final class CollectionTable
 		DateTimeZone $timezone,
 		bool $arranged = false,
 		string $moved = '',
+		bool $publishable = true,
 	): self {
 		$nodes = self::items($nodes);
-		$headers = self::headers($columns, $urls, $arranged);
+		$headers = self::headers($columns, $urls, $arranged, $publishable);
 
 		return new self(
 			showChildren: $meta->showChildren,
@@ -75,7 +76,9 @@ final class CollectionTable
 	/**
 	 * The column heads. The first field column leads: it links the entry
 	 * and carries the tree. Hidden and locked badges join the stages of
-	 * the main version, or else the first stages shown.
+	 * the main version, or else the first stages shown. A status column
+	 * has a slot for each of its stages, but none for drafts in a
+	 * collection of records only, which never have one.
 	 *
 	 * @param iterable<Column|StatusColumn> $columns
 	 * @return list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}>
@@ -84,6 +87,7 @@ final class CollectionTable
 		iterable $columns,
 		CollectionUrls $urls,
 		bool $arranged,
+		bool $publishable,
 	): array {
 		$headers = [];
 		$lead = false;
@@ -99,7 +103,13 @@ final class CollectionTable
 					'kind' => 'status',
 					'ariaSort' => null,
 					'lead' => false,
-					'stages' => array_map(static fn(Stage $stage): string => $stage->value, $column->stages),
+					'stages' => array_values(array_map(
+						static fn(Stage $stage): string => $stage->value,
+						array_filter(
+							$column->stages,
+							static fn(Stage $stage): bool => $publishable || $stage !== Stage::Draft,
+						),
+					)),
 					'look' => $column->look,
 					'fixed' => $column->fixed,
 					'badges' => false,
@@ -330,9 +340,10 @@ final class CollectionTable
 	}
 
 	/**
-	 * A status column's share of a row's stages, up to the last that holds
-	 * something unless fixed. A record's saved state counts as its main
-	 * version.
+	 * A status column's share of a row's stages, one per slot of the column,
+	 * up to the last that holds something unless fixed. A record's saved
+	 * state fills the main version's slot; the draft slot, which a record
+	 * lacks, stays empty and out of the sentence.
 	 *
 	 * @param array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool} $header
 	 * @param list<array{key: string, state: string, name: string, text: string, help: string, badge: string}> $stages
@@ -341,19 +352,36 @@ final class CollectionTable
 	 */
 	private static function stagesOf(array $header, array $stages, array $badges): array
 	{
-		$chosen = array_values(array_filter(
-			$stages,
-			static fn(array $stage): bool => in_array(
-				$stage['key'] === 'saved' ? Stage::Main->value : $stage['key'],
-				$header['stages'],
-				true,
-			),
-		));
-		$shown = $header['fixed'] ? $chosen : NodeStatus::chain($chosen);
+		$bySlot = [];
+
+		foreach ($stages as $stage) {
+			$bySlot[$stage['key'] === 'saved' ? Stage::Main->value : $stage['key']] = $stage;
+		}
+
+		$slots = [];
+		$held = [];
+
+		foreach ($header['stages'] as $slot) {
+			$stage = $bySlot[$slot] ?? null;
+			$held[] = $stage;
+			$slots[] = $stage ?? [
+				'key' => $slot,
+				'state' => 'none',
+				'name' => '',
+				'text' => '',
+				'help' => '',
+				'badge' => '',
+			];
+		}
+
+		$shown = $header['fixed'] ? $slots : NodeStatus::chain($slots);
 
 		return [
 			'stages' => $shown,
-			'sentence' => NodeStatus::sentence($shown),
+			'sentence' => NodeStatus::sentence(array_values(array_filter(
+				array_slice($held, 0, count($shown)),
+				static fn(?array $stage): bool => $stage !== null,
+			))),
 			'look' => $header['look'],
 			'fixed' => $header['fixed'],
 			'badges' => $badges,

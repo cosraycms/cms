@@ -126,12 +126,49 @@ final class CollectionStatusColumnTest extends TestCase
 		$this->assertSame(['saved'], array_column($cells[1]['status']['stages'] ?? [], 'key'));
 	}
 
+	public function testARecordKeepsTheDraftSlotBesideNodes(): void
+	{
+		$status = $this->table(
+			[Column::new('Title', 'title'), Column::status()],
+			record: true,
+			mine: true,
+		)->rows[0]['cells'][1]['status'] ?? [];
+
+		$this->assertSame(
+			[['saved', 'saved'], ['draft', 'none'], ['mine', 'present']],
+			array_map(static fn(array $stage): array => [$stage['key'], $stage['state']], $status['stages'] ?? []),
+		);
+		$this->assertStringNotContainsString('status:draft', $status['sentence'] ?? '');
+	}
+
+	public function testRecordsAloneHaveNoDraftSlot(): void
+	{
+		$columns = [Column::new('Title', 'title'), Column::status()];
+		$table = $this->table($columns, record: true, mine: true, publishable: false);
+		$fixed = $this->table(
+			[Column::new('Title', 'title'), Column::status()->fixed()],
+			record: true,
+			publishable: false,
+		);
+
+		$this->assertSame(['main', 'mine'], $table->headers[1]['stages']);
+		$this->assertSame(
+			['saved', 'mine'],
+			array_column($table->rows[0]['cells'][1]['status']['stages'] ?? [], 'key'),
+		);
+		$this->assertSame(
+			['saved', 'mine'],
+			array_column($fixed->rows[0]['cells'][1]['status']['stages'] ?? [], 'key'),
+		);
+	}
+
 	/** @param list<Column|StatusColumn> $columns */
 	private function table(
 		array $columns,
 		bool $draft = false,
 		bool $record = false,
 		bool $mine = false,
+		bool $publishable = true,
 	): CollectionTable {
 		$node = [
 			'uid' => 'entry',
@@ -157,6 +194,7 @@ final class CollectionStatusColumnTest extends TestCase
 			new CollectionListMeta(showHidden: true),
 			'en',
 			new DateTimeZone('UTC'),
+			publishable: $publishable,
 		);
 	}
 
