@@ -21,12 +21,16 @@ test('the status tab moves edits up the stages and discards a draft without my c
 
 	await expect(applyStep).toBeHidden();
 	await expect(saveStep).toBeHidden();
+	await expect(draft).toBeHidden();
+	await expect(mine(page)).toBeHidden();
 
 	await edit(page, 'Drafted');
 	await expect(panel).toContainText('applies my changes');
 	await saveStep.click();
 	await expect(draft).toHaveAttribute('data-state', 'present');
+	await expect(draft).toBeVisible();
 	await expect(mine(page)).toHaveAttribute('data-state', 'none');
+	await expect(mine(page)).toBeHidden();
 	await expect(saveStep).toBeHidden();
 	await expect(panel).toContainText('applies the draft');
 
@@ -42,7 +46,9 @@ test('the status tab moves edits up the stages and discards a draft without my c
 
 	await expect(page.locator('#cms-toasts')).toContainText('Draft discarded');
 	await expect(draft).toHaveAttribute('data-state', 'none');
+	await expect(draft).toBeHidden();
 	await expect(mine(page)).toHaveAttribute('data-state', 'present');
+	await expect(mine(page)).toBeVisible();
 	await expect(page.getByLabel('Title')).toHaveValue('Drafted, then mine');
 
 	// Applying asks first and names what it takes over.

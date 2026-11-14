@@ -313,6 +313,12 @@ button.cms-status-dots {
 		display: flex;
 	}
 
+	/* Empty stages stay in the markup: status.js shows the mine stage
+	   while an autosave runs or fails. */
+	& > .cms-stage-mark[data-state='none'] {
+		display: none;
+	}
+
 	& .cms-status-dots-row {
 		display: flex;
 		align-items: center;
