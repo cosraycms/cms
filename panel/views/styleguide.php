@@ -277,10 +277,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					. '--cms-stage-halo-strength: 35%; --cms-color-stage-main-ink: white; '
 					. '--cms-color-stage-draft-ink: var(--cms-color-neutral-900); --cms-color-stage-mine-ink: white; '
 					. '--cms-color-stage-problem-ink: white; --cms-color-stage-idle: light-dark(var(--cms-color-neutral-200), var(--cms-color-neutral-700)); '
-					. '--cms-color-stage-idle-ink: light-dark(var(--cms-color-neutral-600), var(--cms-color-neutral-300)); '
-					// Set on :root, offline would follow main by itself.
-					. '--cms-color-stage-offline: var(--cms-color-stage-main); '
-					. '--cms-color-stage-offline-ink: var(--cms-color-stage-main-ink)'; ?>
+					. '--cms-color-stage-idle-ink: light-dark(var(--cms-color-neutral-600), var(--cms-color-neutral-300))'; ?>
 				<?php foreach ([
 					['icons', 'icons with halo', $halo],
 					['dots', 'dots with halo', $halo],

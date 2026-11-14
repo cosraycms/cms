@@ -68,7 +68,7 @@ Depth uses the `--cms-shadow-*`, `--cms-gradient-raised`, and `--cms-pane-shadow
 A node's stages (the main version, the editorial draft, the user's own changes) appear as icons or dots in the editor head, lists, filters, and the status tab; the head and lists join them by lines. Each icon is a `cms-stage-mark` ([status.css](../panel/styles/status.css)), sized by the `--size` of whatever holds it. The `--cms-color-stage-*` tokens colour them everywhere:
 
 - `main`, `draft`, `mine`, and `problem` colour a stage that holds something.
-- `idle` colours an empty stage's icon, `offline` the slashed globe of a main version that is not published, in the main colour unless a theme sets it. Dots show the latter as a ring in the main colour.
+- `idle` colours an empty stage's icon, `offline` the ring with a slash of a main version that is not published, grey like `idle` unless a theme sets it. Dots show the latter as a ring.
 - Each of these six has an `-ink` variant for the icon drawn on its tinted circle.
 - `empty` fills the dot of an empty stage and draws the lines between stages.
 

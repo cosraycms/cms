@@ -354,10 +354,10 @@
 		var(--cms-color-stage-problem),
 		var(--cms-color-shade) 18%
 	);
-	/* The icon of an empty stage, and of a main version that is offline,
-	   which its slashed globe tells apart, as the ring does for dots. */
+	/* The icon of an empty stage, and the ring of a main version that is
+	   offline. */
 	--cms-color-stage-idle: var(--cms-color-text-subtle);
-	--cms-color-stage-offline: var(--cms-color-stage-main);
+	--cms-color-stage-offline: var(--cms-color-stage-idle);
 	--cms-color-stage-idle-ink: color-mix(
 		in oklch,
 		var(--cms-color-stage-idle),

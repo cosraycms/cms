@@ -116,9 +116,17 @@
 		outline: none;
 	}
 
+	/* The check sits small in its artwork. */
+	&:is([data-stage='main'], [data-stage='saved']) {
+		--cms-icon-size: calc(var(--size) * 0.6);
+	}
+
+	/* Offline: a ring with a slash, the size of the mark, without a tint. */
 	&[data-stage='main'][data-state='unpublished'] {
 		--tone: var(--cms-color-stage-offline);
 		--ink: var(--cms-color-stage-offline-ink);
+		--cms-icon-size: var(--size);
+		background: none;
 		outline: none;
 	}
 
@@ -194,7 +202,7 @@
 	}
 
 	/* Dots instead of icons: colour names the stage, shape a special state (a
-	   ring is an unpublished main version, "!" a problem). */
+	   grey ring is an unpublished main version, "!" a problem). */
 	& .cms-status-dots-dot {
 		--color: var(--cms-color-stage-empty);
 		--halo: var(--cms-stage-dot-halo);
@@ -226,7 +234,7 @@
 		}
 
 		&[data-stage='main'][data-state='unpublished'] {
-			--color: var(--cms-color-stage-main);
+			--color: var(--cms-color-stage-offline);
 			background: transparent;
 			outline: none;
 		}

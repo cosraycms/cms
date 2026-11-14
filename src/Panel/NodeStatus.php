@@ -22,7 +22,12 @@ use Throwable;
  */
 final readonly class NodeStatus
 {
-	private const array ICONS = ['main' => 'globe', 'saved' => 'floppy', 'draft' => 'floppy', 'mine' => 'pencil'];
+	private const array ICONS = [
+		'main' => 'check-lg',
+		'saved' => 'check-lg',
+		'draft' => 'file-earmark-text',
+		'mine' => 'pencil',
+	];
 
 	/**
 	 * @param 'published'|'unpublished' $main
@@ -186,7 +191,7 @@ final readonly class NodeStatus
 	/** The panel icon of a stage in a state. */
 	public static function icon(string $stage, string $state = ''): string
 	{
-		return $stage === 'main' && $state === 'unpublished' ? 'globe-slash' : self::ICONS[$stage] ?? 'pencil';
+		return $stage === 'main' && $state === 'unpublished' ? 'slash-circle' : self::ICONS[$stage] ?? 'pencil';
 	}
 
 	/**

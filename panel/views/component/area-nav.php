@@ -22,7 +22,7 @@ if ((bool) ($dashboard ?? true)) {
 }
 
 if (is_string($contentUrl)) {
-	$areas[] = ['area' => 'content', 'url' => $contentUrl, 'label' => __('nav:content'), 'icon' => 'file-earmark-text'];
+	$areas[] = ['area' => 'content', 'url' => $contentUrl, 'label' => __('nav:content'), 'icon' => 'files'];
 }
 
 $menusUrl = u($menusUrl ?? null);
