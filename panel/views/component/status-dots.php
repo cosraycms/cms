@@ -1,6 +1,7 @@
 <?php
 
 use Cosray\Panel\Icon;
+use Cosray\Panel\NodeStatus;
 
 use function Cosray\escape;
 
@@ -20,14 +21,14 @@ $id = u($id ?? null);
 $oob = (bool) (u($oob ?? null) ?? false);
 $sentence = (string) ($status['sentence'] ?? '');
 $look = (string) u($look ?? 'icons');
-$icons = ['main' => 'globe', 'saved' => 'people', 'draft' => 'people', 'mine' => 'person'];
+$icons = NodeStatus::ICONS;
 $marks = static function (array $stages) use ($icons): string {
 	$html = '';
 
 	foreach ($stages as $stage) {
 		$key = (string) $stage['key'];
 		$html .= '<span class="cms-stage-mark" data-stage="' . escape($key) . '" data-state="'
-		. escape((string) $stage['state']) . '">' . Icon::render($icons[$key] ?? 'person') . '</span>';
+		. escape((string) $stage['state']) . '">' . Icon::render($icons[$key] ?? 'pencil') . '</span>';
 	}
 
 	return $html;

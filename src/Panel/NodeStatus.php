@@ -22,6 +22,8 @@ use Throwable;
  */
 final readonly class NodeStatus
 {
+	public const array ICONS = ['main' => 'globe', 'saved' => 'floppy', 'draft' => 'floppy', 'mine' => 'pencil'];
+
 	/**
 	 * @param 'published'|'unpublished' $main
 	 * @param 'none'|'present'|'conflict' $mine

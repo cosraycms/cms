@@ -1,8 +1,8 @@
 # Built-in panel icons
 
-Except for the custom artwork noted below, these unmodified SVG assets are a subset of [Bootstrap Icons 1.13.1](https://github.com/twbs/icons/tree/v1.13.1/icons), licensed under MIT. Copyright (c) 2019–2024 The Bootstrap Authors. See `LICENSES/MIT.txt` and the file-level attribution in `REUSE.toml` at the repository root.
+Most of these SVG assets are an unmodified subset of [Bootstrap Icons 1.13.1](https://github.com/twbs/icons/tree/v1.13.1/icons), licensed under MIT. Copyright (c) 2019–2024 The Bootstrap Authors. See `LICENSES/MIT.txt` and the file-level attribution in `REUSE.toml` at the repository root.
 
-Use regular variants, never `*-fill` artwork. Both `Cosray\Panel\Icon::render()` and `icon()` in `src/lib/icons.js`, through the served sprite, read this collection. Their name argument is a canonical asset name, not a path or arbitrary SVG. An icon carries the class `cms-icon` and none of the artwork's own; where a rule must single out one icon, `Icon::render()` takes a part class of the surrounding component as a second argument. Icons are decorative; name icon-only actions on their buttons or links.
+Bootstrap Icons are a starting point, not a constraint. When another set with a compatible license, or artwork of our own, fits better, use it: match the 16px grid and the regular line weight, record its origin in `REUSE.toml`, and note it below. Prefer regular variants over `*-fill` artwork. Both `Cosray\Panel\Icon::render()` and `icon()` in `src/lib/icons.js`, through the served sprite, read this collection. Their name argument is a canonical asset name, not a path or arbitrary SVG. An icon carries the class `cms-icon` and none of the artwork's own; where a rule must single out one icon, `Icon::render()` takes a part class of the surrounding component as a second argument. Icons are decorative; name icon-only actions on their buttons or links.
 
 Notable mappings from the former artwork:
 
@@ -19,7 +19,7 @@ Masthead areas use `grid-1x2` for the dashboard, `file-earmark-text` for content
 
 A full-row grid blocks field toggles its width with `arrows-expand-vertical` and `arrows-collapse-vertical`.
 
-The node inspector uses `layout-sidebar-inset-reverse` to collapse and expand, and its strip uses `toggles`, `link-45deg`, and `sliders` for the status, paths, and advanced tabs. Its status tab marks the main version with `globe`, the draft and a record's saved state with `people`, and the user's own edits with `person`; its steps use `arrow-up` on the line and `arrow-bar-up` for applying, which the head's Apply shares, and `lightning` says the visibility switches act at once.
+The node inspector uses `layout-sidebar-inset-reverse` to collapse and expand, and its strip uses `toggles`, `link-45deg`, and `sliders` for the status, paths, and advanced tabs. Its status tab, the editor head and lists mark each stage after the action that leads there, from `Cosray\Panel\NodeStatus::ICONS`: the user's own edits with `pencil`, the draft and a record's saved state with `floppy` like Save, and the main version with `globe`; its steps use `arrow-up` on the line and `arrow-bar-up` for applying, which the head's Apply shares, and `lightning` says the visibility switches act at once.
 
 The layout preview's width presets use `display`, `tablet-landscape`, `tablet`, and `phone`; its reload uses `arrow-clockwise`.
 

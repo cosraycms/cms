@@ -1,6 +1,7 @@
 <?php
 
 use Cosray\Panel\Icon;
+use Cosray\Panel\NodeStatus;
 
 use function Cosray\escape;
 
@@ -158,9 +159,9 @@ $columns .= $hasRowActions ? ' max-content' : '';
 				<?php foreach ($page->stages as $chip): ?>
 					<?php
 					[$stage, $state, $icon] = match ($chip['key']) {
-						'draft' => ['draft', 'present', 'people'],
-						'mine' => ['mine', 'present', 'person'],
-						'unpublished' => ['main', 'unpublished', 'globe'],
+						'draft' => ['draft', 'present', NodeStatus::ICONS['draft']],
+						'mine' => ['mine', 'present', NodeStatus::ICONS['mine']],
+						'unpublished' => ['main', 'unpublished', NodeStatus::ICONS['main']],
 						default => [null, null, null],
 					};
 					?>

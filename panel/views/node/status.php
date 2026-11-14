@@ -1,6 +1,7 @@
 <?php
 
 use Cosray\Panel\Icon;
+use Cosray\Panel\NodeStatus;
 
 use function Cosray\escape;
 
@@ -22,7 +23,7 @@ $visibility = is_array($status['visibility'] ?? null) ? $status['visibility'] : 
 $conflict = is_array($status['conflict'] ?? null) ? $status['conflict'] : null;
 $mine = (string) ($status['mine'] ?? 'none');
 $draft = (bool) ($status['draft'] ?? false);
-$icons = ['main' => 'globe', 'saved' => 'people', 'draft' => 'people', 'mine' => 'person'];
+$icons = NodeStatus::ICONS;
 $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 ?>
 <div id="editor-status-panel" class="cms-status-pipeline" <?= $oob ? 'hx-swap-oob="true"' : '' ?>>
@@ -36,7 +37,7 @@ $saveLabel = $record ? 'editor:save' : 'editor:save-draft';
 			?>
 			<li class="cms-status-pipeline-stage" data-stage="<?= escape($key) ?>" data-state="<?= escape($state) ?>">
 				<span class="cms-stage-mark" data-stage="<?= escape($key) ?>" data-state="<?= escape($state) ?>">
-					<?= Icon::render($icons[$key] ?? 'person') ?>
+					<?= Icon::render($icons[$key] ?? 'pencil') ?>
 				</span>
 				<div class="cms-status-pipeline-body">
 					<p class="cms-status-pipeline-title">

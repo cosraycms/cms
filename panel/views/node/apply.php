@@ -1,6 +1,7 @@
 <?php
 
 use Cosray\Panel\Icon;
+use Cosray\Panel\NodeStatus;
 
 use function Cosray\escape;
 
@@ -20,7 +21,7 @@ $published = (bool) ($status['visibility']['published'] ?? false);
 $pending = ($status['mine'] ?? 'none') !== 'none' || (bool) ($status['draft'] ?? false);
 $conflict = ($status['mine'] ?? 'none') === 'conflict';
 $stages = array_column((array) ($status['stages'] ?? []), null, 'key');
-$items = ['draft' => 'people', 'mine' => 'person'];
+$items = ['draft' => NodeStatus::ICONS['draft'], 'mine' => NodeStatus::ICONS['mine']];
 ?>
 <div
 	id="editor-apply"
