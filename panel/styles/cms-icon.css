@@ -1,8 +1,0 @@
-.cms-icon {
-	display: inline-block;
-	flex-shrink: 0;
-	width: var(--cms-icon-size);
-	height: var(--cms-icon-size);
-	vertical-align: -0.125em;
-	fill: currentColor;
-}

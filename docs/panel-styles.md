@@ -65,7 +65,7 @@ Depth uses the `--cms-shadow-*`, `--cms-gradient-raised`, and `--cms-pane-shadow
 
 ### Stage marks
 
-A node's stages (the main version, the editorial draft, the user's own changes) appear as icons, dots, or the compact main icon with small dots beside it, in the editor head, lists, filters, and the status tab. Each icon is a `cms-stage-mark` ([cms-stage-mark.css](../panel/styles/cms-stage-mark.css)), sized by the `--size` of whatever holds it. The `--cms-color-stage-*` tokens colour them everywhere:
+A node's stages (the main version, the editorial draft, the user's own changes) appear as icons, dots, or the compact main icon with small dots beside it, in the editor head, lists, filters, and the status tab. Each icon is a `cms-stage-mark` ([status.css](../panel/styles/status.css)), sized by the `--size` of whatever holds it. The `--cms-color-stage-*` tokens colour them everywhere:
 
 - `main`, `draft`, `mine`, and `problem` colour a stage that holds something.
 - `idle` colours an empty stage's icon, `offline` the icon of a main version that is not published. Dots show the latter as a ring in the main colour.
@@ -129,17 +129,19 @@ Every class the panel defines or looks up starts with `cms-` and names its compo
 <button class="cms-button cms-button-primary cms-button-small">Save</button>
 ```
 
-Panel markup may meet a site's stylesheet, and components nest inside each other, so a short part name such as `.row` or `.title` would match far beyond its own component. A part keeps its component's name however deep it sits; a part that grows parts of its own and appears elsewhere becomes a component with its own root and file. Utilities follow the same prefix, such as `cms-sr-only`.
+Panel markup may meet a site's stylesheet, and components nest inside each other, so a short part name such as `.row` or `.title` would match far beyond its own component. A part keeps its component's name however deep it sits; a part that grows parts of its own and appears elsewhere becomes a component with its own root. Utilities follow the same prefix, such as `cms-sr-only`.
+
+Stylesheets group related components by area, such as [shell.css](../panel/styles/shell.css) or [media-field.css](../panel/styles/media-field.css), and each component's rules sit together in exactly one of them. File names need no prefix, as nothing outside the panel meets them; [panel.css](../panel/styles/panel.css) imports them in cascade order.
 
 Classes that third-party code sets, such as ProseMirror's and the code editor's syntax tokens, keep their names. Panel components avoid the names the site's block rendering emits with its default prefix: `cms-blocks`, `cms-block`, `cms-blocks-images`, `cms-figure`, and `cms-image-gallery` with its items. They also leave the `cms-block-` prefix to the style classes a site gives its blocks; the blocks field's components are named `cms-blocks-…`. [class-names.test.ts](../panel/tests/class-names.test.ts) checks the rule in the panel's stylesheets, views and scripts and lists the foreign classes each may use.
 
-Prefer shallow selectors and files named after their component. Element selectors are useful where the markup is owned; classes help when a part varies or needs a behavior hook. Local custom properties suit value variations, but extra selectors or a different file boundary can be clearer for structural differences.
+Prefer shallow selectors. Element selectors are useful where the markup is owned; classes help when a part varies or needs a behavior hook. Local custom properties suit value variations, but extra selectors or a component of its own can be clearer for structural differences.
 
-Markup that changes place keeps one form. A block of the blocks canvas renders the same on the field's grid and as a part of a split, because splitting and removing parts move blocks between the two; its place-dependent controls — the inserter, the resize edges, the action menu's entries, the settings dialog's layout numbers — list the places they serve in `data-places` (`block`, `columns`, `rows`), and [cms-blocks-editor.css](../panel/styles/cms-blocks-editor.css) shows them from where the block sits: on the field's grid (`.cms-blocks-editor-grid > .cms-blocks-editor-block`), or among the parts (`.cms-blocks-editor-parts > .cms-blocks-editor-block`) of a split (`.cms-blocks-editor-block.is-split`) whose `data-split` names the direction. The split's own chrome carries no places.
+Markup that changes place keeps one form. A block of the blocks canvas renders the same on the field's grid and as a part of a split, because splitting and removing parts move blocks between the two; its place-dependent controls — the inserter, the resize edges, the action menu's entries, the settings dialog's layout numbers — list the places they serve in `data-places` (`block`, `columns`, `rows`), and [blocks.css](../panel/styles/blocks.css) shows them from where the block sits: on the field's grid (`.cms-blocks-editor-grid > .cms-blocks-editor-block`), or among the parts (`.cms-blocks-editor-parts > .cms-blocks-editor-block`) of a split (`.cms-blocks-editor-block.is-split`) whose `data-split` names the direction. The split's own chrome carries no places.
 
 ## Layout and scrolling
 
-The current shell uses bounded, independently scrolling regions on larger screens and document scrolling on small or short viewports. See [cms-shell.css](../panel/styles/cms-shell.css), [cms-page.css](../panel/styles/cms-page.css), and each screen stylesheet for actual breakpoints and pane geometry rather than maintaining another numeric specification here.
+The current shell uses bounded, independently scrolling regions on larger screens and document scrolling on small or short viewports. See [shell.css](../panel/styles/shell.css), with the page frame, and each area stylesheet for actual breakpoints and pane geometry rather than maintaining another numeric specification here.
 
 Constraints to consider when trying another layout:
 

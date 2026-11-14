@@ -1,0 +1,1550 @@
+/* The frame around every media field — image, gallery, file list,
+   video: a header bar with the library and upload actions, the content
+   beneath it. Empty, the bar is the whole control and sits level with
+   the inputs beside it. */
+.cms-media-field {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	border: 1px solid var(--cms-color-border-control);
+	border-radius: var(--cms-control-radius);
+	background: var(--cms-color-surface);
+	box-shadow: var(--cms-shadow-raised);
+
+	& > .cms-media-field-bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--cms-space-1) var(--cms-space-3);
+		/* Centres a small button in a frame as tall as an input. */
+		min-height: calc(var(--cms-control-height) - 2px);
+		padding: calc((var(--cms-control-height) - 2px - var(--cms-control-height-sm)) / 2);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-xs);
+	}
+
+	& > .cms-media-field-bar + .cms-media-field-body {
+		border-top: 1px solid var(--cms-color-border);
+	}
+
+	& .cms-media-field-browse {
+		& svg {
+			width: 1rem;
+			height: 1rem;
+		}
+	}
+
+	& .cms-media-field-hint {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-width: 0;
+
+		& > svg {
+			flex-shrink: 0;
+			width: 1.125rem;
+			height: 1.125rem;
+			color: var(--cms-color-text-faint);
+		}
+	}
+
+	& .cms-media-field-choose {
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--cms-color-text);
+		font: inherit;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--cms-color-accent);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&[disabled] {
+			color: var(--cms-color-text-faint);
+			text-decoration: none;
+			cursor: default;
+		}
+	}
+
+	& .cms-media-field-tally {
+		margin-left: auto;
+		padding-right: var(--cms-space-2);
+		font-size: var(--cms-font-size-xs);
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	& > .cms-media-field-body {
+		min-width: 0;
+	}
+
+	/* A block gallery keeps its (empty) tiles mounted for the settings slot. */
+	&.is-empty > .cms-media-field-body {
+		display: none;
+	}
+
+	& > .cms-media-field-none {
+		display: flex;
+		align-items: center;
+		min-height: calc(var(--cms-control-height) - 2px);
+		padding: var(--cms-space-1) var(--cms-space-3);
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	/* Locked: the content in a well, nothing that would change it. */
+	&.is-readonly {
+		border-color: var(--cms-color-border);
+		background: var(--cms-color-surface-sunken);
+		box-shadow: var(--cms-shadow-recessed);
+	}
+
+	/* Inside a block a filled field is content alone; the drop state
+	   draws around it since there is no border to dash. */
+	&.is-block:not(.is-empty) {
+		border: 0;
+		border-radius: var(--cms-radius-sm);
+		background: none;
+		box-shadow: none;
+
+		&.is-dragging {
+			outline: 1px dashed var(--cms-color-accent);
+			outline-offset: 2px;
+		}
+	}
+
+	& > input[type='file'] {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(1px, 1px, 1px, 1px);
+		white-space: nowrap;
+	}
+
+	/* What a block's image lacks of what the field requires. */
+	& .cms-media-field-missing {
+		margin: var(--cms-space-1) 0 0;
+		color: var(--cms-color-warning-text);
+		font-size: var(--cms-font-size-xs);
+	}
+}
+
+/* A media field's files as rows, in the field and in a fallback preview. */
+.cms-file-list {
+	display: flex;
+	flex-direction: column;
+
+	& .cms-file-list-row {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-3);
+		min-height: 2.75rem;
+		padding: var(--cms-space-1-5) var(--cms-space-2) var(--cms-space-1-5) var(--cms-space-3);
+		border-bottom: 1px solid var(--cms-color-border);
+		font-size: var(--cms-font-size-sm);
+
+		&:last-child {
+			border-bottom: 0;
+		}
+
+		&:hover {
+			background: var(--cms-color-hover);
+		}
+	}
+
+	& .cms-file-list-icon {
+		display: grid;
+		flex-shrink: 0;
+		place-items: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		color: var(--cms-color-text-muted);
+
+		& svg {
+			width: 1.25rem;
+			height: 1.25rem;
+		}
+
+		& img {
+			width: 100%;
+			height: 100%;
+			border-radius: var(--cms-radius-sm);
+			object-fit: cover;
+		}
+	}
+
+	& .cms-file-list-name {
+		display: flex;
+		flex: 1 1 auto;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0 var(--cms-space-3);
+		min-width: 0;
+	}
+
+	& .cms-file-list-filename {
+		min-width: 0;
+		max-width: 100%;
+		overflow: hidden;
+		color: var(--cms-color-text);
+		text-decoration: none;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		&:is(a):hover {
+			text-decoration: underline;
+			text-underline-offset: 3px;
+		}
+	}
+
+	& .cms-file-list-title {
+		min-width: 0;
+		overflow: hidden;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& .cms-file-list-size {
+		flex-shrink: 0;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	& .cms-file-list-tool {
+		display: grid;
+		flex-shrink: 0;
+		place-items: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		padding: 0;
+		border: 0;
+		border-radius: var(--cms-radius);
+		background: transparent;
+		color: var(--cms-color-text-muted);
+		cursor: pointer;
+
+		& svg {
+			width: 0.875rem;
+			height: 0.875rem;
+		}
+
+		&:hover {
+			background: var(--cms-color-surface);
+			color: var(--cms-color-text);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+	}
+}
+
+/* A video field's player above its row. */
+.cms-video {
+	background: var(--cms-color-neutral-900);
+
+	& .cms-video-player {
+		display: block;
+		width: 100%;
+		max-height: 24rem;
+	}
+}
+
+/* The single image of a form field: its picture, facts, texts and actions. */
+.cms-image-card {
+	--thumb-height: 8rem;
+	--thumb-max-width: 14rem;
+	--thumb-ratio: 11 / 7;
+	display: flex;
+	gap: var(--cms-space-4);
+	padding: var(--cms-space-2);
+
+	& .cms-image-card-thumb {
+		position: relative;
+		display: grid;
+		flex-shrink: 0;
+		align-self: center;
+		place-items: center;
+		width: max(3rem, min(var(--thumb-max-width), calc(var(--thumb-height) * var(--thumb-ratio))));
+		max-height: var(--thumb-height);
+		aspect-ratio: var(--thumb-ratio);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface-sunken);
+		overflow: hidden;
+		cursor: pointer;
+
+		& img {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+		}
+	}
+
+	& .cms-image-card-plate {
+		font-size: var(--cms-font-size-xs);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--cms-color-text-subtle);
+	}
+
+	& .cms-image-card-details {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: column;
+		justify-content: flex-end;
+		gap: var(--cms-space-0-5);
+		min-width: 0;
+	}
+
+	& .cms-image-card-filename {
+		overflow: hidden;
+		font-size: var(--cms-font-size-sm);
+		font-weight: 600;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& .cms-image-card-facts {
+		min-height: 1.25rem;
+		font-size: var(--cms-font-size-xs);
+		color: var(--cms-color-text-subtle);
+		font-variant-numeric: tabular-nums;
+
+		/* Wraps between the facts, and inside one only when it cannot fit a line. */
+		& span {
+			display: inline-block;
+			max-width: 100%;
+		}
+	}
+
+	& .cms-image-card-texts {
+		margin: var(--cms-space-2) 0 0;
+		font-size: var(--cms-font-size-xs);
+		color: var(--cms-color-text-muted);
+
+		&:empty {
+			display: none;
+		}
+
+		& div {
+			display: -webkit-box;
+			overflow: hidden;
+			line-height: 1.5;
+			overflow-wrap: anywhere;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 2;
+		}
+
+		& dt {
+			display: inline;
+			margin-inline-end: var(--cms-space-1);
+			color: var(--cms-color-text-subtle);
+		}
+
+		& dd {
+			display: inline;
+			margin: 0;
+		}
+	}
+
+	& .cms-image-card-add {
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		text-decoration: underline;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--cms-color-text);
+		}
+	}
+
+	& .cms-image-card-controls {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--cms-space-2);
+		margin-top: var(--cms-space-3);
+
+		& svg {
+			width: 0.875rem;
+			height: 0.875rem;
+		}
+	}
+
+	& .cms-button.cms-image-card-discard {
+		--button-hover-text: var(--cms-color-danger-text);
+	}
+
+	@media (width < 40rem) {
+		--thumb-height: 10rem;
+		--thumb-max-width: 100%;
+		flex-direction: column;
+
+		& .cms-image-card-thumb {
+			align-self: flex-start;
+		}
+	}
+}
+
+/* An image or video as a block shows it: at block width, with a bar that
+   appears while the figure is hovered or holds focus. */
+.cms-media-figure {
+	& figure {
+		margin: 0;
+	}
+
+	& .cms-media-figure-frame {
+		position: relative;
+		/* Clipped without overflow, which would also confine the replace
+		   menu's placement to the frame. */
+		clip-path: inset(0 round var(--cms-radius-sm));
+	}
+
+	/* Unclickable while hidden, so the media's own ground keeps its click. */
+	& .cms-media-figure-overlay {
+		position: absolute;
+		inset-inline: 0;
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-0-5);
+		padding: var(--cms-space-1-5) var(--cms-space-2);
+		background: color-mix(in srgb, var(--cms-color-surface) 88%, transparent);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 120ms ease;
+	}
+
+	& figure:hover .cms-media-figure-overlay,
+	& figure:focus-within .cms-media-figure-overlay,
+	& figure:has(:popover-open) .cms-media-figure-overlay {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	/* Opening the menu must not leave its anchor at zero opacity during the fade. */
+	& figure:has(:popover-open) .cms-media-figure-overlay {
+		transition: none;
+	}
+
+	& .cms-media-figure-filename {
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow: hidden;
+		font-size: var(--cms-font-size-xs);
+		color: var(--cms-color-text-muted);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& .cms-media-figure-button {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-1);
+		flex-shrink: 0;
+		padding: var(--cms-space-0-5) var(--cms-space-1-5);
+		border: 0;
+		border-radius: var(--cms-radius-md);
+		background: transparent;
+		font-size: var(--cms-font-size-xs);
+		font-weight: 500;
+		color: var(--cms-color-text-muted);
+		cursor: pointer;
+
+		&:hover,
+		&[aria-expanded='true'] {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+	}
+
+	& .cms-media-figure-settings {
+		margin-top: var(--cms-space-3);
+	}
+
+	/* At block width, but no taller than 20rem: a portrait picture
+	   letterboxes inside the block instead of taking the screen. */
+	&.cms-media-figure-image {
+		& img {
+			display: block;
+			width: 100%;
+			height: auto;
+			max-height: 20rem;
+			object-fit: contain;
+		}
+
+		& .cms-media-figure-plate {
+			display: grid;
+			place-items: center;
+			aspect-ratio: 4 / 3;
+			background: var(--cms-color-surface);
+			font-size: var(--cms-font-size-xs);
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--cms-color-text-subtle);
+		}
+
+		/* Along the image's bottom edge. */
+		& .cms-media-figure-overlay {
+			inset-block-end: 0;
+		}
+
+		& figcaption {
+			margin-top: var(--cms-space-2);
+			font-size: var(--cms-font-size-sm);
+			line-height: 1.5;
+			color: var(--cms-color-text-muted);
+		}
+	}
+
+	&.cms-media-figure-video {
+		& .cms-media-figure-frame {
+			background: var(--cms-color-neutral-900);
+		}
+
+		/* The same line as the image block; a portrait clip letterboxes. */
+		& video {
+			display: block;
+			width: 100%;
+			max-height: 20rem;
+		}
+
+		/* Along the top edge: the player's own controls own the bottom. */
+		& .cms-media-figure-overlay {
+			inset-block-start: 0;
+		}
+	}
+}
+
+/* The trigger a filled single media field replaces its file through, and
+   its menu. The menu is a popover beside the trigger, not inside it.
+   It follows the image card, whose controls size every icon at equal
+   specificity. */
+.cms-media-replace {
+	flex-shrink: 0;
+
+	/* Loaded after the image card, whose controls size their icons alike. */
+	& > svg:last-child {
+		width: 0.625rem;
+		height: 0.625rem;
+	}
+}
+
+.cms-media-replace-menu {
+	--width: max-content;
+
+	& button {
+		align-items: flex-start;
+		padding-block: var(--cms-space-2);
+	}
+
+	& svg {
+		flex-shrink: 0;
+		width: 1rem;
+		height: 1rem;
+		margin-top: 0.125rem;
+		color: var(--cms-color-text-muted);
+	}
+
+	& .cms-media-replace-choice {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-0-5);
+	}
+
+	& small {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+	}
+}
+
+/* The images of a field that takes several: tiles to open, drag and remove. */
+.cms-gallery {
+	--fold-height: 2rem;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+
+	& .cms-gallery-viewport {
+		padding: var(--cms-space-3-5);
+
+		&.is-clipped {
+			overflow: hidden;
+		}
+	}
+
+	& .cms-gallery-fold {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--cms-space-1-5);
+		height: var(--fold-height);
+		padding: 0;
+		border: 0;
+		border-top: 1px solid var(--cms-color-border);
+		background: none;
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-xs);
+		cursor: pointer;
+
+		&[hidden] {
+			display: none;
+		}
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: calc(-1 * var(--cms-focus-offset));
+		}
+
+		& svg {
+			width: 0.75rem;
+			height: 0.75rem;
+		}
+	}
+
+	& .cms-gallery-tiles {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+		gap: var(--cms-space-3);
+	}
+
+	& .cms-gallery-tile {
+		position: relative;
+		aspect-ratio: 1;
+		padding: var(--cms-space-1);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface);
+
+		&:hover .cms-gallery-tile-tools,
+		&:focus-within .cms-gallery-tile-tools {
+			opacity: 1;
+		}
+	}
+
+	& .cms-gallery-picture {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
+		container-type: size;
+		cursor: pointer;
+
+		& img {
+			max-width: 100%;
+			max-height: 100%;
+			border-radius: var(--cms-radius);
+		}
+
+		& .cms-crop-window {
+			width: min(100cqw, 100cqh * var(--crop-ratio));
+			border-radius: var(--cms-radius);
+		}
+	}
+
+	& .cms-gallery-plate {
+		font-size: 0.625rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--cms-color-text-subtle);
+	}
+
+	& .cms-gallery-tile-missing {
+		position: absolute;
+		top: var(--cms-space-1-5);
+		left: var(--cms-space-1-5);
+		display: flex;
+		padding: var(--cms-space-1);
+		border-radius: var(--cms-radius-sm);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-warning-text);
+
+		& svg {
+			width: 0.875rem;
+			height: 0.875rem;
+		}
+	}
+
+	& .cms-gallery-tile-tools {
+		position: absolute;
+		top: var(--cms-space-1-5);
+		right: var(--cms-space-1-5);
+		display: flex;
+		gap: var(--cms-space-1);
+		opacity: 0;
+		transition: opacity 0.12s ease;
+
+		@media (hover: none) {
+			opacity: 1;
+		}
+
+		& button {
+			display: grid;
+			place-items: center;
+			width: 1.5rem;
+			height: 1.5rem;
+			padding: 0;
+			border: 1px solid var(--cms-color-border);
+			border-radius: var(--cms-radius);
+			background: var(--cms-color-surface);
+			box-shadow: var(--cms-shadow-sm);
+			color: var(--cms-color-text-muted);
+			cursor: pointer;
+
+			&:hover {
+				color: var(--cms-color-text);
+				background: var(--cms-color-hover);
+			}
+
+			&:focus-visible {
+				outline: var(--cms-focus-outline);
+				outline-offset: var(--cms-focus-offset);
+			}
+
+			&.cms-gallery-discard:hover {
+				color: var(--cms-color-danger);
+			}
+		}
+
+		& svg {
+			width: 0.75rem;
+			height: 0.75rem;
+		}
+	}
+
+	/*
+	 * The block presentation: the tiles at block width and nothing else at
+	 * rest. Add and library sit on a bar along the bottom edge that appears
+	 * on hover; the tiles preview the ratio and crop chosen in the settings
+	 * dialog.
+	 */
+	&.is-block {
+		position: relative;
+
+		& .cms-gallery-viewport {
+			padding: 0;
+		}
+
+		&:has(> .cms-gallery-fold:not([hidden])) .cms-gallery-bar {
+			inset-block-end: var(--fold-height);
+		}
+
+		& .cms-gallery-tiles.has-ratio .cms-gallery-tile {
+			aspect-ratio: var(--ratio);
+		}
+
+		& .cms-gallery-tiles.has-ratio .cms-gallery-picture img {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+		}
+
+		& .cms-gallery-tiles.is-cropped .cms-gallery-picture img {
+			object-fit: cover;
+		}
+
+		& .cms-gallery-bar {
+			position: absolute;
+			inset-inline: 0;
+			inset-block-end: 0;
+			display: flex;
+			align-items: center;
+			gap: var(--cms-space-0-5);
+			padding: var(--cms-space-1-5) var(--cms-space-2);
+			border-radius: 0 0 var(--cms-radius-sm) var(--cms-radius-sm);
+			background: color-mix(in srgb, var(--cms-color-surface) 88%, transparent);
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 120ms ease;
+		}
+
+		&:hover .cms-gallery-bar,
+		&:focus-within .cms-gallery-bar {
+			opacity: 1;
+			pointer-events: auto;
+		}
+
+		& .cms-gallery-status {
+			flex: 1 1 auto;
+			font-size: var(--cms-font-size-xs);
+			color: var(--cms-color-text-muted);
+			font-variant-numeric: tabular-nums;
+		}
+
+		& .cms-gallery-button {
+			flex-shrink: 0;
+			padding: var(--cms-space-0-5) var(--cms-space-1-5);
+			border: 0;
+			border-radius: var(--cms-radius-md);
+			background: transparent;
+			font-size: var(--cms-font-size-xs);
+			font-weight: 500;
+			color: var(--cms-color-text-muted);
+			cursor: pointer;
+
+			&:hover {
+				background: var(--cms-color-hover);
+				color: var(--cms-color-text);
+			}
+		}
+	}
+}
+
+/* A block gallery's ratio and crop, in the block's settings dialog. */
+.cms-gallery-settings {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-3);
+
+	& .cms-gallery-settings-option {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-1);
+		color: var(--cms-color-text-label);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+	}
+
+	& .cms-gallery-settings-check {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		font-size: var(--cms-font-size-sm);
+	}
+}
+
+/* What another language holds, read-only above an empty field. */
+.cms-media-fallback {
+	display: grid;
+	gap: var(--cms-space-2);
+	margin-bottom: var(--cms-space-3);
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-md);
+	padding: var(--cms-space-3);
+	color: var(--cms-color-text-subtle);
+
+	& .cms-media-fallback-label {
+		font-size: var(--cms-font-size-xs);
+		font-style: italic;
+	}
+
+	& .cms-media-fallback-images {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+		gap: var(--cms-space-2);
+	}
+
+	& .cms-media-fallback-image {
+		display: grid;
+		place-items: center;
+		aspect-ratio: 4 / 3;
+		overflow: hidden;
+		border-radius: var(--cms-radius-sm);
+		background: var(--cms-color-surface);
+		font-size: var(--cms-font-size-xs);
+		text-transform: uppercase;
+
+		& img {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+		}
+	}
+
+	& video {
+		width: 100%;
+		max-height: 24rem;
+		background: var(--cms-color-neutral-900);
+	}
+}
+
+/* The per-use texts of an item: alt text and caption, or a title. A link
+   row joins them in an image's details and takes their entry's look. */
+.cms-media-meta {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+	gap: var(--cms-space-3);
+
+	& :is(.cms-media-meta-entry, .cms-link-row-entry) {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-1-5);
+		min-width: 0;
+	}
+
+	& :is(.cms-media-meta-caption, .cms-link-row-caption) {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0 var(--cms-space-1-5);
+		color: var(--cms-color-text-label);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 600;
+		line-height: 1.25rem;
+	}
+
+	& :is(.cms-media-meta-remark, .cms-link-row-remark) {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 400;
+	}
+
+	& :is(.cms-media-meta-requirement, .cms-link-row-requirement) {
+		color: var(--cms-color-text-requirement);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 400;
+	}
+
+	/* One line, level with the input beside it, growing with its text
+	   where the browser can size a field to its content. */
+	& .cms-textarea {
+		min-height: var(--cms-control-height);
+		resize: vertical;
+
+		@supports (field-sizing: content) {
+			field-sizing: content;
+			resize: none;
+		}
+	}
+
+	& .cms-media-meta-fallback {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-style: italic;
+		line-height: 1.45;
+	}
+}
+
+/* A video's poster image in its details dialog. */
+.cms-poster-row {
+	& .cms-poster-row-target {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: var(--cms-space-2);
+	}
+
+	& img {
+		width: 4rem;
+		height: 2.5rem;
+		border-radius: var(--cms-radius-sm);
+		object-fit: cover;
+	}
+
+	& .cms-poster-row-name {
+		min-width: 0;
+		overflow-wrap: anywhere;
+	}
+}
+
+/* The details dialog of a file or video: its per-use texts, a video's poster. */
+.cms-media-details {
+	& .cms-media-details-fields {
+		margin-bottom: var(--cms-space-8);
+	}
+
+	& .cms-media-details-locales {
+		margin-bottom: var(--cms-space-4);
+	}
+}
+
+/* A crop's part of an image, whatever box it is shown in. */
+.cms-crop-window {
+	position: relative;
+	width: 100%;
+	aspect-ratio: var(--crop-ratio);
+}
+
+/* A caption's field: as an input looks, with its few tools inside. */
+.cms-inline-editor {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	gap: var(--cms-space-2);
+	min-width: 0;
+	padding-inline-end: var(--cms-space-1);
+	border: 1px solid var(--cms-color-border-control);
+	border-radius: var(--cms-control-radius);
+	background-color: var(--cms-color-surface);
+	box-shadow: var(--cms-shadow-raised);
+	font-size: var(--cms-font-size-sm);
+	line-height: 1.55;
+	transition:
+		border-color 0.12s ease,
+		box-shadow 0.12s ease;
+
+	&.is-focused {
+		border-color: var(--cms-color-focus);
+		box-shadow: var(--cms-focus-ring);
+	}
+
+	& .ProseMirror {
+		flex: 1 1 auto;
+		min-width: 0;
+		min-height: var(--cms-control-height);
+		padding: calc((var(--cms-control-height) - 1lh - 2px) / 2) var(--cms-space-2-5);
+		outline: none;
+		color: var(--cms-color-text);
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+
+		& p {
+			margin: 0;
+		}
+	}
+
+	& .cms-inline-editor-placeholder {
+		position: absolute;
+		inset-inline-start: var(--cms-space-2-5);
+		inset-block-start: calc((var(--cms-control-height) - 1lh - 2px) / 2);
+		color: var(--cms-color-text-faint);
+		pointer-events: none;
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	& .cms-inline-editor-tools {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		gap: 1px;
+		height: calc(var(--cms-control-height) - 2px);
+
+		& button {
+			display: grid;
+			place-items: center;
+			width: 1.5rem;
+			height: 1.5rem;
+			padding: 0;
+			border: 0;
+			border-radius: var(--cms-radius);
+			background: none;
+			color: var(--cms-color-text-muted);
+			cursor: pointer;
+
+			&:hover {
+				background: var(--cms-color-hover);
+				color: var(--cms-color-text);
+			}
+
+			&[aria-pressed='true'] {
+				background: var(--cms-color-selected, var(--cms-color-hover));
+				color: var(--cms-color-text);
+			}
+
+			&:focus-visible {
+				outline: var(--cms-focus-outline);
+			}
+		}
+
+		& svg {
+			width: 0.875rem;
+			height: 0.875rem;
+		}
+	}
+}
+
+/* The details dialog of an image, on its modal host: a header of two lines
+   with a stepper through a gallery, the picture to set the focal point and
+   crop on beside its per-use texts, and the replace menu in the footer. */
+.cms-modal:has(> .cms-image-details) > .cms-modal-close {
+	top: 1.375rem;
+}
+
+.cms-image-details {
+	& .cms-image-details-head {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-3);
+	}
+
+	& .cms-image-details-heading {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	& .cms-image-details-filename {
+		margin: 0;
+		overflow: hidden;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-sm);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& .cms-image-details-stepper {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+	}
+
+	& .cms-image-details-position {
+		padding-right: var(--cms-space-2);
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-variant-numeric: tabular-nums;
+	}
+
+	& .cms-image-details-step {
+		display: grid;
+		place-items: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		padding: 0;
+		border: 1px solid var(--cms-color-border-strong);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-text-muted);
+		cursor: pointer;
+
+		& svg {
+			width: 0.75rem;
+			height: 0.75rem;
+		}
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+
+		&:focus-visible {
+			position: relative;
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&.cms-image-details-prev {
+			border-right: 0;
+			border-radius: var(--cms-radius-md) 0 0 var(--cms-radius-md);
+		}
+
+		&.cms-image-details-next {
+			border-radius: 0 var(--cms-radius-md) var(--cms-radius-md) 0;
+		}
+	}
+
+	& .cms-image-details-body {
+		display: grid;
+		grid-template-columns: minmax(0, 1.6fr) minmax(20rem, 1fr);
+		grid-template-rows: minmax(0, 1fr);
+		padding: 0;
+		overflow: hidden;
+
+		@media (width < 60rem) {
+			grid-template-columns: minmax(0, 1fr);
+			grid-template-rows: none;
+			grid-auto-rows: max-content;
+			overflow: auto;
+		}
+	}
+
+	& .cms-image-details-stage {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-4);
+		min-width: 0;
+		min-height: 0;
+		padding: var(--cms-space-6);
+		border-inline-end: 1px solid var(--cms-color-border);
+
+		@media (width < 60rem) {
+			border-inline-end: 0;
+			border-block-end: 1px solid var(--cms-color-border);
+		}
+	}
+
+	/* The checkerboard shows a transparent image's edges. */
+	& .cms-image-details-preview {
+		display: grid;
+		grid-template-rows: minmax(0, 1fr);
+		place-items: center;
+		flex: 1 1 auto;
+		min-height: 0;
+		container-type: size;
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-lg);
+		background: repeating-conic-gradient(
+				var(--cms-color-checker) 0 25%,
+				var(--cms-color-surface) 0 50%
+			)
+			0 0 / 1.5rem 1.5rem;
+		overflow: hidden;
+
+		@media (width < 60rem) {
+			flex: 0 0 auto;
+			height: 45dvh;
+		}
+	}
+
+	/* Exactly the image's box, so a point on it is a point in the image. */
+	& .cms-image-details-frame {
+		position: relative;
+		width: min(100cqw, 100cqh * var(--ratio));
+		aspect-ratio: var(--ratio);
+		touch-action: none;
+
+		& img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			user-select: none;
+		}
+	}
+
+	&:has(.cms-image-details-marker[role='slider']) .cms-image-details-frame {
+		cursor: crosshair;
+	}
+
+	& .cms-image-details-marker {
+		position: absolute;
+		width: 1.5rem;
+		height: 1.5rem;
+		border: 2px solid #fff;
+		border-radius: 50%;
+		background: rgb(0 0 0 / 70%);
+		box-shadow:
+			0 0 0 1px rgb(0 0 0 / 60%),
+			var(--cms-shadow-sm);
+		transform: translate(-50%, -50%);
+		cursor: grab;
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&.is-inherited {
+			background: transparent;
+		}
+
+		/* Only a keyboard user needs it before a point is set. */
+		&.is-unset:not(:focus-visible) {
+			opacity: 0;
+		}
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	& .cms-image-details-stage-tools {
+		display: flex;
+		flex: 0 0 auto;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--cms-space-2) var(--cms-space-4);
+		min-height: var(--cms-control-height);
+
+		& .cms-content-locales {
+			flex: 0 1 18rem;
+		}
+	}
+
+	& .cms-image-details-ratio {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+
+		&[hidden] {
+			display: none;
+		}
+
+		& select {
+			width: auto;
+		}
+	}
+
+	/* Clipped to the image, which the handles are not. */
+	& .cms-image-details-shade {
+		position: absolute;
+		inset: 0;
+		overflow: hidden;
+		pointer-events: none;
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	& .cms-image-details-hole {
+		position: absolute;
+		box-shadow: 0 0 0 100vmax rgb(0 0 0 / 55%);
+	}
+
+	& .cms-image-details-crop-box {
+		position: absolute;
+		outline: 1px solid #fff;
+		box-shadow: 0 0 0 1px rgb(0 0 0 / 50%);
+		cursor: move;
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+		}
+
+		/* Nothing to move yet: a drag draws. */
+		&.is-whole {
+			cursor: crosshair;
+		}
+	}
+
+	& .cms-image-details-handle {
+		position: absolute;
+		width: 0.875rem;
+		height: 0.875rem;
+		border: 2px solid #fff;
+		border-radius: 2px;
+		background: rgb(0 0 0 / 70%);
+		transform: translate(-50%, -50%);
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&[data-handle='nw'] {
+			left: 0;
+			top: 0;
+			cursor: nwse-resize;
+		}
+
+		&[data-handle='n'] {
+			left: 50%;
+			top: 0;
+			cursor: ns-resize;
+		}
+
+		&[data-handle='ne'] {
+			left: 100%;
+			top: 0;
+			cursor: nesw-resize;
+		}
+
+		&[data-handle='e'] {
+			left: 100%;
+			top: 50%;
+			cursor: ew-resize;
+		}
+
+		&[data-handle='se'] {
+			left: 100%;
+			top: 100%;
+			cursor: nwse-resize;
+		}
+
+		&[data-handle='s'] {
+			left: 50%;
+			top: 100%;
+			cursor: ns-resize;
+		}
+
+		&[data-handle='sw'] {
+			left: 0;
+			top: 100%;
+			cursor: nesw-resize;
+		}
+
+		&[data-handle='w'] {
+			left: 0;
+			top: 50%;
+			cursor: ew-resize;
+		}
+	}
+
+	& .cms-image-details-focus-bar {
+		display: flex;
+		flex: 0 0 auto;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--cms-space-4);
+	}
+
+	& .cms-image-details-focus-status {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: var(--cms-space-1) var(--cms-space-3);
+		min-width: 0;
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+		font-variant-numeric: tabular-nums;
+	}
+
+	& .cms-image-details-reset {
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
+		text-decoration: underline;
+		cursor: pointer;
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	& .cms-image-details-shots {
+		display: flex;
+		flex-shrink: 0;
+		align-items: flex-end;
+		gap: var(--cms-space-3);
+	}
+
+	& .cms-image-details-shot {
+		margin: 0;
+
+		& figcaption {
+			margin-top: var(--cms-space-1);
+			color: var(--cms-color-text-subtle);
+			font-size: var(--cms-font-size-xs);
+			font-variant-numeric: tabular-nums;
+			text-align: center;
+		}
+	}
+
+	& .cms-image-details-shot-box {
+		position: relative;
+		height: 4rem;
+		border-radius: var(--cms-radius);
+		background: var(--cms-color-surface-sunken);
+	}
+
+	& .cms-image-details-plate {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	& .cms-image-details-facts {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+		gap: var(--cms-space-2) var(--cms-space-4);
+		margin: 0;
+		padding-top: var(--cms-space-5);
+		border-top: 1px solid var(--cms-color-border);
+		font-size: var(--cms-font-size-sm);
+
+		& > div {
+			display: flex;
+			align-items: baseline;
+			gap: var(--cms-space-2);
+			min-width: 0;
+		}
+
+		& > .cms-image-details-wide {
+			grid-column: 1 / -1;
+			align-items: center;
+		}
+
+		& dt {
+			flex-shrink: 0;
+			color: var(--cms-color-text-subtle);
+		}
+
+		& dd {
+			flex: 1 1 auto;
+			min-width: 0;
+			margin: 0;
+			font-variant-numeric: tabular-nums;
+		}
+	}
+
+	& .cms-image-details-address {
+		display: flex;
+		gap: var(--cms-space-1);
+
+		& input {
+			flex: 1 1 auto;
+			min-width: 0;
+			min-height: var(--cms-control-height-sm);
+			height: var(--cms-control-height-sm);
+			font-family: monospace;
+			font-size: var(--cms-font-size-xs);
+		}
+	}
+
+	& .cms-image-details-copy {
+		display: grid;
+		flex-shrink: 0;
+		place-items: center;
+		width: var(--cms-control-height-sm);
+		height: var(--cms-control-height-sm);
+		padding: 0;
+		border: 1px solid var(--cms-color-border-strong);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-text-muted);
+		cursor: pointer;
+
+		& svg {
+			width: 0.875rem;
+			height: 0.875rem;
+		}
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+	}
+
+	& .cms-image-details-fields {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-5);
+		min-width: 0;
+		padding: var(--cms-space-6);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+
+		@media (width < 60rem) {
+			overflow-y: visible;
+		}
+	}
+
+	& .cms-media-meta {
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--cms-space-5);
+	}
+
+	& .cms-media-meta :is(.cms-textarea, .ProseMirror) {
+		min-height: 5.5rem;
+	}
+
+	& .cms-modal-footer > .cms-media-replace {
+		margin-inline-end: auto;
+	}
+}

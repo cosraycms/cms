@@ -1,0 +1,954 @@
+.cms-input,
+.cms-textarea,
+.cms-select {
+	width: 100%;
+	min-width: 0;
+	padding: calc((var(--cms-control-height) - 1lh - 2px) / 2) var(--cms-space-2-5);
+	border: 1px solid var(--cms-color-border-control);
+	border-radius: var(--cms-control-radius);
+	background-color: var(--cms-color-surface);
+	box-shadow: var(--cms-shadow-raised);
+	color: var(--cms-color-text);
+	font-family: inherit;
+	font-size: var(--cms-font-size-sm);
+	line-height: 1.5rem;
+	transition:
+		border-color 0.12s ease,
+		box-shadow 0.12s ease;
+
+	&::placeholder {
+		color: var(--cms-color-text-faint);
+	}
+
+	/* Transparent, not none: forced colours drop the ring and paint the outline. */
+	&:focus {
+		border-color: var(--cms-color-focus);
+		outline: 1px solid transparent;
+		box-shadow: var(--cms-focus-ring);
+	}
+
+	/*
+	 * Three states, three fills: an editable control is a white box, a
+	 * read-only one a well with its text at full contrast — the value is
+	 * there to be read and copied — and a disabled one an outline with
+	 * nothing in it. A select, radio or checkbox cannot be read-only in
+	 * HTML, so the field wrapper says so for them.
+	 */
+	&[readonly],
+	.cms-field[data-readonly='true'] &[disabled] {
+		border-color: var(--cms-color-border);
+		background-color: var(--cms-color-surface-sunken);
+		box-shadow: var(--cms-shadow-recessed);
+		color: var(--cms-color-text);
+
+		&:focus {
+			border-color: var(--cms-color-focus);
+			box-shadow: var(--cms-focus-ring);
+		}
+	}
+
+	&[disabled] {
+		border-color: var(--cms-color-border-control);
+		background-color: transparent;
+		box-shadow: none;
+		color: var(--cms-color-text-subtle);
+		cursor: not-allowed;
+	}
+
+	&[aria-invalid='true'] {
+		border-color: var(--cms-color-danger);
+		box-shadow: var(--cms-error-ring);
+	}
+}
+
+/* Native date/time editors add padding inside the input's own padding. */
+.cms-input::-webkit-datetime-edit-fields-wrapper {
+	padding: 0;
+}
+
+.cms-textarea {
+	resize: vertical;
+	line-height: 1.55;
+
+	/* Inverted on purpose in both themes, like the code editor. */
+	&.cms-textarea-code {
+		background-color: var(--cms-code-bg);
+		color: var(--cms-code-text);
+		font-family:
+			'JetBrains Mono', 'Menlo', 'DejaVu Sans Mono', 'Liberation Mono', 'Consolas', 'Ubuntu Mono',
+			'Courier New', 'andale mono', 'lucida console', monospace;
+	}
+}
+
+/* The native look ignores line-height, which leaves a select shorter than an
+   input, and pins its arrow to the edge. */
+.cms-select {
+	appearance: none;
+	padding-inline-end: calc(var(--cms-space-2-5) * 2 + 1rem);
+	background-image: var(--cms-select-chevron);
+	background-position: right var(--cms-space-2-5) center;
+	background-repeat: no-repeat;
+	background-size: 1rem;
+}
+
+/* Element controls follow the same three fills: a read-only rich text
+   frame is a well, not a white box. */
+.cms-field[data-readonly='true'] .cms-richtext {
+	border-color: var(--cms-color-border);
+	background: var(--cms-color-surface-sunken);
+	box-shadow: var(--cms-shadow-recessed);
+}
+
+.cms-input[type='number'],
+.cms-input[type='date'],
+.cms-input[type='time'],
+.cms-input[type='datetime-local'] {
+	width: auto;
+	min-width: 10rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.cms-field[data-invalid='true'] {
+	& .cms-input,
+	& .cms-select,
+	& .cms-textarea {
+		border-color: var(--cms-color-danger);
+	}
+}
+
+.cms-checkbox,
+.cms-radio {
+	width: 1rem;
+	height: 1rem;
+	flex-shrink: 0;
+	accent-color: var(--cms-color-accent);
+	cursor: pointer;
+
+	&:focus-visible {
+		outline: var(--cms-focus-outline);
+		outline-offset: var(--cms-focus-offset);
+	}
+}
+
+/* Paired fill/text tokens keep the track and thumb in sync across themes. */
+.cms-switch {
+	appearance: none;
+	width: 2.375rem;
+	height: 1.375rem;
+	flex-shrink: 0;
+	margin: 0;
+	padding: 0.1875rem;
+	border: 0;
+	border-radius: var(--cms-radius-full);
+	background: var(--cms-switch-bg);
+	box-shadow: var(--cms-shadow-recessed);
+	cursor: pointer;
+	transition: background-color 120ms ease;
+
+	&::before {
+		content: '';
+		display: block;
+		width: 1rem;
+		height: 1rem;
+		border: 1px solid var(--cms-button-secondary-border);
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-surface-raised);
+		box-shadow: var(--cms-shadow-sm);
+		transition: translate 120ms ease;
+	}
+
+	&:checked {
+		background: var(--cms-color-accent);
+
+		&::before {
+			border-color: transparent;
+			background: var(--cms-color-text-on-accent);
+			translate: 1rem 0;
+		}
+	}
+
+	&:focus-visible {
+		outline: var(--cms-focus-outline);
+		outline-offset: var(--cms-focus-offset);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+
+	/* Forced colours flatten both fills, so on and off would look alike. */
+	@media (forced-colors: active) {
+		forced-color-adjust: none;
+		background: Canvas;
+		box-shadow: inset 0 0 0 1px ButtonText;
+
+		&::before {
+			border-color: transparent;
+			background: ButtonText;
+			box-shadow: none;
+		}
+
+		&:checked {
+			background: Highlight;
+			box-shadow: none;
+
+			&::before {
+				background: HighlightText;
+			}
+		}
+
+		&:disabled {
+			box-shadow: inset 0 0 0 1px GrayText;
+
+			&::before {
+				background: GrayText;
+			}
+
+			&:checked {
+				background: GrayText;
+
+				&::before {
+					background: Canvas;
+				}
+			}
+		}
+
+		&:focus-visible {
+			outline-color: Highlight;
+		}
+	}
+}
+
+/* Locked, not inactive: a read-only box control keeps its full weight. */
+.cms-field[data-readonly='true'] :is(.cms-checkbox, .cms-radio, .cms-switch):disabled {
+	opacity: 1;
+	cursor: default;
+}
+
+.cms-checkbox-label {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--cms-space-2);
+	color: var(--cms-color-text-label);
+	font-size: var(--cms-font-size-sm);
+}
+
+.cms-radio-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-2);
+}
+
+.cms-radio-option {
+	display: flex;
+	align-items: center;
+	gap: var(--cms-space-2);
+	color: var(--cms-color-text-label);
+	font-size: var(--cms-font-size-sm);
+}
+
+.cms-sub-label {
+	display: block;
+	margin-bottom: var(--cms-space-1);
+	color: var(--cms-color-text-label);
+	font-size: var(--cms-font-size-sm);
+	font-weight: 500;
+}
+
+.cms-control-unknown {
+	padding: var(--cms-space-3);
+	border: 1px dashed var(--cms-color-danger-border);
+	border-radius: var(--cms-radius-md);
+	color: var(--cms-color-danger-text);
+	font-size: var(--cms-font-size-sm);
+}
+
+.cms-toggle {
+	& .cms-toggle-label {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-height: var(--cms-control-height);
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
+		cursor: pointer;
+
+		&:has(:disabled) {
+			cursor: default;
+		}
+	}
+
+	& .cms-switch {
+		width: 2.75rem;
+		height: 1.625rem;
+
+		&::before {
+			width: 1.25rem;
+			height: 1.25rem;
+		}
+
+		&:checked::before {
+			translate: 1.125rem 0;
+		}
+	}
+
+	& .cms-toggle-status {
+		display: grid;
+
+		& > span {
+			grid-area: 1 / 1;
+		}
+	}
+
+	& .cms-toggle-on,
+	& :checked ~ .cms-toggle-status .cms-toggle-off {
+		visibility: hidden;
+	}
+
+	& :checked ~ .cms-toggle-status .cms-toggle-on {
+		visibility: visible;
+	}
+}
+
+.cms-tristate {
+	display: inline-flex;
+	align-self: flex-start;
+	max-width: 100%;
+	min-height: var(--cms-control-height);
+	padding: var(--cms-space-1);
+	gap: var(--cms-space-1);
+	border: 1px solid var(--cms-color-border-control);
+	border-radius: var(--cms-control-radius);
+	background: var(--cms-color-surface-sunken);
+	box-shadow: var(--cms-shadow-recessed);
+	color: var(--cms-color-text);
+	font-size: var(--cms-font-size-sm);
+
+	& .cms-tristate-option {
+		position: relative;
+		display: flex;
+		min-width: 0;
+
+		& > span {
+			display: flex;
+			align-items: center;
+			padding: 0 var(--cms-space-2);
+			border: 1px solid transparent;
+			border-radius: var(--cms-radius);
+			overflow-wrap: anywhere;
+			cursor: pointer;
+		}
+	}
+
+	& :checked + span {
+		border-color: var(--cms-color-border-control);
+		background: var(--cms-color-surface);
+		box-shadow: var(--cms-shadow-raised);
+	}
+
+	& :focus-visible + span {
+		outline: var(--cms-focus-outline);
+		outline-offset: var(--cms-focus-offset);
+	}
+
+	& :disabled + span {
+		color: var(--cms-color-text-subtle);
+		cursor: default;
+	}
+
+	.cms-field[data-readonly='true'] & :checked + span {
+		color: var(--cms-color-text);
+	}
+
+	@media (forced-colors: active) {
+		& :checked + span {
+			forced-color-adjust: none;
+			border-color: Highlight;
+			background: Highlight;
+			color: HighlightText;
+			box-shadow: none;
+		}
+
+		& :focus-visible + span {
+			outline-color: Highlight;
+		}
+
+		.cms-field[data-readonly='true'] & :checked + span {
+			color: HighlightText;
+		}
+	}
+}
+
+/* The native picker lies invisibly over the swatch, so clicking the swatch
+   opens it and the swatch can show "no colour", which the picker cannot. */
+.cms-color {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--cms-space-2);
+
+	& .cms-color-swatch {
+		position: relative;
+		flex: none;
+		width: var(--cms-control-height);
+		height: var(--cms-control-height);
+		border: 1px solid var(--cms-color-border-control);
+		border-radius: var(--cms-control-radius);
+		outline: 1px solid transparent;
+		background-color: var(--color);
+		box-shadow: var(--cms-shadow-raised);
+
+		&[data-empty] {
+			background-color: var(--cms-color-surface);
+			background-image: linear-gradient(
+				to top right,
+				transparent calc(50% - 0.75px),
+				var(--cms-color-border-control) calc(50% - 0.75px) calc(50% + 0.75px),
+				transparent calc(50% + 0.75px)
+			);
+		}
+
+		&:has(:focus-visible) {
+			border-color: var(--cms-color-focus);
+			box-shadow: var(--cms-focus-ring);
+		}
+	}
+
+	& input[type='color'] {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		padding: 0;
+		border: 0;
+		opacity: 0;
+		cursor: pointer;
+
+		&:disabled {
+			cursor: default;
+		}
+	}
+
+	& .cms-input {
+		width: 8rem;
+		font-variant-numeric: tabular-nums;
+	}
+
+	& .cms-color-palette {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--cms-space-1);
+
+		& .cms-color-swatch {
+			width: var(--cms-control-height-sm);
+			height: var(--cms-control-height-sm);
+			padding: 0;
+			cursor: pointer;
+
+			&[aria-pressed='true'] {
+				outline: 2px solid var(--cms-color-text);
+				outline-offset: 2px;
+			}
+
+			&:focus-visible {
+				border-color: var(--cms-color-focus);
+				box-shadow: var(--cms-focus-ring);
+			}
+
+			&:disabled {
+				cursor: default;
+			}
+		}
+	}
+}
+
+.cms-youtube {
+	display: grid;
+	gap: var(--cms-space-2);
+
+	& .cms-youtube-player {
+		display: block;
+		width: 100%;
+		max-width: calc(30rem * var(--ratio, 16 / 9));
+		aspect-ratio: var(--ratio, 16 / 9);
+		border: 0;
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface);
+	}
+
+	& .cms-youtube-entry {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--cms-space-2);
+
+		& .cms-input {
+			flex: 1 1 12rem;
+			min-width: 0;
+		}
+	}
+
+	& .cms-youtube-replace {
+		justify-self: end;
+		border-color: transparent;
+		background: none;
+		box-shadow: none;
+		color: var(--cms-color-text-muted);
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+	}
+
+	& [hidden] {
+		display: none;
+	}
+
+	& .cms-field-error {
+		margin: 0;
+	}
+}
+
+.cms-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cms-space-3);
+	container-type: inline-size;
+
+	& .cms-group-field {
+		flex: 1 1 12rem;
+		min-width: 0;
+
+		&[data-width] {
+			flex: 1 1 calc(var(--group-width) - var(--cms-space-3));
+
+			@container (max-width: 26rem) {
+				flex-basis: 100%;
+			}
+		}
+	}
+}
+
+.cms-repeater {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-2);
+
+	& .cms-repeater-item {
+		display: flex;
+		align-items: flex-end;
+		gap: var(--cms-space-2);
+	}
+
+	& .cms-repeater-item-control {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+}
+
+/* The node reference picker: a combobox over a list of picked rows, or a
+   single box that shows its node when the field takes one. */
+.cms-reference {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+
+	& .cms-reference-search,
+	& .cms-reference-box {
+		position: relative;
+	}
+
+	& .cms-reference-single:not([readonly]) {
+		padding-inline-end: calc(var(--cms-space-2-5) + 3.5rem);
+	}
+
+	& .cms-reference-single.has-selection::placeholder {
+		color: var(--cms-color-text);
+	}
+
+	& .cms-reference-tools {
+		position: absolute;
+		inset-block: 1px;
+		inset-inline-end: var(--cms-space-2-5);
+		display: flex;
+		align-items: center;
+
+		& button {
+			display: grid;
+			place-items: center;
+			width: 1.75rem;
+			height: 1.75rem;
+			padding: 0;
+			border: 0;
+			background: transparent;
+			color: var(--cms-color-text-muted);
+			cursor: pointer;
+
+			&:hover {
+				color: var(--cms-color-text);
+			}
+		}
+	}
+
+	& .cms-reference-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	& .cms-reference-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.35rem 0.5rem;
+		border: 1px solid var(--cms-color-border);
+		border-radius: 0.25rem;
+		background: var(--cms-color-surface);
+	}
+
+	& .cms-reference-title {
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& .cms-reference-type {
+		font-size: 0.8em;
+		opacity: 0.6;
+	}
+
+	& .cms-reference-remove {
+		border: 0;
+		background: transparent;
+		cursor: pointer;
+		font-size: 1.1em;
+		line-height: 1;
+		padding: 0 0.25rem;
+	}
+
+	& .cms-reference-popup {
+		position: absolute;
+		z-index: 20;
+		left: 0;
+		right: 0;
+		margin-top: 0.15rem;
+		max-height: 20rem;
+		overflow-y: auto;
+		border: 1px solid var(--cms-color-border);
+		border-radius: 0.25rem;
+		background: var(--cms-color-surface);
+		box-shadow: var(--cms-shadow-md);
+	}
+
+	& .cms-reference-results {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	& .cms-reference-result {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 0.4rem 0.6rem;
+		border: 0;
+		background: transparent;
+		text-align: left;
+		cursor: pointer;
+
+		&.is-active,
+		&:hover {
+			background: var(--cms-color-hover);
+		}
+	}
+
+	& .cms-reference-note {
+		padding: 0.4rem 0.6rem;
+		font-size: 0.85em;
+		color: var(--cms-color-text-muted);
+	}
+}
+
+/* A stored link: where it points, with buttons to change it. */
+.cms-link-row {
+	& .cms-link-row-target {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-width: 0;
+	}
+
+	& .cms-link-text {
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow: hidden;
+		font-size: var(--cms-font-size-sm);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& .cms-link-row-warning {
+		margin: 0;
+		color: var(--cms-color-warning-text);
+		font-size: var(--cms-font-size-xs);
+	}
+}
+
+/* A Link field's control. */
+.cms-link {
+	/* The buttons stay beside the target in a wide field. */
+	& .cms-link-row .cms-link-text {
+		flex-grow: 0;
+	}
+
+	& .cms-link-fallback {
+		display: flex;
+		align-items: baseline;
+		gap: var(--cms-space-1-5);
+		margin: var(--cms-space-1-5) 0 0;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-style: italic;
+
+		& .cms-link-text {
+			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+}
+
+/* What a control looks like while a file hovers over it: a dashed accent
+   edge, the content dimmed, one label over it all. The control sets
+   `is-dragging` from its own drag events; the label shows only meanwhile. */
+.cms-dropzone {
+	position: relative;
+
+	&.is-dragging {
+		border-style: dashed;
+		border-color: var(--cms-color-accent);
+
+		& > :not(.cms-dropzone-label) {
+			opacity: 0.3;
+			pointer-events: none;
+		}
+	}
+
+	/* A page may keep its label in place and let the state show it. */
+	&:not(.is-dragging) > .cms-dropzone-label {
+		display: none;
+	}
+
+	& > .cms-dropzone-label {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--cms-space-2);
+		border-radius: inherit;
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 600;
+		pointer-events: none;
+
+		& svg {
+			width: var(--cms-space-4);
+			height: var(--cms-space-4);
+		}
+	}
+}
+
+.cms-entries {
+	--entries-x: var(--cms-space-4);
+
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-md);
+	background: var(--cms-color-surface);
+
+	& .cms-entries-tally {
+		padding: var(--cms-space-2) var(--entries-x);
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-variant-numeric: tabular-nums;
+	}
+
+	& .cms-entries-row {
+		border-top: 1px solid var(--cms-color-border-soft);
+
+		&.is-dragging {
+			opacity: 0.4;
+		}
+
+		&.is-chosen > .cms-entries-summary {
+			background: var(--cms-color-hover);
+		}
+	}
+
+	& .cms-control-unknown {
+		margin: var(--cms-space-2) var(--entries-x);
+	}
+
+	& .cms-entries-summary {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-3);
+		padding: var(--cms-space-3) var(--entries-x);
+
+		&:hover {
+			background: var(--cms-color-hover);
+		}
+	}
+
+	& .cms-entries-grip {
+		display: grid;
+		flex-shrink: 0;
+		place-items: center;
+		color: var(--cms-color-text-faint);
+		cursor: grab;
+		touch-action: none;
+	}
+
+	& .cms-entries-opener {
+		display: flex;
+		flex: 1 1 auto;
+		align-items: center;
+		gap: var(--cms-space-3);
+		min-width: 0;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		text-align: left;
+		cursor: pointer;
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: 2px;
+			border-radius: var(--cms-radius-sm);
+		}
+	}
+
+	& .cms-entries-thumb {
+		display: grid;
+		flex-shrink: 0;
+		place-items: center;
+		width: 2.75rem;
+		height: 2.75rem;
+		overflow: hidden;
+		border: 1px solid var(--cms-color-border-soft);
+		border-radius: var(--cms-radius-sm);
+		background: var(--cms-color-surface-sunken);
+
+		& img {
+			max-width: 100%;
+			max-height: 100%;
+			object-fit: contain;
+		}
+	}
+
+	& .cms-entries-texts {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: column;
+		gap: 0.125rem;
+		min-width: 0;
+	}
+
+	& .cms-entries-title {
+		overflow: hidden;
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& .cms-entries-subtitle {
+		overflow: hidden;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		&:empty {
+			display: none;
+		}
+	}
+
+	& .cms-entries-kebab {
+		display: inline-flex;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		width: 1.625rem;
+		height: 1.625rem;
+		padding: 0;
+		border: 0;
+		border-radius: var(--cms-radius-sm);
+		background: none;
+		color: var(--cms-color-text-subtle);
+		font: inherit;
+		cursor: pointer;
+
+		&:hover,
+		&[aria-expanded='true'] {
+			background: var(--cms-color-surface-sunken);
+			color: var(--cms-color-text);
+		}
+	}
+
+	& .cms-entries-form {
+		padding: var(--cms-space-4) var(--entries-x) var(--cms-space-5);
+		border-top: 1px solid var(--cms-color-border-soft);
+		background: var(--cms-color-surface-sunken);
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	& .cms-entries-adders {
+		display: flex;
+	}
+
+	& .cms-entries-adder {
+		display: flex;
+		flex: 1 1 0;
+		align-items: center;
+		justify-content: center;
+		gap: var(--cms-space-2);
+		padding: var(--cms-space-3);
+		border: 0;
+		border-top: 1px dashed var(--cms-color-border);
+		background: none;
+		color: var(--cms-color-text-subtle);
+		font: inherit;
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+		cursor: pointer;
+
+		& + .cms-entries-adder {
+			border-left: 1px dashed var(--cms-color-border);
+		}
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+
+		&[hidden] {
+			display: none;
+		}
+	}
+}

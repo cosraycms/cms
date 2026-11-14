@@ -682,7 +682,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			<section class="cms-styleguide-section" data-section="page-head">
 				<h2>Page head</h2>
 				<p class="cms-styleguide-note">
-					Every part is optional and the order is fixed. <code>cms-page.css</code>
+					Every part is optional and the order is fixed. <code>cms-page</code>
 					styles all of them; a screen adds only what is its own. The toolbar is a row of
 					the content column, outside its scroller, so it stays put while the content
 					moves.

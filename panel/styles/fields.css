@@ -1,0 +1,380 @@
+/* display: flex outranks the UA rule behind the hidden attribute, which
+   conditional visibility (when-conditions, the menu form's type sections)
+   relies on. */
+.cms-field[hidden] {
+	display: none;
+}
+
+.cms-field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-1-5);
+	min-width: 0;
+	padding-inline: var(--cms-space-2);
+
+	& .cms-field-label {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		color: var(--cms-color-text-label);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+		line-height: 1.25rem;
+
+		& > div {
+			min-width: 0;
+			overflow-wrap: anywhere;
+		}
+	}
+
+	& .cms-field-requirement,
+	& .cms-field-state {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 400;
+		line-height: 1;
+		white-space: nowrap;
+
+		&::before {
+			margin-inline: 0.125em 0.375em;
+			content: '·' / '';
+		}
+	}
+
+	& > .cms-field-body {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-1-5);
+		min-width: 0;
+	}
+
+	& .cms-field-control {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-2);
+		min-width: 0;
+	}
+
+	& .cms-field-description {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.45;
+	}
+
+	/* Nothing to lay out yet: the preview waits for the first block. */
+	&:not(:has(.cms-blocks-editor > .cms-blocks-editor-grid > *)) .cms-field-layout-preview {
+		display: none;
+	}
+
+	& .cms-field-button {
+		padding: 0 var(--cms-space-2);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 500;
+		line-height: 1.25rem;
+
+		&:hover {
+			border-color: var(--cms-color-border-strong);
+			color: var(--cms-color-text);
+		}
+
+		&.has-error {
+			border-color: var(--cms-color-danger-border);
+			color: var(--cms-color-danger);
+		}
+	}
+}
+
+/* Inline validation message painted below the control by errors.js;
+   also used standalone for inspector fields outside .cms-field. The mark
+   keeps the message from resting on its colour alone. */
+.cms-field-error {
+	display: flex;
+	align-items: baseline;
+	gap: var(--cms-space-1-5);
+	margin: 0;
+	color: var(--cms-color-danger-text);
+	font-size: 0.8125rem;
+	line-height: 1.45;
+
+	&::before {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 0.875rem;
+		height: 0.875rem;
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-danger);
+		color: var(--cms-color-text-on-fill);
+		font-size: 0.625rem;
+		font-weight: 700;
+		line-height: 1;
+		content: '!' / '';
+		translate: 0 0.125rem;
+	}
+}
+
+.cms-fieldset {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+
+	& .cms-fieldset-legend {
+		padding: 0;
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-base);
+		font-weight: 600;
+		letter-spacing: -0.012em;
+	}
+
+	& .cms-fieldset-description {
+		max-width: 62ch;
+		padding: var(--cms-space-1) 0 0;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.5;
+	}
+
+	& .cms-fieldset-fields {
+		width: 100%;
+		margin-top: var(--cms-space-4);
+	}
+}
+
+/* Column gutters use field padding: a gap would repeat across all 100 columns. */
+.cms-fields {
+	display: grid;
+	grid-template-columns: repeat(100, minmax(0, 1fr));
+
+	/* Item margins separate logical rows without adding gaps inside a row span.
+	   Cancel the trailing margin only when the grid has visible items. */
+	&:has(> :not([hidden])) {
+		margin-block-end: calc(-1 * var(--cms-space-8));
+	}
+
+	& > * {
+		--rows: 1;
+		grid-row: span calc(2 * var(--rows));
+		margin-block-end: var(--cms-space-8);
+	}
+
+	& > .cms-field:not([hidden]) {
+		display: grid;
+		grid-template-rows: subgrid;
+		row-gap: 0;
+	}
+
+	& > .cms-field > .cms-field-label {
+		grid-row: 1;
+		align-self: end;
+		margin-block-end: var(--cms-space-1);
+	}
+
+	& > .cms-field > .cms-field-body {
+		grid-row: 2 / -1;
+		align-self: start;
+	}
+}
+
+@container content (width < 45rem) {
+	.cms-fields > * {
+		grid-column: 1 / -1 !important;
+	}
+}
+
+.cms-content-locales {
+	display: flex;
+	align-items: stretch;
+	gap: var(--cms-space-0-5);
+	width: 100%;
+	min-width: 0;
+	min-height: var(--cms-control-height);
+	padding: var(--cms-space-1);
+	border-radius: var(--cms-radius-full);
+	background: var(--cms-color-surface-sunken);
+	box-shadow: var(--cms-shadow-recessed);
+
+	& .cms-content-locales-option {
+		display: block;
+		flex: 1 1 0;
+		min-width: 0;
+		padding: calc((var(--cms-control-height-sm) - 1.25rem - 2px) / 2) var(--cms-space-2);
+		overflow: hidden;
+		/* Transparent, not none: choosing a language must not shift the labels. */
+		border: 1px solid transparent;
+		border-radius: var(--cms-radius-full);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+		line-height: 1.25rem;
+		text-align: center;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		&:hover {
+			color: var(--cms-color-text);
+		}
+
+		&[aria-checked='true'],
+		&[aria-pressed='true'] {
+			border-color: var(--cms-button-secondary-border);
+			background: var(--cms-button-secondary-bg);
+			background-image: var(--cms-gradient-raised);
+			box-shadow: var(--cms-button-secondary-shadow);
+			color: var(--cms-button-secondary-text);
+
+			@media (forced-colors: active) {
+				forced-color-adjust: none;
+				border-color: Highlight;
+				background: Highlight;
+				box-shadow: none;
+				color: HighlightText;
+			}
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&.has-error:not([aria-checked='true']) {
+			color: var(--cms-color-danger);
+		}
+	}
+
+	&.has-error {
+		box-shadow: 0 0 0 1px var(--cms-color-danger-border);
+	}
+
+	/* In the collapsed inspector: a column of locale ids. */
+	&.is-vertical {
+		flex-direction: column;
+		width: auto;
+
+		& .cms-content-locales-option {
+			flex: 0 0 auto;
+			padding-inline: var(--cms-space-1-5);
+			font-size: var(--cms-font-size-xs);
+			text-transform: uppercase;
+		}
+	}
+
+	/* In a screen header: sized to its options and pushed to the end. */
+	&.is-compact {
+		width: auto;
+		margin-left: auto;
+
+		& .cms-content-locales-option {
+			flex: 0 0 auto;
+		}
+	}
+}
+
+/* One locale's copy of a translated control: the content-language
+   selector shows the active one. */
+.cms-locale-variant {
+	/* Names the language a fallback comes from. */
+	& .cms-locale-variant-source {
+		display: block;
+		margin-block-start: var(--cms-space-1);
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-style: italic;
+	}
+
+	/* A blocks variant's note is laid out even while hidden, so its padding
+	   applies outside the preview too: it keeps the space below the canvas. */
+	& > [data-blocks-fallback-source] {
+		margin-block-start: 0;
+		padding: 0 var(--cms-space-3) var(--cms-space-3);
+	}
+
+	/* Shown, but not editable here: an outline with no fill, like a
+	   disabled control. */
+	&.is-fallback-preview {
+		margin-bottom: var(--cms-space-3);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		color: var(--cms-color-text-subtle);
+
+		& .cms-blocks-editor {
+			border: 0;
+			background: transparent;
+			box-shadow: none;
+		}
+
+		& .cms-blocks-editor > .cms-blocks-editor-adders,
+		& .cms-blocks-editor-block > .cms-blocks-editor-chrome,
+		& .cms-blocks-editor-block > .cms-blocks-editor-resize,
+		& .cms-blocks-editor-block > dialog,
+		& .cms-richtext-toolbar,
+		& .cms-code-toolbar,
+		& .cms-media-field > .cms-media-field-bar,
+		& .cms-image-card .cms-image-card-controls,
+		& .cms-media-figure .cms-media-figure-overlay,
+		& .cms-gallery .cms-gallery-tile-tools,
+		& .cms-media-meta,
+		& .cms-file-list :is(.cms-file-list-tool, .cms-media-replace) {
+			display: none;
+		}
+	}
+}
+
+.cms-settings {
+	& .cms-settings-field + .cms-settings-field {
+		margin-top: var(--cms-space-3);
+	}
+
+	& .cms-settings-fields + .cms-settings-fields,
+	& .cms-settings-fields + .cms-settings-section {
+		margin-top: var(--cms-space-5);
+	}
+
+	& .cms-settings-fields + .cms-settings-slot {
+		margin-top: var(--cms-space-3);
+	}
+
+	& .cms-settings-section {
+		font-weight: 600;
+	}
+
+	/* Sets a block's own fields off from its layout and spacing. */
+	& .cms-settings-rule {
+		margin-block: var(--cms-space-5);
+		border: 0;
+		border-top: 1px solid var(--cms-color-border-soft);
+	}
+
+	/* A choice left at the site's default reads as a placeholder. */
+	& .cms-select:has(option[value='']:checked) {
+		color: var(--cms-color-text-subtle);
+	}
+
+	/* The toggle between one gap and a row and column gap of their own. */
+	& .cms-settings-split {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		font-size: var(--cms-font-size-sm);
+		cursor: pointer;
+	}
+
+	/* Most element controls keep nothing in the slot they are offered. */
+	& .cms-settings-section:has(+ .cms-settings-slot:empty),
+	& .cms-settings-slot:empty {
+		display: none;
+	}
+
+	/* An element's per-use form stacks in the compact dialog. */
+	& .cms-settings-slot .cms-media-meta {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	& .cms-settings-slot .cms-media-locales {
+		margin-block: var(--cms-space-3);
+	}
+}

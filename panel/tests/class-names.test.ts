@@ -33,15 +33,15 @@ const foreign: Foreign[] = [
 	// prism-code-editor's own classes, and Prism's token kinds below `.token`.
 	{
 		name: /^(prism-code-editor|show-line-numbers|active-line|active-bracket|token)$/,
-		files: ['styles/cms-code.css'],
+		files: ['styles/code.css'],
 	},
-	{ name: /./, files: ['styles/cms-code.css'], within: '.token' },
+	{ name: /./, files: ['styles/code.css'], within: '.token' },
 	// A rich text paragraph's content style `default`, which renders no class.
 	{ name: /^default$/, files: ['src/elements/richtext/commands.js'] },
 	// The site's menu, rendered into the menu tree's preview.
 	{
 		name: /^nav-(label|image)$/,
-		files: ['styles/cms-menus.css'],
+		files: ['styles/menus.css'],
 		within: '.cms-menu-tree-preview-body',
 	},
 	// The site's YouTube embed, swapped for a thumbnail in the layout preview's page.

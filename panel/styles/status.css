@@ -1,0 +1,618 @@
+.cms-status {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--cms-space-2);
+	padding: 0.125rem var(--cms-space-2-5);
+	border: 1px solid transparent;
+	border-radius: var(--cms-radius-full);
+	font-size: var(--cms-font-size-xs);
+	font-weight: 500;
+	white-space: nowrap;
+
+	&::before {
+		width: 0.375rem;
+		height: 0.375rem;
+		border-radius: var(--cms-radius-full);
+		background: currentcolor;
+		content: '';
+	}
+
+	/* The editor toggles its changes chip with the attribute; the display above would win otherwise. */
+	&[hidden] {
+		display: none;
+	}
+
+	&.is-published {
+		border-color: color-mix(in oklch, var(--cms-color-success), transparent 70%);
+		background: var(--cms-color-success-surface);
+		color: var(--cms-color-success-text);
+	}
+
+	&.is-changes,
+	&.is-hidden,
+	&.is-unsaved {
+		border-color: color-mix(in oklch, var(--cms-color-warning), transparent 70%);
+		background: var(--cms-color-warning-surface);
+		color: var(--cms-color-warning-text);
+	}
+
+	&.is-unpublished {
+		border-color: var(--cms-color-border);
+		background: var(--cms-color-selected);
+		color: var(--cms-color-text-muted);
+	}
+
+	&.is-locked {
+		border-color: color-mix(in oklch, var(--cms-color-danger), transparent 70%);
+		background: var(--cms-color-danger-surface);
+		color: var(--cms-color-danger-text);
+	}
+}
+
+.cms-count {
+	display: inline-flex;
+	align-items: center;
+	min-height: 1.625rem;
+	padding: 0 var(--cms-space-3);
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-full);
+	background: var(--cms-color-surface);
+	color: var(--cms-color-text-muted);
+	font-size: var(--cms-font-size-xs);
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Marks what an editor restored from an autosave changes. */
+.cms-changed {
+	display: inline-block;
+	margin-inline-start: var(--cms-space-1-5);
+	padding: 0.0625rem var(--cms-space-1-5);
+	border-radius: var(--cms-radius-full);
+	background: var(--cms-color-warning-surface);
+	color: var(--cms-color-warning-text);
+	font-size: var(--cms-font-size-xs);
+	font-weight: 500;
+	line-height: 1.3;
+	white-space: nowrap;
+	vertical-align: 0.0625rem;
+}
+
+.cms-changed-dot {
+	display: inline-block;
+	width: 0.375rem;
+	height: 0.375rem;
+	margin-inline-start: var(--cms-space-1);
+	border-radius: var(--cms-radius-full);
+	background: var(--cms-color-warning);
+	vertical-align: 0.125rem;
+}
+
+/* A stage's mark: its icon on a tint of the stage's colour, grey while the
+   stage is empty, ringed by the halo while it holds something. Whatever
+   holds the marks sets their --size. */
+.cms-stage-mark {
+	--tone: var(--cms-color-stage-idle);
+	--ink: var(--cms-color-stage-idle-ink);
+	--fill: color-mix(in oklch, var(--tone) var(--cms-stage-tint), transparent);
+	--cms-icon-size: calc(var(--size) / 2);
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	width: var(--size);
+	height: var(--size);
+	border-radius: var(--cms-radius-full);
+	background: var(--fill);
+	color: var(--ink);
+	outline: var(--cms-stage-halo) solid
+		color-mix(
+			in oklch,
+			var(--cms-stage-halo-color, var(--tone)) var(--cms-stage-halo-strength),
+			transparent
+		);
+	outline-offset: var(--cms-stage-halo-gap);
+
+	&[data-state='none'] {
+		outline: none;
+	}
+
+	&[data-stage='main'][data-state='unpublished'] {
+		--tone: var(--cms-color-stage-offline);
+		--ink: var(--cms-color-stage-offline-ink);
+		outline: none;
+	}
+
+	&[data-stage='main'][data-state='published'],
+	&[data-stage='saved'] {
+		--tone: var(--cms-color-stage-main);
+		--ink: var(--cms-color-stage-main-ink);
+	}
+
+	&[data-stage='draft'][data-state='present'] {
+		--tone: var(--cms-color-stage-draft);
+		--ink: var(--cms-color-stage-draft-ink);
+	}
+
+	&[data-stage='mine']:is([data-state='present'], [data-state='saving']) {
+		--tone: var(--cms-color-stage-mine);
+		--ink: var(--cms-color-stage-mine-ink);
+	}
+
+	&[data-stage='mine'][data-state='saving'] {
+		animation: cms-stage-mark-pulse 0.9s ease-in-out infinite;
+	}
+
+	&[data-stage='mine']:is([data-state='conflict'], [data-state='error']) {
+		--tone: var(--cms-color-stage-problem);
+		--ink: var(--cms-color-stage-problem-ink);
+	}
+}
+
+@keyframes cms-stage-mark-pulse {
+	50% {
+		opacity: 0.5;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.cms-stage-mark[data-state='saving'] {
+		animation: none !important;
+	}
+}
+
+/* A node's stages as icons, from Panel\NodeStatus, marked like the status
+   tab's. status.js moves the mine stage between saves. Neighbours move
+   apart by the halo's reach so two rings never touch. */
+.cms-status-dots {
+	--size: var(--cms-stage-mark-size);
+	--reach: calc(var(--cms-stage-halo) + var(--cms-stage-halo-gap));
+	display: inline-flex;
+	align-items: center;
+	gap: calc(0.25rem + 2 * var(--reach));
+
+	&.is-sm {
+		--size: var(--cms-stage-mark-size-sm);
+		gap: calc(0.1875rem + 2 * var(--reach));
+	}
+
+	/* Dots instead of icons: colour names the stage, shape a special state (a
+	   ring is an unpublished main version, "!" a problem). */
+	& .cms-status-dots-dot {
+		--color: var(--cms-color-stage-empty);
+		--halo: var(--cms-stage-dot-halo);
+		display: inline-grid;
+		place-items: center;
+		flex: none;
+		box-sizing: border-box;
+		width: var(--dot);
+		height: var(--dot);
+		border: 2px solid var(--color);
+		border-radius: var(--cms-radius-full);
+		background: var(--color);
+		outline: var(--halo) solid
+			color-mix(
+				in oklch,
+				var(--cms-stage-halo-color, var(--color)) var(--cms-stage-halo-strength),
+				transparent
+			);
+		outline-offset: var(--cms-stage-dot-halo-gap);
+
+		&[data-state='none'] {
+			outline: none;
+		}
+
+		&[data-stage='main'][data-state='published'],
+		&[data-stage='saved'] {
+			--color: var(--cms-color-stage-main);
+		}
+
+		&[data-stage='main'][data-state='unpublished'] {
+			--color: var(--cms-color-stage-main);
+			background: transparent;
+			outline: none;
+		}
+
+		&[data-stage='draft'][data-state='present'] {
+			--color: var(--cms-color-stage-draft);
+		}
+
+		&[data-stage='mine'][data-state='present'] {
+			--color: var(--cms-color-stage-mine);
+		}
+
+		&[data-stage='mine'][data-state='conflict'] {
+			--color: var(--cms-color-stage-problem);
+		}
+	}
+}
+
+.cms-status-dots.is-dots {
+	--dot: var(--cms-stage-dot-size);
+	--reach: calc(var(--cms-stage-dot-halo) + var(--cms-stage-dot-halo-gap));
+	gap: calc(0.1875rem + 2 * var(--reach));
+
+	& .cms-status-dots-dot[data-stage='mine'][data-state='conflict'] {
+		width: calc(var(--dot) * 1.5);
+		height: calc(var(--dot) * 1.5);
+
+		&::after {
+			color: var(--cms-color-white);
+			font-size: 0.625rem;
+			font-weight: 700;
+			line-height: 1;
+			content: '!';
+		}
+	}
+}
+
+/* The main version's icon, with a small dot beside it for each further
+   stage that holds something; the dots are too small for a halo. */
+.cms-status-dots.is-compact {
+	gap: calc(0.1875rem + var(--reach));
+
+	& .cms-status-dots-pips {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	& .cms-status-dots-dot {
+		--dot: var(--cms-stage-pip-size);
+		--halo: 0px;
+		border: 0;
+	}
+}
+
+/* In the editor head: opens the inspector's status tab, and says what the
+   dots mean on hover and focus. */
+button.cms-status-dots {
+	position: relative;
+	min-height: 1.75rem;
+	padding: 0 var(--cms-space-2);
+	border: 0;
+	border-radius: var(--cms-radius-md);
+	background: none;
+	font: inherit;
+	cursor: pointer;
+
+	&:hover {
+		background: var(--cms-color-hover);
+	}
+
+	&:focus-visible {
+		outline: var(--cms-focus-outline);
+		outline-offset: var(--cms-focus-offset);
+	}
+
+	& .cms-status-dots-tooltip {
+		--size: 1rem;
+		position: absolute;
+		top: calc(100% + var(--cms-space-2));
+		left: 0;
+		z-index: 30;
+		display: none;
+		flex-direction: column;
+		gap: var(--cms-space-1-5);
+		width: min(20rem, calc(100vw - 2 * var(--cms-space-4)));
+		padding: var(--cms-space-2-5) var(--cms-space-3);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-neutral-900);
+		color: var(--cms-color-white);
+		box-shadow: var(--cms-shadow-lg);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 400;
+		letter-spacing: normal;
+		line-height: 1.4;
+		text-align: start;
+		white-space: normal;
+		pointer-events: none;
+	}
+
+	&:hover .cms-status-dots-tooltip,
+	&:focus-visible .cms-status-dots-tooltip {
+		display: flex;
+	}
+
+	& .cms-status-dots-row {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+
+		& strong {
+			font-weight: 600;
+		}
+	}
+
+	& .cms-status-dots-hint {
+		margin-top: var(--cms-space-1);
+		color: var(--cms-color-neutral-400);
+	}
+}
+
+/* The tooltip is dark in both themes; its marks take the dark theme's
+   stage colours and inks, on a tint strong enough for the small size. */
+button.cms-status-dots .cms-status-dots-tooltip {
+	color-scheme: dark;
+
+	& .cms-stage-mark {
+		--fill: color-mix(in oklch, var(--tone) max(var(--cms-stage-tint), 30%), transparent);
+	}
+}
+
+/* The inspector's status tab: the stages top to bottom on a line, and
+   between two of them the step that takes the lower one into the upper. */
+.cms-status-pipeline {
+	--size: 1.75rem;
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-4);
+
+	& .cms-status-pipeline-heading {
+		margin: 0;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
+	& .cms-status-pipeline-stages {
+		display: flex;
+		flex-direction: column;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	& .cms-status-pipeline-stage {
+		position: relative;
+		display: grid;
+		grid-template-columns: var(--size) minmax(0, 1fr);
+		column-gap: var(--cms-space-3);
+		padding-bottom: var(--cms-space-5);
+
+		&:last-child {
+			padding-bottom: 0;
+		}
+
+		&:not(:last-child)::before {
+			position: absolute;
+			top: calc(var(--size) + var(--cms-space-1));
+			bottom: var(--cms-space-1);
+			left: calc(var(--size) / 2 - 0.5px);
+			width: 1px;
+			background: var(--cms-color-border);
+			content: '';
+		}
+
+		&[data-state='none'] :is(.cms-status-pipeline-name, .cms-status-pipeline-text) {
+			color: var(--cms-color-text-subtle);
+		}
+
+		&[data-stage='mine']:is([data-state='conflict'], [data-state='error'])
+			.cms-status-pipeline-text {
+			color: var(--cms-color-danger-text);
+		}
+	}
+
+	& .cms-status-pipeline-body {
+		min-width: 0;
+	}
+
+	& .cms-status-pipeline-title {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--cms-space-1-5);
+		min-height: var(--size);
+		margin: 0;
+	}
+
+	& .cms-status-pipeline-name {
+		font-size: var(--cms-font-size-sm);
+		font-weight: 600;
+	}
+
+	& .cms-status-pipeline-help,
+	& .cms-status-pipeline-text {
+		margin: 0;
+	}
+
+	& .cms-status-pipeline-help {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.4;
+	}
+
+	& .cms-status-pipeline-text {
+		margin-top: var(--cms-space-0-5);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.4;
+	}
+
+	& .cms-status-pipeline-badge {
+		--tone: var(--cms-color-text-subtle);
+		padding: 0 var(--cms-space-1-5);
+		border-radius: var(--cms-radius-sm);
+		background: color-mix(in oklch, var(--tone), transparent 86%);
+		color: color-mix(in oklch, var(--tone), var(--cms-color-shade) 25%);
+		font-size: 0.6875rem;
+		font-weight: 500;
+		line-height: 1.125rem;
+		white-space: nowrap;
+
+		&.is-published {
+			--tone: var(--cms-color-stage-main);
+		}
+	}
+
+	& .cms-status-pipeline-notice {
+		--cms-icon-size: 1rem;
+		display: flex;
+		gap: var(--cms-space-2);
+		margin-top: var(--cms-space-2);
+		padding: var(--cms-space-2-5) var(--cms-space-3);
+		border: 1px solid color-mix(in oklch, var(--cms-color-warning), transparent 65%);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-warning-surface);
+		color: var(--cms-color-warning-text);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.4;
+
+		& .cms-icon {
+			flex: none;
+			margin-top: 0.0625rem;
+		}
+
+		& p {
+			margin: 0;
+		}
+	}
+
+	& .cms-status-pipeline-stage[data-state='none'] .cms-status-pipeline-notice {
+		display: none;
+	}
+
+	& .cms-status-pipeline-discard {
+		padding: 0 var(--cms-space-1-5);
+		border: 1px solid var(--cms-color-danger-border-soft);
+		border-radius: var(--cms-radius-sm);
+		background: transparent;
+		color: var(--cms-color-danger-text);
+		font: inherit;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		line-height: 1.125rem;
+		white-space: nowrap;
+		cursor: pointer;
+
+		&:hover {
+			background: color-mix(in oklch, var(--cms-color-danger), transparent 92%);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	& .cms-status-pipeline-step {
+		display: grid;
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
+		align-items: start;
+		margin-top: var(--cms-space-5);
+
+		&[hidden] {
+			display: none;
+		}
+
+		& .cms-status-pipeline-arrow {
+			--cms-icon-size: 0.75rem;
+			position: relative;
+			display: inline-grid;
+			place-items: center;
+			justify-self: center;
+			width: 1.25rem;
+			height: 1.25rem;
+			margin-top: var(--cms-space-1);
+			border: 1px solid var(--cms-color-border);
+			border-radius: var(--cms-radius-full);
+			background: var(--cms-inspector-bg);
+			color: var(--cms-color-text-subtle);
+		}
+
+		& .cms-status-pipeline-help {
+			margin-top: var(--cms-space-1);
+		}
+	}
+
+	& .cms-status-pipeline-visibility {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-4);
+		padding-top: var(--cms-space-5);
+		border-top: 1px solid var(--cms-color-border);
+
+		& .cms-status-pipeline-bar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: var(--cms-space-2);
+		}
+	}
+
+	& .cms-status-pipeline-instant {
+		--cms-icon-size: 0.75rem;
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-1);
+		padding: 0 var(--cms-space-2);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-full);
+		color: var(--cms-color-text-muted);
+		font-size: 0.6875rem;
+		line-height: 1.25rem;
+		white-space: nowrap;
+	}
+}
+
+/* The status filters above a list, each a chip with its stage's icon. */
+.cms-stage-filters {
+	--size: var(--cms-stage-mark-size-sm);
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cms-space-2);
+
+	& .cms-stage-filters-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-height: 2rem;
+		padding: 0 var(--cms-space-3);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+		text-decoration: none;
+
+		&:hover {
+			background: var(--cms-color-hover);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&[aria-current='true'] {
+			border-color: var(--cms-color-text);
+			background: var(--cms-color-text);
+			color: var(--cms-color-surface);
+
+			/* The chip inverts the theme: the mark keeps the page's surface under
+			   its tint so it reads as it does everywhere else. */
+			& .cms-stage-mark {
+				background-color: var(--cms-color-surface);
+				background-image: linear-gradient(var(--fill) 0 0);
+			}
+
+			& .cms-stage-filters-count {
+				color: inherit;
+				opacity: 0.75;
+			}
+		}
+	}
+
+	& .cms-stage-filters-count {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-variant-numeric: tabular-nums;
+	}
+}

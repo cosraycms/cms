@@ -346,3 +346,159 @@
 		display: none;
 	}
 }
+
+/* The summary of a failed save in the editor and the create dialog: what
+   keeps the entry from saving, each field a chip that jumps to it. */
+.cms-errors {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--cms-space-3-5);
+	margin-bottom: var(--cms-space-6);
+	padding: var(--cms-space-4);
+	border: 1px solid var(--cms-color-danger-border-soft);
+	border-radius: var(--cms-radius-lg);
+	background: var(--cms-color-surface);
+	font-size: var(--cms-font-size-sm);
+
+	&[hidden] {
+		display: none;
+	}
+
+	&:focus-visible {
+		outline: var(--cms-focus-outline);
+		outline-offset: var(--cms-focus-offset);
+	}
+
+	& .cms-errors-mark {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 1.375rem;
+		height: 1.375rem;
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-danger);
+		color: var(--cms-color-text-on-fill);
+		font-size: 0.8125rem;
+		font-weight: 700;
+		line-height: 1;
+	}
+
+	& .cms-errors-summary {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: column;
+		gap: var(--cms-space-2-5);
+		min-width: 0;
+		padding-top: 0.125rem;
+	}
+
+	& .cms-errors-title {
+		margin: 0;
+		font-weight: 600;
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	& .cms-errors-lead {
+		margin: 0;
+		color: var(--cms-color-text-muted);
+	}
+
+	/* The lead belongs to the title above it, not to the chips below. */
+	& .cms-errors-title + .cms-errors-lead {
+		margin-top: calc(0.125rem - var(--cms-space-2-5));
+	}
+
+	& .cms-errors-chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--cms-space-2);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	& .cms-errors-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-1-5);
+		min-height: 1.75rem;
+		padding: 0 var(--cms-space-2-5);
+		border: 1px solid var(--cms-color-danger-border-soft);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-danger-surface);
+		color: var(--cms-color-danger-text);
+		font: inherit;
+		text-align: start;
+		cursor: pointer;
+
+		&:hover {
+			background: color-mix(in oklch, var(--cms-color-danger), var(--cms-color-surface) 84%);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+	}
+
+	& .cms-errors-general {
+		margin: 0;
+		padding-left: var(--cms-space-4);
+		color: var(--cms-color-danger-text);
+	}
+
+	&.is-resolved {
+		align-items: center;
+		border-color: color-mix(in oklch, var(--cms-color-success), transparent 70%);
+
+		& .cms-errors-mark {
+			background: var(--cms-color-success);
+		}
+
+		& .cms-errors-summary {
+			padding-top: 0;
+		}
+
+		& .cms-errors-lead {
+			color: var(--cms-color-success-text);
+		}
+	}
+}
+
+/* The create dialog: a few required fields and what creating means. */
+.cms-create {
+	& .cms-modal-body {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-5);
+	}
+
+	& .cms-errors {
+		margin-bottom: 0;
+	}
+
+	& .cms-create-hint {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--cms-space-3);
+		padding: var(--cms-space-3) var(--cms-space-4);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-canvas);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+		line-height: 1.45;
+
+		& .cms-status-dots {
+			flex: none;
+			margin-top: 0.3rem;
+		}
+
+		& p {
+			margin: 0;
+		}
+	}
+}
