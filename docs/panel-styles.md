@@ -72,12 +72,12 @@ A node's stages (the main version, the editorial draft, the user's own changes) 
 - Each of these six has an `-ink` variant for the icon drawn on its tinted circle.
 - `empty` fills the dot of an empty stage and draws the lines between stages.
 
-The `--cms-stage-*` tokens shape them: `mark-size` and `mark-size-sm` for icons (head and lists), `dot-size` for the dots, and `tint` for the strength of an icon's background. A halo rings every stage that holds something. Icons have none by default and dots a soft 2px band; `halo` and `dot-halo` set the ring width, `halo-gap` and `dot-halo-gap` its distance from the mark, `halo-strength` how much colour it shows, and `halo-color` a colour for every ring instead of each stage's own. Neighbouring marks move apart by the halo's reach.
+The `--cms-stage-*` tokens shape them: `mark-size` and `mark-size-sm` for icons (head and lists), `dot-size` for the dots, and `tint` for the strength of an icon's background. A halo rings every stage that holds something. Icons have none by default and dots a soft 2px band; `halo` sets an icon's ring width as a share of its size, rounded to whole pixels, `dot-halo` the dots' ring width, `halo-gap` and `dot-halo-gap` its distance from the mark, `halo-strength` how much colour it shows, and `halo-color` a colour for every ring instead of each stage's own. Neighbouring marks move apart by the halo's reach.
 
 ```css
 @layer theme {
 	:root {
-		--cms-stage-halo: 1.5px;
+		--cms-stage-halo: 0.08;
 		--cms-stage-halo-gap: 1.5px;
 		--cms-stage-halo-strength: 45%;
 	}
@@ -90,7 +90,7 @@ A full `tint` with light inks inverts the icons: a solid circle in the stage's c
 @layer theme {
 	:root {
 		--cms-stage-tint: 100%;
-		--cms-stage-halo: 2px;
+		--cms-stage-halo: 0.1;
 		--cms-stage-halo-gap: 1px;
 		--cms-stage-halo-strength: 35%;
 		--cms-color-stage-main-ink: white;

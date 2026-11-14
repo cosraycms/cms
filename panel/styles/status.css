@@ -96,6 +96,7 @@
 	--ink: var(--cms-color-stage-idle-ink);
 	--fill: color-mix(in oklch, var(--tone) var(--cms-stage-tint), transparent);
 	--cms-icon-size: calc(var(--size) / 2);
+	--halo: round(calc(var(--size) * var(--cms-stage-halo)), 1px);
 	display: inline-grid;
 	place-items: center;
 	flex: none;
@@ -104,13 +105,24 @@
 	border-radius: var(--cms-radius-full);
 	background: var(--fill);
 	color: var(--ink);
-	outline: var(--cms-stage-halo) solid
-		color-mix(
-			in oklch,
-			var(--cms-stage-halo-color, var(--tone)) var(--cms-stage-halo-strength),
+	/* Light mode only for now. */
+	outline: var(--halo) solid
+		light-dark(
+			color-mix(
+				in oklch,
+				var(--cms-stage-halo-color, var(--tone)) var(--cms-stage-mark-halo-strength),
+				transparent
+			),
 			transparent
 		);
 	outline-offset: var(--cms-stage-halo-gap);
+
+	&:not([data-state='none']) {
+		--fill: light-dark(
+			var(--tone),
+			color-mix(in oklch, var(--tone) var(--cms-stage-tint), transparent)
+		);
+	}
 
 	&[data-state='none'] {
 		outline: none;
@@ -174,7 +186,8 @@
    rings never touch. */
 .cms-status-dots {
 	--size: var(--cms-stage-mark-size);
-	--reach: calc(var(--cms-stage-halo) + var(--cms-stage-halo-gap));
+	--halo: round(calc(var(--size) * var(--cms-stage-halo)), 1px);
+	--reach: calc(var(--halo) + var(--cms-stage-halo-gap));
 	--gap: calc(0.375rem + 2 * var(--reach));
 	display: inline-flex;
 	align-items: center;

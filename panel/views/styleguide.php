@@ -271,9 +271,9 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					</div>
 				<?php endforeach ?>
 				<?php // Stage tokens as a theme would set them. ?>
-				<?php $halo = '--cms-stage-halo: 1.5px; --cms-stage-halo-gap: 1.5px; --cms-stage-dot-halo: 1.5px; '
+				<?php $halo = '--cms-stage-halo: 0.08; --cms-stage-halo-gap: 1.5px; --cms-stage-dot-halo: 1.5px; '
 					. '--cms-stage-dot-halo-gap: 1.5px; --cms-stage-halo-strength: 45%'; ?>
-				<?php $inverted = '--cms-stage-tint: 100%; --cms-stage-halo: 2px; --cms-stage-halo-gap: 1px; '
+				<?php $inverted = '--cms-stage-tint: 100%; --cms-stage-halo: 0.1; --cms-stage-halo-gap: 1px; '
 					. '--cms-stage-halo-strength: 35%; --cms-color-stage-main-ink: white; '
 					. '--cms-color-stage-draft-ink: var(--cms-color-neutral-900); --cms-color-stage-mine-ink: white; '
 					. '--cms-color-stage-problem-ink: white; --cms-color-stage-idle: light-dark(var(--cms-color-neutral-200), var(--cms-color-neutral-700)); '
