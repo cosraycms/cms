@@ -148,7 +148,7 @@ final readonly class NodeStatus
 					$this->editor !== null && $this->editor !== ''
 						? __('status:main-applied-by', ['date' => $applied, 'editor' => $this->editor])
 						: __('status:main-applied', ['date' => $applied]),
-				'help' => __($published ? 'status:main-visible' : 'status:main-invisible'),
+				'help' => __('status:main-help'),
 				'badge' => __($published ? 'status:online' : 'status:offline'),
 			],
 			[

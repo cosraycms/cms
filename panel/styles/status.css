@@ -372,7 +372,9 @@ button.cms-status-dots .cms-status-dots-tooltip {
 }
 
 /* The inspector's status tab: the stages top to bottom on a line, and
-   between two of them the step that takes the lower one into the upper. */
+   between two of them the step that takes the lower one into the upper.
+   Empty stages and steps with nothing to take stay in the markup, hidden;
+   the line joins the visible ones. */
 .cms-status-pipeline {
 	--size: 1.75rem;
 	display: flex;
@@ -388,6 +390,57 @@ button.cms-status-dots .cms-status-dots-tooltip {
 		text-transform: uppercase;
 	}
 
+	& .cms-status-pipeline-about {
+		& summary {
+			--cms-icon-size: 0.875rem;
+			display: inline-flex;
+			align-items: center;
+			gap: var(--cms-space-1-5);
+			border-radius: var(--cms-radius-sm);
+			color: var(--cms-color-text-subtle);
+			list-style: none;
+			cursor: pointer;
+
+			&::-webkit-details-marker {
+				display: none;
+			}
+
+			&:hover {
+				color: var(--cms-color-text);
+			}
+
+			&:focus-visible {
+				outline: var(--cms-focus-outline);
+				outline-offset: var(--cms-focus-offset);
+			}
+		}
+
+		&[open] summary {
+			color: var(--cms-color-text);
+		}
+
+		& dl {
+			display: flex;
+			flex-direction: column;
+			gap: var(--cms-space-2);
+			margin: var(--cms-space-2-5) 0 0;
+			padding: var(--cms-space-2-5) var(--cms-space-3);
+			border-radius: var(--cms-radius-md);
+			background: var(--cms-color-selected);
+			font-size: var(--cms-font-size-xs);
+			line-height: 1.4;
+		}
+
+		& dt {
+			font-weight: 600;
+		}
+
+		& dd {
+			margin: 0;
+			color: var(--cms-color-text-muted);
+		}
+	}
+
 	& .cms-status-pipeline-stages {
 		display: flex;
 		flex-direction: column;
@@ -396,20 +449,22 @@ button.cms-status-dots .cms-status-dots-tooltip {
 		list-style: none;
 	}
 
-	& .cms-status-pipeline-stage {
+	& .cms-status-pipeline-item {
+		--mark: var(--size);
 		position: relative;
 		display: grid;
 		grid-template-columns: var(--size) minmax(0, 1fr);
+		align-items: start;
 		column-gap: var(--cms-space-3);
 		padding-bottom: var(--cms-space-5);
 
-		&:last-child {
-			padding-bottom: 0;
+		&:is([hidden], [data-state='none']) {
+			display: none;
 		}
 
-		&:not(:last-child)::before {
+		&::before {
 			position: absolute;
-			top: calc(var(--size) + var(--cms-space-1));
+			top: calc(var(--mark) + var(--cms-space-1));
 			bottom: var(--cms-space-1);
 			left: calc(var(--size) / 2 - 0.5px);
 			width: 1px;
@@ -417,14 +472,20 @@ button.cms-status-dots .cms-status-dots-tooltip {
 			content: '';
 		}
 
-		&[data-state='none'] :is(.cms-status-pipeline-name, .cms-status-pipeline-text) {
-			color: var(--cms-color-text-subtle);
-		}
+		/* The last visible item: neither a line nor space below it. */
+		&:not(:has(~ .cms-status-pipeline-item:not([hidden], [data-state='none']))) {
+			padding-bottom: 0;
 
-		&[data-stage='mine']:is([data-state='conflict'], [data-state='error'])
-			.cms-status-pipeline-text {
-			color: var(--cms-color-danger-text);
+			&::before {
+				content: none;
+			}
 		}
+	}
+
+	&
+		.cms-status-pipeline-stage[data-stage='mine']:is([data-state='conflict'], [data-state='error'])
+		.cms-status-pipeline-text {
+		color: var(--cms-color-danger-text);
 	}
 
 	& .cms-status-pipeline-body {
@@ -501,10 +562,6 @@ button.cms-status-dots .cms-status-dots-tooltip {
 		}
 	}
 
-	& .cms-status-pipeline-stage[data-state='none'] .cms-status-pipeline-notice {
-		display: none;
-	}
-
 	& .cms-status-pipeline-discard {
 		padding: 0 var(--cms-space-1-5);
 		border: 1px solid var(--cms-color-danger-border-soft);
@@ -533,15 +590,7 @@ button.cms-status-dots .cms-status-dots-tooltip {
 	}
 
 	& .cms-status-pipeline-step {
-		display: grid;
-		grid-column: 1 / -1;
-		grid-template-columns: subgrid;
-		align-items: start;
-		margin-top: var(--cms-space-5);
-
-		&[hidden] {
-			display: none;
-		}
+		--mark: calc(1.25rem + var(--cms-space-1));
 
 		& .cms-status-pipeline-arrow {
 			--cms-icon-size: 0.75rem;
@@ -560,6 +609,32 @@ button.cms-status-dots .cms-status-dots-tooltip {
 
 		& .cms-status-pipeline-help {
 			margin-top: var(--cms-space-1);
+		}
+	}
+
+	/* The stage a step's button leads into, small and without its halo. */
+	& .cms-button .cms-stage-mark.is-plain {
+		--size: 1rem;
+		--cms-icon-size: calc(var(--size) * 0.7);
+		outline: none;
+
+		&:is([data-stage='main'], [data-stage='saved']) {
+			--cms-icon-size: calc(var(--size) * 0.85);
+		}
+
+		&[data-stage='main'][data-state='unpublished'] {
+			--cms-icon-size: var(--size);
+		}
+	}
+
+	& .cms-status-pipeline-hint {
+		margin: 0;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.4;
+
+		&[hidden] {
+			display: none;
 		}
 	}
 

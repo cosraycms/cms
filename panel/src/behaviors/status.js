@@ -4,7 +4,8 @@
 // server never sees: saving while an autosave is pending or in flight,
 // kept once the server holds it, error when it failed. The head's buttons
 // and the pipeline's steps follow: saving the draft needs edits of the
-// user's, applying edits or a draft. Forms marked data-done-toast say they
+// user's, applying edits or a draft; the pipeline shows the mine stage only
+// while it holds something. Forms marked data-done-toast say they
 // succeeded in a toast, which outlives the editor they reload.
 
 /** @import { Context } from './dialogs.js' */
@@ -74,9 +75,6 @@ function show(state) {
 		.forEach((element) => {
 			element.textContent = label;
 		});
-	document
-		.querySelector(`#${PANEL} [data-mine-discard]`)
-		?.toggleAttribute('hidden', state === 'none');
 
 	if (head) {
 		const rows = Array.from(head.querySelectorAll('.cms-status-dots-row'), (row) =>
@@ -164,6 +162,12 @@ function follow() {
 
 	if (save instanceof HTMLElement) {
 		save.hidden = state === 'none';
+	}
+
+	const idle = panel?.querySelector('[data-idle-hint]');
+
+	if (idle instanceof HTMLElement) {
+		idle.hidden = state !== 'none';
 	}
 
 	discardMineToo(state);

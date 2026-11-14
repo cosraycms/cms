@@ -17,24 +17,38 @@ test('the status tab moves edits up the stages and discards a draft without my c
 	const panel = page.locator('#editor-status-panel');
 	const draft = page.locator('#editor-status-dots > [data-stage="draft"]');
 	const applyStep = panel.getByRole('button', { name: 'Apply to the main version' });
-	const saveStep = panel.getByRole('button', { name: 'Save draft' });
+	const saveStep = panel.getByRole('button', { name: 'Save as draft' });
+	const saveIntoStep = panel.getByRole('button', { name: 'Save to the draft' });
+	const draftStage = panel.locator('li[data-stage="draft"]');
+	const mineStage = panel.locator('li[data-stage="mine"]');
+	const idle = panel.locator('[data-idle-hint]');
 
 	await expect(applyStep).toBeHidden();
 	await expect(saveStep).toBeHidden();
 	await expect(draft).toBeHidden();
 	await expect(mine(page)).toBeHidden();
+	await expect(draftStage).toBeHidden();
+	await expect(mineStage).toBeHidden();
+	await expect(idle).toBeVisible();
 
+	// With my changes and no draft, both ways up sit between them and the main version.
 	await edit(page, 'Drafted');
-	await expect(panel).toContainText('applies my changes');
+	await expect(mineStage).toBeVisible();
+	await expect(idle).toBeHidden();
+	await expect(draftStage).toBeHidden();
+	await expect(panel).toContainText('applies my changes · visitors see it at once');
 	await saveStep.click();
 	await expect(draft).toHaveAttribute('data-state', 'present');
 	await expect(draft).toBeVisible();
 	await expect(mine(page)).toHaveAttribute('data-state', 'none');
 	await expect(mine(page)).toBeHidden();
 	await expect(saveStep).toBeHidden();
+	await expect(draftStage).toBeVisible();
+	await expect(mineStage).toBeHidden();
 	await expect(panel).toContainText('applies the draft');
 
 	await edit(page, 'Drafted, then mine');
+	await expect(saveIntoStep).toBeVisible();
 	await expect(panel).toContainText('applies the draft and my changes');
 
 	// Discarding the draft can keep my changes, which still hold the draft's.
@@ -47,6 +61,7 @@ test('the status tab moves edits up the stages and discards a draft without my c
 	await expect(page.locator('#cms-toasts')).toContainText('Draft discarded');
 	await expect(draft).toHaveAttribute('data-state', 'none');
 	await expect(draft).toBeVisible();
+	await expect(draftStage).toBeHidden();
 	await expect(mine(page)).toHaveAttribute('data-state', 'present');
 	await expect(mine(page)).toBeVisible();
 	await expect(page.getByLabel('Title')).toHaveValue('Drafted, then mine');
