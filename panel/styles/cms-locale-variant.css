@@ -10,6 +10,13 @@
 		font-style: italic;
 	}
 
+	/* A blocks variant's note is laid out even while hidden, so its padding
+	   applies outside the preview too: it keeps the space below the canvas. */
+	& > [data-blocks-fallback-source] {
+		margin-block-start: 0;
+		padding: 0 var(--cms-space-3) var(--cms-space-3);
+	}
+
 	/* Shown, but not editable here: an outline with no fill, like a
 	   disabled control. */
 	&.is-fallback-preview {
@@ -17,11 +24,6 @@
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-md);
 		color: var(--cms-color-text-subtle);
-
-		& > .cms-locale-variant-source {
-			margin-block-start: 0;
-			padding: 0 var(--cms-space-3) var(--cms-space-3);
-		}
 
 		& .cms-blocks-editor {
 			border: 0;
