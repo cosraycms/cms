@@ -5,14 +5,14 @@ use Cosray\Panel\NodeStatus;
 
 use function Cosray\escape;
 
-// A node's stages, from Panel\NodeStatus: in the editor head a button of
-// icons with a tooltip that opens the inspector's status tab, in lists an
-// image with a short text, as icons, dots, or compact: the main version's
-// icon with a dot for each further stage that holds something. The
-// editor's status.js moves the mine stage through the client states
-// (saving, error) between saves.
+// A node's stages, from Panel\NodeStatus, as icons or dots: in the editor
+// head a button with a tooltip that opens the inspector's status tab, in
+// lists an image with a short text of the stages a list row passes. The
+// head holds every stage, as the editor's status.js moves the mine stage
+// through the client states (saving, error) between saves, and its styles
+// show them up to the last that holds something.
 // Receives: status (the editor's status view or a list row's), size (md, sm),
-// look (icons, dots, compact), id and oob for the editor head.
+// look (icons, dots), id and oob for the editor head.
 
 $status = (array) u($status);
 $stages = (array) ($status['stages'] ?? []);
@@ -21,14 +21,14 @@ $id = u($id ?? null);
 $oob = (bool) (u($oob ?? null) ?? false);
 $sentence = (string) ($status['sentence'] ?? '');
 $look = (string) u($look ?? 'icons');
-$icons = NodeStatus::ICONS;
-$marks = static function (array $stages) use ($icons): string {
+$marks = static function (array $stages): string {
 	$html = '';
 
 	foreach ($stages as $stage) {
 		$key = (string) $stage['key'];
+		$state = (string) $stage['state'];
 		$html .= '<span class="cms-stage-mark" data-stage="' . escape($key) . '" data-state="'
-		. escape((string) $stage['state']) . '">' . Icon::render($icons[$key] ?? 'pencil') . '</span>';
+		. escape($state) . '">' . Icon::render(NodeStatus::icon($key, $state)) . '</span>';
 	}
 
 	return $html;
@@ -43,17 +43,7 @@ $dots = static function (array $stages): string {
 
 	return $html;
 };
-$isMain = static fn(array $stage): bool => in_array($stage['key'], ['main', 'saved'], true);
-$main = array_filter($stages, $isMain);
-$look = $look === 'compact' && $main === [] ? 'dots' : $look;
-$content = match ($look) {
-	'compact' => $marks($main) . '<span class="cms-status-dots-pips">' . $dots(array_filter(
-		$stages,
-		static fn(array $stage): bool => !$isMain($stage) && $stage['state'] !== 'none',
-	)) . '</span>',
-	'dots' => $dots($stages),
-	default => $marks($stages),
-};
+$content = $look === 'dots' ? $dots($stages) : $marks($stages);
 ?>
 <?php if (is_string($id)): ?>
 	<button

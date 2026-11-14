@@ -1415,30 +1415,27 @@ final class Styleguide extends Panel
 
 	/**
 	 * A node's stages in the states the looks of a status column must tell
-	 * apart: online alone, offline with a draft, both further stages, and a
-	 * conflict.
+	 * apart: online alone, offline with a draft, my changes without a draft,
+	 * both further stages, and a conflict.
 	 *
-	 * @return list<array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string}>
+	 * @return list<list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>>
 	 */
 	private function stageSamples(): array
 	{
 		$dates = NodeStatus::dates($this->localeId(), $this->config->app->timezone);
-		$sample = static function (bool $published, ?string $draft, ?string $base) use ($dates): array {
-			$stages = NodeStatus::of(
-				record: false,
-				published: $published,
-				edited: '2026-08-11 22:25:00+00',
-				editor: 'Ada',
-				draft: $draft === null ? null : ['changed' => $draft, 'editorName' => 'Ada'],
-				autosave: $base === null ? null : ['changed' => '2026-08-11 22:45:00+00', 'base' => $base],
-			)->stages($dates);
-
-			return ['stages' => $stages, 'sentence' => NodeStatus::sentence($stages)];
-		};
+		$sample = static fn(bool $published, ?string $draft, ?string $base): array => NodeStatus::of(
+			record: false,
+			published: $published,
+			edited: '2026-08-11 22:25:00+00',
+			editor: 'Ada',
+			draft: $draft === null ? null : ['changed' => $draft, 'editorName' => 'Ada'],
+			autosave: $base === null ? null : ['changed' => '2026-08-11 22:45:00+00', 'base' => $base],
+		)->stages($dates);
 
 		return [
 			$sample(true, null, null),
 			$sample(false, '2026-08-11 22:30:00+00', null),
+			$sample(true, null, '2026-08-11 22:25:00+00'),
 			$sample(true, '2026-08-11 22:30:00+00', '2026-08-11 22:30:00+00'),
 			$sample(true, '2026-08-11 22:40:00+00', '2026-08-11 22:30:00+00'),
 		];
@@ -1464,6 +1461,7 @@ final class Styleguide extends Panel
 				draft: $draft === null ? null : ['changed' => $draft, 'editorName' => 'Ada'],
 				autosave: $mine === null ? null : ['changed' => $mine, 'base' => '2026-08-11 22:25:00+00'],
 			)->stages($dates);
+			$stages = NodeStatus::chain($stages);
 
 			return ['stages' => $stages, 'sentence' => NodeStatus::sentence($stages)];
 		};

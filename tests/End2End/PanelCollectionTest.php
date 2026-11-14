@@ -99,7 +99,7 @@ final class PanelCollectionTest extends End2EndTestCase
 			"{$row}/td[not(contains(@class, 'cms-list-col-select'))][2][contains(@class, 'is-lead')]/a[contains(., 'Status A')]",
 			$html,
 		);
-		// Only stages that hold something: the fresh article has none here.
+		// Up to the last stage that holds something: the fresh article has none here.
 		$this->assertHtmlNodeMissing(
 			"{$row}/td[not(contains(@class, 'cms-list-col-select'))][3]//*[@data-stage]",
 			$html,

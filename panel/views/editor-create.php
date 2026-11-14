@@ -53,9 +53,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		<div class="cms-create-hint">
 			<?php if (!$record): ?>
 				<span class="cms-status-dots is-sm" aria-hidden="true">
-					<span class="cms-stage-mark" data-stage="main" data-state="unpublished"><?= Icon::render(NodeStatus::ICONS['main']) ?></span>
-					<span class="cms-stage-mark" data-stage="draft" data-state="none"><?= Icon::render(NodeStatus::ICONS['draft']) ?></span>
-					<span class="cms-stage-mark" data-stage="mine" data-state="none"><?= Icon::render(NodeStatus::ICONS['mine']) ?></span>
+					<span class="cms-stage-mark" data-stage="main" data-state="unpublished"><?= Icon::render(NodeStatus::icon('main', 'unpublished')) ?></span>
 				</span>
 			<?php endif ?>
 			<p><?= escape(__($record ? 'editor:create-record' : 'editor:create-entry')) ?></p>

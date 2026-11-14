@@ -65,14 +65,14 @@ Depth uses the `--cms-shadow-*`, `--cms-gradient-raised`, and `--cms-pane-shadow
 
 ### Stage marks
 
-A node's stages (the main version, the editorial draft, the user's own changes) appear as icons, dots, or the compact main icon with small dots beside it, in the editor head, lists, filters, and the status tab. Each icon is a `cms-stage-mark` ([status.css](../panel/styles/status.css)), sized by the `--size` of whatever holds it. The `--cms-color-stage-*` tokens colour them everywhere:
+A node's stages (the main version, the editorial draft, the user's own changes) appear as icons or dots in the editor head, lists, filters, and the status tab; the head and lists join them by lines. Each icon is a `cms-stage-mark` ([status.css](../panel/styles/status.css)), sized by the `--size` of whatever holds it. The `--cms-color-stage-*` tokens colour them everywhere:
 
 - `main`, `draft`, `mine`, and `problem` colour a stage that holds something.
-- `idle` colours an empty stage's icon, `offline` the icon of a main version that is not published. Dots show the latter as a ring in the main colour.
+- `idle` colours an empty stage's icon, `offline` the slashed globe of a main version that is not published, in the main colour unless a theme sets it. Dots show the latter as a ring in the main colour.
 - Each of these six has an `-ink` variant for the icon drawn on its tinted circle.
-- `empty` fills the dot of an empty stage.
+- `empty` fills the dot of an empty stage and draws the lines between stages.
 
-The `--cms-stage-*` tokens shape them: `mark-size` and `mark-size-sm` for icons (head and lists), `dot-size` and `pip-size` for the dots, and `tint` for the strength of an icon's background. A halo rings every stage that holds something. Icons have none by default and dots a soft 2px band; `halo` and `dot-halo` set the ring width, `halo-gap` and `dot-halo-gap` its distance from the mark, `halo-strength` how much colour it shows, and `halo-color` a colour for every ring instead of each stage's own. Neighbouring marks move apart by the halo's reach.
+The `--cms-stage-*` tokens shape them: `mark-size` and `mark-size-sm` for icons (head and lists), `dot-size` for the dots, and `tint` for the strength of an icon's background. A halo rings every stage that holds something. Icons have none by default and dots a soft 2px band; `halo` and `dot-halo` set the ring width, `halo-gap` and `dot-halo-gap` its distance from the mark, `halo-strength` how much colour it shows, and `halo-color` a colour for every ring instead of each stage's own. Neighbouring marks move apart by the halo's reach.
 
 ```css
 @layer theme {

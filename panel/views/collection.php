@@ -159,9 +159,9 @@ $columns .= $hasRowActions ? ' max-content' : '';
 				<?php foreach ($page->stages as $chip): ?>
 					<?php
 					[$stage, $state, $icon] = match ($chip['key']) {
-						'draft' => ['draft', 'present', NodeStatus::ICONS['draft']],
-						'mine' => ['mine', 'present', NodeStatus::ICONS['mine']],
-						'unpublished' => ['main', 'unpublished', NodeStatus::ICONS['main']],
+						'draft' => ['draft', 'present', NodeStatus::icon('draft')],
+						'mine' => ['mine', 'present', NodeStatus::icon('mine')],
+						'unpublished' => ['main', 'unpublished', NodeStatus::icon('main', 'unpublished')],
 						default => [null, null, null],
 					};
 					?>

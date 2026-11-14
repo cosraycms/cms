@@ -6,15 +6,15 @@ namespace Cosray;
 
 /**
  * A listing column of a node's stages, made by Column::status(). It shows
- * every stage as an icon unless told otherwise; a collection without one
- * gets it after its first column.
+ * them as icons up to the last that holds something, the empty ones before
+ * it in grey; a collection without one gets it after its first column.
  */
 final class StatusColumn
 {
 	/** @var non-empty-list<Stage> */
 	public readonly array $stages;
 	public private(set) string $look = 'icons';
-	public private(set) bool $present = false;
+	public private(set) bool $fixed = false;
 	private ?string $title = null;
 
 	public function __construct(Stage ...$stages)
@@ -45,21 +45,10 @@ final class StatusColumn
 		return $this;
 	}
 
-	/**
-	 * The main version's icon, with a small dot for each further stage that
-	 * holds something.
-	 */
-	public function compact(): self
+	/** Every stage, also after the last that holds something. */
+	public function fixed(): self
 	{
-		$this->look = 'compact';
-
-		return $this;
-	}
-
-	/** Only the stages that hold something. */
-	public function present(): self
-	{
-		$this->present = true;
+		$this->fixed = true;
 
 		return $this;
 	}

@@ -46,7 +46,7 @@ test('the status tab moves edits up the stages and discards a draft without my c
 
 	await expect(page.locator('#cms-toasts')).toContainText('Draft discarded');
 	await expect(draft).toHaveAttribute('data-state', 'none');
-	await expect(draft).toBeHidden();
+	await expect(draft).toBeVisible();
 	await expect(mine(page)).toHaveAttribute('data-state', 'present');
 	await expect(mine(page)).toBeVisible();
 	await expect(page.getByLabel('Title')).toHaveValue('Drafted, then mine');

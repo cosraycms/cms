@@ -64,7 +64,7 @@ final class CollectionStatusColumnTest extends TestCase
 			[
 				Column::status(Stage::Main),
 				Column::new('Title', 'title'),
-				Column::status(Stage::Draft, Stage::Mine)->present(),
+				Column::status(Stage::Draft, Stage::Mine),
 			],
 			draft: true,
 		);
@@ -90,15 +90,30 @@ final class CollectionStatusColumnTest extends TestCase
 		$this->assertSame(['hidden'], array_column($cells[2]['status']['badges'] ?? [], 'kind'));
 	}
 
-	public function testCompactNamesEveryStageItStandsFor(): void
+	public function testStagesRunUpToTheLastThatHoldsSomething(): void
+	{
+		$columns = [Column::new('Title', 'title'), Column::status()];
+		$alone = $this->table($columns)->rows[0]['cells'][1]['status'] ?? [];
+		$mine = $this->table($columns, mine: true)->rows[0]['cells'][1]['status'] ?? [];
+
+		$this->assertSame(['main'], array_column($alone['stages'] ?? [], 'key'));
+		$this->assertStringNotContainsString('status:draft', $alone['sentence'] ?? '');
+		$this->assertSame(
+			[['main', 'published'], ['draft', 'none'], ['mine', 'present']],
+			array_map(static fn(array $stage): array => [$stage['key'], $stage['state']], $mine['stages'] ?? []),
+		);
+	}
+
+	public function testFixedColumnsShowEveryStage(): void
 	{
 		$cells = $this->table([
 			Column::new('Title', 'title'),
-			Column::status()->compact()->present(),
+			Column::status()->fixed(),
+			Column::status(Stage::Draft, Stage::Mine),
 		])->rows[0]['cells'];
 
-		$this->assertSame(['main'], array_column($cells[1]['status']['stages'] ?? [], 'key'));
-		$this->assertStringContainsString('status:draft', $cells[1]['status']['sentence'] ?? '');
+		$this->assertSame(['main', 'draft', 'mine'], array_column($cells[1]['status']['stages'] ?? [], 'key'));
+		$this->assertSame([], $cells[2]['status']['stages'] ?? null);
 	}
 
 	public function testARecordsSavedStateIsItsMainVersion(): void
@@ -112,8 +127,12 @@ final class CollectionStatusColumnTest extends TestCase
 	}
 
 	/** @param list<Column|StatusColumn> $columns */
-	private function table(array $columns, bool $draft = false, bool $record = false): CollectionTable
-	{
+	private function table(
+		array $columns,
+		bool $draft = false,
+		bool $record = false,
+		bool $mine = false,
+	): CollectionTable {
 		$node = [
 			'uid' => 'entry',
 			'published' => true,
@@ -123,7 +142,7 @@ final class CollectionStatusColumnTest extends TestCase
 				'edited' => '2026-08-11 22:25:00+00',
 				'editor' => 'Ada',
 				'draft' => $draft ? ['changed' => '2026-08-11 22:30:00+00', 'editorName' => 'Ada'] : null,
-				'mine' => null,
+				'mine' => $mine ? ['changed' => '2026-08-11 22:35:00+00', 'base' => '2026-08-11 22:25:00+00'] : null,
 			],
 			'columns' => array_map(
 				static fn(Column|StatusColumn $column): array => $column instanceof Column ? ['value' => 'Entry'] : [],

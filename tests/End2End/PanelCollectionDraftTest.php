@@ -52,9 +52,9 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 
 		$this->assertHtmlNodeExists($this->dot('listing-changed', 'main', 'published'), $html);
 		$this->assertHtmlNodeExists($this->dot('listing-changed', 'draft', 'present'), $html);
-		$this->assertHtmlNodeExists($this->dot('listing-clean', 'draft', 'none'), $html);
+		$this->assertHtmlNodeExists($this->dot('listing-clean', 'main', 'published'), $html);
+		$this->assertHtmlNodeMissing($this->dot('listing-clean', 'draft', 'none'), $html);
 		$this->assertHtmlNodeExists($this->dot('listing-offline', 'main', 'unpublished'), $html);
-		$this->assertHtmlNodeExists($this->dot('listing-offline', 'draft', 'none'), $html);
 		$this->assertHtmlNodeExists(
 			'//dialog[@data-dialog="bulk-publish"]//label[@data-bulk-option]/input[@name="changes"]',
 			$html,

@@ -161,18 +161,36 @@
 }
 
 /* A node's stages as icons, from Panel\NodeStatus, marked like the status
-   tab's. status.js moves the mine stage between saves. Neighbours move
-   apart by the halo's reach so two rings never touch. */
+   tab's, each joined to the one before by a line. status.js moves the mine
+   stage between saves. Neighbours move apart by the halo's reach so two
+   rings never touch. */
 .cms-status-dots {
 	--size: var(--cms-stage-mark-size);
 	--reach: calc(var(--cms-stage-halo) + var(--cms-stage-halo-gap));
+	--gap: calc(0.375rem + 2 * var(--reach));
 	display: inline-flex;
 	align-items: center;
-	gap: calc(0.25rem + 2 * var(--reach));
+	gap: var(--gap);
 
 	&.is-sm {
 		--size: var(--cms-stage-mark-size-sm);
-		gap: calc(0.1875rem + 2 * var(--reach));
+		--gap: calc(0.3125rem + 2 * var(--reach));
+	}
+
+	& > :is(.cms-stage-mark, .cms-status-dots-dot) + :is(.cms-stage-mark, .cms-status-dots-dot) {
+		position: relative;
+
+		&::before {
+			position: absolute;
+			top: 50%;
+			right: 100%;
+			width: var(--gap);
+			height: 1px;
+			margin-right: var(--edge, 0px);
+			background: var(--cms-color-stage-empty);
+			translate: 0 -50%;
+			content: '';
+		}
 	}
 
 	/* Dots instead of icons: colour names the stage, shape a special state (a
@@ -180,6 +198,7 @@
 	& .cms-status-dots-dot {
 		--color: var(--cms-color-stage-empty);
 		--halo: var(--cms-stage-dot-halo);
+		--edge: 2px;
 		display: inline-grid;
 		place-items: center;
 		flex: none;
@@ -229,7 +248,7 @@
 .cms-status-dots.is-dots {
 	--dot: var(--cms-stage-dot-size);
 	--reach: calc(var(--cms-stage-dot-halo) + var(--cms-stage-dot-halo-gap));
-	gap: calc(0.1875rem + 2 * var(--reach));
+	--gap: calc(0.3125rem + 2 * var(--reach));
 
 	& .cms-status-dots-dot[data-stage='mine'][data-state='conflict'] {
 		width: calc(var(--dot) * 1.5);
@@ -242,24 +261,6 @@
 			line-height: 1;
 			content: '!';
 		}
-	}
-}
-
-/* The main version's icon, with a small dot beside it for each further
-   stage that holds something; the dots are too small for a halo. */
-.cms-status-dots.is-compact {
-	gap: calc(0.1875rem + var(--reach));
-
-	& .cms-status-dots-pips {
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-	}
-
-	& .cms-status-dots-dot {
-		--dot: var(--cms-stage-pip-size);
-		--halo: 0px;
-		border: 0;
 	}
 }
 
@@ -313,9 +314,10 @@ button.cms-status-dots {
 		display: flex;
 	}
 
-	/* Empty stages stay in the markup: status.js shows the mine stage
-	   while an autosave runs or fails. */
-	& > .cms-stage-mark[data-state='none'] {
+	/* The stages up to the last that holds something. The others stay in
+	   the markup, as status.js shows the mine stage while an autosave runs
+	   or fails. */
+	& > .cms-stage-mark[data-state='none']:not(:has(~ .cms-stage-mark:not([data-state='none']))) {
 		display: none;
 	}
 

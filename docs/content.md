@@ -253,12 +253,12 @@ public function columns(): array
         Column::new(__('Title'), 'title')->bold(true)->sort('title'),
         Column::new(__('Last changed'), 'meta.changed')
             ->date(true)->sort('changed', direction: 'desc'),
-        Column::status(Stage::Draft, Stage::Mine)->title(__('Changes'))->present(),
+        Column::status(Stage::Draft, Stage::Mine)->title(__('Changes'))->dots(),
     ];
 }
 ```
 
-A status column shows its stages as icons. `dots()` shows dots instead, and `compact()` shows the main version's icon with a small dot beside it for each further stage that holds something. `present()` leaves out the stages that hold nothing. `title()` replaces the "Status" heading; an empty title hides it from view but keeps it for screen readers.
+A status column shows its stages as a chain of icons, joined by lines, from its first stage up to the last that holds something. Empty stages before that one stay in grey, so each stage keeps its place in every row; the chain grows as changes wait to go live. `fixed()` shows every stage of the column, and `dots()` shows dots instead of icons. `title()` replaces the "Status" heading; an empty title hides it from view but keeps it for screen readers.
 
 For dated collections, flag the `date` or `start` sort as the default as appropriate. A callback-rendered column uses the same declarations: sorting still operates on stored fields, never on a fetched page or the callback's result. `SortField::number()` supports both Number and Decimal values without PHP float conversion. Dates require `YYYY-MM-DD`; datetimes require RFC 3339 values with seconds and an offset or `Z` and sort by instant. Missing and whitespace-only custom values sort last in either direction. Arrays, objects, malformed typed values, relative dates, and non-finite numbers cause query errors rather than silently receiving a misleading order.
 

@@ -20,7 +20,7 @@ final class CollectionTable
 	use NormalizesInput;
 
 	/**
-	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, present: bool, badges: bool}> $headers
+	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}> $headers
 	 * @param list<array{
 	 *     uid: string,
 	 *     depth: int,
@@ -78,7 +78,7 @@ final class CollectionTable
 	 * the main version, or else the first stages shown.
 	 *
 	 * @param iterable<Column|StatusColumn> $columns
-	 * @return list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, present: bool, badges: bool}>
+	 * @return list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}>
 	 */
 	private static function headers(
 		iterable $columns,
@@ -101,7 +101,7 @@ final class CollectionTable
 					'lead' => false,
 					'stages' => array_map(static fn(Stage $stage): string => $stage->value, $column->stages),
 					'look' => $column->look,
-					'present' => $column->present,
+					'fixed' => $column->fixed,
 					'badges' => false,
 				];
 
@@ -135,7 +135,7 @@ final class CollectionTable
 				'lead' => !$lead,
 				'stages' => [],
 				'look' => '',
-				'present' => false,
+				'fixed' => false,
 				'badges' => false,
 			];
 			$lead = true;
@@ -156,7 +156,7 @@ final class CollectionTable
 	}
 
 	/**
-	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, present: bool, badges: bool}> $headers
+	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}> $headers
 	 * @param list<mixed> $nodes
 	 * @return list<array{
 	 *     uid: string,
@@ -264,7 +264,7 @@ final class CollectionTable
 
 	/**
 	 * @param array<string, mixed> $node
-	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, present: bool, badges: bool}> $headers
+	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}> $headers
 	 * @return list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, badges: list<array{kind: string, label: string}>}}>
 	 */
 	private static function cells(
@@ -287,7 +287,7 @@ final class CollectionTable
 			]);
 
 			if ($header !== null && $header['kind'] === 'status') {
-				$stages ??= self::dots($node, $locale, $timezone)['stages'] ?? [];
+				$stages ??= self::dots($node, $locale, $timezone, fixed: true)['stages'] ?? [];
 				$cells[] = [
 					'label' => $label,
 					'value' => '',
@@ -330,11 +330,11 @@ final class CollectionTable
 	}
 
 	/**
-	 * A status column's share of a row's stages. A record's saved state
-	 * counts as its main version. Compact names every stage it stands for,
-	 * the others only those they show.
+	 * A status column's share of a row's stages, up to the last that holds
+	 * something unless fixed. A record's saved state counts as its main
+	 * version.
 	 *
-	 * @param array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, present: bool, badges: bool} $header
+	 * @param array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool} $header
 	 * @param list<array{key: string, state: string, name: string, text: string, help: string, badge: string}> $stages
 	 * @param list<array{kind: string, label: string}> $badges
 	 * @return array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, badges: list<array{kind: string, label: string}>}
@@ -349,12 +349,11 @@ final class CollectionTable
 				true,
 			),
 		));
-		$shown = $header['present']
-			? array_values(array_filter($chosen, static fn(array $stage): bool => $stage['state'] !== 'none'))
-			: $chosen;
+		$shown = $header['fixed'] ? $chosen : NodeStatus::chain($chosen);
+
 		return [
 			'stages' => $shown,
-			'sentence' => NodeStatus::sentence($header['look'] === 'compact' ? $chosen : $shown),
+			'sentence' => NodeStatus::sentence($shown),
 			'look' => $header['look'],
 			'badges' => $badges,
 		];
@@ -387,12 +386,13 @@ final class CollectionTable
 	}
 
 	/**
-	 * The row's stages as Panel\NodeStatus derives them, for its dots.
+	 * The row's stages as Panel\NodeStatus derives them, for its dots: up to
+	 * the last that holds something unless fixed.
 	 *
 	 * @param array<string, mixed> $node
 	 * @return ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string}
 	 */
-	public static function dots(array $node, string $locale, DateTimeZone $timezone): ?array
+	public static function dots(array $node, string $locale, DateTimeZone $timezone, bool $fixed = false): ?array
 	{
 		$facts = $node['stages'] ?? null;
 
@@ -417,6 +417,7 @@ final class CollectionTable
 				? null
 				: ['changed' => (string) ($mine['changed'] ?? ''), 'base' => (string) ($mine['base'] ?? '')],
 		)->stages(NodeStatus::dates($locale, $timezone));
+		$stages = $fixed ? $stages : NodeStatus::chain($stages);
 
 		return ['stages' => $stages, 'sentence' => NodeStatus::sentence($stages)];
 	}

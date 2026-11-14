@@ -19,11 +19,13 @@ Masthead areas use `grid-1x2` for the dashboard, `file-earmark-text` for content
 
 A full-row grid blocks field toggles its width with `arrows-expand-vertical` and `arrows-collapse-vertical`.
 
-The node inspector uses `layout-sidebar-inset-reverse` to collapse and expand, and its strip uses `toggles`, `link-45deg`, and `sliders` for the status, paths, and advanced tabs. Its status tab, the editor head and lists mark each stage after the action that leads there, from `Cosray\Panel\NodeStatus::ICONS`: the user's own edits with `pencil`, the draft and a record's saved state with `floppy` like Save, and the main version with `globe`; its steps use `arrow-up` on the line and `arrow-bar-up` for applying, which the head's Apply shares, and `lightning` says the visibility switches act at once.
+The node inspector uses `layout-sidebar-inset-reverse` to collapse and expand, and its strip uses `toggles`, `link-45deg`, and `sliders` for the status, paths, and advanced tabs. Its status tab, the editor head and lists mark each stage after the action that leads there, from `Cosray\Panel\NodeStatus::icon()`: the user's own edits with `pencil`, the draft and a record's saved state with `floppy` like Save, and the main version with `globe`, or `globe-slash` while it is offline; its steps use `arrow-up` on the line and `arrow-bar-up` for applying, which the head's Apply shares, and `lightning` says the visibility switches act at once.
 
 The layout preview's width presets use `display`, `tablet-landscape`, `tablet`, and `phone`; its reload uses `arrow-clockwise`.
 
 Block defaults map RichText → `body-text`, Heading → `heading`, Image → `image`, Images → `images`, Video → `film`, Youtube → `play-btn`, and Iframe → `window`. Custom blocks without available artwork use `square`. These defaults are bundled and work without an Iconify request, including on a cold cache.
+
+The custom `globe-slash` is Bootstrap's `globe` cut around the slash of its `*-slash` icons, such as `eye-slash`.
 
 The custom `heading` icon is inspired by Bootstrap's `card-heading`, without the card border and with an additional thin text line. Level-specific rich-text actions retain `type-h1`, `type-h2`, and `type-h3`.
 

@@ -21,7 +21,7 @@ $published = (bool) ($status['visibility']['published'] ?? false);
 $pending = ($status['mine'] ?? 'none') !== 'none' || (bool) ($status['draft'] ?? false);
 $conflict = ($status['mine'] ?? 'none') === 'conflict';
 $stages = array_column((array) ($status['stages'] ?? []), null, 'key');
-$items = ['draft' => NodeStatus::ICONS['draft'], 'mine' => NodeStatus::ICONS['mine']];
+$items = ['draft' => NodeStatus::icon('draft'), 'mine' => NodeStatus::icon('mine')];
 ?>
 <div
 	id="editor-apply"

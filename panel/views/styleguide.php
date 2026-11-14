@@ -256,11 +256,16 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 						<span class="cms-status is-<?= escape($status) ?>"><?= escape(ucfirst($status)) ?></span>
 					<?php endforeach ?>
 				</div>
-				<?php // A status column's looks, row by row: icons, dots, compact. ?>
-				<?php foreach (['icons', 'dots', 'compact'] as $look): ?>
+				<?php // A status column's looks, row by row: up to the last stage that holds something, or fixed. ?>
+				<?php $chains = static fn(bool $fixed): array => array_map(static function (array $stages) use ($fixed): array {
+					$stages = $fixed ? $stages : \Cosray\Panel\NodeStatus::chain($stages);
+
+					return ['stages' => $stages, 'sentence' => \Cosray\Panel\NodeStatus::sentence($stages)];
+				}, (array) u($stageSamples)); ?>
+				<?php foreach ([['icons', false], ['dots', false], ['icons', true], ['dots', true]] as [$look, $fixed]): ?>
 					<div class="cms-styleguide-sample">
-						<code><?= escape($look) ?></code>
-						<?php foreach ($stageSamples as $sample): ?>
+						<code><?= escape($look . ($fixed ? ' fixed' : '')) ?></code>
+						<?php foreach ($chains($fixed) as $sample): ?>
 							<?php $this->include('component/status-dots', ['status' => $sample, 'size' => 'sm', 'look' => $look]) ?>
 						<?php endforeach ?>
 					</div>
@@ -273,18 +278,18 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					. '--cms-color-stage-draft-ink: var(--cms-color-neutral-900); --cms-color-stage-mine-ink: white; '
 					. '--cms-color-stage-problem-ink: white; --cms-color-stage-idle: light-dark(var(--cms-color-neutral-200), var(--cms-color-neutral-700)); '
 					. '--cms-color-stage-idle-ink: light-dark(var(--cms-color-neutral-600), var(--cms-color-neutral-300)); '
-					// Set on :root, offline would follow idle by itself.
-					. '--cms-color-stage-offline: var(--cms-color-stage-idle); '
-					. '--cms-color-stage-offline-ink: var(--cms-color-stage-idle-ink)'; ?>
+					// Set on :root, offline would follow main by itself.
+					. '--cms-color-stage-offline: var(--cms-color-stage-main); '
+					. '--cms-color-stage-offline-ink: var(--cms-color-stage-main-ink)'; ?>
 				<?php foreach ([
 					['icons', 'icons with halo', $halo],
 					['dots', 'dots with halo', $halo],
 					['icons', 'icons inverted', $inverted],
-					['compact', 'compact inverted', $inverted],
+					['dots', 'dots inverted', $inverted],
 				] as [$look, $label, $style]): ?>
 					<div class="cms-styleguide-sample" style="<?= escape($style) ?>">
 						<code><?= escape($label) ?></code>
-						<?php foreach ($stageSamples as $sample): ?>
+						<?php foreach ($chains(false) as $sample): ?>
 							<?php $this->include('component/status-dots', ['status' => $sample, 'size' => 'sm', 'look' => $look]) ?>
 						<?php endforeach ?>
 					</div>
