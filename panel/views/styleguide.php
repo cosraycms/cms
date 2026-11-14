@@ -256,7 +256,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 						<span class="cms-status is-<?= escape($status) ?>"><?= escape(ucfirst($status)) ?></span>
 					<?php endforeach ?>
 				</div>
-				<?php // A status column's looks, row by row: up to the last stage that holds something, or fixed. ?>
+				<?php // A status column's looks, row by row: the stages that hold something in their places, or fixed. ?>
 				<?php $chains = static fn(bool $fixed): array => array_map(static function (array $stages) use ($fixed): array {
 					$stages = $fixed ? $stages : \Cosray\Panel\NodeStatus::chain($stages);
 
@@ -266,7 +266,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					<div class="cms-styleguide-sample">
 						<code><?= escape($look . ($fixed ? ' fixed' : '')) ?></code>
 						<?php foreach ($chains($fixed) as $sample): ?>
-							<?php $this->include('component/status-dots', ['status' => $sample, 'size' => 'sm', 'look' => $look]) ?>
+							<?php $this->include('component/status-dots', ['status' => $sample, 'size' => 'sm', 'look' => $look, 'fixed' => $fixed]) ?>
 						<?php endforeach ?>
 					</div>
 				<?php endforeach ?>

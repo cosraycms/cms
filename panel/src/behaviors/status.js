@@ -77,11 +77,13 @@ function show(state) {
 		});
 
 	if (head) {
-		const rows = Array.from(head.querySelectorAll('.cms-status-dots-row'), (row) =>
-			[
-				row.querySelector('strong')?.textContent ?? '',
-				row.querySelector('.cms-status-dots-text')?.textContent ?? '',
-			].join(' – '),
+		const rows = Array.from(
+			head.querySelectorAll('.cms-status-dots-row:not([data-state="none"])'),
+			(row) =>
+				[
+					row.querySelector('strong')?.textContent ?? '',
+					row.querySelector('.cms-status-dots-text')?.textContent ?? '',
+				].join(' – '),
 		);
 		head.setAttribute('aria-label', __('status:label', { status: rows.join('; ') }));
 	}

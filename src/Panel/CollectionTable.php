@@ -28,7 +28,7 @@ final class CollectionTable
 	 *     last: bool,
 	 *     published: bool,
 	 *     hasChildren: bool,
-	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, badges: list<array{kind: string, label: string}>}}>,
+	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
@@ -165,7 +165,7 @@ final class CollectionTable
 	 *     last: bool,
 	 *     published: bool,
 	 *     hasChildren: bool,
-	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, badges: list<array{kind: string, label: string}>}}>,
+	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
@@ -265,7 +265,7 @@ final class CollectionTable
 	/**
 	 * @param array<string, mixed> $node
 	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}> $headers
-	 * @return list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, badges: list<array{kind: string, label: string}>}}>
+	 * @return list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>
 	 */
 	private static function cells(
 		array $node,
@@ -337,7 +337,7 @@ final class CollectionTable
 	 * @param array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool} $header
 	 * @param list<array{key: string, state: string, name: string, text: string, help: string, badge: string}> $stages
 	 * @param list<array{kind: string, label: string}> $badges
-	 * @return array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, badges: list<array{kind: string, label: string}>}
+	 * @return array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}
 	 */
 	private static function stagesOf(array $header, array $stages, array $badges): array
 	{
@@ -355,6 +355,7 @@ final class CollectionTable
 			'stages' => $shown,
 			'sentence' => NodeStatus::sentence($shown),
 			'look' => $header['look'],
+			'fixed' => $header['fixed'],
 			'badges' => $badges,
 		];
 	}

@@ -6,8 +6,9 @@ namespace Cosray;
 
 /**
  * A listing column of a node's stages, made by Column::status(). It shows
- * them as icons up to the last that holds something, the empty ones before
- * it in grey; a collection without one gets it after its first column.
+ * the ones that hold something as icons, each in its place, an empty one
+ * between them as a stretch of the line. A collection without one gets it
+ * after its first column.
  */
 final class StatusColumn
 {
@@ -45,7 +46,7 @@ final class StatusColumn
 		return $this;
 	}
 
-	/** Every stage, also after the last that holds something. */
+	/** Every stage, the empty ones as grey marks. */
 	public function fixed(): self
 	{
 		$this->fixed = true;

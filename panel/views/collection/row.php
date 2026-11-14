@@ -60,6 +60,7 @@ $grip = $group === null
 							'status' => $cell['status'],
 							'size' => 'sm',
 							'look' => $cell['status']['look'],
+							'fixed' => $cell['status']['fixed'] ?? false,
 						]) ?>
 					<?php endif ?>
 					<?php foreach ($cell['status']['badges'] as $badge): ?>

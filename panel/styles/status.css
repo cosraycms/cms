@@ -288,6 +288,20 @@
 	}
 }
 
+/* An empty stage in a list keeps its place as a dotted stretch of the line
+   between its neighbours; fixed shows it as a grey mark instead. */
+.cms-status-dots:not(.is-fixed, button)
+	> :is(.cms-stage-mark, .cms-status-dots-dot)[data-state='none'] {
+	border-color: transparent;
+	background: radial-gradient(circle, var(--cms-color-stage-empty) 0.75px, transparent 1.25px)
+		center / 4px 4px repeat-x;
+	outline: none;
+
+	& > * {
+		visibility: hidden;
+	}
+}
+
 /* In the editor head: opens the inspector's status tab, and says what the
    dots mean on hover and focus. */
 button.cms-status-dots {
@@ -338,10 +352,10 @@ button.cms-status-dots {
 		display: flex;
 	}
 
-	/* The stages up to the last that holds something. The others stay in
-	   the markup, as status.js shows the mine stage while an autosave runs
-	   or fails. */
-	& > .cms-stage-mark[data-state='none']:not(:has(~ .cms-stage-mark:not([data-state='none']))) {
+	/* Only the stages that hold something. The others stay in the markup,
+	   as status.js shows the mine stage while an autosave runs or fails. */
+	& > .cms-stage-mark[data-state='none'],
+	& .cms-status-dots-row[data-state='none'] {
 		display: none;
 	}
 

@@ -8,11 +8,12 @@ use function Cosray\escape;
 // A node's stages, from Panel\NodeStatus, as icons or dots: in the editor
 // head a button with a tooltip that opens the inspector's status tab, in
 // lists an image with a short text of the stages a list row passes. The
-// head holds every stage, as the editor's status.js moves the mine stage
-// through the client states (saving, error) between saves, and its styles
-// show them up to the last that holds something.
+// head shows only the stages that hold something, but holds every one, as
+// the editor's status.js moves the mine stage through the client states
+// (saving, error) between saves. Lists keep each stage's place: an empty
+// one is a stretch of the line, or with fixed a grey mark.
 // Receives: status (the editor's status view or a list row's), size (md, sm),
-// look (icons, dots), id and oob for the editor head.
+// look (icons, dots), fixed, id and oob for the editor head.
 
 $status = (array) u($status);
 $stages = (array) ($status['stages'] ?? []);
@@ -21,6 +22,7 @@ $id = u($id ?? null);
 $oob = (bool) (u($oob ?? null) ?? false);
 $sentence = (string) ($status['sentence'] ?? '');
 $look = (string) u($look ?? 'icons');
+$fixed = (bool) (u($fixed ?? null) ?? false);
 $marks = static function (array $stages): string {
 	$html = '';
 
@@ -58,7 +60,7 @@ $content = $look === 'dots' ? $dots($stages) : $marks($stages);
 		<?= $marks($stages) ?>
 		<span class="cms-status-dots-tooltip" aria-hidden="true">
 			<?php foreach ($stages as $stage): ?>
-				<span class="cms-status-dots-row" data-stage="<?= escape((string) $stage['key']) ?>">
+				<span class="cms-status-dots-row" data-stage="<?= escape((string) $stage['key']) ?>" data-state="<?= escape((string) $stage['state']) ?>">
 					<?= $marks([$stage]) ?>
 					<span><strong><?= escape((string) $stage['name']) ?><?= ($stage['badge'] ?? '') !== '' ? ' (' . escape((string) $stage['badge']) . ')' : '' ?></strong> · <span class="cms-status-dots-text"><?= escape((string) $stage['text']) ?></span></span>
 				</span>
@@ -68,7 +70,7 @@ $content = $look === 'dots' ? $dots($stages) : $marks($stages);
 	</button>
 <?php else: ?>
 	<span
-		class="cms-status-dots is-<?= escape($size) ?> is-<?= escape($look) ?>"
+		class="cms-status-dots is-<?= escape($size) ?> is-<?= escape($look) ?><?= $fixed ? ' is-fixed' : '' ?>"
 		role="img"
 		aria-label="<?= escape($sentence) ?>"
 		title="<?= escape($sentence) ?>"><?= $content ?></span>

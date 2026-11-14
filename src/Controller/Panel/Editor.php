@@ -587,7 +587,10 @@ final class Editor extends Panel
 		return [
 			'record' => $record,
 			'stages' => $stages,
-			'sentence' => NodeStatus::sentence($stages),
+			'sentence' => NodeStatus::sentence(array_values(array_filter(
+				$stages,
+				static fn(array $stage): bool => $stage['state'] !== 'none',
+			))),
 			// Who saved the state the user's edits are older than, and when.
 			'conflict' => $status->mine === 'conflict'
 				? [

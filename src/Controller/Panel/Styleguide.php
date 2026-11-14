@@ -1498,7 +1498,7 @@ final class Styleguide extends Panel
 				'value' => '',
 				'editUrl' => null,
 				'lead' => false,
-				'status' => [...$dots, 'look' => 'icons', 'badges' => $badges],
+				'status' => [...$dots, 'look' => 'icons', 'fixed' => false, 'badges' => $badges],
 			],
 			['class' => '', 'label' => 'Type', 'value' => 'Page', 'editUrl' => null, 'lead' => false, 'status' => null],
 			[
