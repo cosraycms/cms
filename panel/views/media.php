@@ -126,7 +126,7 @@ unset($search['page']);
 				aria-label="<?= escape(__('media:file-details')) ?>"
 				data-inspector
 				<?= $collapsed ? 'data-collapsed' : '' ?>>
-				<div class="cms-inspector-strip">
+				<div class="cms-inspector-strip cms-scrollbar-quiet">
 					<button
 						type="button"
 						class="cms-inspector-tool"
@@ -154,7 +154,7 @@ unset($search['page']);
 							<?= Icon::render('layout-sidebar-inset-reverse') ?>
 						</button>
 					</div>
-					<div class="cms-inspector-scroll">
+					<div class="cms-inspector-scroll cms-scrollbar-quiet">
 						<?php $this->include('component/content-locales', [
 							'locales' => $contentLocales,
 							'selected' => $defaultLocale,
