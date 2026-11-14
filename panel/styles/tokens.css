@@ -480,12 +480,12 @@
 	/**
 	 * Component — switch
 	 *
-	 * A switch shows a state, not an action, so on is a calm grey rather than
-	 * the accent; the knob's place tells on from off. The publication switch
-	 * takes the main version's green instead.
+	 * A switch shows a state, not an action, so on is green rather than the
+	 * accent; a grey on would read as disabled. It is the main version's
+	 * green, so the publication switch matches its neighbours.
 	 */
 	--cms-switch-bg: light-dark(var(--cms-color-neutral-200), var(--cms-color-neutral-975));
-	--cms-switch-on-bg: var(--cms-color-neutral-500);
+	--cms-switch-on-bg: var(--cms-color-stage-main);
 	--cms-switch-publish-bg: var(--cms-color-stage-main);
 
 	/**
