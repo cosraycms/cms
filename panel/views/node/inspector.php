@@ -90,7 +90,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 		<?php if ($visibility !== null): ?>
 			<input
 				type="checkbox"
-				class="cms-switch"
+				class="cms-switch is-publish"
 				title="<?= escape($publishedLabel) ?>"
 				aria-label="<?= escape($publishedLabel) ?>"
 				data-inspector-published

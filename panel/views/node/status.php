@@ -175,7 +175,7 @@ $saveHelp = match (true) {
 				<input
 					id="editor-published-switch"
 					type="checkbox"
-					class="cms-switch"
+					class="cms-switch is-publish"
 					form="node-editor-visibility"
 					name="published"
 					value="1"

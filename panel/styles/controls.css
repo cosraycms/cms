@@ -158,13 +158,16 @@
 	}
 
 	&:checked {
-		background: var(--cms-color-accent);
+		background: var(--cms-switch-on-bg);
 
 		&::before {
 			border-color: transparent;
-			background: var(--cms-color-text-on-accent);
 			translate: 1rem 0;
 		}
+	}
+
+	&.is-publish {
+		--cms-switch-on-bg: var(--cms-switch-publish-bg);
 	}
 
 	&:focus-visible {
