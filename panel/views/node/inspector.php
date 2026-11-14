@@ -10,7 +10,8 @@ use function Cosray\escape;
 // through the same merge patch, the hidden tabs included. The markup arrives
 // with the first tab selected so nothing flashes before the tabs behavior runs.
 // Collapsed, a strip of quick controls replaces the drawer. Its publication
-// switch is an unnamed copy that flips the drawer's switch.
+// switch is an unnamed copy that flips the drawer's switch, upright, with the
+// state it leads to written below.
 
 $node = (array) u($node);
 $locales = (array) u($locales);
@@ -88,14 +89,19 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 			]) ?>
 		<?php endif ?>
 		<?php if ($visibility !== null): ?>
-			<input
-				type="checkbox"
-				class="cms-switch is-publish"
-				title="<?= escape($publishedLabel) ?>"
-				aria-label="<?= escape($publishedLabel) ?>"
-				data-inspector-published
-				data-editor-state
-				<?= $visibility['published'] ? 'checked' : '' ?> />
+			<label class="cms-inspector-publish" title="<?= escape($publishedLabel) ?>">
+				<input
+					type="checkbox"
+					class="cms-switch is-publish is-vertical"
+					aria-label="<?= escape($publishedLabel) ?>"
+					data-inspector-published
+					data-editor-state
+					<?= $visibility['published'] ? 'checked' : '' ?> />
+				<span class="cms-inspector-publish-state" aria-hidden="true">
+					<span data-when="on"><?= escape(__('status:online')) ?></span>
+					<span data-when="off"><?= escape(__('status:offline')) ?></span>
+				</span>
+			</label>
 		<?php endif ?>
 		<div class="cms-inspector-shortcuts">
 			<?php foreach ($tabs as $key => $label): ?>

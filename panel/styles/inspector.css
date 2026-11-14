@@ -71,6 +71,40 @@
 			visibility 0s;
 	}
 
+	/* The publication switch, with Online or Offline below. Both words share
+	   one cell, so a word that wraps in one state moves nothing in the other. */
+	& .cms-inspector-publish {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--cms-space-1-5);
+		max-width: calc(var(--cms-inspector-collapsed-width) - var(--cms-space-1));
+		cursor: pointer;
+	}
+
+	& .cms-inspector-publish-state {
+		display: grid;
+		color: var(--cms-color-text-subtle);
+		font-size: 0.6875rem;
+		font-weight: 500;
+		line-height: 1.2;
+		text-align: center;
+		overflow-wrap: anywhere;
+	}
+
+	& .cms-inspector-publish:has(:checked) .cms-inspector-publish-state {
+		color: var(--cms-color-success-text);
+	}
+
+	& .cms-inspector-publish-state > span {
+		grid-area: 1 / 1;
+	}
+
+	& .cms-inspector-publish:has(:checked) [data-when='off'],
+	& .cms-inspector-publish:not(:has(:checked)) [data-when='on'] {
+		visibility: hidden;
+	}
+
 	& .cms-inspector-shortcuts {
 		display: flex;
 		flex-direction: column;

@@ -170,6 +170,20 @@
 		--cms-switch-on-bg: var(--cms-switch-publish-bg);
 	}
 
+	/* Upright, on at the top. */
+	&.is-vertical {
+		width: 1.375rem;
+		height: 2.375rem;
+
+		&::before {
+			translate: 0 1rem;
+		}
+
+		&:checked::before {
+			translate: 0 0;
+		}
+	}
+
 	&:focus-visible {
 		outline: var(--cms-focus-outline);
 		outline-offset: var(--cms-focus-offset);
