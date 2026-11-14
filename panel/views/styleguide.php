@@ -271,18 +271,10 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					</div>
 				<?php endforeach ?>
 				<?php // Stage tokens as a theme would set them. ?>
-				<?php $halo = '--cms-stage-halo: 0.08; --cms-stage-halo-gap: 1.5px; --cms-stage-dot-halo: 1.5px; '
-					. '--cms-stage-dot-halo-gap: 1.5px; --cms-stage-halo-strength: 45%'; ?>
-				<?php $inverted = '--cms-stage-tint: 100%; --cms-stage-halo: 0.1; --cms-stage-halo-gap: 1px; '
-					. '--cms-stage-halo-strength: 35%; --cms-color-stage-main-ink: white; '
-					. '--cms-color-stage-draft-ink: var(--cms-color-neutral-900); --cms-color-stage-mine-ink: white; '
-					. '--cms-color-stage-problem-ink: white; --cms-color-stage-idle: light-dark(var(--cms-color-neutral-200), var(--cms-color-neutral-700)); '
-					. '--cms-color-stage-idle-ink: light-dark(var(--cms-color-neutral-600), var(--cms-color-neutral-300))'; ?>
 				<?php foreach ([
-					['icons', 'icons with halo', $halo],
-					['dots', 'dots with halo', $halo],
-					['icons', 'icons inverted', $inverted],
-					['dots', 'dots inverted', $inverted],
+					['icons', 'icons, ring off the mark', '--cms-stage-halo: 0.1; --cms-stage-halo-gap: 1.5px'],
+					['dots', 'dots, ring off the mark', '--cms-stage-dot-halo: 1.5px; --cms-stage-dot-halo-gap: 1.5px'],
+					['icons', 'icons without halo', '--cms-stage-halo: 0'],
 				] as [$look, $label, $style]): ?>
 					<div class="cms-styleguide-sample" style="<?= escape($style) ?>">
 						<code><?= escape($label) ?></code>

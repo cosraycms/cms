@@ -329,28 +329,19 @@
 	/* Status dots: one colour per stage, red only for a problem. */
 	--cms-color-stage-main: light-dark(var(--cms-color-stage-green), var(--cms-color-green-400));
 	--cms-color-stage-draft: var(--cms-color-stage-yellow);
-	--cms-color-stage-mine: var(--cms-color-stage-orange);
+	--cms-color-stage-mine: light-dark(var(--cms-color-stage-orange), #fb923c);
 	--cms-color-stage-problem: var(--cms-color-danger);
 	--cms-color-stage-empty: light-dark(#d6d6d4, var(--cms-color-neutral-700));
 	/* In light mode an icon fills its circle with the stage's colour and
-	   draws in white. In dark mode it tints the circle and draws in an ink
-	   a step darker; yellow needs the bigger step to stay readable. */
-	--cms-color-stage-main-ink: light-dark(
-		white,
-		color-mix(in oklch, var(--cms-color-stage-main), var(--cms-color-shade) 18%)
-	);
+	   draws in white, yellow in dark yellow. In dark mode it draws in the
+	   stage's colour on a faint wash of it. */
+	--cms-color-stage-main-ink: light-dark(white, var(--cms-color-stage-main));
 	--cms-color-stage-draft-ink: light-dark(
 		color-mix(in oklch, var(--cms-color-stage-draft), var(--cms-color-shade) 55%),
-		color-mix(in oklch, var(--cms-color-stage-draft), var(--cms-color-shade) 35%)
+		var(--cms-color-stage-draft)
 	);
-	--cms-color-stage-mine-ink: light-dark(
-		white,
-		color-mix(in oklch, var(--cms-color-stage-mine), var(--cms-color-shade) 18%)
-	);
-	--cms-color-stage-problem-ink: light-dark(
-		white,
-		color-mix(in oklch, var(--cms-color-stage-problem), var(--cms-color-shade) 18%)
-	);
+	--cms-color-stage-mine-ink: light-dark(white, var(--cms-color-stage-mine));
+	--cms-color-stage-problem-ink: light-dark(white, var(--cms-color-stage-problem));
 	/* The icon of an empty stage, and the ring of a main version that is
 	   offline. */
 	--cms-color-stage-idle: var(--cms-color-text-subtle);
@@ -552,20 +543,24 @@
 	/**
 	 * Component — stage marks
 	 *
-	 * A node's stages as icons or dots. The halo is a ring around each stage that holds something, an
-	 * icon's as a share of its size: a
-	 * width of 0 leaves it out, and the gap keeps it off the mark.
+	 * A node's stages as icons or dots. An icon that holds something is a
+	 * solid circle in light mode and a wash of its colour in dark mode; an
+	 * empty one is tinted. The halo is a ring around each stage that holds
+	 * something, an icon's as a share of its size: a width of 0 leaves it
+	 * out, and the gap keeps it off the mark.
 	 */
 	--cms-stage-mark-size: 1.25rem;
 	--cms-stage-mark-size-sm: 1.125rem;
 	--cms-stage-dot-size: 0.625rem;
 	--cms-stage-tint: 14%;
+	--cms-stage-fill-dark: 15%;
 	--cms-stage-halo: 0.15;
 	--cms-stage-halo-gap: 0px;
+	--cms-stage-halo-strength: 35%;
+	--cms-stage-halo-strength-dark: 25%;
 	--cms-stage-dot-halo: 2px;
 	--cms-stage-dot-halo-gap: 0px;
-	--cms-stage-halo-strength: 28%;
-	--cms-stage-mark-halo-strength: 35%;
+	--cms-stage-dot-halo-strength: 28%;
 	/* Unset, the halo takes each stage's own colour. */
 	--cms-stage-halo-color: initial;
 

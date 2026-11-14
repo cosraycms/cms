@@ -88,9 +88,9 @@
 	vertical-align: 0.125rem;
 }
 
-/* A stage's mark: its icon on a tint of the stage's colour, grey while the
-   stage is empty, ringed by the halo while it holds something. Whatever
-   holds the marks sets their --size. */
+/* A stage's mark: its icon on a circle of the stage's colour, solid in
+   light mode and a wash in dark mode, ringed by the halo; an empty stage
+   is a grey tint. Whatever holds the marks sets their --size. */
 .cms-stage-mark {
 	--tone: var(--cms-color-stage-idle);
 	--ink: var(--cms-color-stage-idle-ink);
@@ -105,22 +105,25 @@
 	border-radius: var(--cms-radius-full);
 	background: var(--fill);
 	color: var(--ink);
-	/* Light mode only for now. */
 	outline: var(--halo) solid
 		light-dark(
 			color-mix(
 				in oklch,
-				var(--cms-stage-halo-color, var(--tone)) var(--cms-stage-mark-halo-strength),
+				var(--cms-stage-halo-color, var(--tone)) var(--cms-stage-halo-strength),
 				transparent
 			),
-			transparent
+			color-mix(
+				in oklch,
+				var(--cms-stage-halo-color, var(--tone)) var(--cms-stage-halo-strength-dark),
+				transparent
+			)
 		);
 	outline-offset: var(--cms-stage-halo-gap);
 
 	&:not([data-state='none']) {
 		--fill: light-dark(
 			var(--tone),
-			color-mix(in oklch, var(--tone) var(--cms-stage-tint), transparent)
+			color-mix(in oklch, var(--tone) var(--cms-stage-fill-dark), transparent)
 		);
 	}
 
@@ -232,7 +235,7 @@
 		outline: var(--halo) solid
 			color-mix(
 				in oklch,
-				var(--cms-stage-halo-color, var(--color)) var(--cms-stage-halo-strength),
+				var(--cms-stage-halo-color, var(--color)) var(--cms-stage-dot-halo-strength),
 				transparent
 			);
 		outline-offset: var(--cms-stage-dot-halo-gap);
@@ -359,11 +362,11 @@ button.cms-status-dots {
 }
 
 /* The tooltip is dark in both themes; its marks take the dark theme's
-   stage colours and inks, on a tint strong enough for the small size. */
+   look, empty ones on a tint strong enough for the small size. */
 button.cms-status-dots .cms-status-dots-tooltip {
 	color-scheme: dark;
 
-	& .cms-stage-mark {
+	& .cms-stage-mark[data-state='none'] {
 		--fill: color-mix(in oklch, var(--tone) max(var(--cms-stage-tint), 30%), transparent);
 	}
 }
