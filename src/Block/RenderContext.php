@@ -30,7 +30,7 @@ final class RenderContext
 		public readonly array $args,
 	) {
 		$this->tag = $this->name('tag', 'div');
-		$this->prefix = $this->name('prefix', 'cms');
+		$this->prefix = $this->name('prefix', 'cosray');
 		$class = $args['class'] ?? '';
 		$this->class = is_string($class) ? trim($class) : '';
 	}

@@ -204,7 +204,7 @@ class Blocks extends Value implements IteratorAggregate
 	// Supported args:
 	//
 	// - prefix: All generated css classes are prefixed with this value.
-	//   Default 'cms'
+	//   Default 'cosray'
 	// - tag: The tag of the container. Default 'div'
 	// - class: An additional class added to the container
 	// - imageSizes: `media.sizes` names forming the image block's srcset

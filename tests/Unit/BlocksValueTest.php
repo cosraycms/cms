@@ -203,8 +203,8 @@ final class BlocksValueTest extends TestCase
 		]);
 
 		$this->assertSame(
-			'<div class="cms-blocks" data-columns="12" data-responsive="stack" style="--columns: 12">'
-				. '<div class="cms-block hero" id="intro" data-type="text" data-colspan="8" data-rowspan="2" data-col="3"'
+			'<div class="cosray-blocks" data-columns="12" data-responsive="stack" style="--columns: 12">'
+				. '<div class="cosray-block hero" id="intro" data-type="text" data-colspan="8" data-rowspan="2" data-col="3"'
 				. ' data-row="1" style="--colspan: 8; --rowspan: 2; --col: 3; --row: 1">'
 				. "Hello<br />\nWorld"
 				. '</div></div>',
@@ -287,8 +287,8 @@ final class BlocksValueTest extends TestCase
 
 		$this->assertStringNotContainsString('<img', $html);
 		$this->assertStringNotContainsString('" onmouseover="', $html);
-		$this->assertStringContainsString('class="cms-blocks page&quot; onmouseover=&quot;alert(1)"', $html);
-		$this->assertStringContainsString('class="cms-block &quot;&gt;&lt;img src=x onerror=alert(1)&gt;"', $html);
+		$this->assertStringContainsString('class="cosray-blocks page&quot; onmouseover=&quot;alert(1)"', $html);
+		$this->assertStringContainsString('class="cosray-block &quot;&gt;&lt;img src=x onerror=alert(1)&gt;"', $html);
 		$this->assertStringContainsString('id="x&quot; onmouseover=&quot;alert(1)"', $html);
 	}
 
@@ -377,7 +377,7 @@ final class BlocksValueTest extends TestCase
 		$html = $this->createBlocksValue([$this->image(['uid' => 'missingasset1'])])->render()->html;
 
 		$this->assertSame(
-			'<div class="cms-blocks" data-columns="12" data-responsive="stack" style="--columns: 12"></div>',
+			'<div class="cosray-blocks" data-columns="12" data-responsive="stack" style="--columns: 12"></div>',
 			$html,
 		);
 	}
@@ -483,7 +483,7 @@ final class BlocksValueTest extends TestCase
 
 		$this->assertInstanceOf(Block::class, $block);
 		$this->assertSame(
-			'<div class="cms-block" data-type="text" data-colspan="3" data-rowspan="1" data-col="1" data-row="1"'
+			'<div class="cosray-block" data-type="text" data-colspan="3" data-rowspan="1" data-col="1" data-row="1"'
 				. ' style="--colspan: 3; --rowspan: 1; --col: 1; --row: 1">Solo</div>',
 			(string) $block,
 		);
@@ -522,8 +522,8 @@ final class BlocksValueTest extends TestCase
 
 		$html = self::withoutFingerprints($blocks->render()->html);
 
-		$this->assertStringContainsString('class="cms-block" data-type="image" data-colspan="6"', $html);
-		$this->assertStringContainsString('<figure class="cms-figure"><img ', $html);
+		$this->assertStringContainsString('class="cosray-block" data-type="image" data-colspan="6"', $html);
+		$this->assertStringContainsString('<figure class="cosray-figure"><img ', $html);
 		$this->assertStringEndsWith('</figure></div></div>', $html);
 		$this->assertStringNotContainsString('<figcaption', $html);
 		$this->assertStringContainsString(
@@ -759,7 +759,7 @@ final class BlocksValueTest extends TestCase
 		$html = self::withoutFingerprints($blocks->render()->html);
 
 		$this->assertStringContainsString('data-type="images"', $html);
-		$this->assertSame(1, substr_count($html, 'cms-image-gallery-item'));
+		$this->assertSame(1, substr_count($html, 'cosray-image-gallery-item'));
 		$this->assertStringContainsString(
 			'src="/cms/cache/ga/galleryimg123/one-block-thumb.jpg"',
 			$html,
@@ -778,7 +778,7 @@ final class BlocksValueTest extends TestCase
 		$this->seedAsset('galleryimg123', 'one.jpg');
 
 		$this->assertStringContainsString(
-			'<div class="cms-image-gallery" data-ratio="4/3" style="--ratio: 4/3" data-crop><figure',
+			'<div class="cosray-image-gallery" data-ratio="4/3" style="--ratio: 4/3" data-crop><figure',
 			$blocks->render()->html,
 		);
 		$this->assertSame('4/3', $blocks->first()->images->ratio());
@@ -787,7 +787,7 @@ final class BlocksValueTest extends TestCase
 		$plain = $this->createBlocksValue([$this->images([['uid' => 'galleryimg123']])]);
 		$this->seedAsset('galleryimg123', 'one.jpg');
 
-		$this->assertStringContainsString('<div class="cms-image-gallery"><figure', $plain->render()->html);
+		$this->assertStringContainsString('<div class="cosray-image-gallery"><figure', $plain->render()->html);
 		$this->assertNull($plain->first()->images->ratio());
 		$this->assertFalse($plain->first()->images->crop());
 	}
@@ -832,7 +832,7 @@ final class BlocksValueTest extends TestCase
 		$this->assertStringContainsString('<video controls preload="metadata"><source src="', $html);
 		$this->assertStringContainsString('/cms/assets/vi/videoasset001/clip.mp4" type="video/mp4"></video>', $html);
 		$this->assertStringNotContainsString(
-			'<div class="cms-block"',
+			'<div class="cosray-block"',
 			$this->createBlocksValue([$video('missingasset1')])->render()->html,
 		);
 	}
@@ -918,16 +918,16 @@ final class BlocksValueTest extends TestCase
 		]);
 		// The blocks of a split have no position; they follow each other on its area.
 		$child = static fn(string $text, int $colspan, int $rowspan): string => (
-			"<div class=\"cms-block\" data-type=\"text\" data-colspan=\"{$colspan}\" data-rowspan=\"{$rowspan}\""
+			"<div class=\"cosray-block\" data-type=\"text\" data-colspan=\"{$colspan}\" data-rowspan=\"{$rowspan}\""
 			. " style=\"--colspan: {$colspan}; --rowspan: {$rowspan}\">{$text}</div>"
 		);
 		$split = static fn(string $attributes, string $inner, int $col): string => (
-			"<div class=\"cms-block{$attributes}\" data-colspan=\"6\" data-rowspan=\"2\" data-col=\"{$col}\" data-row=\"1\""
+			"<div class=\"cosray-block{$attributes}\" data-colspan=\"6\" data-rowspan=\"2\" data-col=\"{$col}\" data-row=\"1\""
 			. " style=\"--colspan: 6; --rowspan: 2; --col: {$col}; --row: 1\">{$inner}</div>"
 		);
 
 		$this->assertSame(
-			'<div class="cms-blocks" data-columns="12" data-responsive="stack" style="--columns: 12">'
+			'<div class="cosray-blocks" data-columns="12" data-responsive="stack" style="--columns: 12">'
 				. $split(' pair" data-split="columns', $child('Left', 3, 2) . $child('Right', 3, 2), 1)
 				. $split('" data-split="rows', $child('Top', 6, 1) . $child('Bottom', 6, 1), 7)
 				. '</div>',

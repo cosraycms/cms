@@ -49,7 +49,7 @@ class Images extends Files
 	public function gallery(
 		string $size = 'block-thumb',
 		?string $large = null,
-		string $prefix = 'cms',
+		string $prefix = 'cosray',
 		string|int|null ...$attributes,
 	): Markup {
 		$sizes = $this->owner->config()->media->sizes;

@@ -127,7 +127,7 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 		$this->assertSame('english', $ctx->effective(['en' => 'english', 'zxx' => 'neutral']));
 		$this->assertSame('neutral', $ctx->effective(['en' => '', 'zxx' => 'neutral']));
 		$this->assertNull($ctx->effective(['en' => [], 'de' => 'german']));
-		$this->assertSame('cms', $ctx->prefix());
+		$this->assertSame('cosray', $ctx->prefix());
 		$this->assertSame('div', $ctx->tag());
 		$this->assertSame('', $ctx->class());
 	}

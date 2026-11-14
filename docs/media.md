@@ -91,8 +91,8 @@ An attribute decides what editors can fill in, not the markup. A template prints
 `gallery()` prints this, with the ratio and crop an editor chose for the gallery:
 
 ```html
-<div class="cms-image-gallery" data-ratio="4/3" style="--ratio: 4/3" data-crop>
-    <figure class="cms-image-gallery-item">
+<div class="cosray-image-gallery" data-ratio="4/3" style="--ratio: 4/3" data-crop>
+    <figure class="cosray-image-gallery-item">
         <img src="/cache/…/pic-block-thumb.jpg" data-url-large="/cache/…/pic-large.jpg" width="480" height="320" alt="…">
         <figcaption>Words <small>© Jane Doe</small></figcaption>
     </figure>

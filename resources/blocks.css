@@ -5,7 +5,7 @@
  *
  *   @import 'vendor/cosray/cms/resources/blocks.css';
  *
- * It lives in the `cms.blocks` layer, so unlayered site CSS wins over
+ * It lives in the `cosray.blocks` layer, so unlayered site CSS wins over
  * every rule here without needing a more specific selector. The block
  * prefix follows the `prefix` render argument, so a site that renders
  * with a different prefix copies the file and renames.
@@ -42,13 +42,13 @@
  * either of the latter two.
  */
 
-@layer cms.blocks {
+@layer cosray.blocks {
 	/*
 	 * `--blocks-column-gap` is the resolved column gap, `--blocks-row-gap`
 	 * the row gap. Both start from the site's default `--blocks-gap`; a
 	 * shared `data-gap` sets both, a per-axis attribute only its own.
 	 */
-	.cms-blocks {
+	.cosray-blocks {
 		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
 		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
 
@@ -59,117 +59,117 @@
 		container-type: inline-size;
 	}
 
-	.cms-blocks[data-gap="none"] {
+	.cosray-blocks[data-gap="none"] {
 		--blocks-column-gap: 0px;
 		--blocks-row-gap: 0px;
 	}
 
-	.cms-blocks[data-gap="s"] {
+	.cosray-blocks[data-gap="s"] {
 		--blocks-column-gap: var(--blocks-gap-s, 1rem);
 		--blocks-row-gap: var(--blocks-gap-s, 1rem);
 	}
 
-	.cms-blocks[data-gap="m"] {
+	.cosray-blocks[data-gap="m"] {
 		--blocks-column-gap: var(--blocks-gap-m, 2rem);
 		--blocks-row-gap: var(--blocks-gap-m, 2rem);
 	}
 
-	.cms-blocks[data-gap="l"] {
+	.cosray-blocks[data-gap="l"] {
 		--blocks-column-gap: var(--blocks-gap-l, 3rem);
 		--blocks-row-gap: var(--blocks-gap-l, 3rem);
 	}
 
-	.cms-blocks[data-gap="xl"] {
+	.cosray-blocks[data-gap="xl"] {
 		--blocks-column-gap: var(--blocks-gap-xl, 4.5rem);
 		--blocks-row-gap: var(--blocks-gap-xl, 4.5rem);
 	}
 
 	/* A gap set per axis beats the shared one. */
-	.cms-blocks[data-column-gap="none"] {
+	.cosray-blocks[data-column-gap="none"] {
 		--blocks-column-gap: 0px;
 	}
 
-	.cms-blocks[data-column-gap="s"] {
+	.cosray-blocks[data-column-gap="s"] {
 		--blocks-column-gap: var(--blocks-gap-s, 1rem);
 	}
 
-	.cms-blocks[data-column-gap="m"] {
+	.cosray-blocks[data-column-gap="m"] {
 		--blocks-column-gap: var(--blocks-gap-m, 2rem);
 	}
 
-	.cms-blocks[data-column-gap="l"] {
+	.cosray-blocks[data-column-gap="l"] {
 		--blocks-column-gap: var(--blocks-gap-l, 3rem);
 	}
 
-	.cms-blocks[data-column-gap="xl"] {
+	.cosray-blocks[data-column-gap="xl"] {
 		--blocks-column-gap: var(--blocks-gap-xl, 4.5rem);
 	}
 
-	.cms-blocks[data-row-gap="none"] {
+	.cosray-blocks[data-row-gap="none"] {
 		--blocks-row-gap: 0px;
 	}
 
-	.cms-blocks[data-row-gap="s"] {
+	.cosray-blocks[data-row-gap="s"] {
 		--blocks-row-gap: var(--blocks-gap-s, 1rem);
 	}
 
-	.cms-blocks[data-row-gap="m"] {
+	.cosray-blocks[data-row-gap="m"] {
 		--blocks-row-gap: var(--blocks-gap-m, 2rem);
 	}
 
-	.cms-blocks[data-row-gap="l"] {
+	.cosray-blocks[data-row-gap="l"] {
 		--blocks-row-gap: var(--blocks-gap-l, 3rem);
 	}
 
-	.cms-blocks[data-row-gap="xl"] {
+	.cosray-blocks[data-row-gap="xl"] {
 		--blocks-row-gap: var(--blocks-gap-xl, 4.5rem);
 	}
 
 	/* The blocks of a split follow each other; a placed block sits on its lines. */
-	.cms-block {
+	.cosray-block {
 		min-width: 0;
 		grid-column: span var(--colspan, 1);
 		grid-row: span var(--rowspan, 1);
 	}
 
-	.cms-block[data-col] {
+	.cosray-block[data-col] {
 		grid-column: var(--col) / span var(--colspan, 1);
 		grid-row: var(--row) / span var(--rowspan, 1);
 	}
 
-	.cms-block[data-split] {
+	.cosray-block[data-split] {
 		display: grid;
 		grid-template-columns: subgrid;
 		grid-template-rows: subgrid;
 	}
 
-	.cms-block[data-padding="none"] {
+	.cosray-block[data-padding="none"] {
 		padding: 0;
 	}
 
-	.cms-block[data-padding="s"] {
+	.cosray-block[data-padding="s"] {
 		padding: var(--blocks-padding-s, 1rem);
 	}
 
-	.cms-block[data-padding="m"] {
+	.cosray-block[data-padding="m"] {
 		padding: var(--blocks-padding-m, 2rem);
 	}
 
-	.cms-block[data-padding="l"] {
+	.cosray-block[data-padding="l"] {
 		padding: var(--blocks-padding-l, 3rem);
 	}
 
-	.cms-block[data-padding="xl"] {
+	.cosray-block[data-padding="xl"] {
 		padding: var(--blocks-padding-xl, 4.5rem);
 	}
 
 	@container (max-width: 42rem) {
-		.cms-blocks[data-responsive="stack"] .cms-block {
+		.cosray-blocks[data-responsive="stack"] .cosray-block {
 			grid-column: 1 / -1;
 			grid-row: auto;
 		}
 
-		.cms-blocks[data-responsive="stack"] .cms-block[data-split] {
+		.cosray-blocks[data-responsive="stack"] .cosray-block[data-split] {
 			grid-template-columns: minmax(0, 1fr);
 			grid-template-rows: none;
 			row-gap: var(--blocks-row-gap);
@@ -182,14 +182,14 @@
 	 * it instead of fitting the image in. Without them each image keeps
 	 * its own shape.
 	 */
-	.cms-blocks-images[data-ratio] img {
+	.cosray-blocks-images[data-ratio] img {
 		width: 100%;
 		height: auto;
 		aspect-ratio: var(--ratio);
 		object-fit: contain;
 	}
 
-	.cms-blocks-images[data-crop] img {
+	.cosray-blocks-images[data-crop] img {
 		object-fit: cover;
 	}
 }

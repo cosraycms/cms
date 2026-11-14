@@ -143,7 +143,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 
 		$html = $blocks->render()->html;
 		$this->assertStringContainsString('data-columns="12"', $html);
-		$this->assertStringContainsString('<div class="cms-block lead" data-type="heading"', $html);
+		$this->assertStringContainsString('<div class="cosray-block lead" data-type="heading"', $html);
 		$this->assertStringContainsString('<h3>Opening hours</h3>', $html);
 		$this->assertStringContainsString('data-colspan="4" data-rowspan="2" data-col="7" data-row="2"', $html);
 		$this->assertStringContainsString("Mon-Fri<br />\n9-17", $html);

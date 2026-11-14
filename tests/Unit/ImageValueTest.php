@@ -359,11 +359,11 @@ final class ImageValueTest extends TestCase
 		]);
 
 		$this->assertSame(
-			'<div class="cms-image-gallery">'
-				. '<figure class="cms-image-gallery-item"><img src="/cache/im/'
+			'<div class="cosray-image-gallery">'
+				. '<figure class="cosray-image-gallery-item"><img src="/cache/im/'
 				. self::UID
 				. '/pic-block-thumb.jpg" loading="lazy" width="480" height="240" alt="A &lt;kettle&gt;"><figcaption>Words</figcaption></figure>'
-				. '<figure class="cms-image-gallery-item"><img src="/cache/im/'
+				. '<figure class="cosray-image-gallery-item"><img src="/cache/im/'
 				. self::UID
 				. '/pic-block-thumb.jpg" loading="lazy" width="480" height="240" alt=""></figure></div>',
 			self::withoutFingerprints((string) $gallery->gallery()),
@@ -441,7 +441,7 @@ final class ImageValueTest extends TestCase
 		])->gallery();
 
 		$this->assertStringStartsWith(
-			'<div class="cms-image-gallery" data-ratio="4/3" style="--ratio: 4/3" data-crop>',
+			'<div class="cosray-image-gallery" data-ratio="4/3" style="--ratio: 4/3" data-crop>',
 			$html,
 		);
 	}

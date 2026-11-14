@@ -241,13 +241,13 @@ content[f][value][lo][i][blocks][j][meta][key][zxx]
 
 ```html
 <div
-	class="cms-blocks"
+	class="cosray-blocks"
 	data-columns="12"
 	data-responsive="stack"
 	style="--columns: 12"
 >
 	<div
-		class="cms-block hero"
+		class="cosray-block hero"
 		data-type="image"
 		data-colspan="6"
 		data-rowspan="1"
@@ -264,7 +264,7 @@ A split renders as a `{prefix}-block` with `data-split="columns"` or `data-split
 
 ```html
 <div
-	class="cms-block"
+	class="cosray-block"
 	data-split="columns"
 	data-colspan="6"
 	data-rowspan="2"
@@ -272,8 +272,8 @@ A split renders as a `{prefix}-block` with `data-split="columns"` or `data-split
 	data-row="2"
 	style="--colspan: 6; --rowspan: 2; --col: 1; --row: 2"
 >
-	<div class="cms-block" data-type="image" data-colspan="3" …>…</div>
-	<div class="cms-block" data-type="richtext" data-colspan="3" …>…</div>
+	<div class="cosray-block" data-type="image" data-colspan="3" …>…</div>
+	<div class="cosray-block" data-type="richtext" data-colspan="3" …>…</div>
 </div>
 ```
 
@@ -289,7 +289,7 @@ The editor keeps usable control spacing; Layout preview shows configured spacing
 
 | Argument | Purpose |
 | --- | --- |
-| `prefix` | Generated class prefix, default `cms` |
+| `prefix` | Generated class prefix, default `cosray` |
 | `tag` | Container tag, default `div` |
 | `class` | Additional container class |
 | `imageSizes` | Named rendition ladder, default `block-sm`, `block`, `block-lg` |
@@ -313,7 +313,7 @@ Import the shipped [resources/blocks.css](../resources/blocks.css), or copy it w
 @import "vendor/cosray/cms/resources/blocks.css";
 ```
 
-It uses the `cms.blocks` cascade layer, so ordinary unlayered site CSS wins. A block with a position sits on its lines: `grid-column: var(--col) / span var(--colspan)`, and the same for rows. Below the stacking threshold every block takes the full width in document order, which is the reading order. A split is a subgrid on both axes, so its blocks share the field's tracks; a site with its own grid sheet needs the same rules, or a split's blocks fall back to normal flow inside it.
+It uses the `cosray.blocks` cascade layer, so ordinary unlayered site CSS wins. A block with a position sits on its lines: `grid-column: var(--col) / span var(--colspan)`, and the same for rows. Below the stacking threshold every block takes the full width in document order, which is the reading order. A split is a subgrid on both axes, so its blocks share the field's tracks; a site with its own grid sheet needs the same rules, or a split's blocks fall back to normal flow inside it.
 
 Override points:
 

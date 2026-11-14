@@ -94,9 +94,9 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 		$this->assertStringStartsWith('<!doctype html>', $html);
 		$this->assertStringContainsString('<html lang="en">', $html);
 		// The reference stylesheet is inlined, so the frame needs no request.
-		$this->assertStringContainsString('@layer cms.blocks', $html);
+		$this->assertStringContainsString('@layer cosray.blocks', $html);
 		$this->assertHtmlNodeExists(
-			'//div[contains(@class, "cms-blocks")][@data-columns="12"][@data-gap="l"]',
+			'//div[contains(@class, "cosray-blocks")][@data-columns="12"][@data-gap="l"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists('//div[@data-type="heading"]/h3[text()="Fresh heading"]', $html);
@@ -245,7 +245,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertHtmlNodeExists(
-			'//div[contains(@class, "cms-blocks")][@data-columns="1"]/div[@data-type="heading"]/h2[text()="Blueprint heading"]',
+			'//div[contains(@class, "cosray-blocks")][@data-columns="1"]/div[@data-type="heading"]/h2[text()="Blueprint heading"]',
 			$html,
 		);
 		$this->assertStringNotContainsString('Entwurfsüberschrift', $html);
