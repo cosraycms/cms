@@ -145,7 +145,7 @@ it('keeps the complete catalog reachable and appends a non-common row through th
 	const dialog = open();
 	expect(document.activeElement).toBe(dialog.querySelector('input'));
 	expect(
-		[...dialog.querySelectorAll<HTMLElement>('.cms-blocks-actions')].every((group) => group.hidden),
+		[...dialog.querySelectorAll<HTMLElement>('.cms-block-actions')].every((group) => group.hidden),
 	).toBe(true);
 	expect(choices(dialog).map((button) => button.dataset.blockChoice)).toEqual(
 		types.map((type) => type.type),
@@ -264,7 +264,7 @@ it.each(['before', 'after'])(
 		expect(document.activeElement).toBe(choice);
 		const before = [...new FormData(form)];
 		choice.click();
-		choice.querySelector<HTMLElement>('.cms-blocks-catalog-select')!.click();
+		choice.querySelector<HTMLElement>('.cms-block-catalog-select')!.click();
 		key(choice, 'Enter');
 		key(choice, ' ');
 		expect(rows()).toEqual([sibling, anchor]);
@@ -272,7 +272,7 @@ it.each(['before', 'after'])(
 		expect(dialog.open).toBe(true);
 		const actions = [...choice.querySelectorAll<HTMLButtonElement>('[data-block-insert]')];
 		expect(actions.map((action) => action.tabIndex)).toEqual([0, 0]);
-		expect(choice.querySelector<HTMLElement>('.cms-blocks-actions')!.hidden).toBe(false);
+		expect(choice.querySelector<HTMLElement>('.cms-block-actions')!.hidden).toBe(false);
 		anchor.querySelector<HTMLButtonElement>('[data-repeater-move="up"]')!.click();
 		const changed = vi.fn();
 		const submit = vi.fn((event: Event) => event.preventDefault());

@@ -122,7 +122,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 $retype = count($blockTypes) > 1;
 ?>
 <div
-	class="cms-blocks-editor-block<?= $bare ? ' is-bare' : '' ?>"
+	class="cms-block<?= $bare ? ' is-bare' : '' ?>"
 	data-repeater-row
 	data-meta-owner
 	<?= $layout->placed() ? 'data-placed' : '' ?>
@@ -158,11 +158,11 @@ $retype = count($blockTypes) > 1;
 		value="<?= $layout->row ?>"
 		data-layout="row" />
 	<?php if ($readonly && $settingsSubs !== []): ?>
-	<div class="cms-blocks-editor-chrome">
-		<span class="cms-blocks-editor-tools">
+	<div class="cms-block-chrome">
+		<span class="cms-block-tools">
 			<button
 				type="button"
-				class="cms-blocks-editor-settings"
+				class="cms-block-settings"
 				data-dialog-open="meta"
 				aria-label="<?= $this->escape(__('field:block-settings')) ?>"
 				title="<?= $this->escape(__('field:block-settings')) ?>">
@@ -171,11 +171,11 @@ $retype = count($blockTypes) > 1;
 		</span>
 	</div>
 	<?php elseif (!$readonly): ?>
-	<div class="cms-blocks-editor-chrome">
-		<span class="cms-blocks-editor-tools">
+	<div class="cms-block-chrome">
+		<span class="cms-block-tools">
 			<?php if ($columns > 1): ?>
 				<span
-					class="cms-blocks-editor-grip"
+					class="cms-block-grip"
 					data-repeater-grip
 					tabindex="0"
 					title="<?= $this->escape(__('field:drag-block')) ?>"
@@ -184,7 +184,7 @@ $retype = count($blockTypes) > 1;
 					<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
 				</span>
 			<?php else: ?>
-				<span class="cms-blocks-editor-grip" data-repeater-grip title="<?= $this->escape(__('field:drag-block')) ?>">
+				<span class="cms-block-grip" data-repeater-grip title="<?= $this->escape(__('field:drag-block')) ?>">
 					<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
 				</span>
 			<?php endif ?>
@@ -197,14 +197,14 @@ $retype = count($blockTypes) > 1;
 			<?php if ($settings): ?>
 				<button
 					type="button"
-					class="cms-blocks-editor-settings"
+					class="cms-block-settings"
 					data-dialog-open="meta"
 					aria-label="<?= $this->escape(__('field:block-settings')) ?>"
 					title="<?= $this->escape(__('field:block-settings')) ?>">
 					<?= \Cosray\Panel\Icon::render('pencil') ?>
 				</button>
 			<?php endif ?>
-			<button type="button" class="cms-blocks-editor-kebab"
+			<button type="button" class="cms-block-kebab"
 				popovertarget="<?= $this->escape("{$rowId}-actions") ?>"
 				aria-haspopup="menu" aria-label="<?= $this->escape(__('field:block-actions')) ?>">
 				<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
@@ -294,7 +294,7 @@ $retype = count($blockTypes) > 1;
 			'end' => __('field:colspan'),
 		] as $edge => $title): ?>
 			<span
-				class="cms-blocks-editor-resize is-<?= $edge ?>"
+				class="cms-block-resize is-<?= $edge ?>"
 				data-layout-resize="<?= $edge ?>"
 				data-places="block"
 				aria-hidden="true"
@@ -304,17 +304,17 @@ $retype = count($blockTypes) > 1;
 		<?php endforeach ?>
 		<?php // The line to the next part of a split, centred in the gap; side by side it drags. ?>
 		<span
-			class="cms-blocks-editor-seam"
+			class="cms-block-seam"
 			data-places="columns"
 			data-layout-resize="end"
 			aria-hidden="true"
 			title="<?= $this->escape(__('field:colspan')) ?>">
-			<span class="cms-blocks-editor-knob"></span>
+			<span class="cms-block-knob"></span>
 		</span>
-		<span class="cms-blocks-editor-seam" data-places="rows" aria-hidden="true"></span>
+		<span class="cms-block-seam" data-places="rows" aria-hidden="true"></span>
 	<?php endif ?>
 	<div
-		class="cms-blocks-editor-body"
+		class="cms-block-body"
 		id="<?= $this->escape("{$rowId}-form") ?>"
 		<?php if ($reflected !== []): ?>
 			data-block-values="<?= $this->escape(implode(' ', $reflected)) ?>"
@@ -326,7 +326,7 @@ $retype = count($blockTypes) > 1;
 				<?php // Every field sits in the dialog: the card names the block and opens it. ?>
 				<button
 					type="button"
-					class="cms-blocks-editor-summary"
+					class="cms-block-summary"
 					data-dialog-open="meta"
 					title="<?= $this->escape(__('field:block-settings')) ?>">
 					<?= \Cosray\Panel\Icon::render('pencil') ?>
@@ -334,7 +334,7 @@ $retype = count($blockTypes) > 1;
 				</button>
 			<?php elseif ($editor !== null): ?>
 				<?php // Spans the field grid, so a view lays out its fields as it likes. ?>
-				<div class="cms-blocks-editor-view">
+				<div class="cms-block-view">
 					<?php $this->include($editor, [
 						'type' => $blockType,
 						'subs' => $canvas,

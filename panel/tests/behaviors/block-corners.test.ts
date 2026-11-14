@@ -61,7 +61,7 @@ function fixture(boxes: Box[], width = 400, height = 204) {
 	});
 	const rows = boxes.map((box) => {
 		const row = document.createElement('div');
-		row.className = 'cms-blocks-editor-block';
+		row.className = 'cms-block';
 		measure(row, box);
 		grid.append(row);
 		return row;

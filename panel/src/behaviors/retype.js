@@ -206,7 +206,7 @@ function choose(row, asked, keyboard) {
 	const base = field && insertion(field);
 	const menu = how && 'picker' in how ? document.getElementById(how.picker) : null;
 	const kebab = /** @type {HTMLButtonElement | null} */ (
-		row.querySelector(':scope > .cms-blocks-editor-chrome .cms-blocks-editor-kebab')
+		row.querySelector(':scope > .cms-block-chrome .cms-block-kebab')
 	);
 
 	if (!field || !base || !menu || !kebab) {

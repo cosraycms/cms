@@ -267,7 +267,7 @@ function uid(row: HTMLElement): string {
 }
 
 function menuItem(row: HTMLElement, selector: string): HTMLElement {
-	return row.querySelector<HTMLElement>(`:scope > .cms-blocks-editor-chrome ${selector}`)!;
+	return row.querySelector<HTMLElement>(`:scope > .cms-block-chrome ${selector}`)!;
 }
 
 describe('placement on the canvas', () => {

@@ -5,23 +5,23 @@ $more = (bool) u($more);
 $id = (string) u($id);
 $places = u($places ?? null);
 ?>
-<button type="button" class="cms-blocks-editor-inserter" popovertarget="<?= $this->escape($id) ?>"
+<button type="button" class="cms-block-inserter" popovertarget="<?= $this->escape($id) ?>"
 	<?= is_string($places) ? 'data-places="' . $this->escape($places) . '"' : '' ?>
 	aria-haspopup="menu" aria-label="<?= $this->escape(__('field:add-block')) ?>" title="<?= $this->escape(__(
 		'field:add-block',
 	)) ?>">
 	<?= \Cosray\Panel\Icon::render('plus') ?>
 </button>
-<div id="<?= $this->escape($id) ?>" class="cms-action-menu cms-blocks-editor-picker" popover="auto" data-action-menu>
-	<div class="cms-blocks-editor-picker-choices">
+<div id="<?= $this->escape($id) ?>" class="cms-action-menu cms-block-picker" popover="auto" data-action-menu>
+	<div class="cms-block-picker-choices">
 		<?php foreach ($commonChoices as $index => $choice): ?>
 			<?php $choiceId = "{$id}-choice-{$index}"; ?>
-			<div class="cms-blocks-editor-picker-choice" role="group" aria-labelledby="<?= $this->escape($choiceId) ?>">
-				<span class="cms-blocks-editor-picker-caption" id="<?= $this->escape($choiceId) ?>">
+			<div class="cms-block-picker-choice" role="group" aria-labelledby="<?= $this->escape($choiceId) ?>">
+				<span class="cms-block-picker-caption" id="<?= $this->escape($choiceId) ?>">
 					<span class="cms-action-menu-icon" aria-hidden="true"><?= $choice['icon'] ?></span>
 					<span><?= $this->escape($choice['label']) ?></span>
 				</span>
-				<span class="cms-blocks-actions">
+				<span class="cms-block-actions">
 					<?php foreach (['before' => __('field:before'), 'after' => __('field:after')] as $position => $label): ?>
 						<?php $buttonId = "{$choiceId}-{$position}"; ?>
 						<button type="button" class="cms-button cms-button-secondary cms-button-small"

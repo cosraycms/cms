@@ -75,7 +75,7 @@ function wrap(row, direction) {
 	}
 
 	const parts = /** @type {HTMLElement} */ (
-		/** @type {HTMLElement | null} */ (split.querySelector(':scope > .cms-blocks-editor-parts'))
+		/** @type {HTMLElement | null} */ (split.querySelector(':scope > .cms-block-parts'))
 	);
 	const layout = read(row);
 
@@ -111,7 +111,7 @@ function split(row, direction, type) {
 
 	const container = splitOf(row) ?? wrap(row, direction);
 	const parts = /** @type {HTMLElement | null} */ (
-		container?.querySelector(':scope > .cms-blocks-editor-parts')
+		container?.querySelector(':scope > .cms-block-parts')
 	);
 	const context = parts && insertion(parts);
 
@@ -178,7 +178,7 @@ function choose(row, direction, keyboard) {
 
 	const menu = document.getElementById(how.picker);
 	const kebab = /** @type {HTMLButtonElement | null} */ (
-		row.querySelector(':scope > .cms-blocks-editor-chrome .cms-blocks-editor-kebab')
+		row.querySelector(':scope > .cms-block-chrome .cms-block-kebab')
 	);
 
 	if (!menu || !kebab) {

@@ -75,15 +75,15 @@ function editor(
 		style="--columns: ${bounds.columns}">
 		<div class="cms-blocks-editor-grid" data-repeater-list>
 			<div
-				class="cms-blocks-editor-block"
+				class="cms-block"
 				data-repeater-row
 				data-placed
 				style="--colspan: ${layout.colspan}; --rowspan: ${layout.rowspan}; --col: ${layout.col}; --row: ${layout.row}">
 				<input type="hidden" name="${NAME}[0][uid]" value="b1">
 				${hidden(0, layout)}
-				<div class="cms-blocks-editor-chrome"><span class="cms-blocks-editor-grip" data-repeater-grip tabindex="0"></span></div>
+				<div class="cms-block-chrome"><span class="cms-block-grip" data-repeater-grip tabindex="0"></span></div>
 				<dialog data-dialog="meta">
-					<div class="cms-blocks-editor-layout">
+					<div class="cms-block-layout">
 						${number('colspan', layout.colspan, bounds.min, wall - layout.col)}
 						${number('rowspan', layout.rowspan, 1, MAX_ROWSPAN)}
 					</div>
@@ -91,7 +91,7 @@ function editor(
 			</div>
 			${
 				wall <= bounds.columns
-					? `<div class="cms-blocks-editor-block" data-repeater-row data-placed>
+					? `<div class="cms-block" data-repeater-row data-placed>
 						<input type="hidden" name="${NAME}[1][uid]" value="b2">
 						${hidden(1, neighbour)}
 					</div>`
@@ -138,14 +138,14 @@ describe('blocks selection', () => {
 		document.body.innerHTML = `
 			<div class="cms-blocks-editor is-list" data-repeater data-name="${NAME}" data-id="field-body" data-columns="1" data-min="1">
 				<div class="cms-blocks-editor-grid" data-repeater-list>
-					<div class="cms-blocks-editor-block" data-repeater-row>
-						<div class="cms-blocks-editor-body"><p class="ground">Content</p><button type="button">Act</button></div>
+					<div class="cms-block" data-repeater-row>
+						<div class="cms-block-body"><p class="ground">Content</p><button type="button">Act</button></div>
 					</div>
 				</div>
 			</div>`;
 
 		return {
-			row: document.querySelector<HTMLElement>('.cms-blocks-editor-block')!,
+			row: document.querySelector<HTMLElement>('.cms-block')!,
 			ground: document.querySelector<HTMLElement>('.ground')!,
 			button: document.querySelector<HTMLButtonElement>('button')!,
 		};
@@ -179,19 +179,19 @@ describe('blocks text on the ground', () => {
 		document.body.innerHTML = `
 			<div class="cms-blocks-editor is-grid" data-repeater data-name="${NAME}" data-id="field-body" data-columns="12" data-min="2">
 				<div class="cms-blocks-editor-grid" data-repeater-list>
-					<div class="cms-blocks-editor-block" data-repeater-row>
+					<div class="cms-block" data-repeater-row>
 						<input type="hidden" data-layout="colspan" value="6" />
 						<input type="hidden" data-layout="rowspan" value="1" />
-						<span class="cms-blocks-editor-resize is-bottom" data-layout-resize="bottom"></span>
-						<div class="cms-blocks-editor-body"><div class="field"><textarea>Hello</textarea></div></div>
+						<span class="cms-block-resize is-bottom" data-layout-resize="bottom"></span>
+						<div class="cms-block-body"><div class="field"><textarea>Hello</textarea></div></div>
 					</div>
 				</div>
 			</div>`;
 
 		return {
-			body: document.querySelector<HTMLElement>('.cms-blocks-editor-body')!,
+			body: document.querySelector<HTMLElement>('.cms-block-body')!,
 			text: document.querySelector<HTMLTextAreaElement>('textarea')!,
-			edge: document.querySelector<HTMLElement>('.cms-blocks-editor-resize')!,
+			edge: document.querySelector<HTMLElement>('.cms-block-resize')!,
 		};
 	}
 
@@ -220,9 +220,9 @@ describe('blocks text on the ground', () => {
 		document.body.innerHTML = `
 			<div class="cms-blocks-editor is-grid" data-repeater data-name="${NAME}" data-columns="12" data-min="2">
 				<div class="cms-blocks-editor-grid" data-repeater-list>
-					<div class="cms-blocks-editor-block is-split" data-repeater-row>
-						<div class="cms-blocks-editor-parts" data-repeater>
-							<div class="cms-blocks-editor-block" data-repeater-row><div class="cms-blocks-editor-body"><textarea>Part</textarea></div></div>
+					<div class="cms-block is-split" data-repeater-row>
+						<div class="cms-block-parts" data-repeater>
+							<div class="cms-block" data-repeater-row><div class="cms-block-body"><textarea>Part</textarea></div></div>
 						</div>
 					</div>
 				</div>
@@ -584,7 +584,7 @@ describe('blocks spacing mirror', () => {
 		document.body.innerHTML = `<div class="cms-field" data-meta-owner data-field="body">
 			<div class="cms-blocks-editor is-grid" data-repeater data-name="${NAME}" data-columns="12" data-min="2">
 				<div data-repeater-list>
-					<div class="cms-blocks-editor-block" data-repeater-row data-meta-owner>
+					<div class="cms-block" data-repeater-row data-meta-owner>
 						<input type="hidden" name="${NAME}[0][layout][colspan]" value="6" data-layout="colspan">
 						<dialog data-dialog="meta">${select(`${NAME}[0][meta][padding][zxx]`, '')}</dialog>
 					</div>

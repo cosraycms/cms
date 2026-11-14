@@ -15,15 +15,6 @@ const panel = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 /** Marks where interpolated code sits inside a literal class string. */
 const HOLE = '\u0000';
 
-const reserved = new Set([
-	'cms-blocks',
-	'cms-block',
-	'cms-blocks-images',
-	'cms-figure',
-	'cms-image-gallery',
-	'cms-image-gallery-item',
-]);
-
 type Foreign = { name: RegExp; files: string[]; within?: string };
 
 // Classes that third-party code, content or site output sets, and where the panel meets them.
@@ -61,10 +52,6 @@ function offence(name: string): string | null {
 	if (!head.startsWith('cms-')) {
 		return 'lacks the cms- prefix';
 	}
-	if (head.startsWith('cms-block-') || (!partial && reserved.has(head))) {
-		return "is reserved for the site's block rendering";
-	}
-
 	return null;
 }
 

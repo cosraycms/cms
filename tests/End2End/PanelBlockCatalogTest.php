@@ -79,7 +79,7 @@ final class PanelBlockCatalogTest extends End2EndTestCase
 				. '//*[@data-block-choice="'
 				. CatalogBlock::class
 				. '"]'
-				. '/*[@class="cms-blocks-catalog-select"][normalize-space()="'
+				. '/*[@class="cms-block-catalog-select"][normalize-space()="'
 				. $label
 				. '"]',
 			$html,

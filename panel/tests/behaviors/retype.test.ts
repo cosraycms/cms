@@ -139,9 +139,7 @@ function editor(rows: Row[], types = [TEXT, QUOTE]): { rows: () => HTMLElement[]
 }
 
 function parts(row: HTMLElement): HTMLElement[] {
-	return [
-		...row.querySelectorAll<HTMLElement>(':scope > .cms-blocks-editor-parts > [data-repeater-row]'),
-	];
+	return [...row.querySelectorAll<HTMLElement>(':scope > .cms-block-parts > [data-repeater-row]')];
 }
 
 /** A control of the row by the end of its name; none of these rows nest others. */
@@ -175,14 +173,10 @@ function content(row: HTMLElement): string {
 
 /** The block's kebab opened, its type entry clicked, then the picker's choice for `to`. */
 function retype(row: HTMLElement, to: string): void {
+	row.querySelector<HTMLButtonElement>(':scope > .cms-block-chrome .cms-block-kebab')!.click();
 	row
 		.querySelector<HTMLButtonElement>(
-			':scope > .cms-blocks-editor-chrome .cms-blocks-editor-kebab',
-		)!
-		.click();
-	row
-		.querySelector<HTMLButtonElement>(
-			':scope > .cms-blocks-editor-chrome [data-action-menu] > [data-retype]',
+			':scope > .cms-block-chrome [data-action-menu] > [data-retype]',
 		)!
 		.click();
 

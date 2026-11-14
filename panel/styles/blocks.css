@@ -74,7 +74,7 @@
 		grid-column: 1 / -1;
 	}
 
-	& .cms-blocks-editor-block {
+	& .cms-block {
 		position: relative;
 		/* The parts of a split follow each other; a block on the grid is placed. */
 		grid-column: span var(--colspan, 1);
@@ -110,13 +110,13 @@
 		}
 	}
 
-	& .cms-blocks-editor-grid > .cms-blocks-editor-block[data-placed] {
+	& .cms-blocks-editor-grid > .cms-block[data-placed] {
 		grid-column: var(--col) / span var(--colspan, 1);
 		grid-row: var(--row) / span var(--rowspan, 1);
 	}
 
 	/* The dragged block leaves the grid and follows the pointer above it. */
-	& .cms-blocks-editor-grid > .cms-blocks-editor-block.is-lifted[data-placed] {
+	& .cms-blocks-editor-grid > .cms-block.is-lifted[data-placed] {
 		position: absolute;
 		z-index: 20;
 		inset: 0 auto auto 0;
@@ -145,12 +145,12 @@
 	 * own, its tools sit inside its bottom end corner, and a dashed seam
 	 * in the gap separates it from the next.
 	 */
-	& .cms-blocks-editor-block.is-split {
+	& .cms-block.is-split {
 		display: grid;
 		grid-template-columns: subgrid;
 		grid-template-rows: subgrid;
 
-		& > .cms-blocks-editor-parts {
+		& > .cms-block-parts {
 			display: grid;
 			grid-template-columns: subgrid;
 			grid-template-rows: subgrid;
@@ -161,20 +161,20 @@
 
 	/* A lifted split has left the grid and takes its tracks along
 	   (placement.ts); without a subgrid it has no gap of the grid's. */
-	& .cms-blocks-editor-grid > .cms-blocks-editor-block.is-split.is-lifted {
+	& .cms-blocks-editor-grid > .cms-block.is-split.is-lifted {
 		gap: var(--blocks-gap);
 	}
 
-	& .cms-blocks-editor-parts > .cms-blocks-editor-block {
+	& .cms-block-parts > .cms-block {
 		border: 0;
 		background: none;
 
-		& > .cms-blocks-editor-chrome {
+		& > .cms-block-chrome {
 			inset-block: auto var(--cms-space-2);
 		}
 	}
 
-	& .cms-blocks-editor-seam {
+	& .cms-block-seam {
 		position: absolute;
 		z-index: 5;
 
@@ -201,7 +201,7 @@
 
 			/* A ring on the line with a triangle to either side. Wider than
 			   the seam, it takes the pointer too, so its whole face grabs. */
-			& > .cms-blocks-editor-knob {
+			& > .cms-block-knob {
 				position: absolute;
 				inset-block-start: 50%;
 				/* The line's centre: its 1px border starts at 50%. */
@@ -256,7 +256,7 @@
 					border-style: solid;
 				}
 
-				& > .cms-blocks-editor-knob {
+				& > .cms-block-knob {
 					opacity: 1;
 				}
 			}
@@ -277,14 +277,14 @@
 		}
 	}
 
-	& .cms-blocks-editor-parts > .cms-blocks-editor-block:last-child > .cms-blocks-editor-seam {
+	& .cms-block-parts > .cms-block:last-child > .cms-block-seam {
 		display: none;
 	}
 
 	/* A seam overhangs the next part, which may be the active one. The
 	   hover would lift the seam's part to 3, below that neighbour, which
 	   then covers the seam and ends the hover again: a flicker. */
-	& .cms-blocks-editor-parts > .cms-blocks-editor-block:has(> .cms-blocks-editor-seam:hover) {
+	& .cms-block-parts > .cms-block:has(> .cms-block-seam:hover) {
 		z-index: 5;
 	}
 
@@ -293,26 +293,19 @@
 	 * or in a split, whose direction decides. Each such control lists its
 	 * places; a split's own chrome has none.
 	 */
-	&
-		.cms-blocks-editor-grid
-		> .cms-blocks-editor-block:not(.is-split)
-		[data-places]:not([data-places~='block']),
+	& .cms-blocks-editor-grid > .cms-block:not(.is-split) [data-places]:not([data-places~='block']),
 	&
 		[data-split='columns']
-		> .cms-blocks-editor-parts
-		> .cms-blocks-editor-block
+		> .cms-block-parts
+		> .cms-block
 		[data-places]:not([data-places~='columns']),
-	&
-		[data-split='rows']
-		> .cms-blocks-editor-parts
-		> .cms-blocks-editor-block
-		[data-places]:not([data-places~='rows']) {
+	& [data-split='rows'] > .cms-block-parts > .cms-block [data-places]:not([data-places~='rows']) {
 		display: none;
 	}
 
 	/* A split into rows is as tall as its parts: no row edges of its own. */
-	& [data-split='rows'] > .cms-blocks-editor-resize:is(.is-top, .is-bottom),
-	& [data-split='rows'] > dialog .cms-blocks-editor-dimension:has([data-layout-input='rowspan']) {
+	& [data-split='rows'] > .cms-block-resize:is(.is-top, .is-bottom),
+	& [data-split='rows'] > dialog .cms-block-dimension:has([data-layout-input='rowspan']) {
 		display: none;
 	}
 
@@ -434,7 +427,7 @@
 	}
 
 	/* Keep the full edge draggable around the visible grip. */
-	& .cms-blocks-editor-resize {
+	& .cms-block-resize {
 		position: absolute;
 		z-index: 3;
 		/* Pointer capture needs the browser to keep the gesture. */
@@ -487,7 +480,7 @@
 	}
 
 	/* The top edge where it can move: into free rows above, or down while taller than a row. */
-	& .cms-blocks-editor-block:not([data-top-edge]) > .cms-blocks-editor-resize.is-top {
+	& .cms-block:not([data-top-edge]) > .cms-block-resize.is-top {
 		display: none;
 	}
 
@@ -496,35 +489,34 @@
 	 * blocks' controls at once. An open menu counts as focus, since a click
 	 * inside it may have taken the focus elsewhere.
 	 */
-	& .cms-blocks-editor-block:focus-within,
-	& .cms-blocks-editor-block:has(:popover-open),
-	&:not(:has(.cms-blocks-editor-block:focus-within, .cms-blocks-editor-block :popover-open))
-		.cms-blocks-editor-block:hover {
+	& .cms-block:focus-within,
+	& .cms-block:has(:popover-open),
+	&:not(:has(.cms-block:focus-within, .cms-block :popover-open)) .cms-block:hover {
 		border-color: var(--cms-color-border-strong);
 		border-style: solid;
 
-		& > .cms-blocks-editor-chrome > .cms-blocks-editor-tools {
+		& > .cms-block-chrome > .cms-block-tools {
 			opacity: 1;
 			pointer-events: auto;
 		}
 	}
 
-	& .cms-blocks-editor-block:focus-within,
-	& .cms-blocks-editor-block:has(:popover-open) {
+	& .cms-block:focus-within,
+	& .cms-block:has(:popover-open) {
 		border-color: var(--cms-color-accent);
 		/* Forced colours paint this outline when the accent border is flattened. */
 		outline: 1px solid transparent;
 
-		& > .cms-blocks-editor-resize > .cms-icon {
+		& > .cms-block-resize > .cms-icon {
 			color: var(--cms-color-accent);
 		}
 	}
 
-	& .cms-blocks-editor-resize:hover {
+	& .cms-block-resize:hover {
 		background: var(--cms-color-canvas);
 	}
-	& .cms-blocks-editor-resize:hover > .cms-icon,
-	& .cms-blocks-editor-resize.is-active > .cms-icon {
+	& .cms-block-resize:hover > .cms-icon,
+	& .cms-block-resize.is-active > .cms-icon {
 		color: var(--cms-color-accent);
 		opacity: 1;
 	}
@@ -572,7 +564,7 @@
 	}
 
 	/* The other blocks the gesture changed, until it ends. */
-	& .cms-blocks-editor-grid > .cms-blocks-editor-block[data-affected]::after {
+	& .cms-blocks-editor-grid > .cms-block[data-affected]::after {
 		content: '';
 		position: absolute;
 		z-index: 5;
@@ -585,7 +577,7 @@
 	 * Hangs half over the block's top edge, right-aligned, so it needs no
 	 * gutter of its own — at rest it is as wide as what stays visible.
 	 */
-	& .cms-blocks-editor-chrome {
+	& .cms-block-chrome {
 		position: absolute;
 		z-index: 15;
 		inset-block-start: -0.875rem;
@@ -597,7 +589,7 @@
 
 	/* The controls: hidden means unclickable, or the invisible group would
 	   swallow clicks meant for the block underneath it. */
-	& .cms-blocks-editor-tools {
+	& .cms-block-tools {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-1);
@@ -613,11 +605,11 @@
 	}
 
 	/* Opening a menu must not leave its anchor at zero opacity during a fade. */
-	& .cms-blocks-editor-tools:has(:popover-open) {
+	& .cms-block-tools:has(:popover-open) {
 		transition: none;
 	}
 
-	& .cms-blocks-editor-grip {
+	& .cms-block-grip {
 		display: grid;
 		flex-shrink: 0;
 		place-items: center;
@@ -632,9 +624,9 @@
 		}
 	}
 
-	& .cms-blocks-editor-inserter,
-	& .cms-blocks-editor-settings,
-	& .cms-blocks-editor-kebab {
+	& .cms-block-inserter,
+	& .cms-block-settings,
+	& .cms-block-kebab {
 		display: inline-flex;
 		flex-shrink: 0;
 		align-items: center;
@@ -655,36 +647,36 @@
 		}
 	}
 
-	& .cms-blocks-editor-inserter {
+	& .cms-block-inserter {
 		--cms-icon-size: 1.5em;
 	}
 
-	& .cms-blocks-editor-settings {
+	& .cms-block-settings {
 		--cms-icon-size: 0.9em;
 	}
 
-	& .cms-blocks-editor-settings.has-error {
+	& .cms-block-settings.has-error {
 		color: var(--cms-color-danger);
 	}
 
-	& .cms-blocks-editor-inserter[aria-expanded='true'],
-	& .cms-blocks-editor-kebab[aria-expanded='true'] {
+	& .cms-block-inserter[aria-expanded='true'],
+	& .cms-block-kebab[aria-expanded='true'] {
 		background: var(--cms-color-surface-sunken);
 		color: var(--cms-color-text);
 	}
 
 	/* The + menu: each common type beside its before and after buttons. */
-	& .cms-blocks-editor-picker {
+	& .cms-block-picker {
 		--width: max-content;
 	}
 
-	& .cms-blocks-editor-picker-choices {
+	& .cms-block-picker-choices {
 		display: grid;
 		grid-template-columns: minmax(0, max-content) max-content;
 		column-gap: var(--cms-space-4);
 	}
 
-	& .cms-blocks-editor-picker-choice {
+	& .cms-block-picker-choice {
 		display: grid;
 		grid-column: 1 / -1;
 		grid-template-columns: subgrid;
@@ -694,7 +686,7 @@
 		font-size: var(--cms-font-size-sm);
 	}
 
-	& .cms-blocks-editor-picker-caption {
+	& .cms-block-picker-caption {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-2);
@@ -704,7 +696,7 @@
 	}
 
 	/* The layout numbers in the settings dialog: three short inputs abreast. */
-	& .cms-blocks-editor-layout {
+	& .cms-block-layout {
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: var(--cms-space-3);
@@ -715,21 +707,21 @@
 		}
 	}
 
-	& .cms-blocks-editor-layout + .cms-settings-fields {
+	& .cms-block-layout + .cms-settings-fields {
 		margin-top: var(--cms-space-4);
 	}
 
-	& .cms-blocks-editor-body {
+	& .cms-block-body {
 		padding: var(--cms-space-4);
 	}
 
 	/* An editor view of its own inside the hundred-column field grid. */
-	& .cms-blocks-editor-body > .cms-fields > .cms-blocks-editor-view {
+	& .cms-block-body > .cms-fields > .cms-block-view {
 		grid-column: 1 / -1;
 	}
 
 	/* A block that edits every field in its dialog: its name opens it. */
-	& .cms-blocks-editor-body .cms-blocks-editor-summary {
+	& .cms-block-body .cms-block-summary {
 		display: inline-flex;
 		grid-column: 1 / -1;
 		justify-self: start;
@@ -774,7 +766,7 @@
 	}
 
 	/* A block grows with its text: no inner scrollbar on the canvas. */
-	& .cms-blocks-editor-block .ProseMirror {
+	& .cms-block .ProseMirror {
 		padding: 0;
 		max-height: none;
 		overflow-y: visible;
@@ -782,7 +774,7 @@
 
 	/* The negative margin puts bare text where the control's edge was.
 	   The card carries focus, including the forced-colours outline. */
-	& .cms-blocks-editor-block.is-bare > .cms-blocks-editor-body {
+	& .cms-block.is-bare > .cms-block-body {
 		& :is(.cms-input, .cms-textarea):not(cosray-host *) {
 			width: calc(100% + 2 * var(--cms-space-2));
 			margin-inline: calc(-1 * var(--cms-space-2));
@@ -817,28 +809,28 @@
 			}
 		}
 
-		& .cms-blocks-editor-heading {
+		& .cms-block-heading {
 			display: flex;
 			gap: var(--cms-space-3);
 			align-items: center;
 
-			& .cms-blocks-editor-heading-text {
+			& .cms-block-heading-text {
 				flex: 1 1 auto;
 				min-width: 0;
 			}
 
-			& .cms-blocks-editor-heading-text .cms-input {
+			& .cms-block-heading-text .cms-input {
 				font-weight: 600;
 				letter-spacing: -0.01em;
 				line-height: 1.25;
 				padding-block: 0;
 			}
 
-			& .cms-blocks-editor-heading-level {
+			& .cms-block-heading-level {
 				flex: 0 0 auto;
 			}
 
-			& .cms-blocks-editor-heading-button {
+			& .cms-block-heading-button {
 				padding: var(--cms-space-1) var(--cms-space-2);
 				border: 0;
 				border-radius: var(--cms-radius-sm);
@@ -873,33 +865,23 @@
 				}
 			}
 
-			&:has(.cms-blocks-editor-heading-level option[value='1']:checked)
-				.cms-blocks-editor-heading-text
-				.cms-input {
+			&:has(.cms-block-heading-level option[value='1']:checked) .cms-block-heading-text .cms-input {
 				font-size: var(--cms-font-size-3xl);
 			}
 
-			&:has(.cms-blocks-editor-heading-level option[value='2']:checked)
-				.cms-blocks-editor-heading-text
-				.cms-input {
+			&:has(.cms-block-heading-level option[value='2']:checked) .cms-block-heading-text .cms-input {
 				font-size: var(--cms-font-size-2xl);
 			}
 
-			&:has(.cms-blocks-editor-heading-level option[value='3']:checked)
-				.cms-blocks-editor-heading-text
-				.cms-input {
+			&:has(.cms-block-heading-level option[value='3']:checked) .cms-block-heading-text .cms-input {
 				font-size: var(--cms-font-size-xl);
 			}
 
-			&:has(.cms-blocks-editor-heading-level option[value='4']:checked)
-				.cms-blocks-editor-heading-text
-				.cms-input {
+			&:has(.cms-block-heading-level option[value='4']:checked) .cms-block-heading-text .cms-input {
 				font-size: var(--cms-font-size-lg);
 			}
 
-			&:has(.cms-blocks-editor-heading-level option[value='6']:checked)
-				.cms-blocks-editor-heading-text
-				.cms-input {
+			&:has(.cms-block-heading-level option[value='6']:checked) .cms-block-heading-text .cms-input {
 				font-size: var(--cms-font-size-sm);
 			}
 		}
@@ -952,7 +934,7 @@
 	}
 }
 
-.cms-blocks-actions {
+.cms-block-actions {
 	display: inline-flex;
 
 	&[hidden] {
@@ -1112,7 +1094,7 @@
 	}
 }
 
-.cms-blocks-catalog {
+.cms-block-catalog {
 	--action-height: 1.375rem;
 
 	display: flex;
@@ -1123,7 +1105,7 @@
 		overflow: hidden;
 	}
 
-	& .cms-blocks-catalog-search {
+	& .cms-block-catalog-search {
 		display: grid;
 		gap: var(--cms-space-2);
 		flex: 0 0 auto;
@@ -1135,14 +1117,14 @@
 		min-width: 0;
 	}
 
-	& .cms-blocks-catalog-status {
+	& .cms-block-catalog-status {
 		margin: 0;
 		flex: 0 0 auto;
 		color: var(--cms-color-text-muted);
 		font-size: var(--cms-font-size-sm);
 	}
 
-	& .cms-blocks-catalog-results {
+	& .cms-block-catalog-results {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr));
 		gap: var(--cms-space-2);
@@ -1152,7 +1134,7 @@
 		overscroll-behavior: contain;
 	}
 
-	& .cms-blocks-catalog-choice {
+	& .cms-block-catalog-choice {
 		position: relative;
 		display: flex;
 		flex-direction: column;
@@ -1173,7 +1155,7 @@
 			display: none;
 		}
 
-		&:has(> .cms-blocks-actions:not([hidden])) {
+		&:has(> .cms-block-actions:not([hidden])) {
 			padding-block-end: var(--action-height);
 			cursor: default;
 		}
@@ -1188,7 +1170,7 @@
 		}
 	}
 
-	& .cms-blocks-catalog-select {
+	& .cms-block-catalog-select {
 		display: flex;
 		flex: 1;
 		flex-direction: column;
@@ -1199,7 +1181,7 @@
 		min-width: 0;
 	}
 
-	& .cms-blocks-actions {
+	& .cms-block-actions {
 		position: absolute;
 		inset-inline: -1px;
 		inset-block-end: -1px;
@@ -1219,19 +1201,19 @@
 		}
 	}
 
-	& .cms-blocks-catalog-choice:is(:hover, :focus-within) > .cms-blocks-actions {
+	& .cms-block-catalog-choice:is(:hover, :focus-within) > .cms-block-actions {
 		opacity: 1;
 		pointer-events: auto;
 	}
 
 	@media (hover: none), (any-pointer: coarse) {
-		& .cms-blocks-actions {
+		& .cms-block-actions {
 			opacity: 1;
 			pointer-events: auto;
 		}
 	}
 
-	& .cms-blocks-catalog-icon {
+	& .cms-block-catalog-icon {
 		display: flex;
 		font-size: var(--cms-font-size-xl);
 	}

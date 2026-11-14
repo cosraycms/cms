@@ -110,9 +110,7 @@ function editor(rows: Row[], types = [TEXT], common?: string[]): { rows: () => H
 }
 
 function parts(row: HTMLElement): HTMLElement[] {
-	return [
-		...row.querySelectorAll<HTMLElement>(':scope > .cms-blocks-editor-parts > [data-repeater-row]'),
-	];
+	return [...row.querySelectorAll<HTMLElement>(':scope > .cms-block-parts > [data-repeater-row]')];
 }
 
 function layout(row: HTMLElement): Layout {
@@ -141,14 +139,10 @@ function type(row: HTMLElement): string | undefined {
 
 /** The row's kebab opened, then its entry for this place clicked. */
 function act(row: HTMLElement, selector: string): HTMLButtonElement {
-	row
-		.querySelector<HTMLButtonElement>(
-			':scope > .cms-blocks-editor-chrome .cms-blocks-editor-kebab',
-		)!
-		.click();
+	row.querySelector<HTMLButtonElement>(':scope > .cms-block-chrome .cms-block-kebab')!.click();
 
 	const entry = row.querySelector<HTMLButtonElement>(
-		`:scope > .cms-blocks-editor-chrome [data-action-menu] > ${selector}`,
+		`:scope > .cms-block-chrome [data-action-menu] > ${selector}`,
 	)!;
 
 	entry.click();
@@ -205,7 +199,7 @@ describe('splitting a block', () => {
 		expect(type(added)).toBe(QUOTE);
 		expect(uid(added).value).not.toBe('');
 		expect(
-			container.querySelector<HTMLElement>(':scope > .cms-blocks-editor-parts')!.dataset,
+			container.querySelector<HTMLElement>(':scope > .cms-block-parts')!.dataset,
 		).toMatchObject({
 			name: `${BASE}[0][blocks]`,
 			columns: '5',
@@ -353,9 +347,9 @@ describe('resizing a split', () => {
 		number(container, 'colspan', '9');
 
 		expect(parts(container).map(layout)).toEqual([area(3), area(6)]);
-		expect(
-			container.querySelector<HTMLElement>(':scope > .cms-blocks-editor-parts')!.dataset.columns,
-		).toBe('9');
+		expect(container.querySelector<HTMLElement>(':scope > .cms-block-parts')!.dataset.columns).toBe(
+			'9',
+		);
 
 		number(container, 'rowspan', '2');
 
@@ -372,7 +366,7 @@ describe('resizing a split', () => {
 		const { rows } = editor([split('s1', area(6, 2), text('a', area(6)), text('b', area(6)))]);
 		const [container] = rows();
 		const grip = container.querySelector<HTMLElement>(
-			':scope > .cms-blocks-editor-chrome [data-repeater-grip]',
+			':scope > .cms-block-chrome [data-repeater-grip]',
 		)!;
 
 		grip.dispatchEvent(
@@ -427,7 +421,7 @@ describe('resizing a split', () => {
 
 		// The last part trades with the one before it.
 		last
-			.querySelector<HTMLElement>(':scope > .cms-blocks-editor-chrome [data-repeater-grip]')!
+			.querySelector<HTMLElement>(':scope > .cms-block-chrome [data-repeater-grip]')!
 			.dispatchEvent(
 				new KeyboardEvent('keydown', {
 					key: 'ArrowRight',

@@ -89,7 +89,7 @@ function canvas(
 	const elements = boxes.map((box) => {
 		const row = document.createElement('div');
 
-		row.className = 'cms-blocks-editor-block';
+		row.className = 'cms-block';
 		row.setAttribute('data-repeater-row', '');
 		position(row, box);
 		grid.append(row);
@@ -463,7 +463,7 @@ describe('ghost insert', () => {
 		const dialog = document.querySelector<HTMLDialogElement>('dialog[open]')!;
 
 		expect(
-			[...dialog.querySelectorAll<HTMLElement>('.cms-blocks-actions')].every(
+			[...dialog.querySelectorAll<HTMLElement>('.cms-block-actions')].every(
 				(group) => group.hidden,
 			),
 		).toBe(true);

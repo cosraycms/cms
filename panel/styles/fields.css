@@ -308,9 +308,9 @@
 		}
 
 		& .cms-blocks-editor > .cms-blocks-editor-adders,
-		& .cms-blocks-editor-block > .cms-blocks-editor-chrome,
-		& .cms-blocks-editor-block > .cms-blocks-editor-resize,
-		& .cms-blocks-editor-block > dialog,
+		& .cms-block > .cms-block-chrome,
+		& .cms-block > .cms-block-resize,
+		& .cms-block > dialog,
 		& .cms-richtext-toolbar,
 		& .cms-code-toolbar,
 		& .cms-media-field > .cms-media-field-bar,

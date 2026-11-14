@@ -284,12 +284,12 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// beside the text, both labels for screen readers only.
 		$this->assertHtmlNodeExists(
 			'//template[@data-repeater-template="Cosray\\Block\\Heading"]/div[contains(@class, "is-bare")]'
-				. '//div[@class="cms-blocks-editor-heading"]/div[@class="cms-blocks-editor-heading-text"]//input/following::div[@class="cms-blocks-editor-heading-level"]//button[@popovertarget]',
+				. '//div[@class="cms-block-heading"]/div[@class="cms-block-heading-text"]//input/following::div[@class="cms-block-heading-level"]//button[@popovertarget]',
 			$html,
 		);
 		$this->assertHtmlNodeMissing(
 			'//template[@data-repeater-template="Cosray\\Block\\Heading"]'
-				. '//div[@class="cms-blocks-editor-heading"]//label[not(contains(@class, "cms-sr-only"))]',
+				. '//div[@class="cms-block-heading"]//label[not(contains(@class, "cms-sr-only"))]',
 			$html,
 		);
 		// A block field says what belongs into it while empty.
