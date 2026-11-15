@@ -20,6 +20,7 @@ $name = (string) ($lead['value'] ?? $row['uid']);
 $grip = $group === null
 	? ''
 	: '<span class="cms-list-grip" data-order-grip aria-hidden="true">' . \Cosray\Panel\Icon::render('grip-vertical') . '</span>';
+$titleGrip = $bulk ? '' : $grip;
 ?>
 <tr
 	class="cms-list-row<?= $treeMode ? ' is-tree' : '' ?>"
@@ -36,6 +37,7 @@ $grip = $group === null
 	style="--tree-depth: <?= (int) $row['depth'] ?>">
 	<?php if ($bulk): ?>
 		<td class="cms-list-cell cms-list-col-select" role="cell">
+			<?= $grip ?>
 			<input
 				type="checkbox"
 				name="nodes[]"
@@ -92,7 +94,7 @@ $grip = $group === null
 							<span class="cms-list-toggle is-spacer" aria-hidden="true"></span>
 						<?php endif ?>
 					<?php endif ?>
-					<?= $grip ?>
+					<?= $titleGrip ?>
 					<?php if ($cell['editUrl'] !== null): ?>
 						<a class="cms-list-value" href="<?= escape((string) $cell['editUrl']) ?>">
 							<?= escape((string) $cell['value']) ?>
@@ -102,7 +104,7 @@ $grip = $group === null
 					<?php endif ?>
 				</div>
 			<?php elseif ($cell['editUrl'] !== null): ?>
-				<?= $isLead ? $grip : '' ?>
+				<?= $isLead ? $titleGrip : '' ?>
 				<a class="cms-list-value" href="<?= escape((string) $cell['editUrl']) ?>">
 					<?= escape((string) $cell['value']) ?>
 				</a>

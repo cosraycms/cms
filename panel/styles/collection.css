@@ -454,8 +454,31 @@
 		padding-left: var(--cms-space-6);
 	}
 
+	/* A manually ordered listing widens the gutter left of the checkboxes for its grips. */
+	&:has([data-order-grip]) {
+		--cms-list-select-width: 3.25rem;
+
+		& .cms-list-col-select {
+			padding-left: var(--cms-space-8);
+		}
+	}
+
 	& input[type='checkbox'] {
 		margin: 0;
+	}
+
+	/*
+	 * Row checkboxes show on hover and focus, and all of them once one is
+	 * ticked; opacity rather than display keeps them in the tab order.
+	 */
+	& tbody [data-bulk-check] {
+		opacity: 0;
+		transition: opacity 0.12s ease;
+	}
+
+	& .cms-list-row:is(:hover, :focus-within) [data-bulk-check],
+	&:has([data-bulk-check]:checked) [data-bulk-check] {
+		opacity: 1;
 	}
 
 	& :is(.cms-list-cell, th).cms-list-col-select ~ .is-lead {
@@ -498,17 +521,17 @@
 	}
 
 	/*
-	 * A dashed line drops from the parent's toggle through its children, and
-	 * each child hangs from it by a branch; the last child ends the line at
-	 * its branch. An outer line still running past a nested row is a guide
-	 * the row carries for it. The title stretches to the cell and the lines
-	 * overshoot the cell's padding, so they run unbroken from row to row.
+	 * A rail drops from the parent's toggle through its children. Each level
+	 * indents by a toggle and its gap, so a child's toggle sits under its
+	 * parent's title. An outer rail still running past a nested row is a
+	 * guide the row carries for it. The title stretches to the cell and the
+	 * rails overshoot the cell's padding, so they run unbroken from row to row.
 	 */
 	& .cms-list-title {
-		--step: 1.375rem;
-		--line: var(--cms-color-text-faint);
-		--line-x: calc((var(--tree-depth, 0) - 0.5) * var(--step));
-		--line-dash: repeating-linear-gradient(to bottom, var(--line) 0 3px, transparent 3px 6px);
+		--toggle: 1.375rem;
+		--step: calc(var(--toggle) + var(--cms-space-2));
+		--line: var(--cms-color-border-strong);
+		--line-x: calc((var(--tree-depth, 0) - 1) * var(--step) + var(--toggle) / 2);
 
 		position: relative;
 		display: flex;
@@ -523,41 +546,30 @@
 		}
 
 		&:not(.is-flat)::before,
-		&:not(.is-flat)::after {
+		& .cms-list-guide {
 			position: absolute;
-			left: var(--line-x);
+			top: calc(-1 * var(--cms-space-2));
+			bottom: calc(-1 * var(--cms-space-2));
+			width: 1px;
+			background: var(--line);
 			content: '';
 			pointer-events: none;
 		}
 
-		&:not(.is-flat)::before,
-		& .cms-list-guide {
-			top: calc(-1 * var(--cms-space-2));
-			bottom: calc(-1 * var(--cms-space-2));
-			width: 1px;
-			background-image: var(--line-dash);
-		}
-
-		&:not(.is-flat)::after {
-			top: 50%;
-			width: var(--step);
-			height: 1px;
-			background-image: repeating-linear-gradient(to right, var(--line) 0 3px, transparent 3px 6px);
+		&:not(.is-flat)::before {
+			left: var(--line-x);
 		}
 
 		& .cms-list-guide {
-			position: absolute;
-			left: calc((var(--guide-depth) - 0.5) * var(--step));
-			pointer-events: none;
+			left: calc((var(--guide-depth) - 1) * var(--step) + var(--toggle) / 2);
 		}
 	}
 
 	& .cms-list-row[data-last='true'] .cms-list-title::before {
-		bottom: 50%;
+		bottom: var(--cms-space-1);
 	}
 
-	& .cms-list-row[data-depth='0'] .cms-list-title::before,
-	& .cms-list-row[data-depth='0'] .cms-list-title::after {
+	& .cms-list-row[data-depth='0'] .cms-list-title::before {
 		display: none;
 	}
 
@@ -569,10 +581,6 @@
 		height: 1.375rem;
 		flex-shrink: 0;
 		border-radius: var(--cms-radius);
-		/* Sits on the branch: its own ground ends the branch at its edge. */
-		position: relative;
-		z-index: 1;
-		background: var(--row-bg);
 		color: var(--cms-color-text-subtle);
 		text-decoration: none;
 
@@ -583,7 +591,6 @@
 		}
 
 		&.is-spacer {
-			background: none;
 			pointer-events: none;
 		}
 
@@ -628,6 +635,28 @@
 
 	& .cms-list-cell > .cms-list-grip {
 		margin-right: var(--cms-space-2);
+	}
+
+	/* Pinned to the gutter, so a row with a grip keeps its checkbox in line. */
+	& .cms-list-col-select > .cms-list-grip {
+		position: absolute;
+		top: 50%;
+		left: var(--cms-space-2);
+		height: 1.75rem;
+		margin: 0;
+		translate: 0 -50%;
+		color: var(--cms-color-text-subtle);
+		opacity: 0;
+		transition: opacity 0.12s ease;
+
+		&:hover {
+			background: var(--cms-color-selected);
+			color: var(--cms-color-text);
+		}
+	}
+
+	& .cms-list-row:is(:hover, :focus-within) .cms-list-col-select > .cms-list-grip {
+		opacity: 1;
 	}
 
 	/* Marks where the last move put the row. */
@@ -737,7 +766,9 @@
 }
 
 @media (pointer: coarse) {
-	.cms-list .cms-list-row-actions {
+	.cms-list
+		tbody
+		:is(.cms-list-row-actions, [data-bulk-check], .cms-list-col-select > .cms-list-grip) {
 		opacity: 1;
 	}
 }
@@ -764,11 +795,18 @@
 			box-shadow: none;
 		}
 
-		& .cms-list-col-select {
+		& .cms-list-cell.cms-list-col-select {
 			display: flex;
+			gap: var(--cms-space-2);
+			padding-left: var(--cms-space-4);
 
 			&::before {
 				display: none;
+			}
+
+			& > .cms-list-grip {
+				position: static;
+				translate: none;
 			}
 		}
 
@@ -812,6 +850,10 @@
 		& .cms-list-row-actions {
 			opacity: 1;
 			flex-wrap: wrap;
+		}
+
+		& tbody :is([data-bulk-check], .cms-list-col-select > .cms-list-grip) {
+			opacity: 1;
 		}
 
 		& .cms-list-col-actions {
