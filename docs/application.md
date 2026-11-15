@@ -26,6 +26,20 @@ The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); 
 
 `app.name` names the session cookies, so changing it signs everyone out. The site's name as people read it, in mails for example, is `app.title`, `APP_TITLE` in the environment; it defaults to the host of `app.url`, else `app.name`.
 
+### Database namespace
+
+Cosray keeps its tables in a namespace of their own: the PostgreSQL schema `cms` by default, which the install migration creates, and the table-name prefix `cms_` on other drivers. The `cms.prefix` placeholder sets it. On PostgreSQL, a value ending in a dot names a schema; any other value is prepended to each table name.
+
+```php
+$app = App::create($root, [
+    'db.placeholders' => [
+        'pgsql' => ['cms.prefix' => 'cms.'],
+    ],
+]);
+```
+
+An empty prefix is possible but strongly discouraged. Cosray's tables have short, plain names such as `users`, `types`, `nodes`, `tags`, `jobs` and `drafts`, which a site's own tables or another package may want as well. A namespace keeps them apart and shows at a glance which tables Cosray owns and migrates, so site code and site migrations do not change them by accident. It also lets backups, permissions and maintenance address Cosray's tables as a whole, for example with `pg_dump --schema=cms`, and site SQL names them unambiguously, as in `cms.nodes`. Choose the namespace before installing: changing it later means moving every table, for example with `ALTER TABLE … SET SCHEMA`.
+
 ### Filesystem directories and URL paths
 
 | Setting | Meaning |
