@@ -60,6 +60,9 @@ FROM (
 ) chosen
 ORDER BY node, run;
 
+-- Before the lookups by node below.
+CREATE INDEX /*:cms.obj:*/ix_revisions_node ON /*:cms.prefix:*/revisions (node, revision);
+
 UPDATE /*:cms.prefix:*/revisions r SET base = l.previous
 FROM (
 	SELECT revision, lag(revision) OVER (PARTITION BY node ORDER BY revision) AS previous
@@ -117,7 +120,6 @@ ALTER TABLE /*:cms.prefix:*/drafts ALTER COLUMN created DROP DEFAULT;
 ALTER TABLE /*:cms.prefix:*/nodes DROP COLUMN editor;
 ALTER TABLE /*:cms.prefix:*/nodes DROP COLUMN version;
 
-CREATE INDEX /*:cms.obj:*/ix_revisions_node ON /*:cms.prefix:*/revisions (node, revision);
 CREATE INDEX /*:cms.obj:*/ix_events_revision ON /*:cms.prefix:*/events (revision)
 	WHERE revision IS NOT NULL;
 ALTER TABLE /*:cms.prefix:*/revisions
