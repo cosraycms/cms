@@ -64,6 +64,11 @@ final class PanelCollectionTest extends End2EndTestCase
 			"//th[contains(@class, 'is-lead')]/following-sibling::th[1][@class='cms-list-col-status' and normalize-space()='Status']",
 			$html,
 		);
+		// Without its own columns a collection shows who changed an entry last, and when.
+		$this->assertHtmlNodeExists(
+			"//th[@class='cms-list-col-status']/following-sibling::th[1][normalize-space()='Editor']/following-sibling::th[1][starts-with(normalize-space(), 'Modified')]",
+			$html,
+		);
 		$this->assertStringNotContainsString('class="collection-grid"', $html);
 	}
 

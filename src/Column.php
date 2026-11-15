@@ -89,7 +89,7 @@ abstract class Column
 
 	/**
 	 * The listing columns of a collection without its own: the title, which
-	 * is also the initial order, and the last change.
+	 * is also the initial order, who changed the entry last, and when.
 	 *
 	 * @return list<self>
 	 */
@@ -97,6 +97,7 @@ abstract class Column
 	{
 		return [
 			self::text(__('collection:column-title'), 'title')->bold()->sort('title'),
+			self::editor(),
 			self::changed(),
 		];
 	}
