@@ -32,16 +32,22 @@ final class Navigation
 		return $this->root->collection($class);
 	}
 
-	/** @return list<NavigationItem> */
-	public function children(): array
+	/**
+	 * @param (Closure(string): bool)|null $permits
+	 * @return list<NavigationItem>
+	 */
+	public function children(?Closure $permits = null): array
 	{
-		return $this->root->children();
+		return $this->root->children($permits);
 	}
 
-	/** @return list<NavigationItem> */
-	public function items(): array
+	/**
+	 * @param (Closure(string): bool)|null $permits
+	 * @return list<NavigationItem>
+	 */
+	public function items(?Closure $permits = null): array
 	{
-		return $this->children();
+		return $this->children($permits);
 	}
 
 	/** @return array<string, Ref> */

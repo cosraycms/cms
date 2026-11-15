@@ -9,6 +9,8 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Finder\Nodes;
 use Cosray\Navigation;
 use Cosray\Schema\Handle;
+use Cosray\Schema\Label;
+use Cosray\Schema\Permission;
 use Cosray\SystemNav;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Collection\TestHierarchyCollection;
@@ -103,6 +105,30 @@ final class NavigationTest extends TestCase
 		new Navigation()->collection('App\\Missing');
 	}
 
+	public function testEntriesNeedingADeniedPermissionAreLeftOutWithTheirEmptiedSections(): void
+	{
+		$navigation = new Navigation();
+		$navigation->collection(TestArticlesCollection::class);
+		$navigation->collection(RestrictedCollection::class);
+		$navigation->section('Admin')->link('Logs', '/panel/logs')->permission('read-logs');
+		$navigation->section('Help')->link('Guide', '/panel/guide');
+		$labels = static fn(array $items): array => array_map(static fn($item) => $item->meta->label, $items);
+
+		$this->assertSame(
+			['Test articles', 'Restricted', 'Admin', 'Help'],
+			$labels($navigation->items()),
+			'without a check, every entry is listed',
+		);
+		$this->assertSame(
+			['Test articles', 'Admin', 'Help'],
+			$labels($navigation->items(static fn(string $permission): bool => $permission === 'read-logs')),
+		);
+		$this->assertSame(
+			['Test articles', 'Help'],
+			$labels($navigation->items(static fn(string $permission): bool => false)),
+		);
+	}
+
 	public function testSystemLinksAreOrderedAndHiddenOnesLeftOut(): void
 	{
 		$system = new SystemNav();
@@ -155,3 +181,12 @@ final class EntriesOnlyCollection implements Entries
 }
 
 final class UndeclaredCollection {}
+
+#[Handle('restricted'), Label('Restricted'), Permission('edit-secrets')]
+final class RestrictedCollection implements Entries
+{
+	public function entries(Nodes $nodes): Nodes
+	{
+		return $nodes;
+	}
+}

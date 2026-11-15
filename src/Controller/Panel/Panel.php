@@ -133,6 +133,7 @@ abstract class Panel
 				// Only a full document loads the entry; a swap reuses the modules.
 				'modulePreloads' => $layer === 'document' ? $this->client()->preloads() : [],
 				'collections' => $collections,
+				'permits' => $this->permits(...),
 				'rail' => match (static::AREA) {
 					'content' => $collections !== [],
 					'system' => $systemNav !== [],
@@ -384,10 +385,15 @@ abstract class Panel
 		return $logo === '' ? null : $logo;
 	}
 
-	/** @return list<NavigationItem> */
+	/**
+	 * The content rail's entries the user may see. Cosmetic gating only, like
+	 * menusUrl(): a collection's routes do not check its permission.
+	 *
+	 * @return list<NavigationItem>
+	 */
 	protected function collections(): array
 	{
-		return $this->navigation()->items();
+		return $this->navigation()->items($this->permits(...));
 	}
 
 	protected function navigation(): Navigation
@@ -445,7 +451,7 @@ abstract class Panel
 				return $this->panelPath() . '/collection/' . $slug;
 			}
 
-			$url = $this->firstUrl($item->children());
+			$url = $this->firstUrl($item->children($this->permits(...)));
 
 			if ($url !== null) {
 				return $url;

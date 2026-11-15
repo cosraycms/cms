@@ -236,7 +236,7 @@ Plugin migrations share the `default` namespace. Timestamped filenames avoid col
 $panel = $cms->config->panel->path;
 $cms->templates(__DIR__ . '/../views');
 $cms->panelPage('/shop/orders', [\App\Panel\Orders::class, 'list'], 'acme-shop:orders', 'orders');
-$cms->section('Shop')->link('Orders', "{$panel}/shop/orders");
+$cms->section('Shop')->link('Orders', "{$panel}/shop/orders")->permission('edit-orders');
 $cms->assets(__DIR__ . '/../dist');
 $cms->css("{$panel}/vendor/acme-shop/shop.css");
 $cms->js("{$panel}/vendor/acme-shop/shop.js");
@@ -269,7 +269,7 @@ final class Imports extends \Cosray\Controller\Panel\Panel
 }
 ```
 
-System links appear between Users and the profile, in registration order unless their `meta->order` differs. `permission()` only hides a link from users without that permission; the route enforces it through `#[Permission]`. A page without `AREA` belongs to the content area.
+System links appear between Users and the profile, in registration order unless their `meta->order` differs. In either rail, `permission()` only hides a link from users without that permission, and a section left empty disappears; the route enforces the permission through `#[Permission]`. A page without `AREA` belongs to the content area.
 
 Existing nodes open at `{panel.path}/node/{uid}`; creation uses `{panel.path}/node/create/{type}`. Build URLs through [NodeUrls](../src/Panel/NodeUrls.php):
 

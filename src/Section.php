@@ -47,7 +47,7 @@ final class Section implements NavigationItem
 
 	/** @return list<NavigationItem> */
 	#[Override]
-	public function children(): array
+	public function children(?Closure $permits = null): array
 	{
 		$visible = [];
 
@@ -56,7 +56,13 @@ final class Section implements NavigationItem
 				continue;
 			}
 
-			if ($item instanceof self && $item->children() === []) {
+			$permission = $item->meta->permission;
+
+			if ($permits !== null && $permission !== null && !$permits($permission)) {
+				continue;
+			}
+
+			if ($item instanceof self && $item->children($permits) === []) {
 				continue;
 			}
 

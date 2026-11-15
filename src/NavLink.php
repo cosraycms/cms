@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray;
 
+use Closure;
 use Cosray\Exception\RuntimeException;
 use Override;
 
@@ -38,7 +39,7 @@ final class NavLink implements NavigationItem
 
 	/** @return list<NavigationItem> */
 	#[Override]
-	public function children(): array
+	public function children(?Closure $permits = null): array
 	{
 		return [];
 	}

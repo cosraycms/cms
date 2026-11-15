@@ -68,7 +68,7 @@ use function Cosray\escape;
 				<span><?= $label ?></span>
 			</span>
 			<?php $this->include('component/collections', [
-				'collections' => $item->children(),
+				'collections' => $item->children(u($permits ?? null)),
 				'level' => $level + 1,
 			]) ?>
 		</div>

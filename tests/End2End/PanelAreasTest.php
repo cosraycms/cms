@@ -32,6 +32,11 @@ final class PanelAreasTest extends End2EndTestCase
 	{
 		$plugin = parent::createBootstrap($config);
 		$plugin->section('Inhalt')->collection(TestArticlesCollection::class);
+		$logbook = $plugin->section('Logbook');
+		$logbook->link('Guide', '/panel/guide');
+		$logbook->link('Logs', '/panel/logs')->permission('read-logs');
+		$plugin->section('Audit')->link('Audit', '/panel/audit')->permission('read-logs');
+		$plugin->policy()->allow('role:admin', 'read-logs');
 
 		return $plugin;
 	}
@@ -90,6 +95,21 @@ final class PanelAreasTest extends End2EndTestCase
 		// Switching areas replaces everything below the masthead, so the whole
 		// nav swaps the frame rather than the content region.
 		$this->assertStringContainsString('hx-target:inherited="#frame"', $html);
+	}
+
+	public function testTheContentRailLeavesOutWhatTheUserMayNotOpen(): void
+	{
+		$editor = $this->html('/panel/collection/test-articles');
+		$this->assertHtmlNodeExists('//*[@id="collection-nav"]//a[@href="/panel/guide"]', $editor);
+		$this->assertHtmlNodeMissing('//*[@id="collection-nav"]//a[@href="/panel/logs"]', $editor);
+		// A section left without entries goes with them.
+		$this->assertHtmlNodeMissing('//*[@id="collection-nav"]//span[text()="Audit"]', $editor);
+
+		$this->authenticateAs('admin');
+
+		$admin = $this->html('/panel/collection/test-articles');
+		$this->assertHtmlNodeExists('//*[@id="collection-nav"]//a[@href="/panel/logs"]', $admin);
+		$this->assertHtmlNodeExists('//*[@id="collection-nav"]//a[@href="/panel/audit"]', $admin);
 	}
 
 	public function testEverySignedInUserOpensTheSystemAreaAtTheirFirstEntry(): void

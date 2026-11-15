@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Collection;
 
+use Closure;
 use Cosray\Exception\RuntimeException;
 use Cosray\NavigationItem;
 use Cosray\NavMeta;
@@ -33,7 +34,7 @@ final class Ref implements NavigationItem
 
 	/** @return list<NavigationItem> */
 	#[Override]
-	public function children(): array
+	public function children(?Closure $permits = null): array
 	{
 		return [];
 	}
