@@ -77,6 +77,7 @@ class Bootstrap implements CorePlugin
 	protected array $renderers = [];
 
 	protected readonly Navigation $navigation;
+	protected readonly SystemNav $systemNav;
 	/** @var array<non-empty-string, class-string> */
 	protected array $nodes = [];
 
@@ -132,6 +133,7 @@ class Bootstrap implements CorePlugin
 		$this->navigation = new Navigation($this->collectionSchemas);
 		// Registered first so it leads the content rail above every section.
 		$this->navigation->collection(AllContent::class);
+		$this->systemNav = new SystemNav();
 		$this->dashboardCards = PanelDashboard::withDefaults();
 		$this->policy = Policy::withDefaults();
 		$this->userTypes = new UserTypes();
@@ -360,6 +362,7 @@ class Bootstrap implements CorePlugin
 	protected function collect(): void
 	{
 		$this->container->add(Navigation::class, $this->navigation)->value();
+		$this->container->add(SystemNav::class, $this->systemNav)->value();
 
 		foreach ($this->nodes as $name => $node) {
 			$this->container
@@ -424,6 +427,11 @@ class Bootstrap implements CorePlugin
 	public function navigation(): Navigation
 	{
 		return $this->navigation;
+	}
+
+	public function system(): SystemNav
+	{
+		return $this->systemNav;
 	}
 
 	public function meta(): Types

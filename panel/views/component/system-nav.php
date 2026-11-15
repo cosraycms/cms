@@ -23,7 +23,11 @@ $entries = (array) u($systemNav);
 					href="<?= escape((string) $entry['url']) ?>"
 					<?= $entry['active'] ? 'aria-current="page"' : '' ?>>
 					<span class="cms-sidebar-label">
-						<span class="cms-sidebar-icon"><?= \Cosray\Panel\Icon::render((string) $entry['icon']) ?></span>
+						<?php if (is_string($entry['icon'])): ?>
+							<span class="cms-sidebar-icon"><?= \Cosray\Panel\Icon::render($entry['icon']) ?></span>
+						<?php else: ?>
+							<?php $this->include('component/collection-icon', ['iconMeta' => $entry['iconMeta'], 'default' => true]) ?>
+						<?php endif ?>
 						<span><?= escape((string) $entry['label']) ?></span>
 					</span>
 				</a>

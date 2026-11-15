@@ -43,6 +43,31 @@ final class PanelPluginPageTest extends End2EndTestCase
 		$this->assertStringContainsString('/panel/vendor/test-plugin/theme.css', $html);
 	}
 
+	public function testAPluginEntryJoinsTheSystemRailOfUsersWithItsPermission(): void
+	{
+		$this->authenticateAs('admin');
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/test-plugin/stats'));
+
+		$this->assertHtmlNodeExists('//a[@id="system-link" and @href="/panel/users" and @aria-current="page"]', $html);
+		$this->assertHtmlNodeExists('//*[@id="system-nav"]//li[1]/a[@href="/panel/users"]', $html);
+		$this->assertHtmlNodeExists(
+			'//*[@id="system-nav"]//li[2]/a[@href="/panel/test-plugin/stats" and @aria-current="page" and normalize-space(.)="Test Stats"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists('//*[@id="system-nav"]//li[3]/a[@href="/panel/profile"]', $html);
+	}
+
+	public function testAPluginEntryIsHiddenAndItsPageRefusedWithoutItsPermission(): void
+	{
+		$this->authenticateAs('editor');
+
+		$this->assertHtmlNodeMissing(
+			'//*[@id="system-nav"]//a[@href="/panel/test-plugin/stats"]',
+			$this->getHtmlResponse($this->makeRequest('GET', '/panel/profile')),
+		);
+		$this->assertResponseStatus(403, $this->makeRequest('GET', '/panel/test-plugin/stats'));
+	}
+
 	public function testPluginPanelPageRequiresAuthentication(): void
 	{
 		$response = $this->makeRequest('GET', '/panel/test-plugin');

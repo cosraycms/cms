@@ -9,6 +9,7 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Finder\Nodes;
 use Cosray\Navigation;
 use Cosray\Schema\Handle;
+use Cosray\SystemNav;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Collection\TestHierarchyCollection;
 use Cosray\Tests\Fixtures\Collection\TestStaticIconCollection;
@@ -100,6 +101,29 @@ final class NavigationTest extends TestCase
 	{
 		$this->throws(RuntimeException::class, "Unknown collection class 'App\\Missing'");
 		new Navigation()->collection('App\\Missing');
+	}
+
+	public function testSystemLinksAreOrderedAndHiddenOnesLeftOut(): void
+	{
+		$system = new SystemNav();
+		$system->link('Stats', '/panel/stats')->permission(' view-stats ');
+		$system->link('Hidden', '/panel/hidden')->meta->hidden = true;
+		$system->link('Logs', '/panel/logs', '/panel/logs');
+		$system->link('First', '/panel/first')->meta->order = -1;
+
+		$links = $system->links();
+
+		$this->assertSame(['First', 'Stats', 'Logs'], array_map(static fn($link) => $link->meta->label, $links));
+		$this->assertSame('view-stats', $links[1]->meta->permission);
+		$this->assertTrue($links[2]->active('/panel/logs/today'));
+	}
+
+	public function testNavLinkPermissionsMustNotBeEmpty(): void
+	{
+		$this->throws(RuntimeException::class, 'Nav link permissions must not be empty');
+		new SystemNav()
+			->link('Stats', '/panel/stats')
+			->permission(' ');
 	}
 
 	public function testCollectionIconAttributeIsNormalizedInMeta(): void

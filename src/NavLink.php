@@ -68,4 +68,18 @@ final class NavLink implements NavigationItem
 
 		return $this;
 	}
+
+	/** Hides the link from users without the permission; its route must still enforce it. */
+	public function permission(string $permission): static
+	{
+		$permission = trim($permission);
+
+		if ($permission === '') {
+			throw new RuntimeException('Nav link permissions must not be empty');
+		}
+
+		$this->meta->permission = $permission;
+
+		return $this;
+	}
 }

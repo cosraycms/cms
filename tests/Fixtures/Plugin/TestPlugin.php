@@ -38,6 +38,12 @@ final class TestPlugin implements Plugin
 		$cms
 			->section('Test Plugin')
 			->link('Test Page', "{$cms->config->panel->path}/test-plugin");
+		$cms->panelPage('/test-plugin/stats', [SystemPageController::class, 'index'], 'test-plugin:page', 'stats');
+		$cms->allow('role:admin', 'view-test-stats');
+		$cms
+			->system()
+			->link('Test Stats', "{$cms->config->panel->path}/test-plugin/stats")
+			->permission('view-test-stats');
 		$cms->register('test-plugin.service', stdClass::class);
 		$cms->routes(static function (App $app): void {
 			$app->get('/test-plugin', [stdClass::class, 'index'], 'test-plugin.route');

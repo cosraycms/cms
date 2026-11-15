@@ -251,6 +251,26 @@ Panel controllers extend [Panel](../src/Controller/Panel/Panel.php) and return `
 - `shell`: panel chrome for history restore or a full htmx render, without scripts.
 - `document`: a complete page for an ordinary request.
 
+A page can also join the system area that the masthead's gear opens. `system()`, on the app or a plugin's registrar, adds its link to that rail, and the controller names the area:
+
+```php
+$cms->panelPage('/shop/imports', [\App\Panel\Imports::class, 'index'], 'acme-shop:imports', 'imports');
+$cms->system()->link('Imports', "{$panel}/shop/imports")->icon('bi:upload')->permission('import-orders');
+
+final class Imports extends \Cosray\Controller\Panel\Panel
+{
+    protected const string AREA = 'system';
+
+    #[\Cosray\Middleware\Permission('import-orders')]
+    public function index(): array
+    {
+        return $this->context(['title' => 'Imports']);
+    }
+}
+```
+
+System links appear between Users and the profile, in registration order unless their `meta->order` differs. `permission()` only hides a link from users without that permission; the route enforces it through `#[Permission]`. A page without `AREA` belongs to the content area.
+
 Existing nodes open at `{panel.path}/node/{uid}`; creation uses `{panel.path}/node/create/{type}`. Build URLs through [NodeUrls](../src/Panel/NodeUrls.php):
 
 ```php

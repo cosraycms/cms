@@ -34,11 +34,21 @@ use Cosray\Panel\Extras;
 use Cosray\Renderer;
 use Cosray\Security\Policy;
 use Cosray\Session;
+use Cosray\SystemNav;
 use Cosray\User;
 use Cosray\Util\Form;
 use Cosray\Util\LiveReload;
 use DateTimeZone;
 
+/**
+ * @phpstan-type SystemEntry array{
+ *     label: string,
+ *     url: string,
+ *     icon: ?string,
+ *     iconMeta: array{id: string, args: array<array-key, mixed>}|null,
+ *     active: bool,
+ * }
+ */
 abstract class Panel
 {
 	/**
@@ -450,7 +460,7 @@ abstract class Panel
 	 * signed-in user has at least the profile. Cosmetic gating only, like
 	 * menusUrl(): the routes enforce their permissions themselves.
 	 *
-	 * @return list<array{label: string, url: string, icon: string, active: bool}>
+	 * @return list<SystemEntry>
 	 */
 	private function systemNav(): array
 	{
@@ -459,10 +469,27 @@ abstract class Panel
 		}
 
 		$panelPath = $this->panelPath();
+		$path = $this->request->uri()->getPath();
 		$entries = [];
 
 		if ($this->permits('edit-users')) {
 			$entries[] = $this->systemEntry(__('nav:users'), $panelPath . '/users', 'people');
+		}
+
+		foreach ($this->container->instance(SystemNav::class)->links() as $link) {
+			$permission = $link->meta->permission;
+
+			if ($permission !== null && !$this->permits($permission)) {
+				continue;
+			}
+
+			$entries[] = [
+				'label' => __($link->meta->label),
+				'url' => $link->url,
+				'icon' => null,
+				'iconMeta' => $link->meta->icon,
+				'active' => $link->active($path),
+			];
 		}
 
 		$entries[] = $this->systemEntry(__('nav:profile'), $panelPath . '/profile', 'person');
@@ -470,7 +497,7 @@ abstract class Panel
 		return $entries;
 	}
 
-	/** @return array{label: string, url: string, icon: string, active: bool} */
+	/** @return SystemEntry */
 	private function systemEntry(string $label, string $url, string $icon): array
 	{
 		$path = $this->request->uri()->getPath();
@@ -479,6 +506,7 @@ abstract class Panel
 			'label' => $label,
 			'url' => $url,
 			'icon' => $icon,
+			'iconMeta' => null,
 			'active' => $path === $url || str_starts_with($path, $url . '/'),
 		];
 	}

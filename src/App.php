@@ -164,6 +164,11 @@ class App implements RouteAdder
 		return $this->bootstrap->collection($class);
 	}
 
+	public function system(): SystemNav
+	{
+		return $this->bootstrap->system();
+	}
+
 	/** @param class-string<IconProvider>|IconProvider $icons */
 	public function icons(string|IconProvider $icons, bool $replace = false): self
 	{

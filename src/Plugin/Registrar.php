@@ -15,6 +15,7 @@ use Cosray\Contract\DashboardCard;
 use Cosray\Field\Schema\Handler as FieldHandler;
 use Cosray\Node\Schema\Handler as NodeHandler;
 use Cosray\Section;
+use Cosray\SystemNav;
 
 /**
  * Registration facade handed to each plugin during boot.
@@ -77,6 +78,11 @@ final class Registrar
 	public function collection(string $class): Ref
 	{
 		return $this->bootstrap->collection($class);
+	}
+
+	public function system(): SystemNav
+	{
+		return $this->bootstrap->system();
 	}
 
 	/** @param class-string<DashboardCard>|DashboardCard $card */
