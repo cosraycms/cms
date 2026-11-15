@@ -9,9 +9,10 @@ $this->layout('layer/main');
 
 $page = u($page);
 
-// Track sizing per column kind. Status pills and row actions size to their content
-// because the translation decides a pill's width; the title absorbs the slack,
-// and past the sum of the floors the list scrolls sideways.
+// Status pills and row actions size to their content because the translation decides
+// a pill's width. The title stops at a cap so the `auto` columns share the spare width.
+// With fewer than two to share it, the title takes that width itself: a single one would
+// only move the gap, and none would leave the rows short of the list's edge.
 $hasRowActions = false;
 
 $arranged = false;
@@ -29,15 +30,25 @@ $notice = (array) u($notice ?? []);
 
 $columns = $bulk ? 'var(--cms-list-select-width)' : '';
 
+$tracks = [];
+
 foreach ($page->table->headers as $header) {
-	$columns .= $header['lead'] ? ' minmax(12rem, 2fr)' : match ($header['kind']) {
-		'datetime' => ' minmax(9rem, auto)',
-		'date' => ' minmax(7rem, auto)',
-		'number' => ' minmax(5rem, auto)',
-		'status' => ' max-content',
-		'user' => $header['look'] === 'avatar' ? ' max-content' : ' minmax(7rem, auto)',
-		default => ' minmax(7rem, auto)',
+	$tracks[] = $header['lead'] ? '' : match ($header['kind']) {
+		'datetime' => 'minmax(9rem, auto)',
+		'date' => 'minmax(7rem, auto)',
+		'number' => 'minmax(5rem, auto)',
+		'status' => 'max-content',
+		'user' => $header['look'] === 'avatar' ? 'max-content' : 'minmax(7rem, auto)',
+		default => 'minmax(7rem, auto)',
 	};
+}
+
+$leadTrack = count(array_filter($tracks, static fn(string $track): bool => str_ends_with($track, 'auto)'))) < 2
+	? 'minmax(12rem, 1fr)'
+	: 'minmax(12rem, 36rem)';
+
+foreach ($tracks as $track) {
+	$columns .= ' ' . ($track === '' ? $leadTrack : $track);
 }
 
 $columns = ltrim($columns);
