@@ -466,6 +466,7 @@ return [
 		'menu:untitled' => '(untitled)',
 		'nav:account' => 'Account: :name',
 		'nav:content' => 'Content',
+		'nav:dark-theme' => 'Dark theme',
 		'nav:dashboard' => 'Dashboard',
 		'nav:home' => 'Home',
 		'nav:language' => 'Language',

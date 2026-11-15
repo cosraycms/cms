@@ -482,6 +482,7 @@ return [
 		'menu:untitled' => '(bez tytułu)',
 		'nav:account' => 'Konto: :name',
 		'nav:content' => 'Treści',
+		'nav:dark-theme' => 'Ciemny motyw',
 		'nav:dashboard' => 'Pulpit',
 		'nav:home' => 'Strona główna',
 		'nav:language' => 'Język',

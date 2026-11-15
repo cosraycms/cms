@@ -192,10 +192,49 @@
 		}
 	}
 
-	& .cms-masthead-account {
+	& .cms-masthead-tools {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
 		flex-shrink: 0;
 		min-width: 0;
 		margin-left: auto;
+	}
+
+	& .cms-masthead-account {
+		min-width: 0;
+	}
+
+	& .cms-masthead-theme {
+		/* The account trigger's height: its avatar, padding and border. */
+		--size: calc(1.75rem + 2 * var(--cms-space-0-5) + 2px);
+
+		display: grid;
+		place-items: center;
+		width: var(--size);
+		height: var(--size);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-full);
+		color: var(--cms-color-text-muted);
+		transition:
+			background 0.14s ease,
+			border-color 0.14s ease,
+			color 0.14s ease;
+
+		& .cms-icon {
+			--cms-icon-size: 1rem;
+		}
+
+		&:hover {
+			border-color: var(--cms-color-border-strong);
+			background: var(--hover-bg);
+			color: var(--cms-color-text);
+		}
+
+		/* The icon shows the current theme. */
+		& .cms-masthead-theme-moon {
+			display: none;
+		}
 	}
 
 	& .cms-masthead-account-trigger {
@@ -288,6 +327,29 @@
 
 	@media (width < 40rem), (height < 30rem) {
 		padding-inline: var(--cms-space-4);
+	}
+}
+
+/* Follows the effective theme rather than `aria-pressed`, which a script sets only once the page runs. */
+:root[data-theme='dark'] .cms-masthead-theme {
+	& .cms-masthead-theme-sun {
+		display: none;
+	}
+
+	& .cms-masthead-theme-moon {
+		display: inline-block;
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) .cms-masthead-theme {
+		& .cms-masthead-theme-sun {
+			display: none;
+		}
+
+		& .cms-masthead-theme-moon {
+			display: inline-block;
+		}
 	}
 }
 

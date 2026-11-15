@@ -41,7 +41,7 @@ Keep ordinary raw palette values in `tokens.css` where practical. Fixed-color co
 
 ### Dark theme and contrast
 
-`color-scheme: light dark` lets `light-dark()` tokens follow the operating system. `data-theme="light"` or `"dark"` on `<html>` forces a scheme in the styleguide. A component-level `color-scheme` declaration can pin inherited tokens and native controls to one theme; use it only when that local change is intended.
+`color-scheme: light dark` lets `light-dark()` tokens follow the operating system. `data-theme="light"` or `"dark"` on `<html>` forces a scheme: the masthead's theme toggle keeps a choice that differs from the system in the panel cookie (`src/Panel/Cookie.php`), and the server renders it on every page; the styleguide forces one with `?theme=`. A component-level `color-scheme` declaration can pin inherited tokens and native controls to one theme; use it only when that local change is intended.
 
 A project can restrict the entire panel to one scheme:
 

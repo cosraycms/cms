@@ -469,6 +469,7 @@ return [
 		'menu:untitled' => '(zonder titel)',
 		'nav:account' => 'Account: :name',
 		'nav:content' => 'Inhoud',
+		'nav:dark-theme' => 'Donker thema',
 		'nav:dashboard' => 'Dashboard',
 		'nav:home' => 'Start',
 		'nav:language' => 'Taal',

@@ -152,6 +152,32 @@ final class PanelAuthTest extends End2EndTestCase
 		$this->assertStringContainsString('Dashboard', $html);
 	}
 
+	public function testThePanelArrivesInTheRememberedTheme(): void
+	{
+		$this->authenticateAs('editor');
+
+		$response = $this->makeRequest('GET', '/panel', [
+			'authToken' => $this->defaultAuthToken,
+			'cookies' => ['cosray_panel' => 'theme=dark'],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertHtmlNodeExists('/html[@data-theme="dark"]', $html);
+		$this->assertHtmlNodeExists('//button[@data-theme-toggle][@aria-pressed="true"]', $html);
+	}
+
+	public function testTheSignInPageArrivesInTheRememberedTheme(): void
+	{
+		$response = $this->makeRequest('GET', '/panel/login', [
+			'authToken' => '',
+			'cookies' => ['cosray_panel' => 'theme=light'],
+		]);
+
+		$this->assertResponseOk($response);
+		$this->assertHtmlNodeExists('/html[@data-theme="light"]', $this->getHtmlResponse($response));
+	}
+
 	public function testHtmxGuestRequestReturnsHxRedirectHeader(): void
 	{
 		$response = $this->makeRequest('GET', '/panel', [

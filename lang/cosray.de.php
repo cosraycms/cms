@@ -469,6 +469,7 @@ return [
 		'menu:untitled' => '(ohne Titel)',
 		'nav:account' => 'Konto: :name',
 		'nav:content' => 'Inhalte',
+		'nav:dark-theme' => 'Dunkles Design',
 		'nav:dashboard' => 'Dashboard',
 		'nav:home' => 'Startseite',
 		'nav:language' => 'Sprache',

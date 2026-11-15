@@ -17,6 +17,7 @@ final class Cookie
 	private const array CHOICES = [
 		'blocks' => ['wide'],
 		'inspector' => ['collapsed'],
+		'theme' => ['light', 'dark'],
 	];
 
 	/** @param array<string, string> $choices */
@@ -41,6 +42,11 @@ final class Cookie
 
 	public function is(string $key, string $choice): bool
 	{
-		return ($this->choices[$key] ?? null) === $choice;
+		return $this->choice($key) === $choice;
+	}
+
+	public function choice(string $key): ?string
+	{
+		return $this->choices[$key] ?? null;
 	}
 }
