@@ -150,6 +150,35 @@ $columns = ltrim($columns . ' ' . implode(' ', $tracks));
 				<?php endforeach ?>
 			</form>
 
+			<?php if ($page->stages !== []): ?>
+				<?php // The status filters, each with its count and the icon of its stage. ?>
+				<nav class="cms-stage-filters" aria-label="<?= escape(__('collection:stages')) ?>">
+					<?php foreach ($page->stages as $chip): ?>
+						<?php
+						[$stage, $state, $icon] = match ($chip['key']) {
+							'draft' => ['draft', 'present', NodeStatus::icon('draft')],
+							'mine' => ['mine', 'present', NodeStatus::icon('mine')],
+							'unpublished' => ['main', 'unpublished', NodeStatus::icon('main', 'unpublished')],
+							default => [null, null, null],
+						};
+						?>
+						<a
+							class="cms-stage-filters-chip"
+							href="<?= escape($chip['url']) ?>"
+							<?= $chip['active'] ? 'aria-current="true"' : '' ?>
+							<?= $chip['count'] === 0 ? 'data-empty' : '' ?>>
+							<?php if ($stage !== null): ?>
+								<span class="cms-stage-mark" data-stage="<?= $stage ?>" data-state="<?= $state ?>" aria-hidden="true">
+									<?= Icon::render($icon) ?>
+								</span>
+							<?php endif ?>
+							<span><?= escape($chip['label']) ?></span>
+							<span class="cms-stage-filters-count"><?= (int) $chip['count'] ?></span>
+						</a>
+					<?php endforeach ?>
+				</nav>
+			<?php endif ?>
+
 			<?php if ($page->parent !== null): ?>
 				<div class="cms-collection-parent-context">
 					<?php if ($page->parent->type !== null): ?>
@@ -166,31 +195,6 @@ $columns = ltrim($columns . ' ' . implode(' ', $tracks));
 				</div>
 			<?php endif ?>
 		</div>
-
-		<?php if ($page->stages !== []): ?>
-			<?php // The status filters, each with its count and the icon of its stage. ?>
-			<nav class="cms-stage-filters" aria-label="<?= escape(__('collection:stages')) ?>">
-				<?php foreach ($page->stages as $chip): ?>
-					<?php
-					[$stage, $state, $icon] = match ($chip['key']) {
-						'draft' => ['draft', 'present', NodeStatus::icon('draft')],
-						'mine' => ['mine', 'present', NodeStatus::icon('mine')],
-						'unpublished' => ['main', 'unpublished', NodeStatus::icon('main', 'unpublished')],
-						default => [null, null, null],
-					};
-					?>
-					<a class="cms-stage-filters-chip" href="<?= escape($chip['url']) ?>" <?= $chip['active'] ? 'aria-current="true"' : '' ?>>
-						<?php if ($stage !== null): ?>
-							<span class="cms-stage-mark" data-stage="<?= $stage ?>" data-state="<?= $state ?>" aria-hidden="true">
-								<?= Icon::render($icon) ?>
-							</span>
-						<?php endif ?>
-						<span><?= escape($chip['label']) ?></span>
-						<span class="cms-stage-filters-count"><?= (int) $chip['count'] ?></span>
-					</a>
-				<?php endforeach ?>
-			</nav>
-		<?php endif ?>
 
 		<?php if ($bulk): ?>
 			<?php // The form element stays empty: checkboxes and action buttons

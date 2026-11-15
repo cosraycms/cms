@@ -748,6 +748,11 @@ button.cms-status-dots .cms-status-dots-tooltip {
 		}
 	}
 
+	/* An empty filter keeps its place, so the row does not shift as counts change. */
+	& .cms-stage-filters-chip[data-empty]:not([aria-current]) {
+		opacity: 0.5;
+	}
+
 	& .cms-stage-filters-count {
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-xs);
