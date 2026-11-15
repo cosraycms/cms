@@ -719,11 +719,19 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--cms-space-1);
-		opacity: 0;
-		transition: opacity 0.12s ease;
 	}
 
-	& .cms-list-row:is(:hover, :focus-within, :has(:popover-open)) .cms-list-row-actions {
+	/* The menu stays faintly in sight, like the checkboxes, so a row's actions can be found. */
+	& .cms-list-row-actions .cms-list-action {
+		opacity: 0;
+		transition: opacity 0.12s ease;
+
+		&.is-more {
+			opacity: 0.2;
+		}
+	}
+
+	& .cms-list-row:is(:hover, :focus-within, :has(:popover-open)) .cms-list-action.cms-list-action {
 		opacity: 1;
 	}
 
@@ -781,7 +789,11 @@
 @media (pointer: coarse) {
 	.cms-list
 		tbody
-		:is(.cms-list-row-actions, [data-bulk-check], .cms-list-col-select > .cms-list-grip) {
+		:is(
+			.cms-list-row-actions .cms-list-action.cms-list-action,
+			[data-bulk-check],
+			.cms-list-col-select > .cms-list-grip
+		) {
 		opacity: 1;
 	}
 }
@@ -862,8 +874,11 @@
 		}
 
 		& .cms-list-row-actions {
-			opacity: 1;
 			flex-wrap: wrap;
+
+			& .cms-list-action.cms-list-action {
+				opacity: 1;
+			}
 		}
 
 		& tbody :is([data-bulk-check], .cms-list-col-select > .cms-list-grip) {

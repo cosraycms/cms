@@ -156,7 +156,7 @@ $menuId = 'row-' . (string) $row['uid'];
 				<?php if ($row['focusedChildrenUrl'] !== null || $group !== null): ?>
 					<button
 						type="button"
-						class="cms-list-action"
+						class="cms-list-action is-more"
 						popovertarget="<?= escape($menuId) ?>-more"
 						aria-haspopup="menu"
 						aria-label="<?= escape(__('collection:row-actions', ['name' => $name])) ?>"><?= \Cosray\Panel\Icon::render(
