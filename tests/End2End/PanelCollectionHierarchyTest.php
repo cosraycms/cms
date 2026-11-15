@@ -278,6 +278,8 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy');
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
+		// A collection of several types shows each entry's type by default.
+		$this->assertHtmlNodeExists('//thead//th[normalize-space()="Type"]', $html);
 		$this->assertHtmlNodeExists(
 			'//*[contains(@class, "cms-collection-type-menu")]//a[contains(@href, "type=test-hierarchy-child")]'
 				. '[normalize-space(span[1])="Hierarchy Child" and normalize-space(span[2])="1"]',

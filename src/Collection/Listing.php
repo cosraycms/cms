@@ -17,6 +17,7 @@ use Cosray\Node\Positions;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 use Cosray\StatusColumn;
+use Cosray\TextColumn;
 
 /**
  * A registered collection as the panel lists it: its entries, columns,
@@ -48,8 +49,9 @@ final class Listing
 	) {
 		$this->meta = $schema->listing;
 		$this->blueprints = $schema->blueprints;
-		$this->columns = self::withStatus(array_values(
-			$collection instanceof Columns ? $collection->columns() : Column::defaults(),
+		$this->columns = self::withStatus(self::withoutLoneType(
+			array_values($collection instanceof Columns ? $collection->columns() : Column::defaults()),
+			$schema->types,
 		));
 		$sorts = [];
 		foreach ($this->columns as $column) {
@@ -64,6 +66,26 @@ final class Listing
 		}
 		$this->sorts = $sorts;
 		$this->defaultSort = self::defaultSort($sorts);
+	}
+
+	/**
+	 * Without the type column where `#[Types]` names a single type: every row
+	 * would show the same. A collection narrowed in code keeps it.
+	 *
+	 * @param list<mixed> $columns
+	 * @param list<string> $types
+	 * @return list<mixed>
+	 */
+	private static function withoutLoneType(array $columns, array $types): array
+	{
+		if (count($types) !== 1) {
+			return $columns;
+		}
+
+		return array_values(array_filter(
+			$columns,
+			static fn(mixed $column): bool => !$column instanceof TextColumn || $column->field !== 'meta.name',
+		));
 	}
 
 	/**
