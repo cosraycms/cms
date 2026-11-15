@@ -21,80 +21,82 @@ $maxDepth = $props['maxDepth'] === null ? null : (int) $props['maxDepth'];
 $manages = (bool) $manages;
 ?>
 <div class="cms-menu-tree-props">
-	<form method="post" action="<?= escape((string) $urls['edit']) ?>">
-		<?php $this->include('component/csrf') ?>
-		<?php $this->include('menu/localized', [
-			'name' => 'description',
-			'label' => __('menu:description'),
-			'values' => $description,
-			'error' => $errors['description'] ?? null,
-			'id' => 'menu-description',
-			'locales' => $locales,
-			'defaultLocale' => $defaultLocale,
-		]) ?>
-
-		<div class="cms-field<?= isset($errors['maxDepth']) ? ' has-error' : '' ?>">
-			<label class="cms-field-label" for="menu-max-depth"><div><?= escape(
-				__('menu:max-depth'),
-			) ?></div></label>
-			<div class="cms-field-control">
-				<input
-					class="cms-input"
-					id="menu-max-depth"
-					name="maxDepth"
-					type="number"
-					min="1"
-					max="10"
-					placeholder="∞"
-					value="<?= escape($maxDepth === null ? '' : (string) $maxDepth) ?>"
-					<?= isset($errors['maxDepth']) ? 'aria-invalid="true"' : '' ?> />
-			</div>
-			<?php if (isset($errors['maxDepth'])): ?>
-				<p class="cms-menus-error"><?= escape((string) $errors['maxDepth']) ?></p>
-			<?php endif ?>
-		</div>
-
-		<div class="cms-field<?= isset($errors['menu']) ? ' has-error' : '' ?>">
-			<label class="cms-field-label" for="menu-handle"><div><?= escape(__('menu:handle')) ?></div></label>
-			<div class="cms-field-control">
-				<input
-					class="cms-input"
-					id="menu-handle"
-					name="menu"
-					type="text"
-					required
-					pattern="[a-z0-9-]{1,32}"
-					value="<?= escape($handle) ?>"
-					<?= $manages ? '' : 'disabled' ?>
-					<?= isset($errors['menu']) ? 'aria-invalid="true"' : '' ?> />
-			</div>
-			<?php if (isset($errors['menu'])): ?>
-				<p class="cms-menus-error"><?= escape((string) $errors['menu']) ?></p>
-			<?php endif ?>
-		</div>
-
-		<button type="submit" class="cms-button cms-button-primary">
-			<?= \Cosray\Panel\Icon::render('floppy') ?>
-			<?= escape(__('menu:save')) ?>
-		</button>
-	</form>
-
-	<?php if ($manages): ?>
-		<form
-			method="post"
-			action="<?= escape((string) $urls['delete']) ?>"
-			hx-confirm="<?= escape((string) $props['confirm']) ?>"
-			data-confirm-action="<?= escape(__('menu:delete')) ?>"
-			data-confirm-tone="danger">
+	<div class="cms-menu-tree-props-bar">
+		<form method="post" action="<?= escape((string) $urls['edit']) ?>">
 			<?php $this->include('component/csrf') ?>
-			<button type="submit" class="cms-button cms-button-danger">
-				<?= \Cosray\Panel\Icon::render('trash3') ?>
-				<?= escape(__('menu:delete')) ?>
+			<?php $this->include('menu/localized', [
+				'name' => 'description',
+				'label' => __('menu:description'),
+				'values' => $description,
+				'error' => $errors['description'] ?? null,
+				'id' => 'menu-description',
+				'locales' => $locales,
+				'defaultLocale' => $defaultLocale,
+			]) ?>
+
+			<div class="cms-field<?= isset($errors['maxDepth']) ? ' has-error' : '' ?>">
+				<label class="cms-field-label" for="menu-max-depth"><div><?= escape(
+					__('menu:max-depth'),
+				) ?></div></label>
+				<div class="cms-field-control">
+					<input
+						class="cms-input"
+						id="menu-max-depth"
+						name="maxDepth"
+						type="number"
+						min="1"
+						max="10"
+						placeholder="∞"
+						value="<?= escape($maxDepth === null ? '' : (string) $maxDepth) ?>"
+						<?= isset($errors['maxDepth']) ? 'aria-invalid="true"' : '' ?> />
+				</div>
+				<?php if (isset($errors['maxDepth'])): ?>
+					<p class="cms-menus-error"><?= escape((string) $errors['maxDepth']) ?></p>
+				<?php endif ?>
+			</div>
+
+			<div class="cms-field<?= isset($errors['menu']) ? ' has-error' : '' ?>">
+				<label class="cms-field-label" for="menu-handle"><div><?= escape(__('menu:handle')) ?></div></label>
+				<div class="cms-field-control">
+					<input
+						class="cms-input"
+						id="menu-handle"
+						name="menu"
+						type="text"
+						required
+						pattern="[a-z0-9-]{1,32}"
+						value="<?= escape($handle) ?>"
+						<?= $manages ? '' : 'disabled' ?>
+						<?= isset($errors['menu']) ? 'aria-invalid="true"' : '' ?> />
+				</div>
+				<?php if (isset($errors['menu'])): ?>
+					<p class="cms-menus-error"><?= escape((string) $errors['menu']) ?></p>
+				<?php endif ?>
+			</div>
+
+			<button type="submit" class="cms-button cms-button-primary">
+				<?= \Cosray\Panel\Icon::render('floppy') ?>
+				<?= escape(__('menu:save')) ?>
 			</button>
 		</form>
-	<?php endif ?>
 
-	<p class="cms-menus-help"><?= escape(__('menu:handle-help')) ?> <?= escape(
-		$manages ? __('menu:rename-warning') : __('menu:handle-locked'),
-	) ?></p>
+		<?php if ($manages): ?>
+			<form
+				method="post"
+				action="<?= escape((string) $urls['delete']) ?>"
+				hx-confirm="<?= escape((string) $props['confirm']) ?>"
+				data-confirm-action="<?= escape(__('menu:delete')) ?>"
+				data-confirm-tone="danger">
+				<?php $this->include('component/csrf') ?>
+				<button type="submit" class="cms-button cms-button-danger">
+					<?= \Cosray\Panel\Icon::render('trash3') ?>
+					<?= escape(__('menu:delete')) ?>
+				</button>
+			</form>
+		<?php endif ?>
+
+		<p class="cms-menus-help"><?= escape(__('menu:handle-help')) ?> <?= escape(
+			$manages ? __('menu:rename-warning') : __('menu:handle-locked'),
+		) ?></p>
+	</div>
 </div>

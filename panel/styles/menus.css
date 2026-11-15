@@ -98,21 +98,25 @@
 	--menu-pane-width: 24rem;
 
 	/* The menu's own fields belong to the tree, not to the item pane beside
-	   it, so the bar stops where the pane column begins. The forms lay their
-	   controls out as cells of this grid, which is what lines the buttons up
-	   with the inputs across two separate forms. */
+	   it, so the bar stops where the pane column begins. */
 	& .cms-menu-tree-props {
+		container: menu-props / inline-size;
+		flex: 0 0 auto;
+		margin-right: calc(var(--menu-pane-width) + var(--cms-space-4));
+	}
+
+	/* The forms lay their controls out as cells of this grid, which is what
+	   lines the buttons up with the inputs across two separate forms. */
+	& .cms-menu-tree-props-bar {
 		display: grid;
 		grid-template-columns:
-			minmax(0, 1fr)
+			minmax(12rem, 1fr)
+			10rem
 			minmax(8rem, 14rem)
-			minmax(5rem, 7rem)
 			max-content
 			max-content;
 		gap: var(--cms-space-2) var(--cms-space-3);
 		align-items: start;
-		flex: 0 0 auto;
-		margin-right: calc(var(--menu-pane-width) + var(--cms-space-4));
 
 		& form {
 			display: contents;
@@ -142,9 +146,24 @@
 		   are all intrinsic, so it has to be kept out of their sizing or a
 		   long sentence widens the buttons instead of wrapping. */
 		& > .cms-menus-help {
-			grid-column: 2 / -1;
+			grid-column: 3 / -1;
 			width: 0;
 			min-width: 100%;
+		}
+	}
+
+	/* Too narrow for one row: the description takes a row of its own. */
+	@container menu-props (width < 50rem) {
+		& .cms-menu-tree-props-bar {
+			grid-template-columns: 10rem minmax(8rem, 1fr) max-content max-content;
+
+			& > form:first-child > .cms-field:first-of-type {
+				grid-column: 1 / -1;
+			}
+
+			& > .cms-menus-help {
+				grid-column: 2 / -1;
+			}
 		}
 	}
 
@@ -590,12 +609,15 @@
 
 	.cms-menu-tree {
 		& .cms-menu-tree-props {
+			margin-right: 0;
+		}
+
+		& .cms-menu-tree-props-bar {
 			grid-template-columns: minmax(0, 1fr);
 			align-items: stretch;
-			margin-right: 0;
 
 			& .cms-button {
-				margin-top: 0;
+				margin: 0;
 			}
 
 			& > .cms-menus-help {
