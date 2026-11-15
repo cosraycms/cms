@@ -30,7 +30,7 @@ final class CollectionTable
 	 *     last: bool,
 	 *     published: bool,
 	 *     hasChildren: bool,
-	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
+	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, avatarOnly: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
@@ -177,7 +177,7 @@ final class CollectionTable
 	 *     last: bool,
 	 *     published: bool,
 	 *     hasChildren: bool,
-	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
+	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, avatarOnly: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
@@ -277,7 +277,7 @@ final class CollectionTable
 	/**
 	 * @param array<string, mixed> $node
 	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}> $headers
-	 * @return list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>
+	 * @return list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, avatarOnly: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>
 	 */
 	private static function cells(
 		array $node,
@@ -307,6 +307,7 @@ final class CollectionTable
 					'editUrl' => null,
 					'lead' => false,
 					'avatar' => null,
+					'avatarOnly' => false,
 					'status' => self::stagesOf($header, $stages, $header['badges'] ? self::status($node, $meta) : []),
 				];
 
@@ -330,6 +331,14 @@ final class CollectionTable
 				$value = $value->avatar();
 			}
 
+			// The first column links the entry by its name alone.
+			$avatar =
+				!$lead
+				&& $value instanceof Avatar
+				&& ((bool) ($column['avatar'] ?? false) || !(bool) ($column['name'] ?? false))
+					? $value->array()
+					: null;
+
 			$cells[] = [
 				'label' => $label,
 				'value' => self::displayValue(
@@ -341,11 +350,8 @@ final class CollectionTable
 				'class' => implode(' ', $classes),
 				'editUrl' => $lead && $uid !== '' ? $urls->edit($uid) : null,
 				'lead' => $lead,
-				// The first column links the entry by its text.
-				'avatar' =>
-					!$lead && (bool) ($column['avatar'] ?? false) && $value instanceof Avatar
-						? $value->array()
-						: null,
+				'avatar' => $avatar,
+				'avatarOnly' => $avatar !== null && (bool) ($column['avatar'] ?? false),
 				'status' => null,
 			];
 		}

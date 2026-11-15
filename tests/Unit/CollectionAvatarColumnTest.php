@@ -16,25 +16,39 @@ use DateTimeZone;
 
 final class CollectionAvatarColumnTest extends TestCase
 {
-	public function testAnAvatarColumnShowsTheUserAsAvatar(): void
+	public function testAUserShowsAsAvatarAndName(): void
+	{
+		$ann = new Avatar(5, 'Ann Lee', 'ann', 'ann@example.com');
+		$table = $this->table(
+			[Column::new('Title', 'title'), Column::new('Editor', 'meta.editor')],
+			[['value' => 'Entry'], ['value' => $ann]],
+		);
+		$cell = $table->rows[0]['cells'][1];
+
+		$this->assertSame($ann->array(), $cell['avatar']);
+		$this->assertFalse($cell['avatarOnly']);
+		$this->assertSame('Ann Lee', $cell['value']);
+	}
+
+	public function testAvatarShowsTheAvatarAlone(): void
 	{
 		$ann = new Avatar(5, 'Ann Lee', 'ann', 'ann@example.com');
 		$table = $this->table(
 			[Column::new('Title', 'title'), Column::new('Editor', 'meta.editor')->avatar(true)],
-			[['value' => 'Entry'], ['value' => $ann, 'avatar' => true]],
+			[['value' => 'Entry'], ['value' => $ann, 'avatar' => true, 'name' => true]],
 		);
 		$cell = $table->rows[0]['cells'][1];
 
 		$this->assertSame('avatar', $table->headers[1]['kind']);
 		$this->assertSame($ann->array(), $cell['avatar']);
-		$this->assertSame('Ann Lee', $cell['value']);
+		$this->assertTrue($cell['avatarOnly']);
 	}
 
-	public function testWithoutTheFlagTheUserShowsAsName(): void
+	public function testNameShowsTheNameAlone(): void
 	{
 		$table = $this->table(
-			[Column::new('Title', 'title'), Column::new('Editor', 'meta.editor')],
-			[['value' => 'Entry'], ['value' => new Avatar(5, 'Ann Lee', 'ann', 'ann@example.com')]],
+			[Column::new('Title', 'title'), Column::new('Editor', 'meta.editor')->name(true)],
+			[['value' => 'Entry'], ['value' => new Avatar(5, 'Ann Lee', 'ann', 'ann@example.com'), 'name' => true]],
 		);
 
 		$this->assertNull($table->rows[0]['cells'][1]['avatar']);
@@ -55,18 +69,18 @@ final class CollectionAvatarColumnTest extends TestCase
 			'deleted' => null,
 		]);
 		$table = $this->table(
-			[Column::new('Title', 'title'), Column::new('Owner', static fn(): User => $user)->avatar(true)],
-			[['value' => 'Entry'], ['value' => $user, 'avatar' => true]],
+			[Column::new('Title', 'title'), Column::new('Owner', static fn(): User => $user)],
+			[['value' => 'Entry'], ['value' => $user]],
 		);
 
 		$this->assertSame($user->avatar()->array(), $table->rows[0]['cells'][1]['avatar']);
 	}
 
-	public function testTheLeadColumnKeepsItsText(): void
+	public function testTheLeadColumnShowsTheNameAlone(): void
 	{
 		$table = $this->table(
-			[Column::new('Editor', 'meta.editor')->avatar(true)],
-			[['value' => new Avatar(5, 'Ann Lee', 'ann', 'ann@example.com'), 'avatar' => true]],
+			[Column::new('Editor', 'meta.editor')],
+			[['value' => new Avatar(5, 'Ann Lee', 'ann', 'ann@example.com')]],
 		);
 		$cell = $table->rows[0]['cells'][0];
 

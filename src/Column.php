@@ -18,6 +18,7 @@ final class Column
 	private bool|Closure $badge = false;
 	private bool|Closure $date = false;
 	private bool|Closure $avatar = false;
+	private bool|Closure $name = false;
 	public private(set) ?Sort $sort = null;
 	private string $color = '';
 
@@ -90,12 +91,21 @@ final class Column
 	}
 
 	/**
-	 * Shows a user as an avatar with the name as its tooltip, rather than the
-	 * name. Applies to user values like `meta.editor`, never to the first column.
+	 * Shows a user value like `meta.editor` as the avatar alone, the name its
+	 * tooltip, rather than avatar and name. Wins over `name()`. The first
+	 * column, which links the entry, always shows the name alone.
 	 */
 	public function avatar(bool|Closure $avatar): self
 	{
 		$this->avatar = $avatar;
+
+		return $this;
+	}
+
+	/** Shows a user value like `meta.editor` as the name alone, without its avatar. */
+	public function name(bool|Closure $name): self
+	{
+		$this->name = $name;
 
 		return $this;
 	}
@@ -151,6 +161,7 @@ final class Column
 			'badge' => is_bool($this->badge) ? $this->badge : ($this->badge)($node),
 			'date' => is_bool($this->date) ? $this->date : ($this->date)($node),
 			'avatar' => is_bool($this->avatar) ? $this->avatar : ($this->avatar)($node),
+			'name' => is_bool($this->name) ? $this->name : ($this->name)($node),
 			'color' => $this->color,
 		];
 	}

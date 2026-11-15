@@ -1528,6 +1528,7 @@ final class Styleguide extends Panel
 				'editUrl' => null,
 				'lead' => false,
 				'avatar' => $editor->array(),
+				'avatarOnly' => false,
 				'status' => null,
 			],
 		];

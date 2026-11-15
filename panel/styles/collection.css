@@ -475,6 +475,13 @@
 		white-space: nowrap;
 	}
 
+	& .cms-list-user {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-width: 0;
+	}
+
 	& a.cms-list-value {
 		color: var(--cms-color-text);
 		font-weight: 500;

@@ -238,10 +238,12 @@ Column::new(__('Created'), 'meta.created')->date(true)
     ->sort('created', direction: 'desc');
 ```
 
-`meta.editor` and `meta.creator` show the user's name. `avatar(true)` shows the user's initials instead, on a colour derived from the user's UID so that renames keep it, with the name as tooltip and accessible name. A column closure can return a `User` to get the same display. The first column always shows text because it links the entry:
+`meta.editor` and `meta.creator` show the user's avatar and name. The avatar's initials sit on a colour fixed by the user's ID, so a rename keeps it. A column closure can return a `User` for the same display. `avatar(true)` shows the avatar alone, with the name as tooltip and accessible name; `name(true)` shows the name alone. The first column always shows the name alone because it links the entry:
 
 ```php
-Column::new(__('Editor'), 'meta.editor')->avatar(true);
+Column::new(__('Editor'), 'meta.editor');               // avatar and name
+Column::new(__('Editor'), 'meta.editor')->avatar(true); // avatar alone
+Column::new(__('Creator'), 'meta.creator')->name(true); // name alone
 ```
 
 #### Status columns

@@ -717,7 +717,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 							<table
 								class="cms-list"
 								role="table"
-								style="--columns: var(--cms-list-select-width) minmax(12rem, 2fr) max-content minmax(5rem, auto) minmax(5rem, auto) max-content max-content">
+								style="--columns: var(--cms-list-select-width) minmax(12rem, 2fr) max-content minmax(5rem, auto) minmax(5rem, auto) minmax(7rem, auto) max-content">
 								<thead role="rowgroup">
 									<tr role="row">
 										<th class="cms-list-col-select" role="columnheader">
