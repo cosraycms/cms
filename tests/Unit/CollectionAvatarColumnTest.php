@@ -18,7 +18,7 @@ final class CollectionAvatarColumnTest extends TestCase
 {
 	public function testAnAvatarColumnShowsTheUserAsAvatar(): void
 	{
-		$ann = new Avatar('ann-uid', 'Ann Lee', 'ann', 'ann@example.com');
+		$ann = new Avatar(5, 'Ann Lee', 'ann', 'ann@example.com');
 		$table = $this->table(
 			[Column::new('Title', 'title'), Column::new('Editor', 'meta.editor')->avatar(true)],
 			[['value' => 'Entry'], ['value' => $ann, 'avatar' => true]],
@@ -34,7 +34,7 @@ final class CollectionAvatarColumnTest extends TestCase
 	{
 		$table = $this->table(
 			[Column::new('Title', 'title'), Column::new('Editor', 'meta.editor')],
-			[['value' => 'Entry'], ['value' => new Avatar('ann-uid', 'Ann Lee', 'ann', 'ann@example.com')]],
+			[['value' => 'Entry'], ['value' => new Avatar(5, 'Ann Lee', 'ann', 'ann@example.com')]],
 		);
 
 		$this->assertNull($table->rows[0]['cells'][1]['avatar']);
@@ -66,7 +66,7 @@ final class CollectionAvatarColumnTest extends TestCase
 	{
 		$table = $this->table(
 			[Column::new('Editor', 'meta.editor')->avatar(true)],
-			[['value' => new Avatar('ann-uid', 'Ann Lee', 'ann', 'ann@example.com'), 'avatar' => true]],
+			[['value' => new Avatar(5, 'Ann Lee', 'ann', 'ann@example.com'), 'avatar' => true]],
 		);
 		$cell = $table->rows[0]['cells'][0];
 

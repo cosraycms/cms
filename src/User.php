@@ -52,7 +52,7 @@ class User
 
 	public function avatar(): Avatar
 	{
-		return new Avatar($this->uid, $this->name, $this->username, $this->email);
+		return new Avatar($this->id, $this->name, $this->username, $this->email);
 	}
 
 	/** @return array<string, mixed> the `users.data` document */

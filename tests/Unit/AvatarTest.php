@@ -10,31 +10,34 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 final class AvatarTest extends TestCase
 {
-	public function testHueDependsOnTheUidAlone(): void
+	public function testHueDependsOnTheIdAlone(): void
 	{
-		$before = new Avatar('3f2a9c', 'Max Keller', 'max', 'max@example.com');
-		$after = new Avatar('3f2a9c', 'Maximilian Keller-Brandt', 'mkb', 'mkb@example.org');
+		$before = new Avatar(7, 'Max Keller', 'max', 'max@example.com');
+		$after = new Avatar(7, 'Maximilian Keller-Brandt', 'mkb', 'mkb@example.org');
 
 		$this->assertSame($before->hue, $after->hue);
-		$this->assertNotSame($before->hue, new Avatar('8d01e4', 'Max Keller', 'max', 'max@example.com')->hue);
 	}
 
-	public function testHueIsAnAngle(): void
+	public function testConsecutiveUsersGetDistinctHues(): void
 	{
-		foreach (['', 'a', 'editor', '0193a7e2-6c1f-7b42-9a55-3d8e6f2c1b07'] as $uid) {
-			$hue = new Avatar($uid, null, 'user', '')->hue;
+		$hues = array_map(static fn(int $id): int => new Avatar($id, null, 'user', '')->hue, range(1, 12));
+		sort($hues);
+		$gaps = array_map(
+			static fn(int $index): int => ($hues[($index + 1) % 12] - $hues[$index] + 360) % 360,
+			range(0, 11),
+		);
 
-			$this->assertGreaterThanOrEqual(0, $hue);
-			$this->assertLessThan(360, $hue);
-		}
+		$this->assertGreaterThanOrEqual(0, $hues[0]);
+		$this->assertLessThan(360, $hues[11]);
+		$this->assertGreaterThanOrEqual(15, min($gaps));
 	}
 
 	public function testLabelPrefersNameThenUsernameThenEmail(): void
 	{
-		$this->assertSame('Max Keller', new Avatar('u', ' Max Keller ', 'max', 'max@example.com')->label);
-		$this->assertSame('max', new Avatar('u', '  ', 'max', 'max@example.com')->label);
-		$this->assertSame('max@example.com', new Avatar('u', null, '', 'max@example.com')->label);
-		$this->assertSame('max', (string) new Avatar('u', null, 'max', 'max@example.com'));
+		$this->assertSame('Max Keller', new Avatar(1, ' Max Keller ', 'max', 'max@example.com')->label);
+		$this->assertSame('max', new Avatar(1, '  ', 'max', 'max@example.com')->label);
+		$this->assertSame('max@example.com', new Avatar(1, null, '', 'max@example.com')->label);
+		$this->assertSame('max', (string) new Avatar(1, null, 'max', 'max@example.com'));
 	}
 
 	/** @return array<string, array{?string, string, string, string}> */
@@ -55,15 +58,15 @@ final class AvatarTest extends TestCase
 	#[DataProvider('initialsProvider')]
 	public function testInitials(?string $name, string $username, string $email, string $expected): void
 	{
-		$this->assertSame($expected, new Avatar('u', $name, $username, $email)->initials);
+		$this->assertSame($expected, new Avatar(1, $name, $username, $email)->initials);
 	}
 
 	public function testArrayCarriesWhatTheViewNeeds(): void
 	{
-		$avatar = new Avatar('u-1', 'Max Keller', 'max', 'max@example.com');
+		$avatar = new Avatar(1, 'Max Keller', 'max', 'max@example.com');
 
 		$this->assertSame(
-			['uid' => 'u-1', 'label' => 'Max Keller', 'initials' => 'MK', 'hue' => $avatar->hue],
+			['label' => 'Max Keller', 'initials' => 'MK', 'hue' => 137],
 			$avatar->array(),
 		);
 	}

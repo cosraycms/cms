@@ -1494,7 +1494,7 @@ final class Styleguide extends Panel
 			string $title,
 			array $dots,
 			array $badges = [],
-			Avatar $editor = new Avatar('styleguide-ada', 'Ada Lovelace', 'ada', 'ada@example.com'),
+			Avatar $editor = new Avatar(1, 'Ada Lovelace', 'ada', 'ada@example.com'),
 		): array => [
 			[
 				'class' => 'is-bold',
@@ -1548,7 +1548,7 @@ final class Styleguide extends Panel
 				'cells' => $cells(
 					'Sudhaus',
 					$dots(false, null, null),
-					editor: new Avatar('styleguide-keller', null, 'm.keller', 'keller@example.com'),
+					editor: new Avatar(2, null, 'm.keller', 'keller@example.com'),
 				),
 				'group' => 'brauerei',
 				'moveDown' => true,
@@ -1562,7 +1562,7 @@ final class Styleguide extends Panel
 					'A title long enough that it has to be cut off somewhere',
 					$dots(false, '2026-08-11 22:25:00+00', null),
 					[['kind' => 'hidden', 'label' => 'Hidden']],
-					new Avatar('styleguide-grace', 'Grace Hopper', 'grace', 'grace@example.com'),
+					new Avatar(3, 'Grace Hopper', 'grace', 'grace@example.com'),
 				),
 			]),
 			$row([

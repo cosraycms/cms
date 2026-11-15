@@ -454,7 +454,9 @@ final class NodeFactoryTest extends TestCase
 	{
 		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
 			'uid' => 'column-email-1',
+			'editor_usr' => 2,
 			'editor_email' => 'editor@example.com',
+			'creator_usr' => 3,
 			'creator_email' => 'creator@example.com',
 		]);
 		$proxy = $this->factory->proxy($node, $this->context);
@@ -467,7 +469,7 @@ final class NodeFactoryTest extends TestCase
 	{
 		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
 			'uid' => 'column-name-1',
-			'editor_uid' => 'ann-uid',
+			'editor_usr' => 4,
 			'editor_data' => ['name' => 'Ann & Co'],
 			'editor_username' => 'ann',
 			'editor_email' => 'ann@example.com',
@@ -476,7 +478,7 @@ final class NodeFactoryTest extends TestCase
 		$value = Column::new('Editor', 'meta.editor')->get($this->factory->proxy($node, $this->context))['value'];
 
 		$this->assertInstanceOf(Avatar::class, $value);
-		$this->assertSame('ann-uid', $value->uid);
+		$this->assertSame(new Avatar(4, null, 'ann', '')->hue, $value->hue);
 		$this->assertSame('Ann & Co', $value->label);
 	}
 

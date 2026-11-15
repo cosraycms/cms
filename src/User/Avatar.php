@@ -8,8 +8,10 @@ use Override;
 use Stringable;
 
 /**
- * A user's initials badge. Its hue derives from the uid, so a rename keeps
- * the colour; the panel's stylesheet sets lightness and chroma per theme.
+ * A user's initials badge. Its hue steps by the golden angle per user id, so
+ * users created one after another sit far apart on the colour wheel and a
+ * rename keeps the colour; the panel's stylesheet sets lightness and chroma
+ * per theme.
  */
 final readonly class Avatar implements Stringable
 {
@@ -18,8 +20,10 @@ final readonly class Avatar implements Stringable
 	public string $initials;
 	public int $hue;
 
+	private const float GOLDEN_ANGLE = 137.50776405003785;
+
 	public function __construct(
-		public string $uid,
+		int $id,
 		?string $name,
 		string $username,
 		string $email,
@@ -29,14 +33,13 @@ final readonly class Avatar implements Stringable
 		$this->initials = self::initialsOf(
 			$name ?? ($username !== '' ? $username : (string) strstr($email, '@', true)),
 		);
-		$this->hue = crc32($uid) % 360;
+		$this->hue = (int) fmod($id * self::GOLDEN_ANGLE, 360);
 	}
 
-	/** @return array{uid: string, label: string, initials: string, hue: int} */
+	/** @return array{label: string, initials: string, hue: int} */
 	public function array(): array
 	{
 		return [
-			'uid' => $this->uid,
 			'label' => $this->label,
 			'initials' => $this->initials,
 			'hue' => $this->hue,

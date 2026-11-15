@@ -454,7 +454,7 @@ final class Users extends Panel
 		);
 	}
 
-	/** @return array{uid: string, avatar: array{uid: string, label: string, initials: string, hue: int}, title: string, email: string, type: string, roles: list<string>, active: bool, url: ?string} */
+	/** @return array{uid: string, avatar: array{label: string, initials: string, hue: int}, title: string, email: string, type: string, roles: list<string>, active: bool, url: ?string} */
 	private function listRow(User $user): array
 	{
 		$labels = $this->policy->roles();

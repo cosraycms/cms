@@ -6,6 +6,7 @@ namespace Cosray\Tests\Unit;
 
 use Cosray\Tests\TestCase;
 use Cosray\User;
+use Cosray\User\Avatar;
 
 final class UserTest extends TestCase
 {
@@ -25,9 +26,10 @@ final class UserTest extends TestCase
 
 	public function testAvatarDescribesTheUser(): void
 	{
-		$avatar = $this->user(['uid' => 'u-1', 'data' => '{"name": "Max Keller"}'])->avatar();
+		$user = $this->user(['data' => '{"name": "Max Keller"}']);
+		$avatar = $user->avatar();
 
-		$this->assertSame('u-1', $avatar->uid);
+		$this->assertSame(new Avatar($user->id, 'Max Keller', '', '')->hue, $avatar->hue);
 		$this->assertSame('Max Keller', $avatar->label);
 		$this->assertSame('MK', $avatar->initials);
 	}

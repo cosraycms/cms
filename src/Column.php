@@ -193,9 +193,15 @@ final class Column
 
 	private static function user(Wrapper $node, string $role): ?Avatar
 	{
+		$id = $node->meta->get("{$role}_usr");
+
+		if (!is_numeric($id)) {
+			return null;
+		}
+
 		$data = (array) $node->meta->get("{$role}_data", []);
 		$avatar = new Avatar(
-			(string) $node->meta->get("{$role}_uid", ''),
+			(int) $id,
 			is_string($data['name'] ?? null) ? $data['name'] : null,
 			(string) $node->meta->get("{$role}_username", ''),
 			(string) $node->meta->get("{$role}_email", ''),
