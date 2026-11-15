@@ -124,6 +124,7 @@ return [
 		'collection:stages' => 'Filtrer par statut',
 		'collection:status' => 'Statut',
 		'collection:tree' => 'Arborescence',
+		'collection:types-all' => 'Tous les types',
 		'collection:view' => 'Vue de la collection',
 		'color:palette' => 'Palette de couleurs',
 		'color:pick' => 'Choisir une couleur',

@@ -141,15 +141,16 @@ final class Listing
 		?string $parent = null,
 		string $stage = '',
 		?int $user = null,
+		string $type = '',
 	): array {
 		[$sort, $dir, $order] = $this->resolveOrder($sort, $dir);
 		$parent = $this->meta->showChildren ? trim((string) $parent) : '';
 		$q = trim($q);
-		// A search or a status filter shows a subset: the hits of every level,
+		// A search or a filter shows a subset: the hits of every level,
 		// in the column order, where moving next to one would silently jump
 		// the rows in between.
-		$filtered = $q !== '' || $stage !== '' && $user !== null;
-		$nodes = $this->scoped($parent, $q, $filtered);
+		$filtered = $q !== '' || $stage !== '' && $user !== null || $type !== '';
+		$nodes = $this->typed($this->scoped($parent, $q, $filtered), $type);
 
 		// The user's own autosaves belong to each row's status.
 		if ($user !== null) {
@@ -201,22 +202,42 @@ final class Listing
 	 *
 	 * @return array<string, int>
 	 */
-	public function stageCounts(int $user, string $q = '', ?string $parent = null): array
+	public function stageCounts(int $user, string $q = '', ?string $parent = null, string $type = ''): array
 	{
 		$parent = $this->meta->showChildren ? trim((string) $parent) : '';
 		$q = trim($q);
-		$counts = ['all' => $this->scoped($parent, $q, $q !== '')->count()];
+		$scoped = fn(bool $flat): Nodes => $this->typed($this->scoped($parent, $q, $flat), $type);
+		$counts = ['all' => $scoped($q !== '' || $type !== '')->count()];
 		$stages = [
-			...($this->scoped($parent, $q, true)->withDrafts()->count() > 0 ? ['draft'] : []),
+			...($scoped(true)->withDrafts()->count() > 0 ? ['draft'] : []),
 			'mine',
-			...($this->scoped($parent, $q, true)->withPublication()->count() > 0 ? ['unpublished'] : []),
+			...($scoped(true)->withPublication()->count() > 0 ? ['unpublished'] : []),
 		];
 
 		foreach ($stages as $stage) {
-			$counts[$stage] = $this->scoped($parent, $q, true)->stage($stage, $user)->count();
+			$counts[$stage] = $scoped(true)->stage($stage, $user)->count();
 		}
 
 		return $counts;
+	}
+
+	/**
+	 * How many entries of each type the listing's scope holds across its
+	 * levels, as the type filter lists them, narrowed by the search and the
+	 * status filter but not by a chosen type.
+	 *
+	 * @return array<string, int> by type handle
+	 */
+	public function typeCounts(int $user, string $q = '', ?string $parent = null, string $stage = ''): array
+	{
+		$parent = $this->meta->showChildren ? trim((string) $parent) : '';
+		$nodes = $this->scoped($parent, trim($q), true);
+
+		if ($stage !== '') {
+			$nodes->stage($stage, $user);
+		}
+
+		return $nodes->countByType();
 	}
 
 	/** Whether the listing holds entries with publication, which a record has not. */
@@ -229,6 +250,12 @@ final class Listing
 	public function drafts(): bool
 	{
 		return $this->entries()->withDrafts()->count() > 0;
+	}
+
+	/** Narrowed to one type on top of the collection's own conditions, never widened past them. */
+	private function typed(Nodes $nodes, string $type): Nodes
+	{
+		return $type === '' ? $nodes : $nodes->match(['type' => $type], ['type']);
 	}
 
 	/**

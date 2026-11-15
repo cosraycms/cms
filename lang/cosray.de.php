@@ -127,6 +127,7 @@ return [
 		'collection:stages' => 'Nach Status filtern',
 		'collection:status' => 'Status',
 		'collection:tree' => 'Baum',
+		'collection:types-all' => 'Alle Typen',
 		'collection:view' => 'Sammlungsansicht',
 		'color:palette' => 'Farbpalette',
 		'color:pick' => 'Farbe auswählen',

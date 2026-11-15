@@ -17,6 +17,7 @@ final class CollectionPage
 	 * @param list<array{slug: string, name: string, url: string}> $createLinks
 	 * @param array{publishUrl: string, deleteUrl: string, duplicateUrl: string, publication: bool, drafts: bool} $bulk
 	 * @param list<array{key: string, label: string, count: int, url: string, active: bool}> $stages
+	 * @param list<array{label: string, count: ?int, url: string, active: bool}> $types the type filter's choices, `all` first; empty without one
 	 */
 	private function __construct(
 		public readonly string $name,
@@ -29,6 +30,7 @@ final class CollectionPage
 		public readonly CollectionPager $pager,
 		public readonly array $bulk,
 		public readonly array $stages = [],
+		public readonly array $types = [],
 	) {}
 
 	/**
@@ -39,6 +41,7 @@ final class CollectionPage
 	 * @param iterable<mixed>|null $parentStatus
 	 * @param ?array{stages: list<array<string, string>>, sentence: string} $parentDots
 	 * @param array<string, int> $stages how many entries each status stage holds
+	 * @param array<string, array{label: string, count: int}> $types the types the listing holds, by handle
 	 * @param bool $publication whether the collection holds entries with publication, which records have not
 	 * @param bool $drafts whether the collection holds entries of types that keep working copies
 	 */
@@ -62,6 +65,7 @@ final class CollectionPage
 		array $stages = [],
 		bool $publication = true,
 		bool $drafts = true,
+		array $types = [],
 	): self {
 		$query = $urls->query;
 		$nodes = self::items($nodes);
@@ -104,7 +108,41 @@ final class CollectionPage
 				'drafts' => $drafts,
 			],
 			stages: self::stages($stages, $query, $urls),
+			types: self::types($types, $query, $urls),
 		);
+	}
+
+	/**
+	 * The type filter's choices, ordered by label: only where the listing
+	 * holds more than one type, or a type is chosen and has to be undone.
+	 *
+	 * @param array<string, array{label: string, count: int}> $types
+	 * @return list<array{label: string, count: ?int, url: string, active: bool}>
+	 */
+	private static function types(array $types, CollectionQuery $query, CollectionUrls $urls): array
+	{
+		if (count($types) < 2 && $query->type === '') {
+			return [];
+		}
+
+		uasort($types, static fn(array $a, array $b): int => strnatcasecmp($a['label'], $b['label']));
+		$choices = [[
+			'label' => __('collection:types-all'),
+			'count' => null,
+			'url' => $urls->collection(['type' => '', 'offset' => '']),
+			'active' => $query->type === '',
+		]];
+
+		foreach ($types as $handle => $type) {
+			$choices[] = [
+				'label' => $type['label'],
+				'count' => $type['count'],
+				'url' => $urls->collection(['type' => $handle, 'offset' => '']),
+				'active' => $query->type === $handle,
+			];
+		}
+
+		return $choices;
 	}
 
 	/**

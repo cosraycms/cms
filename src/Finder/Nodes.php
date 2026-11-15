@@ -316,6 +316,23 @@ final class Nodes implements Iterator
 		return (int) ($record['count'] ?? 0);
 	}
 
+	/**
+	 * How many nodes each type holds, by type handle, under the same
+	 * conditions as count(); types without a node are left out.
+	 *
+	 * @return array<string, int>
+	 */
+	public function countByType(): array
+	{
+		$counts = [];
+
+		foreach ($this->context->db->nodes->count([...$this->baseParams(), 'by_type' => true])->all() as $record) {
+			$counts[(string) $record['type']] = (int) $record['count'];
+		}
+
+		return $counts;
+	}
+
 	public function published(?bool $published): self
 	{
 		$this->published = $published;

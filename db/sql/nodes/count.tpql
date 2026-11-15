@@ -1,4 +1,7 @@
 SELECT
+<?php if (isset($by_type)) : ?>
+	t.handle AS type,
+<?php endif ?>
 	COUNT(DISTINCT n.node) AS count
 FROM
 	/*:cms.prefix:*/nodes n
@@ -71,4 +74,7 @@ WHERE
 <?php endif ?>
 <?php if (isset($condition) && !empty(trim($condition))) : ?>
 	AND (<?= $condition ?>)
+<?php endif ?>
+<?php if (isset($by_type)) : ?>
+GROUP BY t.handle
 <?php endif ?>;

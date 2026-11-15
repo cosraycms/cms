@@ -179,6 +179,34 @@ $columns = ltrim($columns . ' ' . implode(' ', $tracks));
 				</nav>
 			<?php endif ?>
 
+			<?php if ($page->types !== []): ?>
+				<?php $chosen = array_values(array_filter($page->types, static fn(array $type): bool => $type['active']))[0] ?? null; ?>
+				<button
+					type="button"
+					class="cms-collection-type-filter"
+					popovertarget="collection-types"
+					aria-haspopup="menu"
+					<?= $chosen !== null && $chosen['count'] !== null ? 'data-active' : '' ?>>
+					<?php if ($chosen !== null && $chosen['count'] !== null): ?>
+						<span class="cms-collection-type-filter-name"><?= escape(__('collection:column-type')) ?></span>
+						<span><?= escape($chosen['label']) ?></span>
+					<?php else: ?>
+						<span><?= escape(__('collection:column-type')) ?></span>
+					<?php endif ?>
+					<?= Icon::render('chevron-down') ?>
+				</button>
+				<div id="collection-types" class="cms-action-menu cms-collection-type-menu" popover="auto" data-action-menu data-align="start">
+					<?php foreach ($page->types as $type): ?>
+						<a href="<?= escape($type['url']) ?>" <?= $type['active'] ? 'aria-current="true"' : '' ?>>
+							<span><?= escape($type['label']) ?></span>
+							<?php if ($type['count'] !== null): ?>
+								<span class="cms-collection-type-filter-count"><?= (int) $type['count'] ?></span>
+							<?php endif ?>
+						</a>
+					<?php endforeach ?>
+				</div>
+			<?php endif ?>
+
 			<?php if ($page->parent !== null): ?>
 				<div class="cms-collection-parent-context">
 					<?php if ($page->parent->type !== null): ?>

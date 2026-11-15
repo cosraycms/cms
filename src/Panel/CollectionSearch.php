@@ -57,6 +57,15 @@ final class CollectionSearch
 			$fields[] = ['name' => 'open', 'value' => implode(',', $query->open)];
 		}
 
+		// A search narrows the filters' selection rather than replacing it.
+		if ($query->stage !== '') {
+			$fields[] = ['name' => 'stage', 'value' => $query->stage];
+		}
+
+		if ($query->type !== '') {
+			$fields[] = ['name' => 'type', 'value' => $query->type];
+		}
+
 		return $fields;
 	}
 }

@@ -124,6 +124,7 @@ return [
 		'collection:stages' => 'Filter by status',
 		'collection:status' => 'Status',
 		'collection:tree' => 'Tree',
+		'collection:types-all' => 'All types',
 		'collection:view' => 'Collection view',
 		'color:palette' => 'Color palette',
 		'color:pick' => 'Pick a color',

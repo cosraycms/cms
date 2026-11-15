@@ -127,6 +127,7 @@ return [
 		'collection:stages' => 'Filteren op status',
 		'collection:status' => 'Status',
 		'collection:tree' => 'Boomstructuur',
+		'collection:types-all' => 'Alle typen',
 		'collection:view' => 'Collectieweergave',
 		'color:palette' => 'Kleurenpalet',
 		'color:pick' => 'Kleur kiezen',

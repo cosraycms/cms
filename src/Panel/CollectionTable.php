@@ -74,7 +74,8 @@ final class CollectionTable
 			treeMode: $meta->showChildren
 				&& $urls->query->view === 'tree'
 				&& $urls->query->q === ''
-				&& $urls->query->stage === '',
+				&& $urls->query->stage === ''
+				&& $urls->query->type === '',
 			headers: $headers,
 			rows: self::rows($nodes, $headers, $urls, $meta, $locale, $timezone, $moved),
 			positionUrl: $urls->position(),

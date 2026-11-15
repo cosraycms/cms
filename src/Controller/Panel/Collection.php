@@ -8,6 +8,7 @@ use Celema\Core\Exception\HttpBadRequest;
 use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Factory\Factory;
 use Celema\Core\Response;
+use Cosray\Bootstrap;
 use Cosray\Collection\Listing;
 use Cosray\Exception\RuntimeException;
 use Cosray\Node\Positions;
@@ -39,8 +40,14 @@ final class Collection extends Panel
 		$view = $this->stringParam('view');
 		$open = $this->openParam('open');
 		$stage = $this->stringParam('stage');
+		$type = $this->stringParam('type');
+		$typeLabels = $this->typeLabels();
 
 		if ($stage !== '' && !in_array($stage, ['draft', 'mine', 'unpublished'], true)) {
+			throw new HttpBadRequest($this->request);
+		}
+
+		if ($type !== '' && !array_key_exists($type, $typeLabels)) {
 			throw new HttpBadRequest($this->request);
 		}
 
@@ -86,6 +93,7 @@ final class Collection extends Panel
 			parent: $parentUid,
 			stage: $stage,
 			user: $user,
+			type: $type,
 		);
 
 		$query = new CollectionQuery(
@@ -99,10 +107,11 @@ final class Collection extends Panel
 			open: $open,
 			defaultView: $defaultView,
 			stage: $stage,
+			type: $type,
 		);
 		$nodes = $listing['nodes'];
 
-		if ($lister->meta->showChildren && $view === 'tree' && $listing['q'] === '' && $stage === '') {
+		if ($lister->meta->showChildren && $view === 'tree' && $listing['q'] === '' && $stage === '' && $type === '') {
 			$nodes = CollectionTree::build(
 				nodes: $nodes,
 				open: $open,
@@ -118,6 +127,16 @@ final class Collection extends Panel
 		}
 
 		$urls = new CollectionUrls($this->panelPath(), $collection, $query);
+		$types = [];
+
+		foreach ($lister->typeCounts($user, $listing['q'], $parentUid, $stage) as $handle => $count) {
+			$types[$handle] = ['label' => $typeLabels[$handle] ?? $handle, 'count' => $count];
+		}
+
+		// A chosen type stays on offer when a search leaves nothing of it.
+		if ($type !== '' && !isset($types[$type])) {
+			$types[$type] = ['label' => $typeLabels[$type], 'count' => 0];
+		}
 
 		return $this->context([
 			'notice' => $this->notice(),
@@ -146,7 +165,8 @@ final class Collection extends Panel
 						$this->timezone(),
 					),
 				createBlueprints: $parentNode === null ? null : $lister->childBlueprints($parentNode),
-				stages: $lister->stageCounts($user, $listing['q'], $parentUid),
+				stages: $lister->stageCounts($user, $listing['q'], $parentUid, $type),
+				types: $types,
 				publication: $lister->publication(),
 				drafts: $lister->drafts(),
 			),
@@ -305,6 +325,24 @@ final class Collection extends Panel
 		}
 
 		return $status;
+	}
+
+	/** @return array<string, string> the labels of the registered node types, by handle */
+	private function typeLabels(): array
+	{
+		$registered = $this->container->tag(Bootstrap::NODE_TAG);
+		$types = $this->types();
+		$labels = [];
+
+		foreach ($registered->entries() as $handle) {
+			$class = $registered->entry($handle)->definition();
+
+			if (is_string($class) && class_exists($class)) {
+				$labels[$handle] = __((string) $types->get($class, 'label', $handle));
+			}
+		}
+
+		return $labels;
 	}
 
 	private function types(): Types

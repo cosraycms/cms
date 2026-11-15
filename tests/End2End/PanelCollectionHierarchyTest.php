@@ -261,6 +261,74 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 		$this->assertHtmlNodeMissing('//tr[@data-uid="panel-stage-root"]', $html);
 	}
 
+	public function testTypeFilterNarrowsEveryLevelToOneType(): void
+	{
+		$rootId = $this->createHierarchyNode(
+			uid: 'panel-type-root',
+			type: $this->parentTypeId,
+			title: 'Panel Type Root',
+		);
+		$this->createHierarchyNode(
+			uid: 'panel-type-leaf',
+			type: $this->childTypeId,
+			title: 'Panel Type Leaf',
+			parent: $rootId,
+		);
+
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy');
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertHtmlNodeExists(
+			'//*[contains(@class, "cms-collection-type-menu")]//a[contains(@href, "type=test-hierarchy-child")]'
+				. '[normalize-space(span[1])="Hierarchy Child" and normalize-space(span[2])="1"]',
+			$html,
+		);
+
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
+			'query' => ['type' => 'test-hierarchy-child', 'stage' => 'mine'],
+		]);
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		// A search keeps the chosen filters.
+		$this->assertHtmlNodeExists(
+			'//form[@data-live-search]/input[@name="type"][@value="test-hierarchy-child"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists('//form[@data-live-search]/input[@name="stage"][@value="mine"]', $html);
+
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
+			'query' => ['type' => 'test-hierarchy-child'],
+		]);
+		$html = $this->getHtmlResponse($response);
+		$this->assertHtmlNodeCount(1, '//tbody//tr[@data-uid]', $html);
+		$this->assertHtmlNodeExists(
+			'//tr[@data-uid="panel-type-leaf"]//*[contains(@class, "cms-list-path")][normalize-space(span[1])="Panel Type Root"]',
+			$html,
+		);
+	}
+
+	public function testTypeFilterStaysWithinTheCollection(): void
+	{
+		$article = $this->db()->execute("SELECT type FROM cms.types WHERE handle = 'test-article'")->first();
+		$this->createTestNode([
+			'uid' => 'panel-type-outsider',
+			'type' => $article ? (int) $article['type'] : $this->createTestType('test-article'),
+			'title' => ['en' => 'Panel Type Outsider'],
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Panel Type Outsider']]],
+		]);
+
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
+			'query' => ['type' => 'test-article'],
+		]);
+		$this->assertResponseOk($response);
+		$this->assertStringNotContainsString('Panel Type Outsider', $this->getHtmlResponse($response));
+
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
+			'query' => ['type' => 'no-such-type'],
+		]);
+		$this->assertResponseStatus(400, $response);
+	}
+
 	public function testHierarchyTreeDoesNotRenderFakeExpandControls(): void
 	{
 		$this->createHierarchyNode(
