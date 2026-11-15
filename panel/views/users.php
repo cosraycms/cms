@@ -90,9 +90,10 @@ $listUrl = (string) $listUrl;
 					<table
 						class="cms-list"
 						role="table"
-						style="--columns: minmax(12rem, 2fr) minmax(12rem, 2fr) minmax(6rem, 1fr) minmax(8rem, 1fr) max-content">
+						style="--columns: max-content minmax(12rem, 2fr) minmax(12rem, 2fr) minmax(6rem, 1fr) minmax(8rem, 1fr) max-content">
 						<thead role="rowgroup">
 							<tr role="row">
+								<th role="columnheader"></th>
 								<th role="columnheader"><span class="cms-list-heading"><?= escape(__('user:name')) ?></span></th>
 								<th role="columnheader"><span class="cms-list-heading"><?= escape(__('user:email')) ?></span></th>
 								<th role="columnheader"><span class="cms-list-heading"><?= escape(__('user:type')) ?></span></th>
@@ -103,6 +104,10 @@ $listUrl = (string) $listUrl;
 						<tbody role="rowgroup">
 							<?php foreach ($rows as $row): ?>
 								<tr class="cms-list-row" role="row">
+									<td class="cms-list-cell" role="cell">
+										<?php // The name in the next cell names the user. ?>
+										<?php $this->include('component/avatar', ['avatar' => $row['avatar'], 'size' => 'sm']) ?>
+									</td>
 									<td class="cms-list-cell" role="cell">
 										<?php if (is_string($row['url'])): ?>
 											<a class="cms-list-value" href="<?= escape($row['url']) ?>"><?= escape((string) $row['title']) ?></a>

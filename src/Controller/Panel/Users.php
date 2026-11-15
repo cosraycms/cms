@@ -454,14 +454,16 @@ final class Users extends Panel
 		);
 	}
 
-	/** @return array{uid: string, title: string, email: string, type: string, roles: list<string>, active: bool, url: ?string} */
+	/** @return array{uid: string, avatar: array{uid: string, label: string, initials: string, hue: int}, title: string, email: string, type: string, roles: list<string>, active: bool, url: ?string} */
 	private function listRow(User $user): array
 	{
 		$labels = $this->policy->roles();
+		$avatar = $user->avatar();
 
 		return [
 			'uid' => $user->uid,
-			'title' => $user->name ?? ($user->username !== '' ? $user->username : $user->email),
+			'avatar' => $avatar->array(),
+			'title' => $avatar->label,
 			'email' => $user->email,
 			'type' => __($this->types->label($user->type)),
 			'roles' => array_map(fn(string $role): string => $this->roleLabel(
