@@ -8,8 +8,8 @@ use Cosray\CollectionListMeta;
 use Cosray\Column;
 use Cosray\Stage;
 use Cosray\StatusColumn;
-use Cosray\User;
 use Cosray\User\Avatar;
+use Cosray\UserColumn;
 use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
@@ -49,7 +49,7 @@ final class CollectionTable
 	) {}
 
 	/**
-	 * @param iterable<Column|StatusColumn> $columns
+	 * @param iterable<Column|StatusColumn|UserColumn> $columns
 	 * @param iterable<mixed> $nodes
 	 */
 	public static function from(
@@ -82,7 +82,7 @@ final class CollectionTable
 	 * has a slot for each of its stages, but none for drafts in a
 	 * collection of types without them.
 	 *
-	 * @param iterable<Column|StatusColumn> $columns
+	 * @param iterable<Column|StatusColumn|UserColumn> $columns
 	 * @return list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}>
 	 */
 	private static function headers(
@@ -122,7 +122,7 @@ final class CollectionTable
 
 			$label = $column->title;
 			// A manually ordered top level has no column order to offer.
-			$sort = $arranged ? null : $column->sort;
+			$sort = $arranged || !$column instanceof Column ? null : $column->sort;
 			$isSorted = $sort !== null && $sort->key === $urls->query->sort;
 			$nextDir = $sort?->direction;
 			$ariaSort = null;
@@ -146,7 +146,7 @@ final class CollectionTable
 				'ariaSort' => $ariaSort,
 				'lead' => !$lead,
 				'stages' => [],
-				'look' => '',
+				'look' => $column instanceof UserColumn ? $column->look : '',
 				'fixed' => false,
 				'badges' => false,
 			];
@@ -326,18 +326,9 @@ final class CollectionTable
 			}
 
 			$value = $column['value'] ?? '';
-
-			if ($value instanceof User) {
-				$value = $value->avatar();
-			}
-
+			$look = $header !== null && $header['kind'] === 'user' ? $header['look'] : 'name';
 			// The first column links the entry by its name alone.
-			$avatar =
-				!$lead
-				&& $value instanceof Avatar
-				&& ((bool) ($column['avatar'] ?? false) || !(bool) ($column['name'] ?? false))
-					? $value->array()
-					: null;
+			$avatar = !$lead && $look !== 'name' && $value instanceof Avatar ? $value->array() : null;
 
 			$cells[] = [
 				'label' => $label,
@@ -351,7 +342,7 @@ final class CollectionTable
 				'editUrl' => $lead && $uid !== '' ? $urls->edit($uid) : null,
 				'lead' => $lead,
 				'avatar' => $avatar,
-				'avatarOnly' => $avatar !== null && (bool) ($column['avatar'] ?? false),
+				'avatarOnly' => $avatar !== null && $look === 'avatar',
 				'status' => null,
 			];
 		}

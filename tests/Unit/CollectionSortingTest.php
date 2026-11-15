@@ -64,7 +64,7 @@ final class CollectionSortingTest extends TestCase
 		];
 		yield 'first sortable column' => [
 			[
-				Column::new('Editor', 'meta.editor'),
+				Column::editor(),
 				Column::new('Name', 'title')->sort('name', ['title']),
 				Column::new('Changed', 'meta.changed')->sort('changed', direction: 'desc'),
 			],

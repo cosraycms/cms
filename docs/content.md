@@ -197,7 +197,7 @@ final class Alerts implements Entries
 
 ### Columns and panel ordering
 
-The default listing shows title, the [status column](#status-columns), and last changed. Its initial order is title ascending. Type, editor, and created are opt-in columns; type and editor have no built-in display-name sort. Finder's `type` and `editor` fields mean type handle and editor UID, not the labels displayed in those columns.
+The default listing shows title, the [status column](#status-columns), and last changed. Its initial order is title ascending. Type, [editor](#user-columns), and created are opt-in columns; type and editor have no built-in display-name sort. Finder's `type` and `editor` fields mean type handle and editor UID, not the labels displayed in those columns.
 
 `#[Types]` and `entries()` define collection membership. The panel replaces any Finder `order()` set in `entries()` with the selected column order, before applying pagination. Declare the panel's initial order on a column, not in `entries()`.
 
@@ -218,7 +218,7 @@ public function columns(): array
         )->bold(true)->sort('name', fields: ['lastName', 'firstName']),
         Column::new(__('Last changed'), 'meta.changed')
             ->date(true)->sort('changed', direction: 'desc', default: true),
-        Column::new(__('Editor'), 'meta.editor'),
+        Column::editor(),
     ];
 }
 ```
@@ -238,12 +238,19 @@ Column::new(__('Created'), 'meta.created')->date(true)
     ->sort('created', direction: 'desc');
 ```
 
-`meta.editor` and `meta.creator` show the user's avatar and name. The avatar's initials sit on a colour fixed by the user's ID, so a rename keeps it. A column closure can return a `User` for the same display. `avatar(true)` shows the avatar alone, with the name as tooltip and accessible name; `name(true)` shows the name alone. The first column always shows the name alone because it links the entry:
+#### User columns
+
+`Column::editor()` and `Column::creator()` show the user who last changed or created the entry, as avatar and name. The avatar's initials sit on a colour fixed by the user's ID, so a rename keeps it. `Column::user()` shows a user from a closure that returns a `User`. `avatar()` shows the avatar alone, with the name as tooltip and accessible name; `name()` shows the name alone. The first column always shows the name alone because it links the entry. User columns have no sort:
 
 ```php
-Column::new(__('Editor'), 'meta.editor');               // avatar and name
-Column::new(__('Editor'), 'meta.editor')->avatar(true); // avatar alone
-Column::new(__('Creator'), 'meta.creator')->name(true); // name alone
+use Cosray\Column;
+use Cosray\Node\Wrapper;
+use Cosray\User;
+
+Column::editor();                                   // "Editor", avatar and name
+Column::creator()->avatar();                        // "Created by", avatar alone
+Column::editor(__('Last edited by'))->name();       // name alone
+Column::user(__('Owner'), static fn(Wrapper $node): ?User => $node->owner());
 ```
 
 #### Status columns

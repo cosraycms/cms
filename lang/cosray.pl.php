@@ -103,6 +103,7 @@ return [
 		'collection:column-changed' => 'Zmieniono',
 		'collection:column-created' => 'Utworzono',
 		'collection:column-editor' => 'Autor zmian',
+		'collection:column-creator' => 'Autor',
 		'collection:column-title' => 'Tytuł',
 		'collection:column-type' => 'Typ',
 		'collection:create-under' => 'Utwórz wpis podrzędny w „:name”: :type',

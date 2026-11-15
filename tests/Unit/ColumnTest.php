@@ -18,9 +18,7 @@ final class ColumnTest extends TestCase
 			->bold(true)
 			->italic(static fn(Wrapper $node): bool => true)
 			->badge(true)
-			->date(static fn(Wrapper $node): bool => true)
-			->avatar(static fn(Wrapper $node): bool => false)
-			->name(true);
+			->date(static fn(Wrapper $node): bool => true);
 
 		$this->assertSame('Computed', $column->title);
 		$this->assertSame(
@@ -30,8 +28,6 @@ final class ColumnTest extends TestCase
 				'italic' => true,
 				'badge' => true,
 				'date' => true,
-				'avatar' => false,
-				'name' => true,
 				'color' => '',
 			],
 			$column->get(new Wrapper(new stdClass(), [], new Types())),
@@ -43,9 +39,6 @@ final class ColumnTest extends TestCase
 		$this->assertSame('text', Column::new('Text', 'title')->kind());
 		$this->assertSame('badge', Column::new('Badge', 'title')->badge(true)->kind());
 		$this->assertSame('date', Column::new('Date', 'title')->date(true)->kind());
-		$this->assertSame('avatar', Column::new('Editor', 'meta.editor')->avatar(true)->kind());
-		$this->assertSame('text', Column::new('Editor', 'meta.editor')->avatar(static fn(): bool => true)->kind());
-		$this->assertSame('text', Column::new('Editor', 'meta.editor')->kind());
 	}
 
 	public function testFluentSortSetter(): void

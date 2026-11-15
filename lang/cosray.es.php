@@ -93,6 +93,7 @@ return [
 		'collection:column-changed' => 'Modificado',
 		'collection:column-created' => 'Creado',
 		'collection:column-editor' => 'Editado por',
+		'collection:column-creator' => 'Creado por',
 		'collection:column-title' => 'Título',
 		'collection:column-type' => 'Tipo',
 		'collection:create-under' => 'Crear subentrada en “:name”: :type',

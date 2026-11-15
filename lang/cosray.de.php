@@ -96,6 +96,7 @@ return [
 		'collection:column-changed' => 'Bearbeitet',
 		'collection:column-created' => 'Erstellt',
 		'collection:column-editor' => 'Bearbeiter',
+		'collection:column-creator' => 'Erstellt von',
 		'collection:column-title' => 'Titel',
 		'collection:column-type' => 'Typ',
 		'collection:create-under' => 'Untereintrag in „:name“ erstellen: :type',

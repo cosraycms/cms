@@ -32,7 +32,8 @@ $columns = $bulk ? 'var(--cms-list-select-width)' : '';
 foreach ($page->table->headers as $header) {
 	$columns .= $header['lead'] ? ' minmax(12rem, 2fr)' : match ($header['kind']) {
 		'date' => ' minmax(9rem, auto)',
-		'badge', 'status', 'avatar' => ' max-content',
+		'badge', 'status' => ' max-content',
+		'user' => $header['look'] === 'avatar' ? ' max-content' : ' minmax(7rem, auto)',
 		default => ' minmax(7rem, auto)',
 	};
 }

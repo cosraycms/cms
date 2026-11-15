@@ -93,6 +93,7 @@ return [
 		'collection:column-changed' => 'Modified',
 		'collection:column-created' => 'Created',
 		'collection:column-editor' => 'Editor',
+		'collection:column-creator' => 'Created by',
 		'collection:column-title' => 'Title',
 		'collection:column-type' => 'Type',
 		'collection:create-under' => 'Create child entry in “:name”: :type',

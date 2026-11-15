@@ -9,7 +9,6 @@ use Cosray\Collection\Sort;
 use Cosray\Finder\SortField;
 use Cosray\Node\Factory;
 use Cosray\Node\Wrapper;
-use Cosray\User\Avatar;
 
 final class Column
 {
@@ -17,8 +16,6 @@ final class Column
 	private bool|Closure $italic = false;
 	private bool|Closure $badge = false;
 	private bool|Closure $date = false;
-	private bool|Closure $avatar = false;
-	private bool|Closure $name = false;
 	public private(set) ?Sort $sort = null;
 	private string $color = '';
 
@@ -41,6 +38,24 @@ final class Column
 	public static function status(Stage ...$stages): StatusColumn
 	{
 		return new StatusColumn(...$stages);
+	}
+
+	/** The user who last changed the entry. */
+	public static function editor(?string $title = null): UserColumn
+	{
+		return new UserColumn($title ?? __('collection:column-editor'), 'editor');
+	}
+
+	/** The user who created the entry. */
+	public static function creator(?string $title = null): UserColumn
+	{
+		return new UserColumn($title ?? __('collection:column-creator'), 'creator');
+	}
+
+	/** @param Closure(Wrapper): (User|User\Avatar|null) $user */
+	public static function user(string $title, Closure $user): UserColumn
+	{
+		return new UserColumn($title, $user);
 	}
 
 	/**
@@ -91,26 +106,6 @@ final class Column
 	}
 
 	/**
-	 * Shows a user value like `meta.editor` as the avatar alone, the name its
-	 * tooltip, rather than avatar and name. Wins over `name()`. The first
-	 * column, which links the entry, always shows the name alone.
-	 */
-	public function avatar(bool|Closure $avatar): self
-	{
-		$this->avatar = $avatar;
-
-		return $this;
-	}
-
-	/** Shows a user value like `meta.editor` as the name alone, without its avatar. */
-	public function name(bool|Closure $name): self
-	{
-		$this->name = $name;
-
-		return $this;
-	}
-
-	/**
 	 * @param non-empty-list<string|SortField>|null $fields
 	 * @param bool $default Whether the listing starts in this order; without
 	 *                      a flagged column it starts in the first sortable one
@@ -142,10 +137,6 @@ final class Column
 			return 'badge';
 		}
 
-		if ($this->avatar === true) {
-			return 'avatar';
-		}
-
 		return 'text';
 	}
 
@@ -160,8 +151,6 @@ final class Column
 			'italic' => is_bool($this->italic) ? $this->italic : ($this->italic)($node),
 			'badge' => is_bool($this->badge) ? $this->badge : ($this->badge)($node),
 			'date' => is_bool($this->date) ? $this->date : ($this->date)($node),
-			'avatar' => is_bool($this->avatar) ? $this->avatar : ($this->avatar)($node),
-			'name' => is_bool($this->name) ? $this->name : ($this->name)($node),
 			'color' => $this->color,
 		];
 	}
@@ -191,33 +180,11 @@ final class Column
 				return $inner::class;
 			case 'meta.classname':
 				return basename(str_replace('\\', '/', $inner::class));
-			case 'meta.editor':
-			case 'meta.creator':
-				return self::user($node, explode('.', $field)[1]);
 			default:
 				$fieldObj = Factory::fieldFor($inner, $field);
 				$value = $fieldObj->value();
 
 				return $value->isset() ? (string) $value : null;
 		}
-	}
-
-	private static function user(Wrapper $node, string $role): ?Avatar
-	{
-		$id = $node->meta->get("{$role}_usr");
-
-		if (!is_numeric($id)) {
-			return null;
-		}
-
-		$data = (array) $node->meta->get("{$role}_data", []);
-		$avatar = new Avatar(
-			(int) $id,
-			is_string($data['name'] ?? null) ? $data['name'] : null,
-			(string) $node->meta->get("{$role}_username", ''),
-			(string) $node->meta->get("{$role}_email", ''),
-		);
-
-		return $avatar->label !== '' ? $avatar : null;
 	}
 }

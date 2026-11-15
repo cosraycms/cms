@@ -31,7 +31,7 @@ final class AllContent implements Entries, Columns
 		return [
 			Column::new(__('collection:column-title'), 'title')->bold(true)->sort('title'),
 			Column::new(__('collection:column-type'), 'meta.name'),
-			Column::new(__('collection:column-editor'), 'meta.editor'),
+			Column::editor(),
 			Column::new(__('collection:column-created'), 'meta.created')
 				->date(true)
 				->sort('created', direction: 'desc'),

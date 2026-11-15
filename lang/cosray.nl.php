@@ -96,6 +96,7 @@ return [
 		'collection:column-changed' => 'Gewijzigd',
 		'collection:column-created' => 'Aangemaakt',
 		'collection:column-editor' => 'Bewerkt door',
+		'collection:column-creator' => 'Aangemaakt door',
 		'collection:column-title' => 'Titel',
 		'collection:column-type' => 'Type',
 		'collection:create-under' => 'Subitem aanmaken in “:name”: :type',

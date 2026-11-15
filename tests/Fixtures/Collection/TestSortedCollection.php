@@ -38,7 +38,7 @@ final class TestSortedCollection implements Columns, Entries
 				direction: 'desc',
 			),
 			Column::new('Created', 'meta.created')->date(true)->sort('created', direction: 'desc'),
-			Column::new('Editor', 'meta.editor'),
+			Column::editor(),
 		];
 	}
 }

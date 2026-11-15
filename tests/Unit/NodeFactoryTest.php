@@ -461,8 +461,8 @@ final class NodeFactoryTest extends TestCase
 		]);
 		$proxy = $this->factory->proxy($node, $this->context);
 
-		$this->assertSame('editor@example.com', (string) Column::new('Editor', 'meta.editor')->get($proxy)['value']);
-		$this->assertSame('creator@example.com', (string) Column::new('Creator', 'meta.creator')->get($proxy)['value']);
+		$this->assertSame('editor@example.com', (string) Column::editor()->get($proxy)['value']);
+		$this->assertSame('creator@example.com', (string) Column::creator()->get($proxy)['value']);
 	}
 
 	public function testEditorColumnHoldsTheEditorsAvatar(): void
@@ -475,7 +475,7 @@ final class NodeFactoryTest extends TestCase
 			'editor_email' => 'ann@example.com',
 		]);
 
-		$value = Column::new('Editor', 'meta.editor')->get($this->factory->proxy($node, $this->context))['value'];
+		$value = Column::editor()->get($this->factory->proxy($node, $this->context))['value'];
 
 		$this->assertInstanceOf(Avatar::class, $value);
 		$this->assertSame(new Avatar(4, null, 'ann', '')->hue, $value->hue);
@@ -487,7 +487,7 @@ final class NodeFactoryTest extends TestCase
 		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, ['uid' => 'column-none-1']);
 
 		$this->assertNull(
-			Column::new('Editor', 'meta.editor')->get($this->factory->proxy($node, $this->context))['value'],
+			Column::editor()->get($this->factory->proxy($node, $this->context))['value'],
 		);
 	}
 

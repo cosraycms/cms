@@ -6,6 +6,7 @@ namespace Cosray\Contract;
 
 use Cosray\Column;
 use Cosray\StatusColumn;
+use Cosray\UserColumn;
 
 /**
  * Replaces the default listing columns of a collection. Spread
@@ -14,6 +15,6 @@ use Cosray\StatusColumn;
  */
 interface Columns
 {
-	/** @return list<Column|StatusColumn> */
+	/** @return list<Column|StatusColumn|UserColumn> */
 	public function columns(): array;
 }
