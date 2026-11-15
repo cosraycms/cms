@@ -23,6 +23,7 @@ use Cosray\Panel\NodeStatus;
 use Cosray\Panel\System;
 use Cosray\Richtext\Envelope;
 use Cosray\Schema\Tool;
+use Cosray\User\Avatar;
 
 /**
  * Renders every panel component against the current stylesheets, so rare
@@ -1489,7 +1490,12 @@ final class Styleguide extends Panel
 			'moved' => false,
 		], $overrides);
 
-		$cells = static fn(string $title, array $dots, array $badges = []): array => [
+		$cells = static fn(
+			string $title,
+			array $dots,
+			array $badges = [],
+			Avatar $editor = new Avatar('styleguide-ada', 'Ada Lovelace', 'ada', 'ada@example.com'),
+		): array => [
 			[
 				'class' => 'is-bold',
 				'label' => 'Title',
@@ -1515,6 +1521,15 @@ final class Styleguide extends Panel
 				'lead' => false,
 				'status' => null,
 			],
+			[
+				'class' => '',
+				'label' => 'Editor',
+				'value' => $editor->label,
+				'editUrl' => null,
+				'lead' => false,
+				'avatar' => $editor->array(),
+				'status' => null,
+			],
 		];
 
 		return [
@@ -1530,7 +1545,11 @@ final class Styleguide extends Panel
 				'depth' => 1,
 				'childrenUrl' => '#',
 				'published' => false,
-				'cells' => $cells('Sudhaus', $dots(false, null, null)),
+				'cells' => $cells(
+					'Sudhaus',
+					$dots(false, null, null),
+					editor: new Avatar('styleguide-keller', null, 'm.keller', 'keller@example.com'),
+				),
 				'group' => 'brauerei',
 				'moveDown' => true,
 			]),
@@ -1543,6 +1562,7 @@ final class Styleguide extends Panel
 					'A title long enough that it has to be cut off somewhere',
 					$dots(false, '2026-08-11 22:25:00+00', null),
 					[['kind' => 'hidden', 'label' => 'Hidden']],
+					new Avatar('styleguide-grace', 'Grace Hopper', 'grace', 'grace@example.com'),
 				),
 			]),
 			$row([

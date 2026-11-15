@@ -532,6 +532,20 @@
 	);
 
 	/**
+	 * Component — avatar
+	 *
+	 * Lightness and chroma of an avatar's fill and initials, per theme; each
+	 * avatar brings its own hue. Equal lightness keeps every hue equally
+	 * legible.
+	 */
+	--cms-avatar-size: 1.75rem;
+	--cms-avatar-size-sm: 1.5rem;
+	--cms-avatar-fill: 0.9 0.06;
+	--cms-avatar-fill-dark: 0.4 0.08;
+	--cms-avatar-ink: 0.38 0.1;
+	--cms-avatar-ink-dark: 0.93 0.04;
+
+	/**
 	 * Component — dashboard
 	 */
 	--cms-dashboard-card-bg: var(--cms-color-surface);

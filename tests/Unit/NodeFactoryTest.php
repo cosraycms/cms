@@ -36,6 +36,7 @@ use Cosray\Tests\Fixtures\Node\TestReorderedFieldsetDocument;
 use Cosray\Tests\Fixtures\Node\TestSplitFieldsetDocument;
 use Cosray\Tests\TestCase;
 use Cosray\Uid;
+use Cosray\User\Avatar;
 use stdClass;
 
 /**
@@ -458,22 +459,34 @@ final class NodeFactoryTest extends TestCase
 		]);
 		$proxy = $this->factory->proxy($node, $this->context);
 
-		$this->assertSame('editor@example.com', Column::new('Editor', 'meta.editor')->get($proxy)['value']);
-		$this->assertSame('creator@example.com', Column::new('Creator', 'meta.creator')->get($proxy)['value']);
+		$this->assertSame('editor@example.com', (string) Column::new('Editor', 'meta.editor')->get($proxy)['value']);
+		$this->assertSame('creator@example.com', (string) Column::new('Creator', 'meta.creator')->get($proxy)['value']);
 	}
 
-	public function testEditorColumnPrefersEscapedNameOverUsername(): void
+	public function testEditorColumnHoldsTheEditorsAvatar(): void
 	{
 		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
 			'uid' => 'column-name-1',
+			'editor_uid' => 'ann-uid',
 			'editor_data' => ['name' => 'Ann & Co'],
 			'editor_username' => 'ann',
 			'editor_email' => 'ann@example.com',
 		]);
 
-		$row = Column::new('Editor', 'meta.editor')->get($this->factory->proxy($node, $this->context));
+		$value = Column::new('Editor', 'meta.editor')->get($this->factory->proxy($node, $this->context))['value'];
 
-		$this->assertSame('Ann &amp; Co', $row['value']);
+		$this->assertInstanceOf(Avatar::class, $value);
+		$this->assertSame('ann-uid', $value->uid);
+		$this->assertSame('Ann & Co', $value->label);
+	}
+
+	public function testEditorColumnIsEmptyWithoutAnEditor(): void
+	{
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, ['uid' => 'column-none-1']);
+
+		$this->assertNull(
+			Column::new('Editor', 'meta.editor')->get($this->factory->proxy($node, $this->context))['value'],
+		);
 	}
 
 	// -- WeakMap data storage -------------------------------------------------

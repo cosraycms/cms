@@ -456,7 +456,7 @@ abstract class Panel
 			->permits($user instanceof User ? $user : null, $permission);
 	}
 
-	/** @return array{name: ?string, initials: string, title: string, detail: string}|null */
+	/** @return array{name: ?string, avatar: array{uid: string, label: string, initials: string, hue: int}, title: string, detail: string}|null */
 	private function account(): ?array
 	{
 		$user = $this->request->get('user', null);
@@ -465,13 +465,13 @@ abstract class Panel
 			return null;
 		}
 
-		$title = $user->name ?? ($user->username !== '' ? $user->username : $user->email);
+		$avatar = $user->avatar();
 
 		return [
 			'name' => $user->name,
-			'initials' => $user->initials(),
-			'title' => $title,
-			'detail' => $user->email !== $title ? $user->email : '',
+			'avatar' => $avatar->array(),
+			'title' => $avatar->label,
+			'detail' => $user->email !== $avatar->label ? $user->email : '',
 		];
 	}
 

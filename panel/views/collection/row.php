@@ -106,6 +106,8 @@ $grip = $group === null
 				<a class="cms-list-value" href="<?= escape((string) $cell['editUrl']) ?>">
 					<?= escape((string) $cell['value']) ?>
 				</a>
+			<?php elseif (is_array($cell['avatar'] ?? null)): ?>
+				<?php $this->include('component/avatar', ['avatar' => $cell['avatar'], 'size' => 'sm', 'named' => true]) ?>
 			<?php else: ?>
 				<span class="cms-list-value"><?= escape((string) $cell['value']) ?></span>
 			<?php endif ?>

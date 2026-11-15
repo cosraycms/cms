@@ -260,20 +260,6 @@
 		}
 	}
 
-	& .cms-masthead-avatar {
-		display: grid;
-		place-items: center;
-		flex-shrink: 0;
-		width: 1.75rem;
-		height: 1.75rem;
-		border-radius: var(--cms-radius-full);
-		background: var(--cms-color-accent);
-		color: var(--cms-color-text-on-accent);
-		font-size: var(--cms-font-size-xs);
-		font-weight: 600;
-		letter-spacing: 0.02em;
-	}
-
 	& .cms-masthead-name {
 		overflow: hidden;
 		text-overflow: ellipsis;

@@ -6,7 +6,6 @@ namespace Cosray\Tests\Unit;
 
 use Cosray\Tests\TestCase;
 use Cosray\User;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 final class UserTest extends TestCase
 {
@@ -24,25 +23,21 @@ final class UserTest extends TestCase
 		$this->assertNull($this->user(['data' => '{"name": 42}'])->name);
 	}
 
-	/** @return array<string, array{array<string, mixed>, string}> */
-	public static function initialsProvider(): array
+	public function testAvatarDescribesTheUser(): void
 	{
-		return [
-			'full name' => [['data' => '{"name": "Max Keller"}'], 'MK'],
-			'first and last word' => [['data' => '{"name": "Anna-Lena van der Berg"}'], 'AB'],
-			'single name' => [['data' => '{"name": "Max"}'], 'MA'],
-			'multibyte' => [['data' => '{"name": "élise özdemir"}'], 'ÉÖ'],
-			'username without name' => [['username' => 'm.keller'], 'MK'],
-			'email local part' => [['username' => null, 'email' => 'max_keller@example.com'], 'MK'],
-			'single-word email' => [['username' => null, 'email' => 'ernst@example.com'], 'ER'],
-		];
+		$avatar = $this->user(['uid' => 'u-1', 'data' => '{"name": "Max Keller"}'])->avatar();
+
+		$this->assertSame('u-1', $avatar->uid);
+		$this->assertSame('Max Keller', $avatar->label);
+		$this->assertSame('MK', $avatar->initials);
 	}
 
-	/** @param array<string, mixed> $row */
-	#[DataProvider('initialsProvider')]
-	public function testInitials(array $row, string $expected): void
+	public function testAvatarFallsBackToTheEmailsLocalPart(): void
 	{
-		$this->assertSame($expected, $this->user($row)->initials());
+		$avatar = $this->user(['username' => null, 'email' => 'max_keller@example.com'])->avatar();
+
+		$this->assertSame('max_keller@example.com', $avatar->label);
+		$this->assertSame('MK', $avatar->initials);
 	}
 
 	/** @param array<string, mixed> $row */

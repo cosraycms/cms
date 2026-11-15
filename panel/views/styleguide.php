@@ -717,7 +717,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 							<table
 								class="cms-list"
 								role="table"
-								style="--columns: var(--cms-list-select-width) minmax(12rem, 2fr) max-content minmax(5rem, auto) minmax(5rem, auto) max-content">
+								style="--columns: var(--cms-list-select-width) minmax(12rem, 2fr) max-content minmax(5rem, auto) minmax(5rem, auto) max-content max-content">
 								<thead role="rowgroup">
 									<tr role="row">
 										<th class="cms-list-col-select" role="columnheader">
@@ -727,6 +727,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 										<th class="cms-list-col-status" role="columnheader">Status</th>
 										<th role="columnheader"><span class="cms-list-heading">Type</span></th>
 										<th role="columnheader"><span class="cms-list-heading">Modified</span></th>
+										<th role="columnheader"><span class="cms-list-heading">Editor</span></th>
 										<th class="cms-list-col-actions" role="columnheader"></th>
 									</tr>
 								</thead>

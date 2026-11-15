@@ -8,6 +8,8 @@ use Cosray\CollectionListMeta;
 use Cosray\Column;
 use Cosray\Stage;
 use Cosray\StatusColumn;
+use Cosray\User;
+use Cosray\User\Avatar;
 use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
@@ -28,7 +30,7 @@ final class CollectionTable
 	 *     last: bool,
 	 *     published: bool,
 	 *     hasChildren: bool,
-	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
+	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{uid: string, label: string, initials: string, hue: int}, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
@@ -175,7 +177,7 @@ final class CollectionTable
 	 *     last: bool,
 	 *     published: bool,
 	 *     hasChildren: bool,
-	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
+	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{uid: string, label: string, initials: string, hue: int}, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
@@ -275,7 +277,7 @@ final class CollectionTable
 	/**
 	 * @param array<string, mixed> $node
 	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}> $headers
-	 * @return list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>
+	 * @return list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{uid: string, label: string, initials: string, hue: int}, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>
 	 */
 	private static function cells(
 		array $node,
@@ -304,6 +306,7 @@ final class CollectionTable
 					'class' => 'cms-list-col-status',
 					'editUrl' => null,
 					'lead' => false,
+					'avatar' => null,
 					'status' => self::stagesOf($header, $stages, $header['badges'] ? self::status($node, $meta) : []),
 				];
 
@@ -321,10 +324,16 @@ final class CollectionTable
 				$classes[] = 'is-italic';
 			}
 
+			$value = $column['value'] ?? '';
+
+			if ($value instanceof User) {
+				$value = $value->avatar();
+			}
+
 			$cells[] = [
 				'label' => $label,
 				'value' => self::displayValue(
-					$column['value'] ?? '',
+					$value,
 					(bool) ($column['date'] ?? false),
 					$locale,
 					$timezone,
@@ -332,6 +341,11 @@ final class CollectionTable
 				'class' => implode(' ', $classes),
 				'editUrl' => $lead && $uid !== '' ? $urls->edit($uid) : null,
 				'lead' => $lead,
+				// The first column links the entry by its text.
+				'avatar' =>
+					!$lead && (bool) ($column['avatar'] ?? false) && $value instanceof Avatar
+						? $value->array()
+						: null,
 				'status' => null,
 			];
 		}

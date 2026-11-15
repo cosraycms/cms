@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray;
 
+use Cosray\User\Avatar;
+
 class User
 {
 	public readonly int $id;
@@ -48,23 +50,9 @@ class User
 		return $this->username !== '' ? $this->username : $this->email;
 	}
 
-	/**
-	 * First and last word of the name, or of the username or the email's local
-	 * part when there is none ("m.keller" → "MK"). A single word gives its
-	 * first two letters.
-	 */
-	public function initials(): string
+	public function avatar(): Avatar
 	{
-		$source = $this->name ?? ($this->username !== '' ? $this->username : strstr($this->email, '@', true));
-		$words = preg_split('/[\s._-]+/u', (string) $source, -1, PREG_SPLIT_NO_EMPTY) ?: [];
-
-		$initials = match (count($words)) {
-			0 => '',
-			1 => mb_substr($words[0], 0, 2),
-			default => mb_substr($words[0], 0, 1) . mb_substr($words[array_key_last($words)], 0, 1),
-		};
-
-		return mb_strtoupper($initials);
+		return new Avatar($this->uid, $this->name, $this->username, $this->email);
 	}
 
 	/** @return array<string, mixed> the `users.data` document */

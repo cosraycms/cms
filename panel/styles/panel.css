@@ -11,6 +11,7 @@
 @import './collection.css' layer(panel);
 @import './menus.css' layer(panel);
 @import './status.css' layer(panel);
+@import './avatar.css' layer(panel);
 @import './fields.css' layer(panel);
 @import './controls.css' layer(panel);
 @import './media-field.css' layer(panel);

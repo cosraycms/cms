@@ -238,6 +238,12 @@ Column::new(__('Created'), 'meta.created')->date(true)
     ->sort('created', direction: 'desc');
 ```
 
+`meta.editor` and `meta.creator` show the user's name. `avatar(true)` shows the user's initials instead, on a colour derived from the user's UID so that renames keep it, with the name as tooltip and accessible name. A column closure can return a `User` to get the same display. The first column always shows text because it links the entry:
+
+```php
+Column::new(__('Editor'), 'meta.editor')->avatar(true);
+```
+
 #### Status columns
 
 The status column shows each entry's [stages](controls.md#editor-status): the main version, online or offline, the draft, and the user's own changes. Without one among a collection's columns, the listing adds it after the first column. `Column::status()` places it anywhere, and naming stages splits them across columns. The first column that is not a status column links the entry and carries the hierarchy, wherever the status columns sit. Hidden and locked badges join the column that shows the main version, or else the first status column. A record's saved state counts as its main version; types without drafts, records among them, have no draft.

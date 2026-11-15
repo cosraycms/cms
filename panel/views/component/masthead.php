@@ -40,7 +40,7 @@ $label = is_array($account) && $account['name'] === null
 					type="button"
 					class="cms-masthead-account-trigger"
 					popovertarget="cms-account-menu"<?php if ($label !== null): ?> aria-label="<?= escape($label) ?>"<?php endif ?>>
-					<span class="cms-masthead-avatar" aria-hidden="true"><?= escape($account['initials']) ?></span>
+					<?php $this->include('component/avatar', ['avatar' => $account['avatar']]) ?>
 					<?php if ($account['name'] !== null): ?>
 						<span class="cms-masthead-name"><?= escape($account['name']) ?></span>
 					<?php endif ?>

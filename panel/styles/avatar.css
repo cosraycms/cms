@@ -1,0 +1,27 @@
+.cms-avatar {
+	--size: var(--cms-avatar-size);
+
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	width: var(--size);
+	height: var(--size);
+	border-radius: var(--cms-radius-full);
+	background: light-dark(
+		oklch(var(--cms-avatar-fill) var(--hue, 0)),
+		oklch(var(--cms-avatar-fill-dark) var(--hue, 0))
+	);
+	color: light-dark(
+		oklch(var(--cms-avatar-ink) var(--hue, 0)),
+		oklch(var(--cms-avatar-ink-dark) var(--hue, 0))
+	);
+	font-size: calc(var(--size) * 0.43);
+	font-weight: 600;
+	line-height: 1;
+	letter-spacing: 0.02em;
+	user-select: none;
+
+	&.is-sm {
+		--size: var(--cms-avatar-size-sm);
+	}
+}

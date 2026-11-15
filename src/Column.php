@@ -9,6 +9,7 @@ use Cosray\Collection\Sort;
 use Cosray\Finder\SortField;
 use Cosray\Node\Factory;
 use Cosray\Node\Wrapper;
+use Cosray\User\Avatar;
 
 final class Column
 {
@@ -16,6 +17,7 @@ final class Column
 	private bool|Closure $italic = false;
 	private bool|Closure $badge = false;
 	private bool|Closure $date = false;
+	private bool|Closure $avatar = false;
 	public private(set) ?Sort $sort = null;
 	private string $color = '';
 
@@ -88,6 +90,17 @@ final class Column
 	}
 
 	/**
+	 * Shows a user as an avatar with the name as its tooltip, rather than the
+	 * name. Applies to user values like `meta.editor`, never to the first column.
+	 */
+	public function avatar(bool|Closure $avatar): self
+	{
+		$this->avatar = $avatar;
+
+		return $this;
+	}
+
+	/**
 	 * @param non-empty-list<string|SortField>|null $fields
 	 * @param bool $default Whether the listing starts in this order; without
 	 *                      a flagged column it starts in the first sortable one
@@ -119,6 +132,10 @@ final class Column
 			return 'badge';
 		}
 
+		if ($this->avatar === true) {
+			return 'avatar';
+		}
+
 		return 'text';
 	}
 
@@ -133,6 +150,7 @@ final class Column
 			'italic' => is_bool($this->italic) ? $this->italic : ($this->italic)($node),
 			'badge' => is_bool($this->badge) ? $this->badge : ($this->badge)($node),
 			'date' => is_bool($this->date) ? $this->date : ($this->date)($node),
+			'avatar' => is_bool($this->avatar) ? $this->avatar : ($this->avatar)($node),
 			'color' => $this->color,
 		];
 	}
@@ -163,22 +181,26 @@ final class Column
 			case 'meta.classname':
 				return basename(str_replace('\\', '/', $inner::class));
 			case 'meta.editor':
-				$editorData = (array) $node->meta->get('editor_data', []);
-				$editor =
-					$editorData['name'] ?? $node->meta->get('editor_username') ?? $node->meta->get('editor_email');
-
-				return escape((string) $editor);
 			case 'meta.creator':
-				$creatorData = (array) $node->meta->get('creator_data', []);
-				$creator =
-					$creatorData['name'] ?? $node->meta->get('creator_username') ?? $node->meta->get('creator_email');
-
-				return escape((string) $creator);
+				return self::user($node, explode('.', $field)[1]);
 			default:
 				$fieldObj = Factory::fieldFor($inner, $field);
 				$value = $fieldObj->value();
 
 				return $value->isset() ? (string) $value : null;
 		}
+	}
+
+	private static function user(Wrapper $node, string $role): ?Avatar
+	{
+		$data = (array) $node->meta->get("{$role}_data", []);
+		$avatar = new Avatar(
+			(string) $node->meta->get("{$role}_uid", ''),
+			is_string($data['name'] ?? null) ? $data['name'] : null,
+			(string) $node->meta->get("{$role}_username", ''),
+			(string) $node->meta->get("{$role}_email", ''),
+		);
+
+		return $avatar->label !== '' ? $avatar : null;
 	}
 }
