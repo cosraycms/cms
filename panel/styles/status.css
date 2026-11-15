@@ -165,9 +165,21 @@
 		animation: cms-stage-mark-pulse 0.9s ease-in-out infinite;
 	}
 
+	/* A problem shows "!" in place of the pencil, as status.js only moves the state. */
 	&[data-stage='mine']:is([data-state='conflict'], [data-state='error']) {
 		--tone: var(--cms-color-stage-problem);
 		--ink: var(--cms-color-stage-problem-ink);
+
+		& > .cms-icon {
+			display: none;
+		}
+
+		&::after {
+			font-size: calc(var(--size) * 0.75);
+			font-weight: 700;
+			line-height: 1;
+			content: '!' / '';
+		}
 	}
 }
 
@@ -199,6 +211,11 @@
 	&.is-sm {
 		--size: var(--cms-stage-mark-size-sm);
 		--gap: calc(0.3125rem + 2 * var(--reach));
+	}
+
+	& > .cms-stage-mark[data-stage='mine']:is([data-state='conflict'], [data-state='error']) {
+		width: calc(var(--size) * 1.5);
+		height: calc(var(--size) * 1.5);
 	}
 
 	& > :is(.cms-stage-mark, .cms-status-dots-dot) + :is(.cms-stage-mark, .cms-status-dots-dot) {
