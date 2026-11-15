@@ -205,7 +205,7 @@
 		min-width: 0;
 	}
 
-	& .cms-masthead-theme {
+	& .cms-masthead-button {
 		/* The account trigger's height: its avatar, padding and border. */
 		--size: calc(1.75rem + 2 * var(--cms-space-0-5) + 2px);
 
@@ -226,15 +226,23 @@
 			--cms-icon-size: 1rem;
 		}
 
-		&:hover {
+		&:hover,
+		&[aria-current='page'] {
 			border-color: var(--cms-color-border-strong);
 			color: var(--cms-color-text);
 		}
 
-		/* The icon shows the current theme. */
-		& .cms-masthead-theme-moon {
-			display: none;
+		&[aria-current='page'] {
+			background: var(--current-bg);
+			box-shadow:
+				0 0 0 2px var(--cms-masthead-bg),
+				0 0 0 3.5px var(--cms-color-text-subtle);
 		}
+	}
+
+	/* The icon shows the current theme. */
+	& .cms-masthead-theme-moon {
+		display: none;
 	}
 
 	& .cms-masthead-account-trigger {

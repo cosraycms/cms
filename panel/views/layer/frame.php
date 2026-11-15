@@ -23,4 +23,5 @@ if ($layer !== 'frame') {
 <?php endif ?>
 <?php if ($layer === 'frame'): ?>
 	<?php $this->include('component/area-nav', ['oob' => true]) ?>
+	<?php $this->include('component/system-link', ['oob' => true]) ?>
 <?php endif ?>

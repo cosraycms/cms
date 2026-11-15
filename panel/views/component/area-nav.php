@@ -33,12 +33,6 @@ if (is_string($menusUrl)) {
 
 $areas[] = ['area' => 'media', 'url' => (string) $panelPath . '/media', 'label' => __('nav:media'), 'icon' => 'image'];
 
-$systemUrl = u($systemUrl ?? null);
-
-if (is_string($systemUrl)) {
-	$areas[] = ['area' => 'system', 'url' => $systemUrl, 'label' => __('nav:system'), 'icon' => 'gear'];
-}
-
 ?>
 <nav
 	id="area-nav"

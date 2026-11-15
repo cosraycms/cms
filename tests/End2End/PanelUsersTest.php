@@ -41,6 +41,22 @@ final class PanelUsersTest extends End2EndTestCase
 		$this->assertStringNotContainsString('system@cosray.dev', $html);
 	}
 
+	public function testAnAreaSwitchMarksTheSystemLinkCurrent(): void
+	{
+		$this->authenticateAs('superuser');
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/users', ['headers' => [
+			'HX-Request' => 'true',
+			'HX-Boosted' => 'true',
+			'HX-Target' => 'div#frame',
+		]]));
+
+		$this->assertHtmlNodeExists(
+			'//a[@id="system-link" and @href="/panel/users" and @aria-current="page" and @hx-swap-oob="true"]',
+			$html,
+		);
+	}
+
 	public function testATypedUserIsCreatedWithItsFieldsAndAssignableRoles(): void
 	{
 		$this->authenticateAs('superuser');

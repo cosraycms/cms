@@ -23,9 +23,11 @@ $label = is_array($account) && $account['name'] === null
 	<?php $this->include('component/area-nav') ?>
 
 	<div class="cms-masthead-tools">
+		<?php $this->include('component/system-link') ?>
+
 		<button
 			type="button"
-			class="cms-masthead-theme"
+			class="cms-masthead-button cms-masthead-theme"
 			data-theme-toggle
 			aria-pressed="<?= $dark ? 'true' : 'false' ?>"
 			aria-label="<?= escape(__('nav:dark-theme')) ?>"
