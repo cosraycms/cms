@@ -484,6 +484,22 @@
 		white-space: nowrap;
 	}
 
+	/* A hit's ancestors give way before its own title does. */
+	& .cms-list-path {
+		display: flex;
+		gap: var(--cms-space-1);
+		flex: 0 100 auto;
+		min-width: 0;
+		overflow: hidden;
+		color: var(--cms-color-text-subtle);
+		white-space: nowrap;
+
+		& > span:nth-child(odd) {
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	}
+
 	& .cms-list-user {
 		display: flex;
 		align-items: center;

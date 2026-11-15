@@ -22,6 +22,7 @@ $grip = $group === null
 	: '<span class="cms-list-grip" data-order-grip aria-hidden="true">' . \Cosray\Panel\Icon::render('grip-vertical') . '</span>';
 $titleGrip = $bulk ? '' : $grip;
 $creates = (array) $row['childCreateLinks'];
+$path = (array) ($row['path'] ?? []);
 $menuId = 'row-' . (string) $row['uid'];
 ?>
 <tr
@@ -97,6 +98,13 @@ $menuId = 'row-' . (string) $row['uid'];
 						<?php endif ?>
 					<?php endif ?>
 					<?= $titleGrip ?>
+					<?php if ($path !== []): ?>
+						<span class="cms-list-path">
+							<?php foreach ($path as $part): ?>
+								<span><?= escape((string) $part) ?></span><span aria-hidden="true">›</span>
+							<?php endforeach ?>
+						</span>
+					<?php endif ?>
 					<?php if ($cell['editUrl'] !== null): ?>
 						<a class="cms-list-value" href="<?= escape((string) $cell['editUrl']) ?>">
 							<?= escape((string) $cell['value']) ?>

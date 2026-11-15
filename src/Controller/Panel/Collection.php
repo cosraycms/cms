@@ -69,11 +69,6 @@ final class Collection extends Panel
 			$open = [];
 		}
 
-		// A filtered tree would lose the branches between its rows.
-		if ($view === 'tree') {
-			$stage = '';
-		}
-
 		$user = $this->actor()->id;
 		$parentNode = $parentUid === null ? null : $this->parentNode($lister, $parentUid);
 		$parentTitle = $parentNode?->title();
@@ -107,7 +102,7 @@ final class Collection extends Panel
 		);
 		$nodes = $listing['nodes'];
 
-		if ($lister->meta->showChildren && $view === 'tree') {
+		if ($lister->meta->showChildren && $view === 'tree' && $listing['q'] === '' && $stage === '') {
 			$nodes = CollectionTree::build(
 				nodes: $nodes,
 				open: $open,
@@ -151,7 +146,7 @@ final class Collection extends Panel
 						$this->timezone(),
 					),
 				createBlueprints: $parentNode === null ? null : $lister->childBlueprints($parentNode),
-				stages: $view === 'tree' ? [] : $lister->stageCounts($user, $listing['q'], $parentUid),
+				stages: $lister->stageCounts($user, $listing['q'], $parentUid),
 				publication: $lister->publication(),
 				drafts: $lister->drafts(),
 			),

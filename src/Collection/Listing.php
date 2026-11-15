@@ -144,7 +144,12 @@ final class Listing
 	): array {
 		[$sort, $dir, $order] = $this->resolveOrder($sort, $dir);
 		$parent = $this->meta->showChildren ? trim((string) $parent) : '';
-		$nodes = $this->scoped($parent, trim($q));
+		$q = trim($q);
+		// A search or a status filter shows a subset: the hits of every level,
+		// in the column order, where moving next to one would silently jump
+		// the rows in between.
+		$filtered = $q !== '' || $stage !== '' && $user !== null;
+		$nodes = $this->scoped($parent, $q, $filtered);
 
 		// The user's own autosaves belong to each row's status.
 		if ($user !== null) {
@@ -158,13 +163,12 @@ final class Listing
 		// A manually ordered level ignores the column sort: the tree shares
 		// one header row between several levels, and a column click must
 		// not re-sort some of them.
-		$scope = $this->scope($parent);
+		$scope = $filtered ? null : $this->scope($parent);
 
 		if ($scope !== null) {
 			$order = [$this->positionOrder($scope)];
 		}
 
-		$q = trim($q);
 		$nodes->order(...$order);
 
 		$total = $nodes->count();
@@ -179,9 +183,13 @@ final class Listing
 			'sort' => $sort,
 			'dir' => $dir,
 			'arranged' => $scope !== null,
-			// A search shows a subset, where moving next to a hit would
-			// silently jump the rows in between.
-			'nodes' => $this->rows($pageNodes, $q === '' ? $scope : null, $offset, $total),
+			'nodes' => $this->rows(
+				$pageNodes,
+				$scope,
+				$offset,
+				$total,
+				$filtered && $this->meta->showChildren && $parent === '' ? $this->paths($pageNodes) : [],
+			),
 		];
 	}
 
@@ -197,15 +205,15 @@ final class Listing
 	{
 		$parent = $this->meta->showChildren ? trim((string) $parent) : '';
 		$q = trim($q);
-		$counts = ['all' => $this->scoped($parent, $q)->count()];
+		$counts = ['all' => $this->scoped($parent, $q, $q !== '')->count()];
 		$stages = [
-			...($this->scoped($parent, $q)->withDrafts()->count() > 0 ? ['draft'] : []),
+			...($this->scoped($parent, $q, true)->withDrafts()->count() > 0 ? ['draft'] : []),
 			'mine',
-			...($this->scoped($parent, $q)->withPublication()->count() > 0 ? ['unpublished'] : []),
+			...($this->scoped($parent, $q, true)->withPublication()->count() > 0 ? ['unpublished'] : []),
 		];
 
 		foreach ($stages as $stage) {
-			$counts[$stage] = $this->scoped($parent, $q)->stage($stage, $user)->count();
+			$counts[$stage] = $this->scoped($parent, $q, true)->stage($stage, $user)->count();
 		}
 
 		return $counts;
@@ -223,14 +231,19 @@ final class Listing
 		return $this->entries()->withDrafts()->count() > 0;
 	}
 
-	/** The entries a listing page draws from: one level of a hierarchy, matching a search. */
-	private function scoped(string $parent, string $q): Nodes
+	/**
+	 * The entries a listing page draws from, matching a search: one level of
+	 * a hierarchy, or every level when `$flat` and no parent is focused.
+	 */
+	private function scoped(string $parent, string $q, bool $flat = false): Nodes
 	{
 		$nodes = $this->entries();
 
 		if ($this->meta->showChildren) {
 			if ($parent === '') {
-				$nodes->roots();
+				if (!$flat) {
+					$nodes->roots();
+				}
 			} else {
 				$nodes->childrenOf($parent);
 			}
@@ -316,9 +329,10 @@ final class Listing
 	/**
 	 * @param array<Wrapper> $nodes
 	 * @param ?string $group the manual order the rows can be moved in, null when they can't
+	 * @param array<string, list<string>> $paths ancestor titles by uid, outermost first
 	 * @return list<array<string, mixed>>
 	 */
-	private function rows(array $nodes, ?string $group, int $offset, int $total): array
+	private function rows(array $nodes, ?string $group, int $offset, int $total, array $paths = []): array
 	{
 		$result = [];
 		$hasChildren = $this->meta->showChildren
@@ -329,6 +343,7 @@ final class Listing
 			$position = $offset + $index;
 			$result[] = [
 				...$this->row($node, $hasChildren[$node->meta->uid] ?? false),
+				'path' => $paths[$node->meta->uid] ?? [],
 				'group' => $group,
 				'moveUp' => $group !== null && $position > 0,
 				'moveDown' => $group !== null && $position < ($total - 1),
@@ -336,6 +351,59 @@ final class Listing
 		}
 
 		return $result;
+	}
+
+	/**
+	 * The titles of each node's ancestors, outermost first, read a level at a
+	 * time, so a page costs one query per level of its deepest hit.
+	 *
+	 * @param array<Wrapper> $nodes
+	 * @return array<string, list<string>>
+	 */
+	private function paths(array $nodes): array
+	{
+		$paths = [];
+		$pending = [];
+
+		foreach ($nodes as $node) {
+			$paths[$node->meta->uid] = [];
+			$parent = $node->meta->get('parent');
+
+			if (is_string($parent) && $parent !== '') {
+				$pending[$node->meta->uid] = $parent;
+			}
+		}
+
+		// Bounded, so a parent cycle in broken data cannot loop forever.
+		for ($level = 0; $pending !== [] && $level < 32; $level++) {
+			$parents = [];
+
+			foreach ($this->cms->nodes()->published(null)->hidden(null)->only(...array_unique($pending)) as $parent) {
+				$parents[$parent->meta->uid] = $parent;
+			}
+
+			$next = [];
+
+			foreach ($pending as $uid => $parentUid) {
+				$parent = $parents[$parentUid] ?? null;
+
+				if ($parent === null) {
+					continue;
+				}
+
+				$title = trim((string) $parent->title());
+				array_unshift($paths[$uid], $title === '' ? $parentUid : $title);
+				$above = $parent->meta->get('parent');
+
+				if (is_string($above) && $above !== '') {
+					$next[$uid] = $above;
+				}
+			}
+
+			$pending = $next;
+		}
+
+		return $paths;
 	}
 
 	/** @return array<string, mixed> */

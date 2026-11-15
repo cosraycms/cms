@@ -181,7 +181,6 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 
 		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
 			'query' => [
-				'q' => 'Query Root',
 				'sort' => 'title',
 				'dir' => 'asc',
 			],
@@ -190,9 +189,76 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/panel/collection/test-hierarchy?q=Query%20Root&amp;sort=title&amp;dir=asc&amp;open=panel-tree-query-root"',
+			'href="/panel/collection/test-hierarchy?sort=title&amp;dir=asc&amp;open=panel-tree-query-root"',
 			$html,
 		);
+	}
+
+	public function testHierarchySearchFindsEveryLevelWithItsPath(): void
+	{
+		$rootId = $this->createHierarchyNode(
+			uid: 'panel-search-root',
+			type: $this->parentTypeId,
+			title: 'Panel Search Root',
+		);
+		$middleId = $this->createHierarchyNode(
+			uid: 'panel-search-middle',
+			type: $this->parentTypeId,
+			title: 'Panel Search Middle',
+			parent: $rootId,
+		);
+		$this->createHierarchyNode(
+			uid: 'panel-search-leaf',
+			type: $this->childTypeId,
+			title: 'Panel Search Needle',
+			parent: $middleId,
+		);
+
+		foreach (['tree', 'list'] as $view) {
+			$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
+				'query' => ['q' => 'Needle', 'view' => $view],
+			]);
+
+			$this->assertResponseOk($response);
+			$html = $this->getHtmlResponse($response);
+			$this->assertHtmlNodeCount(1, '//tbody//tr[@data-uid]', $html);
+			$this->assertHtmlNodeExists(
+				'//tr[@data-uid="panel-search-leaf"]//*[contains(@class, "cms-list-path")]'
+					. '[normalize-space(span[1])="Panel Search Root" and normalize-space(span[3])="Panel Search Middle"]',
+				$html,
+			);
+			// The hits list flat: no branch to open within a search.
+			$this->assertHtmlNodeMissing('//tbody//*[@data-collection-toggle]', $html);
+		}
+	}
+
+	public function testHierarchyTreeFiltersByStatusAcrossLevels(): void
+	{
+		$rootId = $this->createHierarchyNode(
+			uid: 'panel-stage-root',
+			type: $this->parentTypeId,
+			title: 'Panel Stage Root',
+		);
+		$this->createTestNode([
+			'uid' => 'panel-stage-draft',
+			'type' => $this->childTypeId,
+			'parent' => $rootId,
+			'published' => false,
+			'title' => ['en' => 'Panel Stage Unpublished'],
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Panel Stage Unpublished']]],
+		]);
+
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
+			'query' => ['stage' => 'unpublished', 'view' => 'tree'],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertHtmlNodeExists(
+			'//tr[@data-uid="panel-stage-draft"]//*[contains(@class, "cms-list-path")][normalize-space(span[1])="Panel Stage Root"]',
+			$html,
+		);
+		$this->assertHtmlNodeMissing('//tr[@data-uid="panel-stage-root"]', $html);
 	}
 
 	public function testHierarchyTreeDoesNotRenderFakeExpandControls(): void

@@ -31,6 +31,7 @@ final class CollectionTable
 	 *     last: bool,
 	 *     published: bool,
 	 *     hasChildren: bool,
+	 *     path: list<string>,
 	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, avatarOnly: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
@@ -69,7 +70,11 @@ final class CollectionTable
 
 		return new self(
 			showChildren: $meta->showChildren,
-			treeMode: $meta->showChildren && $urls->query->view === 'tree',
+			// Filtered results come from every level, so they list flat.
+			treeMode: $meta->showChildren
+				&& $urls->query->view === 'tree'
+				&& $urls->query->q === ''
+				&& $urls->query->stage === '',
 			headers: $headers,
 			rows: self::rows($nodes, $headers, $urls, $meta, $locale, $timezone, $moved),
 			positionUrl: $urls->position(),
@@ -178,6 +183,7 @@ final class CollectionTable
 	 *     last: bool,
 	 *     published: bool,
 	 *     hasChildren: bool,
+	 *     path: list<string>,
 	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, avatarOnly: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
@@ -221,6 +227,7 @@ final class CollectionTable
 				'guides' => $tree['guides'],
 				'published' => (bool) ($node['published'] ?? false),
 				'hasChildren' => $hasChildren,
+				'path' => array_values(array_filter((array) ($node['path'] ?? []), 'is_string')),
 				'cells' => self::cells($node, $headers, $urls, $meta, $locale, $timezone),
 				'childrenUrl' => $childrenUrl,
 				'focusedChildrenUrl' =>
