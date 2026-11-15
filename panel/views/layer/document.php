@@ -12,7 +12,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 
 ?>
 <!DOCTYPE html>
-<html lang="<?= escape(str_replace('_', '-', (string) ($formatLocale ?? $localeId ?? 'en'))) ?>"<?php if ($theme !== null): ?> data-theme="<?= escape(
+<html lang="<?= escape(str_replace('_', '-', (string) ($formatLocale ?? $localeId ?? 'en'))) ?>"<?php if (isset($timezone)): ?> data-timezone="<?= escape((string) $timezone) ?>"<?php endif ?><?php if ($theme !== null): ?> data-theme="<?= escape(
 	$theme,
 ) ?>"<?php endif ?>>
 <head>

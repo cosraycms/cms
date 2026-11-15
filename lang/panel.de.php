@@ -191,6 +191,7 @@ return [
 			'Es können nur noch :count Dateien hinzugefügt werden.',
 		],
 		'upload:uploading' => 'Lädt hoch …',
+		'user:timezone-browser' => 'Zeitzone des Browsers verwenden: :timezone',
 		'video:caption-placeholder' => 'Wird unter dem Video angezeigt',
 		'video:poster' => 'Vorschaubild',
 		'video:poster-add' => 'Bild auswählen',

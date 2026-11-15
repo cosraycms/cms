@@ -7,6 +7,8 @@ namespace Cosray;
 use Closure;
 use Cosray\Finder\SortField;
 use Cosray\Node\Wrapper;
+use Cosray\Value\Value;
+use DateTimeInterface;
 use Override;
 
 /**
@@ -30,6 +32,15 @@ final class DateColumn extends TextColumn
 	public function kind(): string
 	{
 		return $this->time ? 'datetime' : 'date';
+	}
+
+	/** A date field's value, which carries the field's time zone. */
+	#[Override]
+	protected function fieldValue(Value $value): mixed
+	{
+		$raw = $value->isset() ? $value->raw() : null;
+
+		return $raw instanceof DateTimeInterface ? $raw : parent::fieldValue($value);
 	}
 
 	#[Override]

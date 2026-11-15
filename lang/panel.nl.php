@@ -185,6 +185,7 @@ return [
 			'Er kunnen nog maar :count bestanden worden toegevoegd.',
 		],
 		'upload:uploading' => 'Uploaden…',
+		'user:timezone-browser' => 'Tijdzone van de browser gebruiken: :timezone',
 		'video:caption-placeholder' => 'Wordt onder de video getoond',
 		'video:poster' => 'Poster',
 		'video:poster-add' => 'Afbeelding kiezen',

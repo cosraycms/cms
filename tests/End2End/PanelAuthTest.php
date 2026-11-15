@@ -45,7 +45,7 @@ final class PanelAuthTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('<html lang="de">', $html);
+		$this->assertStringContainsString('<html lang="de"', $html);
 		$this->assertStringContainsString('Anmeldung zur Website-Verwaltung', $html);
 		$this->assertStringContainsString('Angemeldet bleiben', $html);
 	}
@@ -66,7 +66,7 @@ final class PanelAuthTest extends End2EndTestCase
 			'cookies' => [$cookie => 'de'],
 			'headers' => ['Accept-Language' => 'en'],
 		]));
-		$this->assertStringContainsString('<html lang="de">', $html);
+		$this->assertStringContainsString('<html lang="de"', $html);
 		$this->assertMatchesRegularExpression('#<option value="de"[^>]*\\bselected\\b#', $html);
 
 		$forgotten = $this->makeRequest('POST', '/panel/login/locale', ['body' => ['locale' => 'tlh']]);

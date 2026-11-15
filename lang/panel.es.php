@@ -191,6 +191,7 @@ return [
 			'Solo se pueden añadir :count archivos más.',
 		],
 		'upload:uploading' => 'Subiendo…',
+		'user:timezone-browser' => 'Usar la zona horaria del navegador: :timezone',
 		'video:caption-placeholder' => 'Se muestra debajo del vídeo',
 		'video:poster' => 'Póster',
 		'video:poster-add' => 'Elegir una imagen',

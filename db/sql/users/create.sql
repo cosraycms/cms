@@ -7,6 +7,8 @@ INSERT INTO /*:cms.prefix:*/users (
 	roles,
 	active,
 	panel_locale,
+	panel_region,
+	panel_timezone,
 	data,
 	creator,
 	editor
@@ -19,6 +21,8 @@ INSERT INTO /*:cms.prefix:*/users (
 	ARRAY(SELECT jsonb_array_elements_text(:roles::jsonb)),
 	:active,
 	:panel_locale,
+	:panel_region,
+	:panel_timezone,
 	:data::jsonb,
 	:creator,
 	:editor

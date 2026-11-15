@@ -191,6 +191,7 @@ return [
 			'Si possono aggiungere ancora solo :count file.',
 		],
 		'upload:uploading' => 'Caricamento…',
+		'user:timezone-browser' => 'Usa il fuso orario del browser: :timezone',
 		'video:caption-placeholder' => 'Mostrata sotto il video',
 		'video:poster' => 'Poster',
 		'video:poster-add' => 'Scegli un\'immagine',

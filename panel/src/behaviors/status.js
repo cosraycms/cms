@@ -43,6 +43,7 @@ function text(state) {
 				time: new Date().toLocaleTimeString(document.documentElement.lang || undefined, {
 					hour: '2-digit',
 					minute: '2-digit',
+					timeZone: document.documentElement.dataset.timezone || undefined,
 				}),
 			});
 		default:

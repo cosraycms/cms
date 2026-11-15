@@ -185,6 +185,7 @@ return [
 			'Só é possível adicionar mais :count ficheiros.',
 		],
 		'upload:uploading' => 'A carregar…',
+		'user:timezone-browser' => 'Usar o fuso horário do navegador: :timezone',
 		'video:caption-placeholder' => 'Mostrada abaixo do vídeo',
 		'video:poster' => 'Cartaz',
 		'video:poster-add' => 'Escolher uma imagem',

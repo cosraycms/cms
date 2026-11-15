@@ -8,7 +8,9 @@ use Celema\Verba\Translator;
 use Celema\Verba\Verba;
 use Cosray\Config;
 use Cosray\Locales;
+use Cosray\Panel\Formats;
 use Cosray\User;
+use DateTimeZone;
 use Locale as PhpLocale;
 use Override;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -24,7 +26,8 @@ use Psr\Http\Server\RequestHandlerInterface as Handler;
  * remaining panel locales as fallback chain and restores the content
  * translator afterwards. The content locale attributes stay untouched, so
  * editing and serialization are unaffected. Dates and numbers follow the
- * `formatLocale` attribute, see format().
+ * `formatLocale` attribute, see format(), and timestamps the
+ * `panelTimezone` attribute.
  */
 class PanelLocale implements Middleware
 {
@@ -57,6 +60,8 @@ class PanelLocale implements Middleware
 				$request
 					->withAttribute('panelLocale', $id)
 					->withAttribute('formatLocale', $this->format($request, $id))
+					->withAttribute('detectedFormatLocale', $this->detected($request, $id))
+					->withAttribute('panelTimezone', $this->timezone($request))
 					->withAttribute('panelLocales', $available)
 					->withAttribute('translator', $translator),
 			);
@@ -159,11 +164,27 @@ class PanelLocale implements Middleware
 
 	/**
 	 * The locale dates and numbers are formatted in: the panel language with
+	 * the region the user chose, else the detected one.
+	 */
+	protected function format(Request $request, string $language): string
+	{
+		$user = $request->getAttribute('user', null);
+		$region = $user instanceof User ? Formats::region($user->panelRegion) : null;
+
+		if ($region === null || (string) PhpLocale::getRegion($language) !== '') {
+			return $this->detected($request, $language);
+		}
+
+		return "{$language}_{$region}";
+	}
+
+	/**
+	 * The format locale without the user's choice: the panel language with
 	 * the region of the browser's first tag in that language, so `en-GB`
 	 * gets British dates in the English panel, else with `panel.region`,
 	 * else the language's own default.
 	 */
-	protected function format(Request $request, string $language): string
+	protected function detected(Request $request, string $language): string
 	{
 		if ((string) PhpLocale::getRegion($language) !== '') {
 			return $language;
@@ -180,6 +201,17 @@ class PanelLocale implements Middleware
 		$region = $this->config->panel->region;
 
 		return $region === null ? $language : "{$language}_{$region}";
+	}
+
+	/** The time zone of the panel's timestamps: the user's, else `app.timezone`. */
+	protected function timezone(Request $request): DateTimeZone
+	{
+		$user = $request->getAttribute('user', null);
+
+		return (
+			($user instanceof User ? Formats::timezone($user->panelTimezone) : null)
+				?? $this->config->app->timezone
+		);
 	}
 
 	/** @return list<string> Language tags in descending quality order. */

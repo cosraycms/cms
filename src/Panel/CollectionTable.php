@@ -539,8 +539,10 @@ final class CollectionTable
 			return self::formatNumber($value, $locale);
 		}
 
+		// A date object keeps its own zone, like a date field's; stored text is
+		// a timestamp shown in the panel's zone.
 		if ($date && $value instanceof DateTimeInterface) {
-			$formatted = self::formatDate($value, $locale, $timezone, $time);
+			$formatted = self::formatDate($value, $locale, $value->getTimezone() ?: $timezone, $time);
 
 			if ($formatted !== null) {
 				return $formatted;

@@ -19,6 +19,8 @@ class User
 	public readonly bool $active;
 	public readonly ?string $name;
 	public readonly ?string $panelLocale;
+	public readonly ?string $panelRegion;
+	public readonly ?string $panelTimezone;
 	public readonly string $created;
 	public readonly string $changed;
 	public readonly ?string $deleted;
@@ -38,6 +40,8 @@ class User
 		$this->active = $data['active'];
 		$this->name = self::displayName($data['data'] ?? null);
 		$this->panelLocale = $data['panel_locale'] ?? null;
+		$this->panelRegion = $data['panel_region'] ?? null;
+		$this->panelTimezone = $data['panel_timezone'] ?? null;
 		$this->created = $data['created'];
 		$this->changed = $data['changed'];
 		$this->deleted = $data['deleted'];

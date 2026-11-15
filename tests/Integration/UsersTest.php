@@ -20,6 +20,8 @@ final class UsersTest extends IntegrationTestCase
 		'roles' => ['editor', 'admin'],
 		'active' => true,
 		'panelLocale' => null,
+		'panelRegion' => null,
+		'panelTimezone' => null,
 		'content' => [],
 	];
 
@@ -31,6 +33,25 @@ final class UsersTest extends IntegrationTestCase
 		$this->assertSame(['editor', 'admin'], $user->roles);
 		$this->assertSame('Ada Lovelace', $user->name);
 		$this->assertTrue(password_verify('correct horse battery', $users->byLogin('ada')->password));
+	}
+
+	public function testTheRegionalFormatAndTimezoneAreKeptAndCleared(): void
+	{
+		$users = new Users($this->db());
+		$user = $users->create(
+			'user',
+			['panelRegion' => 'GB', 'panelTimezone' => 'Europe/London'] + self::VALUES,
+			'correct horse battery',
+			Actor::system(),
+		);
+
+		$this->assertSame('GB', $users->find($user->uid)?->panelRegion);
+		$this->assertSame('Europe/London', $users->find($user->uid)?->panelTimezone);
+
+		$users->update($users->find($user->uid), self::VALUES, Actor::system());
+
+		$this->assertNull($users->find($user->uid)?->panelRegion);
+		$this->assertNull($users->find($user->uid)?->panelTimezone);
 	}
 
 	public function testUpdatingKeepsForeignDataAndDeactivationHidesTheUserFromLogin(): void

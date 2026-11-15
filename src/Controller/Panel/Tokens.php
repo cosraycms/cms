@@ -44,7 +44,7 @@ final class Tokens extends Panel
 		try {
 			$expiry = $expires === ''
 				? null
-				: new DateTimeImmutable($expires . ' 23:59:59', $this->config->app->timezone);
+				: new DateTimeImmutable($expires . ' 23:59:59', $this->timezone());
 		} catch (Throwable) {
 			return $this->page(error: __('tokens:error-expires'), name: $name);
 		}
@@ -71,7 +71,7 @@ final class Tokens extends Panel
 	/** @return array<string, mixed> */
 	private function page(?string $created = null, ?string $error = null, string $name = ''): array
 	{
-		$timezone = $this->config->app->timezone;
+		$timezone = $this->timezone();
 		$date = static fn(?string $value): ?string => $value === null
 			? null
 			: new DateTimeImmutable($value)

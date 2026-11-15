@@ -1661,7 +1661,7 @@ final class Editor extends Panel
 			return null;
 		}
 
-		$timezone = $this->config->app->timezone;
+		$timezone = $this->timezone();
 
 		try {
 			$date = new DateTimeImmutable($value, $timezone);

@@ -203,6 +203,7 @@ return [
 			'Można dodać jeszcze tylko :count plików.',
 		],
 		'upload:uploading' => 'Przesyłanie…',
+		'user:timezone-browser' => 'Użyj strefy czasowej przeglądarki: :timezone',
 		'video:caption-placeholder' => 'Wyświetlany pod filmem',
 		'video:poster' => 'Plakat',
 		'video:poster-add' => 'Wybierz obraz',

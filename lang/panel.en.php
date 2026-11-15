@@ -179,6 +179,7 @@ return [
 		'upload:single-only' => 'This field allows only a single file.',
 		'upload:slots-left' => ['Only :count more file can be added.', 'Only :count more files can be added.'],
 		'upload:uploading' => 'Uploading …',
+		'user:timezone-browser' => 'Use the browser’s time zone: :timezone',
 		'video:caption-placeholder' => 'Shown below the video',
 		'video:poster' => 'Poster',
 		'video:poster-add' => 'Choose a picture',

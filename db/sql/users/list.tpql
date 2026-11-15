@@ -8,6 +8,8 @@ SELECT
 	array_to_json(u.roles) AS roles,
 	u.active,
 	u.panel_locale,
+	u.panel_region,
+	u.panel_timezone,
 	u.data,
 	u.created,
 	u.changed,

@@ -12,6 +12,7 @@ use Cosray\Locales;
 use Cosray\Middleware\PanelLocale;
 use Cosray\Tests\TestCase;
 use Cosray\User;
+use DateTimeZone;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -145,6 +146,53 @@ final class PanelLocaleMiddlewareTest extends TestCase
 		$this->assertSame($expected, $handler->request?->getAttribute('formatLocale'));
 	}
 
+	public function testTheUsersRegionWinsOverTheDetectedOne(): void
+	{
+		$handler = $this->handler();
+		$request = $this
+			->panelRequest()
+			->withAttribute('user', $this->user('en', 'AU'))
+			->withHeader('Accept-Language', 'en-GB');
+
+		new PanelLocale($this->config())->process($request, $handler);
+
+		$this->assertSame('en_AU', $handler->request?->getAttribute('formatLocale'));
+		$this->assertSame('en_GB', $handler->request?->getAttribute('detectedFormatLocale'));
+	}
+
+	public function testAnUnknownUserRegionFallsBackToTheDetectedOne(): void
+	{
+		$handler = $this->handler();
+		$request = $this
+			->panelRequest()
+			->withAttribute('user', $this->user('en', 'QQ'))
+			->withHeader('Accept-Language', 'en-GB');
+
+		new PanelLocale($this->config())->process($request, $handler);
+
+		$this->assertSame('en_GB', $handler->request?->getAttribute('formatLocale'));
+	}
+
+	public function testTimestampsFollowTheUsersTimezoneElseTheSites(): void
+	{
+		$config = $this->config(['app.timezone' => 'Europe/Berlin']);
+
+		foreach ([
+			['America/New_York', 'America/New_York'],
+			['Mars/Olympus', 'Europe/Berlin'],
+			[null, 'Europe/Berlin'],
+		] as [$chosen, $expected]) {
+			$handler = $this->handler();
+			$request = $this->panelRequest()->withAttribute('user', $this->user('en', null, $chosen));
+
+			new PanelLocale($config)->process($request, $handler);
+
+			$timezone = $handler->request?->getAttribute('panelTimezone');
+			$this->assertInstanceOf(DateTimeZone::class, $timezone);
+			$this->assertSame($expected, $timezone->getName());
+		}
+	}
+
 	public function testAnInvalidRegionIsAConfigurationError(): void
 	{
 		$this->expectException(RuntimeException::class);
@@ -222,7 +270,7 @@ final class PanelLocaleMiddlewareTest extends TestCase
 			->withAttribute('locales', new Locales());
 	}
 
-	private function user(?string $panelLocale): User
+	private function user(?string $panelLocale, ?string $region = null, ?string $timezone = null): User
 	{
 		return new User([
 			'usr' => 42,
@@ -233,6 +281,8 @@ final class PanelLocaleMiddlewareTest extends TestCase
 			'roles' => ['editor'],
 			'active' => true,
 			'panel_locale' => $panelLocale,
+			'panel_region' => $region,
+			'panel_timezone' => $timezone,
 			'created' => '2024-01-01T00:00:00+00:00',
 			'changed' => '2024-01-01T00:00:00+00:00',
 			'deleted' => null,

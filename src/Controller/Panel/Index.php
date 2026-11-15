@@ -92,7 +92,7 @@ final class Index extends Panel
 			$this->formatLocale(),
 			IntlDateFormatter::MEDIUM,
 			IntlDateFormatter::NONE,
-			$this->config->app->timezone->getName(),
+			$this->timezone()->getName(),
 		);
 		$flags = $this->typeFlags($types);
 		$recent = [];
@@ -141,7 +141,7 @@ final class Index extends Panel
 						],
 					],
 					$this->formatLocale(),
-					$this->config->app->timezone,
+					$this->timezone(),
 				),
 			];
 		}

@@ -37,6 +37,7 @@ use Cosray\Session;
 use Cosray\User;
 use Cosray\Util\Form;
 use Cosray\Util\LiveReload;
+use DateTimeZone;
 
 abstract class Panel
 {
@@ -105,6 +106,7 @@ abstract class Panel
 				'logo' => $this->logo(),
 				'localeId' => $localeId,
 				'formatLocale' => $this->formatLocale(),
+				'timezone' => $this->timezone()->getName(),
 				'panelLocales' => $this->panelLocales(),
 				'account' => $this->account(),
 				'config' => $this->config,
@@ -273,6 +275,14 @@ abstract class Panel
 		$locale = $this->request->get('formatLocale', null);
 
 		return is_string($locale) ? $locale : $this->localeId();
+	}
+
+	/** The time zone of the panel's timestamps; see Middleware\PanelLocale::timezone(). */
+	protected function timezone(): DateTimeZone
+	{
+		$timezone = $this->request->get('panelTimezone', null);
+
+		return $timezone instanceof DateTimeZone ? $timezone : $this->config->app->timezone;
 	}
 
 	protected function localeId(): string

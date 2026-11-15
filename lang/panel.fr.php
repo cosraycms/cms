@@ -188,6 +188,7 @@ return [
 			'Seuls :count fichiers de plus peuvent être ajoutés.',
 		],
 		'upload:uploading' => 'Téléversement…',
+		'user:timezone-browser' => 'Utiliser le fuseau horaire du navigateur : :timezone',
 		'video:caption-placeholder' => 'Affichée sous la vidéo',
 		'video:poster' => 'Affiche',
 		'video:poster-add' => 'Choisir une image',

@@ -95,12 +95,12 @@ final class PanelAreasTest extends End2EndTestCase
 		$german = $this->html('/panel', 'de');
 		$this->assertHtmlNodeExists($this->localeOption('de', true), $german);
 		$this->assertHtmlNodeExists($this->localeOption('en', false), $german);
-		$this->assertStringContainsString('<html lang="de">', $german);
+		$this->assertStringContainsString('<html lang="de"', $german);
 
 		$english = $this->html('/panel', 'en');
 		$this->assertHtmlNodeExists($this->localeOption('en', true), $english);
 		$this->assertHtmlNodeExists($this->localeOption('de', false), $english);
-		$this->assertStringContainsString('<html lang="en">', $english);
+		$this->assertStringContainsString('<html lang="en"', $english);
 	}
 
 	private function localeOption(string $locale, bool $selected): string

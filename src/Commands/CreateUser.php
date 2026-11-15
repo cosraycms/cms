@@ -88,7 +88,15 @@ final class CreateUser
 
 		$user = $this->users->create(
 			$type,
-			[...$account, 'roles' => $role, 'active' => true, 'panelLocale' => null, 'content' => []],
+			[
+				...$account,
+				'roles' => $role,
+				'active' => true,
+				'panelLocale' => null,
+				'panelRegion' => null,
+				'panelTimezone' => null,
+				'content' => [],
+			],
 			$password,
 			Actor::system(),
 		);

@@ -9,6 +9,7 @@ use Cosray\Collection\Sort;
 use Cosray\Finder\SortField;
 use Cosray\Node\Factory;
 use Cosray\Node\Wrapper;
+use Cosray\Value\Value;
 use Override;
 
 /**
@@ -84,13 +85,19 @@ class TextColumn extends Column
 	public function get(Wrapper $node): array
 	{
 		return [
-			'value' => is_string($this->field) ? self::value($node, $this->field) : ($this->field)($node),
+			'value' => is_string($this->field) ? $this->value($node, $this->field) : ($this->field)($node),
 			'bold' => $this->bold,
 			'italic' => $this->italic,
 		];
 	}
 
-	private static function value(Wrapper $node, string $field): mixed
+	/** The cell value of a content field. */
+	protected function fieldValue(Value $value): mixed
+	{
+		return $value->isset() ? (string) $value : null;
+	}
+
+	private function value(Wrapper $node, string $field): mixed
 	{
 		$inner = Wrapper::unwrap($node);
 
@@ -116,10 +123,7 @@ class TextColumn extends Column
 			case 'meta.classname':
 				return basename(str_replace('\\', '/', $inner::class));
 			default:
-				$fieldObj = Factory::fieldFor($inner, $field);
-				$value = $fieldObj->value();
-
-				return $value->isset() ? (string) $value : null;
+				return $this->fieldValue(Factory::fieldFor($inner, $field)->value());
 		}
 	}
 }

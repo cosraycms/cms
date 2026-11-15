@@ -32,6 +32,10 @@
 		opacity 120ms ease,
 		transform 120ms ease;
 
+	&[hidden] {
+		display: none;
+	}
+
 	&.cms-button-primary {
 		--button-bg: var(--cms-button-primary-bg);
 		--button-text: var(--cms-button-primary-text);

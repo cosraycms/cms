@@ -8,6 +8,8 @@ SELECT
 	array_to_json(u.roles) AS roles,
 	u.active,
 	u.panel_locale,
+	u.panel_region,
+	u.panel_timezone,
 	u.data,
 	COALESCE(c.data->>'name', c.username, c.email) AS creator,
 	COALESCE(e.data->>'name', e.username, e.email) AS editor,

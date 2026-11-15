@@ -15,6 +15,11 @@ $roles = (array) u($roles);
 $fields = (array) u($fields);
 $locales = (array) u($locales);
 $panelLocaleChoices = (array) u($panelLocaleChoices);
+$panelRegionChoices = (array) u($panelRegionChoices);
+$panelRegionAuto = u($panelRegionAuto ?? null);
+$panelTimezoneChoices = (array) u($panelTimezoneChoices);
+$panelTimezoneDefault = (string) $panelTimezoneDefault;
+$formatExample = u($formatExample ?? null);
 $deleteUrl = u($deleteUrl ?? null);
 $notice = u($notice ?? null);
 $system = (array) u($system);
@@ -137,6 +142,58 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 										</div>
 									</div>
 								<?php endif ?>
+								<div class="cms-field" style="grid-column: span 50 / span 50" data-field="panel_region">
+									<label class="cms-field-label" for="user-panel-region"><div><?= escape(
+										__('user:panel-region'),
+									) ?></div></label>
+									<div class="cms-field-body">
+										<div class="cms-field-control">
+											<select class="cms-input" id="user-panel-region" name="panel_region">
+												<option value=""><?= escape(
+													is_string($panelRegionAuto)
+														? __('user:panel-region-auto', ['region' => $panelRegionAuto])
+														: __('user:panel-language-auto'),
+												) ?></option>
+												<?php foreach ($panelRegionChoices as $code => $name): ?>
+													<option
+														value="<?= escape((string) $code) ?>"
+														<?= $user->panelRegion === (string) $code ? 'selected' : '' ?>><?= escape((string) $name) ?></option>
+												<?php endforeach ?>
+											</select>
+										</div>
+										<?php if (is_string($formatExample)): ?>
+											<div class="cms-field-description"><?= escape(
+												__('user:panel-format-example', ['example' => $formatExample]),
+											) ?></div>
+										<?php endif ?>
+									</div>
+								</div>
+								<div class="cms-field" style="grid-column: span 50 / span 50" data-field="panel_timezone">
+									<label class="cms-field-label" for="user-panel-timezone"><div><?= escape(
+										__('user:panel-timezone'),
+									) ?></div></label>
+									<div class="cms-field-body">
+										<div class="cms-field-control">
+											<select class="cms-input" id="user-panel-timezone" name="panel_timezone" data-timezone>
+												<option value="" data-zone="<?= escape($panelTimezoneDefault) ?>"><?= escape(
+													__('user:panel-timezone-default', ['timezone' => $panelTimezoneDefault]),
+												) ?></option>
+												<?php foreach ($panelTimezoneChoices as $area => $zones): ?>
+													<optgroup label="<?= escape((string) $area) ?>">
+														<?php foreach ((array) $zones as $zone => $city): ?>
+															<option
+																value="<?= escape((string) $zone) ?>"
+																<?= $user->panelTimezone === (string) $zone ? 'selected' : '' ?>><?= escape(
+																(string) $city,
+															) ?></option>
+														<?php endforeach ?>
+													</optgroup>
+												<?php endforeach ?>
+											</select>
+										</div>
+										<button type="button" class="cms-button cms-button-secondary cms-button-small" data-timezone-browser hidden></button>
+									</div>
+								</div>
 								<?php if ($profile): ?>
 									<?php $this->include('user/input', [
 										'name' => 'current_password',

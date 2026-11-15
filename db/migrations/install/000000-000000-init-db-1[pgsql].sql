@@ -27,6 +27,10 @@ CREATE TABLE /*:cms.prefix:*/users (
 	-- Panel UI language preference; NULL inherits the negotiated default.
 	-- Validated at the application layer against the selectable panel locales.
 	panel_locale text,
+	-- Panel regional format and time zone; NULL inherits the browser's
+	-- region or `panel.region`, and `app.timezone`.
+	panel_region text,
+	panel_timezone text,
 	creator bigint NOT NULL,
 	editor bigint NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
@@ -41,6 +45,10 @@ CREATE TABLE /*:cms.prefix:*/users (
 	CONSTRAINT /*:cms.obj:*/ck_users_uid CHECK (char_length(uid) <= 64),
 	CONSTRAINT /*:cms.obj:*/ck_users_panel_locale
 		CHECK (panel_locale IS NULL OR char_length(panel_locale) <= 32),
+	CONSTRAINT /*:cms.obj:*/ck_users_panel_region
+		CHECK (panel_region IS NULL OR char_length(panel_region) <= 3),
+	CONSTRAINT /*:cms.obj:*/ck_users_panel_timezone
+		CHECK (panel_timezone IS NULL OR char_length(panel_timezone) <= 64),
 	CONSTRAINT /*:cms.obj:*/ck_users_type CHECK (char_length(type) > 0 AND char_length(type) <= 64),
 	CONSTRAINT /*:cms.obj:*/ck_users_email_required CHECK (deleted IS NOT NULL OR email IS NOT NULL),
 	-- The login lookup matches a login against both the email and the
@@ -75,10 +83,10 @@ CREATE FUNCTION /*:cms.prefix:*/record_user_history()
 BEGIN
 	INSERT INTO /*:cms.prefix:*/users_history (
 		usr, type, username, email, password, roles, active,
-		data, panel_locale, editor, changed, deleted
+		data, panel_locale, panel_region, panel_timezone, editor, changed, deleted
 	) VALUES (
 		OLD.usr, OLD.type, OLD.username, OLD.email, OLD.password, OLD.roles, OLD.active,
-		OLD.data, OLD.panel_locale, OLD.editor, OLD.changed, OLD.deleted
+		OLD.data, OLD.panel_locale, OLD.panel_region, OLD.panel_timezone, OLD.editor, OLD.changed, OLD.deleted
 	);
 
 	RETURN OLD;
@@ -652,6 +660,8 @@ CREATE TABLE /*:cms.prefix:*/users_history (
 	active boolean NOT NULL,
 	data jsonb NOT NULL,
 	panel_locale text,
+	panel_region text,
+	panel_timezone text,
 	editor bigint NOT NULL,
 	changed timestamp with time zone NOT NULL DEFAULT now(),
 	deleted timestamp with time zone,

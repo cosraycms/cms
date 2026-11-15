@@ -22,7 +22,7 @@ $name = $app->config->get('app.name');
 
 Recognized environment variables are read from `$_SERVER`, then `$_ENV`, not `getenv()`. Cosray does **not** load `.env` files. If an application uses a loader such as `vlucas/phpdotenv`, run it before constructing the app and let it populate those arrays. Boolean and integer environment settings are validated at construction; malformed values and missing `requireEnv()` variables throw `Cosray\Exception\InvalidEnvironment`. Use native booleans and integers in PHP settings.
 
-The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); conversions and validation live in [Config/](../src/Config/). `session.enabled` controls frontend session middleware. The panel has its own session handling. `app.timezone` controls panel timestamp display.
+The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); conversions and validation live in [Config/](../src/Config/). `session.enabled` controls frontend session middleware. The panel has its own session handling. `app.timezone` is the default time zone of panel timestamps; each user can choose another.
 
 `app.name` names the session cookies, so changing it signs everyone out. The site's name as people read it, in mails for example, is `app.title`, `APP_TITLE` in the environment; it defaults to the host of `app.url`, else `app.name`.
 
@@ -321,7 +321,7 @@ Users have an email login and optional username without `@`. A subclass of [Cosr
 
 The panel speaks each language for which both its catalogs, `cosray` and `panel`, ship a file. It takes the language a user saved in the profile or the account menu, then the one chosen on the sign-in pages, kept in the cookie `{app.name}_panel_locale`, then `panel.locale`, then the browser's `Accept-Language`, then English. The sign-in pages offer the choice once there is more than one language.
 
-Dates, times, and numbers in the panel follow the panel language and a region. The region comes from the browser's first `Accept-Language` tag in that language, so `en-GB` gets day-first dates and a 24-hour clock in the English panel. Without one, `panel.region` applies, like `'panel.region' => 'GB'`; without that, the language's own default, which is the United States for English.
+Dates, times, and numbers in the panel follow the panel language and a region. The region is the regional format a user chose in the profile, else the browser's first `Accept-Language` tag in that language, so `en-GB` gets day-first dates and a 24-hour clock in the English panel. Without one, `panel.region` applies, like `'panel.region' => 'GB'`; without that, the language's own default, which is the United States for English. Timestamps the system records, like when an entry changed, show in the user's chosen time zone, else in `app.timezone`; the profile offers the browser's time zone when it differs. Date and time fields keep their own `meta.timezone`, in the editor and in listing columns.
 
 ### User commands
 

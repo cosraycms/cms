@@ -15,6 +15,7 @@ use Cosray\Config;
 use Cosray\Context;
 use Cosray\Field\Services;
 use Cosray\Middleware\Permission;
+use Cosray\Panel\Formats;
 use Cosray\Panel\FormPatch;
 use Cosray\Panel\System;
 use Cosray\Security\Policy;
@@ -26,6 +27,7 @@ use Cosray\User\PasswordPolicy;
 use Cosray\User\Types;
 use Cosray\Users as UserStore;
 use Cosray\Validation\Account;
+use Locale as PhpLocale;
 use Override;
 use Psr\Log\LoggerInterface as Logger;
 
@@ -247,6 +249,11 @@ final class Users extends Panel
 			'roles' => $this->roleChoices($user),
 			'locked' => $self,
 			'panelLocaleChoices' => $this->panelLocales(),
+			'panelRegionChoices' => $this->regionChoices($user),
+			'panelRegionAuto' => $self ? $this->detectedRegion() : null,
+			'panelTimezoneChoices' => self::timezoneChoices(),
+			'panelTimezoneDefault' => $this->config->app->timezone->getName(),
+			'formatExample' => $self ? Formats::example($this->formatLocale(), $this->timezone()) : null,
 			'fields' => $this->fields($context)->form($user),
 			'locales' => $locales,
 			'defaultLocale' => $context->locales()->getDefault()->id,
@@ -345,6 +352,8 @@ final class Users extends Panel
 				'roles' => $roles,
 				'active' => $active,
 				'panelLocale' => isset($this->panelLocales()[$panelLocale ?? '']) ? $panelLocale : null,
+				'panelRegion' => Formats::region($text('panel_region')),
+				'panelTimezone' => Formats::timezone($text('panel_timezone'))?->getName(),
 				'content' => $content,
 			],
 			$password,
@@ -514,6 +523,51 @@ final class Users extends Panel
 		$url = $this->panelPath() . '/users' . $path;
 
 		return $query === [] ? $url : $url . '?' . http_build_query($query);
+	}
+
+	/**
+	 * The regions with formats in the user's panel language, and the one
+	 * the user chose even when it has none.
+	 *
+	 * @return array<string, string> region code => name
+	 */
+	private function regionChoices(User $user): array
+	{
+		$language = (string) PhpLocale::getPrimaryLanguage($user->panelLocale ?? $this->localeId());
+		$choices = Formats::regions($language, $this->localeId());
+		$region = Formats::region($user->panelRegion);
+
+		if ($region !== null && !isset($choices[$region])) {
+			$choices[$region] = PhpLocale::getDisplayRegion("und_{$region}", $this->localeId()) ?: $region;
+		}
+
+		return $choices;
+	}
+
+	/** The name of the region the panel detected for the current user, if any. */
+	private function detectedRegion(): ?string
+	{
+		$detected = $this->request->get('detectedFormatLocale', null);
+		$region = is_string($detected) ? (string) PhpLocale::getRegion($detected) : '';
+
+		return $region === '' ? null : (PhpLocale::getDisplayRegion("und_{$region}", $this->localeId()) ?: $region);
+	}
+
+	/**
+	 * The time zones grouped by their area, like Europe.
+	 *
+	 * @return array<string, array<string, string>> area => [identifier => city]
+	 */
+	private static function timezoneChoices(): array
+	{
+		$choices = [];
+
+		foreach (Formats::timezones() as $identifier) {
+			$parts = explode('/', $identifier, 2);
+			$choices[$parts[0]][$identifier] = str_replace(['_', '/'], [' ', ' / '], $parts[1] ?? $parts[0]);
+		}
+
+		return $choices;
 	}
 
 	private function isSelf(User $user): bool

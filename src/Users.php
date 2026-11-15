@@ -18,6 +18,8 @@ use Cosray\User\Types;
  *     roles: list<string>,
  *     active: bool,
  *     panelLocale: ?string,
+ *     panelRegion: ?string,
+ *     panelTimezone: ?string,
  *     content: array<string, mixed>,
  * }
  */
@@ -293,6 +295,8 @@ class Users
 			'roles' => json_encode(array_values($values['roles']), JSON_THROW_ON_ERROR),
 			'active' => $values['active'],
 			'panel_locale' => $values['panelLocale'],
+			'panel_region' => $values['panelRegion'],
+			'panel_timezone' => $values['panelTimezone'],
 			'data' => json_encode(
 				[...$stored, 'name' => $values['name'], 'content' => (object) $values['content']],
 				JSON_THROW_ON_ERROR,
