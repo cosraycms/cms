@@ -467,12 +467,9 @@
 		margin: 0;
 	}
 
-	/*
-	 * Row checkboxes show on hover and focus, and all of them once one is
-	 * ticked; opacity rather than display keeps them in the tab order.
-	 */
+	/* Faded rather than hidden, so the checkboxes stay in the tab order. */
 	& tbody [data-bulk-check] {
-		opacity: 0;
+		opacity: 0.2;
 		transition: opacity 0.12s ease;
 	}
 
