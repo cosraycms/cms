@@ -75,12 +75,10 @@ it('lights nothing for a top-level row and clears when the pointer leaves the li
 	expect(lit()).toEqual([]);
 
 	hover('vienna');
-	document
-		.querySelector('[data-uid="vienna"] a')!
-		.dispatchEvent(
-			Object.assign(new Event('pointerout', { bubbles: true }), {
-				relatedTarget: document.getElementById('outside'),
-			}),
-		);
+	document.querySelector('[data-uid="vienna"] a')!.dispatchEvent(
+		Object.assign(new Event('pointerout', { bubbles: true }), {
+			relatedTarget: document.getElementById('outside'),
+		}),
+	);
 	expect(lit()).toEqual([]);
 });
