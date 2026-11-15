@@ -393,14 +393,6 @@
 		&:hover {
 			--row-bg: var(--cms-color-hover);
 		}
-
-		&.is-tree:not([data-depth='0']) {
-			--row-bg: var(--cms-list-child-bg);
-
-			&:hover {
-				--row-bg: var(--cms-color-hover);
-			}
-		}
 	}
 
 	/*
@@ -638,9 +630,8 @@
 		margin-right: var(--cms-space-2);
 	}
 
-	/* Marks where the last move put the row; outranks the child-row ground. */
-	& .cms-list-row[data-moved],
-	& .cms-list-row.is-tree[data-moved]:not([data-depth='0']) {
+	/* Marks where the last move put the row. */
+	& .cms-list-row[data-moved] {
 		--row-bg: var(--cms-color-selected);
 	}
 
