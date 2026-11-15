@@ -10,9 +10,8 @@ $this->layout('layer/main');
 $page = u($page);
 
 // Status pills and row actions size to their content because the translation decides
-// a pill's width. The title stops at a cap so the `auto` columns share the spare width.
-// With fewer than two to share it, the title takes that width itself: a single one would
-// only move the gap, and none would leave the rows short of the list's edge.
+// a pill's width. The title stops at a cap so the `auto` columns share the spare width;
+// with fewer than two, where one would only move the gap, the last column takes it.
 $hasRowActions = false;
 
 $arranged = false;
@@ -33,7 +32,7 @@ $columns = $bulk ? 'var(--cms-list-select-width)' : '';
 $tracks = [];
 
 foreach ($page->table->headers as $header) {
-	$tracks[] = $header['lead'] ? '' : match ($header['kind']) {
+	$tracks[] = $header['lead'] ? 'minmax(12rem, 36rem)' : match ($header['kind']) {
 		'datetime' => 'minmax(9rem, auto)',
 		'date' => 'minmax(7rem, auto)',
 		'number' => 'minmax(5rem, auto)',
@@ -43,17 +42,15 @@ foreach ($page->table->headers as $header) {
 	};
 }
 
-$leadTrack = count(array_filter($tracks, static fn(string $track): bool => str_ends_with($track, 'auto)'))) < 2
-	? 'minmax(12rem, 1fr)'
-	: 'minmax(12rem, 36rem)';
-
-foreach ($tracks as $track) {
-	$columns .= ' ' . ($track === '' ? $leadTrack : $track);
+if ($hasRowActions) {
+	$tracks[] = 'max-content';
 }
 
-$columns = ltrim($columns);
+if (count(array_filter($tracks, static fn(string $track): bool => str_ends_with($track, 'auto)'))) < 2) {
+	$tracks[array_key_last($tracks)] = count($tracks) === 1 ? 'minmax(12rem, 1fr)' : 'minmax(max-content, 1fr)';
+}
 
-$columns .= $hasRowActions ? ' max-content' : '';
+$columns = ltrim($columns . ' ' . implode(' ', $tracks));
 ?>
 
 <div class="cms-page cms-collection">
