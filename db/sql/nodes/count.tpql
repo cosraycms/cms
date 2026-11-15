@@ -6,7 +6,9 @@ FROM
 <?php if (isset($fulltext)) : ?>
 	INNER JOIN /*:cms.prefix:*/full_text ft ON ft.node = n.node AND ft.locale = :search_locale
 <?php endif ?>
-	LEFT JOIN /*:cms.prefix:*/node_handles h ON
+	LEFT JOIN /*:cms.prefix:*/publications p ON
+		p.node = n.node
+	LEFT JOIN /*:cms.prefix:*/handles h ON
 		h.node = n.node
 	LEFT JOIN /*:cms.prefix:*/nodes np ON
 		np.node = n.parent
@@ -57,10 +59,13 @@ WHERE
 <?php endif ?>
 <?php endif ?>
 <?php if (isset($published)) : ?>
-	AND n.published = :published
+<?php // A node without a publication row, a record, is neither published nor hidden. ?>
+	AND <?= $published ? 'p.published' : 'p.published IS NOT TRUE' ?>
+
 <?php endif ?>
 <?php if (isset($hidden)) : ?>
-	AND n.hidden = :hidden
+	AND <?= $hidden ? 'p.hidden' : 'p.hidden IS NOT TRUE' ?>
+
 <?php endif ?>
 <?php if (isset($condition) && !empty(trim($condition))) : ?>
 	AND (<?= $condition ?>)

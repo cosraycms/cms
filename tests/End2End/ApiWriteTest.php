@@ -265,7 +265,7 @@ final class ApiWriteTest extends End2EndTestCase
 		$this->assertGreaterThanOrEqual(500, $response->getStatusCode());
 		$this->assertFalse(
 			(bool) $this->db()->execute(
-				"SELECT hidden FROM cms.nodes WHERE uid = 'contested'",
+				"SELECT p.hidden FROM cms.nodes n LEFT JOIN cms.publications p ON p.node = n.node WHERE n.uid = 'contested'",
 			)->one()['hidden'],
 		);
 	}

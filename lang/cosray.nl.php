@@ -472,6 +472,7 @@ return [
 		'node:locked-descendant' => 'Een item hieronder is vergrendeld.',
 		'node:new-entry' => 'Nieuw item:',
 		'node:parent-not-string' => 'Het bovenliggende item moet een uid-string zijn',
+		'node:record-publication' => 'Een record wordt niet gepubliceerd.',
 		'node:reserved-path' => 'Het URL-pad :path is gereserveerd door het systeem; kies een ander pad',
 		'node:uid-immutable' => 'De uid van een item kan niet worden gewijzigd',
 		'node:unpublished' => 'Niet gepubliceerd',

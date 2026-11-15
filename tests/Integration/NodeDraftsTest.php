@@ -229,7 +229,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 			Actor::system(),
 		);
 
-		$this->store->discard($this->node('drafts-discard-history'));
+		$this->store->discard($this->node('drafts-discard-history'), Actor::system());
 
 		$this->assertSame(0, $this->rows('drafts', 'drafts-discard-history'));
 		$this->assertSame(1, $this->rows('drafts_history', 'drafts-discard-history'));
@@ -250,7 +250,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$payload = $this->payload('drafts-discard', 'Gone', related: ['drafts-discard-target']);
 		$this->store->draft($this->node('drafts-discard'), $payload, $this->locales(), Actor::system());
 
-		$this->store->discard($this->node('drafts-discard'));
+		$this->store->discard($this->node('drafts-discard'), Actor::system());
 
 		$this->assertSame(0, $this->rows('drafts', 'drafts-discard'));
 		$this->assertSame([], $this->referenceOwners('drafts-discard-target'));
@@ -269,7 +269,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 
 		$this->store->hide($this->node('drafts-hidden'), true, Actor::system());
 
-		$this->assertTrue((bool) $this->row('nodes', 'drafts-hidden')['hidden']);
+		$this->assertTrue((bool) $this->row('publications', 'drafts-hidden')['hidden']);
 		$this->assertSame('Live', $this->liveTitle('drafts-hidden'));
 		$this->assertSame('Changed', $this->draftTitle('drafts-hidden'));
 	}
@@ -286,7 +286,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 
 		$this->store->published($this->node('drafts-withdrawn'), false, Actor::system());
 
-		$this->assertFalse((bool) $this->row('nodes', 'drafts-withdrawn')['published']);
+		$this->assertFalse((bool) $this->row('publications', 'drafts-withdrawn')['published']);
 		$this->assertSame('Main', $this->liveTitle('drafts-withdrawn'));
 		$this->assertSame('Pending', $this->draftTitle('drafts-withdrawn'));
 	}
@@ -319,7 +319,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$this->store->applyDraft($this->node('drafts-applied'), $this->locales(), Actor::system());
 
 		$this->assertSame('First', $this->liveTitle('drafts-applied'));
-		$this->assertFalse((bool) $this->row('nodes', 'drafts-applied')['published']);
+		$this->assertFalse((bool) $this->row('publications', 'drafts-applied')['published']);
 
 		$this->store->draft(
 			$this->node('drafts-applied'),
@@ -330,7 +330,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$this->store->applyDraft($this->node('drafts-applied'), $this->locales(), Actor::system(), publish: true);
 
 		$this->assertSame('Second', $this->liveTitle('drafts-applied'));
-		$this->assertTrue((bool) $this->row('nodes', 'drafts-applied')['published']);
+		$this->assertTrue((bool) $this->row('publications', 'drafts-applied')['published']);
 	}
 
 	public function testApplyDraftReportsWhetherThereWasOne(): void
@@ -352,7 +352,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 
 		$this->assertTrue($this->store->applyDraft($this->node('drafts-release'), $this->locales(), Actor::system()));
 		$this->assertSame('Released', $this->liveTitle('drafts-release'));
-		$this->assertTrue((bool) $this->row('nodes', 'drafts-release')['published']);
+		$this->assertTrue((bool) $this->row('publications', 'drafts-release')['published']);
 	}
 
 	public function testALockedNodeRefusesAWorkingCopy(): void
@@ -385,12 +385,12 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$payload = $this->payload('unchanged-live', 'Saved') + ['paths' => ['en' => '/unchanged-live']];
 		$this->store->apply($this->node('unchanged-live'), $payload, $this->locales(), Actor::system());
 		$saved = $this->row('nodes', 'unchanged-live');
-		$history = $this->rows('nodes_history', 'unchanged-live');
+		$history = $this->rows('events', 'unchanged-live');
 
 		$this->store->apply($this->node('unchanged-live'), $payload, $this->locales(), Actor::system());
 
 		$this->assertSame($saved['changed'], $this->row('nodes', 'unchanged-live')['changed']);
-		$this->assertSame($history, $this->rows('nodes_history', 'unchanged-live'));
+		$this->assertSame($history, $this->rows('events', 'unchanged-live'));
 	}
 
 	public function testAWorkingCopySavedAgainUnchangedWritesNoHistory(): void
@@ -411,7 +411,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$this->createPage('unchanged-row', 'Live');
 		$payload = $this->payload('unchanged-row', 'Saved') + ['paths' => ['en' => '/unchanged-row']];
 		$this->store->apply($this->node('unchanged-row'), $payload, $this->locales(), Actor::system());
-		$history = $this->rows('nodes_history', 'unchanged-row');
+		$history = $this->rows('events', 'unchanged-row');
 		$changed = $this->row('nodes', 'unchanged-row')['changed'];
 
 		$this->store->apply(
@@ -423,7 +423,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 
 		$this->assertSame('named-row', $this->handle('unchanged-row'));
 		$this->assertNotSame($changed, $changed = $this->row('nodes', 'unchanged-row')['changed']);
-		$this->assertSame($history + 1, $this->rows('nodes_history', 'unchanged-row'));
+		$this->assertSame($history + 1, $this->rows('events', 'unchanged-row'));
 
 		$this->store->apply(
 			$this->node('unchanged-row'),
@@ -434,7 +434,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 
 		$this->assertSame('/moved-row', $this->activePath('unchanged-row'));
 		$this->assertNotSame($changed, $this->row('nodes', 'unchanged-row')['changed']);
-		$this->assertSame($history + 2, $this->rows('nodes_history', 'unchanged-row'));
+		$this->assertSame($history + 2, $this->rows('events', 'unchanged-row'));
 	}
 
 	private function createPage(string $uid, string $title, bool $published = true): void
@@ -514,7 +514,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 	private function handle(string $uid): ?string
 	{
 		$row = $this->db()->execute(
-			'SELECT h.handle FROM cms.node_handles h JOIN cms.nodes n ON n.node = h.node WHERE n.uid = :uid',
+			'SELECT h.handle FROM cms.handles h JOIN cms.nodes n ON n.node = h.node WHERE n.uid = :uid',
 			['uid' => $uid],
 		)->first();
 

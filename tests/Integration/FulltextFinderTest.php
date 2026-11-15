@@ -84,11 +84,7 @@ final class FulltextFinderTest extends FulltextTestCase
 		$this->page('fts-hidden', 'Needle');
 		$this->page('fts-unpublished', 'Needle');
 		$this->page('fts-deleted', 'Needle');
-		$this->db()->nodes->setHidden([
-			'node' => $this->sql('node', ['uid' => 'fts-hidden'])->one()['node'],
-			'hidden' => true,
-			'editor' => 1,
-		])->run();
+		$this->store->hide($this->node('fts-hidden'), true, Actor::system());
 		$this->store->published($this->node('fts-unpublished'), false, Actor::system());
 		// Leave a stale derived row to test the query boundary independently of synchronization.
 		$this->sql('deleted', ['uid' => 'fts-deleted'])->run();

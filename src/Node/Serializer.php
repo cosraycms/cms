@@ -49,12 +49,14 @@ class Serializer
 	public function data(object $node, array $rawData, array $fieldNames): array
 	{
 		$class = $node::class;
+		// A record has no publication, whatever a stale row says.
+		$publication = !(bool) $this->types->get($class, 'record', false);
 
 		return [
 			'uid' => $rawData['uid'],
 			'handle' => $rawData['handle'] ?? null,
-			'published' => $rawData['published'],
-			'hidden' => $rawData['hidden'],
+			'published' => $publication && (bool) $rawData['published'],
+			'hidden' => $publication && (bool) $rawData['hidden'],
 			'locked' => $rawData['locked'],
 			'created' => $rawData['created'],
 			'changed' => $rawData['changed'],

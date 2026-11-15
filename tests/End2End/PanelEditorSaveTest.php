@@ -1130,13 +1130,13 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$row = $this->db()->execute(
-			'SELECT published FROM cms.nodes WHERE uid = :uid',
+			'SELECT p.published FROM cms.nodes n LEFT JOIN cms.publications p ON p.node = n.node WHERE n.uid = :uid',
 			['uid' => 'panel-save-publish'],
 		)->one();
 		$this->assertTrue((bool) $row['published']);
 
 		$handle = $this->db()->execute(
-			'SELECT h.handle FROM cms.node_handles h
+			'SELECT h.handle FROM cms.handles h
 				JOIN cms.nodes n ON n.node = h.node
 				WHERE n.uid = :uid',
 			['uid' => 'panel-save-publish'],

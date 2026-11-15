@@ -61,7 +61,7 @@ final class FulltextStoreTest extends FulltextTestCase
 			Actor::system(),
 		);
 		self::assertSame("Live\n\nPublic prose", $this->source('fts-draft'));
-		$this->store->discard($this->node('fts-draft'));
+		$this->store->discard($this->node('fts-draft'), Actor::system());
 		self::assertSame("Live\n\nPublic prose", $this->source('fts-draft'));
 	}
 

@@ -34,7 +34,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		$this->assertSame('Edited', $this->autosavedTitle('autosave-kept'));
 		$this->assertSame('Live', $this->liveTitle('autosave-kept'));
 		$this->assertSame(0, $this->rows('drafts', 'autosave-kept'));
-		$this->assertSame(0, $this->rows('nodes_history', 'autosave-kept'));
+		$this->assertSame(0, $this->rows('events', 'autosave-kept'));
 	}
 
 	public function testEditsBackToTheStoredStateLeaveNoAutosave(): void
@@ -44,7 +44,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 
 		$this->assertResponseOk($this->autosave('autosave-undone', 'Live'));
 
-		$this->assertSame(0, $this->rows('autosaves', 'autosave-undone'));
+		$this->assertSame(0, $this->rows('edits', 'autosave-undone'));
 	}
 
 	public function testAnIncompleteFormIsNotKept(): void
@@ -57,7 +57,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		]);
 
 		$this->assertSame(422, $response->getStatusCode());
-		$this->assertSame(0, $this->rows('autosaves', 'autosave-incomplete'));
+		$this->assertSame(0, $this->rows('edits', 'autosave-incomplete'));
 	}
 
 	public function testTheEditorOpensWithTheAutosave(): void
@@ -147,15 +147,17 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		$this->autosave('autosave-foreign', 'Edited');
 
 		$this->db()->execute(
-			"UPDATE cms.nodes SET published = false, hidden = true, locked = true WHERE uid = 'autosave-foreign'",
+			"UPDATE cms.publications SET published = false, hidden = true
+				WHERE node = (SELECT node FROM cms.nodes WHERE uid = 'autosave-foreign')",
 		)->run();
+		$this->db()->execute("UPDATE cms.nodes SET locked = true WHERE uid = 'autosave-foreign'")->run();
 		$this->db()->execute("UPDATE cms.nodes SET locked = false WHERE uid = 'autosave-foreign'")->run();
 
 		$this->assertHtmlNodeMissing("//*[@data-state='conflict']", $this->editor('autosave-foreign'));
 
 		$this->db()->execute(
-			"UPDATE cms.nodes SET content = jsonb_set(content, '{title,value,en}', '\"Theirs\"') "
-				. "WHERE uid = 'autosave-foreign'",
+			"UPDATE cms.nodes SET content = jsonb_set(content, '{title,value,en}', '\"Theirs\"'), "
+				. "edited = clock_timestamp() WHERE uid = 'autosave-foreign'",
 		)->run();
 
 		$this->assertHtmlNodeExists("//*[@data-state='conflict']", $this->editor('autosave-foreign'));
@@ -194,7 +196,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		]);
 
 		$this->assertHtmlNodeExists('//*[@data-toast="success"]', $this->getHtmlResponse($forced));
-		$this->assertSame(0, $this->rows('autosaves', 'autosave-locked'));
+		$this->assertSame(0, $this->rows('edits', 'autosave-locked'));
 	}
 
 	public function testSavingDropsTheAutosaveAndRenewsTheBase(): void
@@ -208,7 +210,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		]);
 
 		$this->assertResponseOk($response);
-		$this->assertSame(0, $this->rows('autosaves', 'autosave-saved'));
+		$this->assertSame(0, $this->rows('edits', 'autosave-saved'));
 		$this->assertHtmlNodeExists(
 			'//*[@id="editor-autosave"][@hx-swap-oob="true"][@data-saved][@data-base!=""]',
 			$this->getHtmlResponse($response),
@@ -225,7 +227,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		]);
 
 		$this->assertResponseOk($response);
-		$this->assertSame(0, $this->rows('autosaves', 'autosave-dropped'));
+		$this->assertSame(0, $this->rows('edits', 'autosave-dropped'));
 		$this->assertSame('Live', $this->liveTitle('autosave-dropped'));
 	}
 
@@ -238,7 +240,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 			'headers' => ['HX-Request' => 'true'],
 		]);
 
-		$this->assertSame(0, $this->rows('autosaves', 'autosave-reloaded'));
+		$this->assertSame(0, $this->rows('edits', 'autosave-reloaded'));
 		$location = json_decode($response->getHeaderLine('HX-Location'), true);
 		$this->assertSame('/panel/node/autosave-reloaded', $location['path']);
 		$this->assertSame('#editor-leave', $location['source']);
@@ -269,7 +271,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		$this->assertSame(0, $this->rows('drafts', 'autosave-discard-kept'));
 		$this->assertSame('Mine', $this->autosavedTitle('autosave-discard-kept'));
 		$this->assertSame(0, $this->rows('drafts', 'autosave-discard-dropped'));
-		$this->assertSame(0, $this->rows('autosaves', 'autosave-discard-dropped'));
+		$this->assertSame(0, $this->rows('edits', 'autosave-discard-dropped'));
 	}
 
 	private function autosave(string $uid, string $title, string $base = '', array $settings = []): object
@@ -312,7 +314,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 	private function autosavedTitle(string $uid): string
 	{
 		$row = $this->db()->execute(
-			'SELECT a.content FROM cms.autosaves a JOIN cms.nodes n ON n.node = a.node WHERE n.uid = :uid',
+			'SELECT a.content FROM cms.edits a JOIN cms.nodes n ON n.node = a.node WHERE n.uid = :uid',
 			['uid' => $uid],
 		)->one();
 

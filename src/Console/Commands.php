@@ -40,12 +40,14 @@ use Cosray\Commands\RevokeToken;
 use Cosray\Commands\SendTestMail;
 use Cosray\Commands\SetPassword;
 use Cosray\Commands\StripLocation;
+use Cosray\Commands\SyncPublications;
 use Cosray\Commands\Titles;
 use Cosray\Commands\WarmMedia;
 use Cosray\Commands\WorkQueue;
 use Cosray\ContainerLogger;
 use Cosray\I18n\SchemaScanner;
 use Cosray\MigrationFactory;
+use Cosray\Node\Publications;
 use Cosray\Panel\Client;
 use Cosray\Queue\Listener;
 use Cosray\Queue\Runner as JobRunner;
@@ -96,6 +98,9 @@ final class Commands
 			WarmMedia::class => fn(): WarmMedia => new WarmMedia($app->config, new Database($this->conn())),
 			RecreateSortIndex::class,
 			Titles::class,
+			SyncPublications::class => fn(): SyncPublications => new SyncPublications(
+				Publications::of($app->container(), new Database($this->conn())),
+			),
 			CreateToken::class,
 			ListTokens::class,
 			RevokeToken::class,

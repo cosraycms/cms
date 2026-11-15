@@ -1,25 +1,35 @@
 -- Returns no row when the node already holds this state, so an unchanged
--- save writes no history row and leaves `changed` alone. The editor is
--- not compared: saving the same state again changes nothing.
+-- save records nothing. `moved` says the parent changed, `edited` that the
+-- content or title did; `left` is the uid of the parent it left.
 UPDATE
-	/*:cms.prefix:*/nodes
+	/*:cms.prefix:*/nodes n
 SET
 	parent = :parent,
-	published = :published,
 	locked = :locked,
-	hidden = :hidden,
-	editor = :editor,
 	content = :content::jsonb,
 	title = :title::jsonb
+FROM
+	(
+		SELECT
+			node,
+			parent,
+			content,
+			title
+		FROM
+			/*:cms.prefix:*/nodes
+		WHERE
+			node = :node
+	) o
 WHERE
-	node = :node
-	AND (parent, published, locked, hidden, content, title) IS DISTINCT FROM (
+	n.node = o.node
+	AND (n.parent, n.locked, n.content, n.title) IS DISTINCT FROM (
 		:parent::bigint,
-		:published::boolean,
 		:locked::boolean,
-		:hidden::boolean,
 		:content::jsonb,
 		:title::jsonb
 	)
 
-RETURNING node;
+RETURNING
+	o.parent IS DISTINCT FROM n.parent AS moved,
+	(o.content, o.title) IS DISTINCT FROM (n.content, n.title) AS edited,
+	(SELECT l.uid FROM /*:cms.prefix:*/nodes l WHERE l.node = o.parent) AS left;

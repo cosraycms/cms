@@ -52,7 +52,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 		// Get first 3
 		$firstPage = $this->db()->execute(
-			'SELECT uid FROM cms.nodes WHERE type = :type AND published = true ORDER BY node LIMIT 3',
+			'SELECT uid FROM cms.nodes n JOIN cms.publications p USING (node) WHERE n.type = :type AND p.published = true ORDER BY node LIMIT 3',
 			['type' => $typeId],
 		)->all();
 
@@ -63,7 +63,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 		// Get next 3 (offset 3)
 		$secondPage = $this->db()->execute(
-			'SELECT uid FROM cms.nodes WHERE type = :type AND published = true ORDER BY node LIMIT 3 OFFSET 3',
+			'SELECT uid FROM cms.nodes n JOIN cms.publications p USING (node) WHERE n.type = :type AND p.published = true ORDER BY node LIMIT 3 OFFSET 3',
 			['type' => $typeId],
 		)->all();
 
@@ -105,7 +105,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 		// Get published and not hidden (visible to public)
 		$visible = $this->db()->execute(
-			'SELECT uid FROM cms.nodes WHERE type = :type AND published = true AND hidden = false',
+			'SELECT uid FROM cms.nodes n JOIN cms.publications p USING (node) WHERE n.type = :type AND p.published = true AND p.hidden = false',
 			['type' => $typeId],
 		)->all();
 
@@ -114,7 +114,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 		// Get published (including hidden)
 		$published = $this->db()->execute(
-			'SELECT uid FROM cms.nodes WHERE type = :type AND published = true',
+			'SELECT uid FROM cms.nodes n JOIN cms.publications p USING (node) WHERE n.type = :type AND p.published = true',
 			['type' => $typeId],
 		)->all();
 
@@ -199,27 +199,30 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 		$typeId = $this->createTestType('multi-order-test');
 
 		// Create nodes with different published status and dates
-		$this->db()->execute(
-			"INSERT INTO cms.nodes (uid, type, published, hidden, creator, editor, created, content)
-			 VALUES ('order-1', :type, true, false, 1, 1, '2024-01-15', '{}'::jsonb)",
-			['type' => $typeId],
-		)->run();
+		$this->createTestNode([
+			'uid' => 'order-1',
+			'type' => $typeId,
+			'published' => true,
+			'created' => '2024-01-15',
+		]);
 
-		$this->db()->execute(
-			"INSERT INTO cms.nodes (uid, type, published, hidden, creator, editor, created, content)
-			 VALUES ('order-2', :type, true, false, 1, 1, '2024-01-10', '{}'::jsonb)",
-			['type' => $typeId],
-		)->run();
+		$this->createTestNode([
+			'uid' => 'order-2',
+			'type' => $typeId,
+			'published' => true,
+			'created' => '2024-01-10',
+		]);
 
-		$this->db()->execute(
-			"INSERT INTO cms.nodes (uid, type, published, hidden, creator, editor, created, content)
-			 VALUES ('order-3', :type, false, false, 1, 1, '2024-01-20', '{}'::jsonb)",
-			['type' => $typeId],
-		)->run();
+		$this->createTestNode([
+			'uid' => 'order-3',
+			'type' => $typeId,
+			'published' => false,
+			'created' => '2024-01-20',
+		]);
 
 		// Order by published DESC, created ASC
 		$ordered = $this->db()->execute(
-			'SELECT uid FROM cms.nodes WHERE type = :type ORDER BY published DESC, created ASC',
+			'SELECT uid FROM cms.nodes n JOIN cms.publications p USING (node) WHERE n.type = :type ORDER BY p.published DESC, n.created ASC',
 			['type' => $typeId],
 		)->all();
 
@@ -261,14 +264,14 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 		// Count published
 		$published = $this->db()->execute(
-			'SELECT COUNT(*) as count FROM cms.nodes WHERE type = :type AND published = true',
+			'SELECT COUNT(*) as count FROM cms.nodes n JOIN cms.publications p USING (node) WHERE n.type = :type AND p.published = true',
 			['type' => $typeId],
 		)->one()['count'];
 		$this->assertEquals(5, $published);
 
 		// Count unpublished
 		$unpublished = $this->db()->execute(
-			'SELECT COUNT(*) as count FROM cms.nodes WHERE type = :type AND published = false',
+			'SELECT COUNT(*) as count FROM cms.nodes n JOIN cms.publications p USING (node) WHERE n.type = :type AND p.published = false',
 			['type' => $typeId],
 		)->one()['count'];
 		$this->assertEquals(3, $unpublished);
@@ -340,8 +343,9 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 		$nodesWithPaths = $this->db()->execute(
 			'SELECT n.uid, u.path, u.locale
 			 FROM cms.nodes n
+			 JOIN cms.publications p ON p.node = n.node
 			 LEFT JOIN cms.url_paths u ON n.node = u.node
-			 WHERE n.type = :type AND n.published = true',
+			 WHERE n.type = :type AND p.published = true',
 			['type' => $typeId],
 		)->all();
 

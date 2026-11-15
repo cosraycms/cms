@@ -1,6 +1,6 @@
 SELECT
 	n.uid,
-	n.published,
+	p.published,
 	n.changed,
 	n.edited,
 	coalesce(ue.data->>'name', ue.username, ue.email) AS editor_name,
@@ -12,10 +12,11 @@ SELECT
 	t.handle AS type
 FROM /*:cms.prefix:*/nodes n
 INNER JOIN /*:cms.prefix:*/types t USING(type)
+LEFT JOIN /*:cms.prefix:*/publications p ON p.node = n.node
 INNER JOIN /*:cms.prefix:*/users ue ON ue.usr = n.editor
 LEFT JOIN /*:cms.prefix:*/drafts d ON d.node = n.node
 LEFT JOIN /*:cms.prefix:*/users ud ON ud.usr = d.editor
-LEFT JOIN /*:cms.prefix:*/autosaves m ON m.node = n.node AND m.editor = :mine
+LEFT JOIN /*:cms.prefix:*/edits m ON m.node = n.node AND m.editor = :mine
 WHERE n.deleted IS NULL
 ORDER BY
 	n.changed DESC,

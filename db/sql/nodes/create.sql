@@ -2,9 +2,7 @@ INSERT INTO /*:cms.prefix:*/nodes (
 	uid,
 	parent,
 	type,
-	published,
 	locked,
-	hidden,
 	editor,
 	creator,
 	created,
@@ -17,9 +15,7 @@ SELECT
 	:uid,
 	:parent,
 	type,
-	:published,
 	:locked,
-	:hidden,
 	:editor,
 	:creator,
 	COALESCE(CAST(:created AS timestamptz), now()),
@@ -34,4 +30,4 @@ WHERE
 
 ON CONFLICT (uid) DO NOTHING
 
-RETURNING node;
+RETURNING node, created, changed;

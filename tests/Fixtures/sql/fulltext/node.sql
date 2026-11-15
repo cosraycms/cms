@@ -1,2 +1,4 @@
-SELECT n.*, (SELECT count(*) FROM cms.nodes_history h WHERE h.node = n.node) AS history
-FROM cms.nodes n WHERE uid = :uid;
+SELECT n.*, p.published, p.hidden, (SELECT count(*) FROM cms.events e WHERE e.node = n.node) AS events
+FROM cms.nodes n
+LEFT JOIN cms.publications p ON p.node = n.node
+WHERE n.uid = :uid;

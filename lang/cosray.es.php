@@ -469,6 +469,7 @@ return [
 		'node:locked-descendant' => 'Hay una entrada bloqueada debajo de esta.',
 		'node:new-entry' => 'Nueva entrada:',
 		'node:parent-not-string' => 'La entrada superior debe indicarse como una cadena uid',
+		'node:record-publication' => 'Un registro no se publica.',
 		'node:reserved-path' => 'La ruta de URL :path está reservada por el sistema; elige otra',
 		'node:uid-immutable' => 'El uid de una entrada no se puede cambiar',
 		'node:unpublished' => 'Sin publicar',

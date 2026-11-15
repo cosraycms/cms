@@ -59,6 +59,11 @@ final class Serializer
 			'deleted' => self::instant($data['deleted'] ?? null),
 		];
 
+		// A record has no publication; it is neither published nor hidden.
+		if ((bool) $this->types->get($inner::class, 'record', false)) {
+			unset($result['published'], $result['hidden']);
+		}
+
 		if ($source) {
 			$result['content'] = self::object($this->content($inner, $data, $names));
 		} else {

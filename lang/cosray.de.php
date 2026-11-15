@@ -472,6 +472,7 @@ return [
 		'node:locked-descendant' => 'Ein Eintrag darunter ist gesperrt.',
 		'node:new-entry' => 'Neuer Eintrag:',
 		'node:parent-not-string' => 'Der übergeordnete Eintrag muss eine uid-Zeichenkette sein',
+		'node:record-publication' => 'Ein Datensatz wird nicht veröffentlicht.',
 		'node:reserved-path' => 'Der URL-Pfad :path ist vom System reserviert; bitte einen anderen wählen',
 		'node:uid-immutable' => 'Die uid eines Eintrags kann nicht geändert werden',
 		'node:unpublished' => 'Unveröffentlicht',

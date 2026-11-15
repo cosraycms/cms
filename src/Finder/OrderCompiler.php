@@ -112,7 +112,7 @@ final class OrderCompiler
 		}
 
 		$lookup =
-			'(SELECT pos.position FROM /*:cms.prefix:*/node_positions pos WHERE '
+			'(SELECT pos.position FROM /*:cms.prefix:*/positions pos WHERE '
 			. $scope
 			. ' AND pos.node = n.node)';
 		$title = $this->builtin('title');

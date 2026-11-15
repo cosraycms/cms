@@ -1,5 +1,5 @@
 -- Says whether the row is new, which starts an editing session.
-INSERT INTO /*:cms.prefix:*/autosaves (
+INSERT INTO /*:cms.prefix:*/edits (
 	node,
 	editor,
 	base,
@@ -17,7 +17,7 @@ ON CONFLICT (node, editor) DO UPDATE SET
 	content = EXCLUDED.content,
 	settings = EXCLUDED.settings
 WHERE
-	(/*:cms.prefix:*/autosaves.base, /*:cms.prefix:*/autosaves.content, /*:cms.prefix:*/autosaves.settings)
+	(/*:cms.prefix:*/edits.base, /*:cms.prefix:*/edits.content, /*:cms.prefix:*/edits.settings)
 		IS DISTINCT FROM (EXCLUDED.base, EXCLUDED.content, EXCLUDED.settings)
 
 RETURNING (xmax = 0) AS created;

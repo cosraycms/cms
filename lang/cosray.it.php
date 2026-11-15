@@ -469,6 +469,7 @@ return [
 		'node:locked-descendant' => 'Un contenuto sottostante è bloccato.',
 		'node:new-entry' => 'Nuovo contenuto:',
 		'node:parent-not-string' => 'Il contenuto padre deve essere una stringa uid',
+		'node:record-publication' => 'Un record non viene pubblicato.',
 		'node:reserved-path' => 'Il percorso URL :path è riservato al sistema; sceglierne un altro',
 		'node:uid-immutable' => 'L’uid di un contenuto non può essere modificato',
 		'node:unpublished' => 'Non pubblicato',

@@ -3,11 +3,11 @@
 -- positioned ones again; uids that are not children of the parent are
 -- ignored.
 DELETE FROM
-	/*:cms.prefix:*/node_positions
+	/*:cms.prefix:*/positions
 WHERE
 	parent = (SELECT node FROM /*:cms.prefix:*/nodes WHERE uid = :parent);
 
-INSERT INTO /*:cms.prefix:*/node_positions (node, parent, position)
+INSERT INTO /*:cms.prefix:*/positions (node, parent, position)
 SELECT
 	n.node,
 	n.parent,

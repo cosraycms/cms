@@ -16,8 +16,8 @@ use Cosray\Cms;
 use Cosray\Collection\Listing;
 use Cosray\Context;
 use Cosray\Exception\NoSuchField;
-use Cosray\Node\Autosaves;
 use Cosray\Node\Duplicator;
+use Cosray\Node\Edits;
 use Cosray\Node\Essence;
 use Cosray\Node\Factory as NodeFactory;
 use Cosray\Node\PathManager;
@@ -77,7 +77,7 @@ final class Editor extends Panel
 
 		// An embedding application has its own idea of unsaved edits.
 		if ($this->origin()['embed'] === null) {
-			$saved = new Autosaves($context->db)->get($this->nodeId($nodeObj), $this->actor()->id);
+			$saved = new Edits($context->db)->get($this->nodeId($nodeObj), $this->actor()->id);
 			$status = $this->statusView($context, $cms, $data, $saved, !(bool) ($data['locked'] ?? false));
 
 			if (!(bool) ($data['locked'] ?? false)) {
@@ -146,7 +146,7 @@ final class Editor extends Panel
 			NodeFactory::fieldNamesFor($nodeObj),
 		);
 		$this->keep($context, $nodeObj, $data, $this->formData());
-		$saved = new Autosaves($context->db)->get($this->nodeId($nodeObj), $this->actor()->id);
+		$saved = new Edits($context->db)->get($this->nodeId($nodeObj), $this->actor()->id);
 
 		return [
 			'preview' => $this->previewPath($node, $this->actor()->id),
@@ -169,7 +169,7 @@ final class Editor extends Panel
 		}
 
 		$edited = $this->applyForm($data, $form);
-		$autosaves = new Autosaves($context->db);
+		$edits = new Edits($context->db);
 		$nodeId = $this->nodeId($node);
 		$settings = $this->autosaveSettings($edited);
 
@@ -177,13 +177,13 @@ final class Editor extends Panel
 			Essence::same($edited['content'], $data['content'])
 			&& Essence::same($settings, $this->autosaveSettings($data))
 		) {
-			$autosaves->delete($nodeId, $this->actor()->id);
+			$edits->delete($nodeId, $this->actor()->id);
 
 			return false;
 		}
 
 		$base = $form['_base'] ?? null;
-		$autosaves->save(
+		$edits->save(
 			$nodeId,
 			$this->actor()->id,
 			is_string($base) && $this->timestamp($base) !== null ? $base : $this->workingChanged($data),
@@ -318,7 +318,7 @@ final class Editor extends Panel
 			];
 		}
 
-		new Autosaves($context->db)->delete($this->nodeId($nodeObj), $this->actor()->id);
+		new Edits($context->db)->delete($this->nodeId($nodeObj), $this->actor()->id);
 
 		if (!$htmx) {
 			return Response::create($factory)->redirect($links->edit($node), 303);
@@ -375,10 +375,10 @@ final class Editor extends Panel
 
 		$links = $this->origin()['links'];
 		$nodeObj = Wrapper::unwrap($result);
-		$this->nodeStore($context, $cms)->discard($nodeObj);
+		$this->nodeStore($context, $cms)->discard($nodeObj, $this->actor());
 
 		if (($this->formData()['mine'] ?? null) === 'discard') {
-			new Autosaves($context->db)->delete($this->nodeId($nodeObj), $this->actor()->id);
+			new Edits($context->db)->delete($this->nodeId($nodeObj), $this->actor()->id);
 		}
 		$response = Response::create($factory);
 
@@ -402,7 +402,7 @@ final class Editor extends Panel
 			throw new HttpNotFound($this->request);
 		}
 
-		new Autosaves($context->db)->delete($this->nodeId(Wrapper::unwrap($result)), $this->actor()->id);
+		new Edits($context->db)->delete($this->nodeId(Wrapper::unwrap($result)), $this->actor()->id);
 		$response = Response::create($factory);
 
 		if (!$this->request->hasHeader('HX-Request')) {
@@ -445,7 +445,7 @@ final class Editor extends Panel
 	private function refuseConflict(Context $context, Cms $cms, object $node, array $data, array $form): array
 	{
 		$this->keep($context, $node, $data, $form);
-		$saved = new Autosaves($context->db)->get($this->nodeId($node), $this->actor()->id);
+		$saved = new Edits($context->db)->get($this->nodeId($node), $this->actor()->id);
 
 		return [
 			'saved' => false,
@@ -512,7 +512,7 @@ final class Editor extends Panel
 			NodeFactory::dataFor($fresh),
 			NodeFactory::fieldNamesFor($fresh),
 		);
-		$saved = new Autosaves($context->db)->get($this->nodeId($fresh), $actor->id);
+		$saved = new Edits($context->db)->get($this->nodeId($fresh), $actor->id);
 
 		return [
 			'kind' => $kind,

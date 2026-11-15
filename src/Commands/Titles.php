@@ -6,7 +6,6 @@ namespace Cosray\Commands;
 
 use Celema\Console\Command;
 use Celema\Console\Io;
-use Celema\Quma\Connection;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Locales;
@@ -22,7 +21,6 @@ use Cosray\Title\Rebuild;
 class Titles
 {
 	public function __construct(
-		private readonly Connection $conn,
 		private readonly Context $context,
 		private readonly Cms $cms,
 		private readonly Locales $locales,
@@ -35,7 +33,6 @@ class Titles
 			$this->context,
 			$this->cms,
 			$this->locales,
-			$this->conn,
 			$this->types,
 		)->run();
 

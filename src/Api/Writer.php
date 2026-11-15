@@ -77,6 +77,7 @@ final class Writer
 	{
 		self::assertMembers($body);
 		$node = $this->cms->nodeFactory()->blueprint($class, $this->context, $this->cms);
+		$this->assertPublication($node, $body);
 		$data = [
 			'published' => self::bool($body, 'published', false),
 			'hidden' => self::bool($body, 'hidden', false),
@@ -196,12 +197,14 @@ final class Writer
 			throw new HttpConflict(payload: ['message' => 'The node has another type.']);
 		}
 
+		$publication = !$this->assertPublication($node, $body);
+
 		return [
 			'uid' => (string) $current($node, 'uid'),
 			'handle' => self::nullableString($body, 'handle', $current($node, 'handle')),
 			'parent' => self::nullableString($body, 'parent', $current($node, 'parent')),
-			'published' => self::bool($body, 'published', (bool) $current($node, 'published')),
-			'hidden' => self::bool($body, 'hidden', (bool) $current($node, 'hidden')),
+			'published' => $publication && self::bool($body, 'published', (bool) $current($node, 'published')),
+			'hidden' => $publication && self::bool($body, 'hidden', (bool) $current($node, 'hidden')),
 			'locked' => (bool) $current($node, 'locked'),
 			'paths' => self::paths($body, is_array($current($node, 'paths')) ? $current($node, 'paths') : []),
 		];
@@ -266,6 +269,27 @@ final class Writer
 				)),
 			]);
 		}
+	}
+
+	/**
+	 * A record has no publication, so a body that sets one is refused.
+	 * Says whether the node is a record.
+	 *
+	 * @param array<array-key, mixed> $body
+	 */
+	private function assertPublication(object $node, array $body): bool
+	{
+		if (!(bool) $this->types->get($node::class, 'record', false)) {
+			return false;
+		}
+
+		foreach (['published', 'hidden'] as $member) {
+			if (($body[$member] ?? null) !== null) {
+				throw self::invalid([$member], 'record', 'A record has no publication.');
+			}
+		}
+
+		return true;
 	}
 
 	/** @param array<array-key, mixed> $body */

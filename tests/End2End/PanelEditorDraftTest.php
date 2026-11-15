@@ -254,7 +254,7 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->createTestNode([
 			'uid' => 'draft-record',
 			'type' => $this->createTestType('test-submission'),
-			'published' => true,
+			'published' => null,
 			'content' => ['title' => ['type' => Text::class, 'value' => ['zxx' => 'Entry']]],
 		]);
 
@@ -396,7 +396,11 @@ final class PanelEditorDraftTest extends End2EndTestCase
 	/** @return array<string, mixed> */
 	private function nodeRow(string $uid): array
 	{
-		$row = $this->db()->execute('SELECT * FROM cms.nodes WHERE uid = :uid', ['uid' => $uid])->first();
+		$row = $this->db()->execute(
+			'SELECT n.*, p.published, p.hidden FROM cms.nodes n
+				LEFT JOIN cms.publications p ON p.node = n.node WHERE n.uid = :uid',
+			['uid' => $uid],
+		)->first();
 		$this->assertNotNull($row);
 
 		return $row;

@@ -1,5 +1,5 @@
 DELETE FROM
-	/*:cms.prefix:*/node_handles
+	/*:cms.prefix:*/handles
 WHERE
 	node = :node
 

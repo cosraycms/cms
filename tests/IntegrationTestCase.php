@@ -283,7 +283,14 @@ class IntegrationTestCase extends TestCase
 
 		$data = array_merge($defaults, $data);
 		$handle = $data['handle'] ?? null;
-		unset($data['handle']);
+		// Null for a record, which has no publication row.
+		$publication = $data['published'] === null
+			? null
+			: [
+				'published' => $data['published'],
+				'hidden' => $data['hidden'],
+			];
+		unset($data['handle'], $data['published'], $data['hidden']);
 
 		// Convert content array to JSON if needed
 		if (is_array($data['content'])) {
@@ -295,15 +302,22 @@ class IntegrationTestCase extends TestCase
 			$data['title'] = json_encode((object) $data['title']);
 		}
 
-		$sql = 'INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, created, changed, content, title)
-				VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor, :created, :changed, :content::jsonb, :title::jsonb)
+		$sql = 'INSERT INTO cms.nodes (uid, parent, locked, type, creator, editor, created, changed, edited, content, title)
+				VALUES (:uid, :parent, :locked, :type, :creator, :editor, :created, :changed, :changed, :content::jsonb, :title::jsonb)
 				RETURNING node';
 
 		$nodeId = $this->db()->execute($sql, $data)->one()['node'];
 
+		if ($publication !== null) {
+			$this->db()->execute(
+				'INSERT INTO cms.publications (node, published, hidden) VALUES (:node, :published, :hidden)',
+				['node' => $nodeId, ...$publication],
+			)->run();
+		}
+
 		if (is_string($handle) && trim($handle) !== '') {
 			$this->db()->execute(
-				'INSERT INTO cms.node_handles (node, handle, creator, editor) VALUES (:node, :handle, 1, 1)',
+				'INSERT INTO cms.handles (node, handle, creator) VALUES (:node, :handle, 1)',
 				['node' => $nodeId, 'handle' => trim($handle)],
 			)->run();
 		}

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Title;
 
-use Celema\Quma\Connection;
 use Celema\Quma\Database;
 use Cosray\Bootstrap;
 use Cosray\Cms;
@@ -18,13 +17,11 @@ use Cosray\Node\Types;
  * Re-materializes `nodes.title` for every live node from its stored content —
  * the backfill after the column is added and the recovery tool after imports.
  * Runs in a booted app context because resolving a title needs the node type
- * registry (title field / Contract\Title). The change and history triggers are
- * suspended so a rebuild is not recorded as a wave of edits.
+ * registry (title field / Contract\Title). It writes only the materialized
+ * title, so a rebuild records no edits and leaves `changed` alone.
  */
 class Rebuild
 {
-	private const array TRIGGERS = ['nodes_trigger_02_change', 'nodes_trigger_03_history'];
-
 	private readonly Database $db;
 	private readonly Factory $factory;
 	private readonly Resolver $resolver;
@@ -33,7 +30,6 @@ class Rebuild
 		private readonly Context $context,
 		private readonly Cms $cms,
 		private readonly Locales $locales,
-		private readonly Connection $conn,
 		Types $types,
 	) {
 		$this->db = $context->db;
@@ -46,15 +42,7 @@ class Rebuild
 	 */
 	public function run(): array
 	{
-		$classes = $this->nodeClasses();
-
-		$this->toggleTriggers('DISABLE');
-
-		try {
-			return $this->rebuild($classes);
-		} finally {
-			$this->toggleTriggers('ENABLE');
-		}
+		return $this->rebuild($this->nodeClasses());
 	}
 
 	/**
@@ -151,15 +139,5 @@ class Rebuild
 		}
 
 		return $map;
-	}
-
-	private function toggleTriggers(string $action): void
-	{
-		foreach (self::TRIGGERS as $trigger) {
-			$sql = "ALTER TABLE /*:cms.prefix:*/nodes {$action} TRIGGER /*:cms.obj:*/{$trigger}";
-			$sql = $this->conn->config->placeholders?->compileSql($sql, __FILE__) ?? $sql;
-
-			$this->db->execute($sql)->run();
-		}
 	}
 }

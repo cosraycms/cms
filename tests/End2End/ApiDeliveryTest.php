@@ -291,15 +291,14 @@ final class ApiDeliveryTest extends End2EndTestCase
 		$this->page('updated', ['en' => 'Updated'], '/updated');
 		$this->page('withdrawn', ['en' => 'Withdrawn'], '/withdrawn');
 		$this->page('later', ['en' => 'Later'], '/later');
-		// The change trigger stamps every update; set the times without it.
-		$this->db()->execute('ALTER TABLE cms.nodes DISABLE TRIGGER USER')->run();
 		$this->db()->execute("UPDATE cms.nodes SET changed = '2026-01-01T00:00:00Z' WHERE uid = 'unchanged'")->run();
 		$this->db()->execute(
 			"UPDATE cms.nodes SET changed = '2026-06-01T00:00:00.250Z' WHERE uid IN ('updated', 'withdrawn')",
 		)->run();
-		$this->db()->execute("UPDATE cms.nodes SET published = false WHERE uid = 'withdrawn'")->run();
+		$this->db()->execute(
+			"UPDATE cms.publications SET published = false WHERE node = (SELECT node FROM cms.nodes WHERE uid = 'withdrawn')",
+		)->run();
 		$this->db()->execute("UPDATE cms.nodes SET changed = '2026-06-01T00:00:00.750Z' WHERE uid = 'later'")->run();
-		$this->db()->execute('ALTER TABLE cms.nodes ENABLE TRIGGER USER')->run();
 
 		$pages = [];
 		$query = ['type' => 'test-page', 'changedSince' => '2026-03-01T00:00:00Z', 'limit' => '1'];

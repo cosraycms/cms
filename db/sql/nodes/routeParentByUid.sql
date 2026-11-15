@@ -6,7 +6,7 @@ SELECT
 	n.content
 FROM
 	/*:cms.prefix:*/nodes n
-	LEFT JOIN /*:cms.prefix:*/node_handles h ON
+	LEFT JOIN /*:cms.prefix:*/handles h ON
 		h.node = n.node
 WHERE
 	n.uid = :uid

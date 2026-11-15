@@ -72,8 +72,11 @@ $type = (int) $db->query("INSERT INTO cms.types (handle) VALUES ('media-page') R
 
 foreach (['focal', 'crop', 'texts', 'strict', 'gallery', 'video', 'restore', 'later', 'stages'] as $name) {
 	$node = $db->prepare(
-		'INSERT INTO cms.nodes (uid, published, hidden, locked, type, creator, editor, content, title)
-		VALUES (:uid, true, false, false, :type, 1, 1, :content, :title) RETURNING node',
+		'WITH n AS (
+			INSERT INTO cms.nodes (uid, locked, type, creator, editor, content, title)
+			VALUES (:uid, false, :type, 1, 1, :content, :title) RETURNING node
+		), p AS (INSERT INTO cms.publications (node, published) SELECT node, true FROM n)
+		SELECT node FROM n',
 	);
 	$node->execute([
 		'uid' => "browser{$name}",
@@ -87,8 +90,11 @@ foreach (['focal', 'crop', 'texts', 'strict', 'gallery', 'video', 'restore', 'la
 
 $type = (int) $db->query("INSERT INTO cms.types (handle) VALUES ('article') RETURNING type")->fetchColumn();
 $node = $db->prepare(
-	'INSERT INTO cms.nodes (uid, published, hidden, locked, type, creator, editor, content, title)
-	VALUES (:uid, true, false, false, :type, 1, 1, :content, :title) RETURNING node',
+	'WITH n AS (
+		INSERT INTO cms.nodes (uid, locked, type, creator, editor, content, title)
+		VALUES (:uid, false, :type, 1, 1, :content, :title) RETURNING node
+	), p AS (INSERT INTO cms.publications (node, published) SELECT node, true FROM n)
+	SELECT node FROM n',
 );
 $node->execute([
 	'uid' => 'browserarticle',

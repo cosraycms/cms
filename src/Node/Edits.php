@@ -11,9 +11,9 @@ use Celema\Quma\Database;
  * restoring them. Content and settings have the shapes of a working copy
  * but are neither validated nor live.
  */
-final class Autosaves
+final class Edits
 {
-	/** Autosaves untouched for this long are pruned when a new one starts. */
+	/** Edits untouched for this long are pruned when new ones start. */
 	public const int DAYS = 14;
 
 	public function __construct(
@@ -30,7 +30,7 @@ final class Autosaves
 	 */
 	public function get(int $node, int $editor): ?array
 	{
-		$row = $this->db->autosaves->get(['node' => $node, 'editor' => $editor])->first();
+		$row = $this->db->edits->get(['node' => $node, 'editor' => $editor])->first();
 
 		if (!$row) {
 			return null;
@@ -54,7 +54,7 @@ final class Autosaves
 	public function save(int $node, int $editor, string $base, array $content, array $settings): void
 	{
 		$saved = $this->db
-			->autosaves
+			->edits
 			->upsert([
 				'node' => $node,
 				'editor' => $editor,
@@ -65,12 +65,12 @@ final class Autosaves
 			->first();
 
 		if ($saved !== null && (bool) $saved['created']) {
-			$this->db->autosaves->prune(['days' => self::DAYS])->run();
+			$this->db->edits->prune(['days' => self::DAYS])->run();
 		}
 	}
 
 	public function delete(int $node, int $editor): void
 	{
-		$this->db->autosaves->delete(['node' => $node, 'editor' => $editor])->run();
+		$this->db->edits->delete(['node' => $node, 'editor' => $editor])->run();
 	}
 }

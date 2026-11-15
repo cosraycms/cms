@@ -230,10 +230,14 @@ final class PanelDashboardTest extends End2EndTestCase
 		bool $deleted = false,
 	): void {
 		$this->db()->execute(
-			'INSERT INTO cms.nodes
-				(uid, published, hidden, locked, type, creator, editor, created, changed, deleted, content, title)
-			 VALUES
-				(:uid, :published, false, false, :type, 1, 1, :changed, :changed, :deleted, :content::jsonb, :title::jsonb)',
+			'WITH n AS (
+				INSERT INTO cms.nodes
+					(uid, locked, type, creator, editor, created, changed, edited, deleted, content, title)
+				VALUES
+					(:uid, false, :type, 1, 1, :changed, :changed, :changed, :deleted, :content::jsonb, :title::jsonb)
+				RETURNING node
+			)
+			INSERT INTO cms.publications (node, published) SELECT node, :published FROM n',
 			[
 				'uid' => $uid,
 				'published' => $published,

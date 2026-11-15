@@ -372,7 +372,7 @@ The mail comes from the template `cosray/password-reset`. A file `cosray/passwor
 
 ### Node permissions
 
-A node type maps the actions `read`, `create`, `change` and `delete` to permissions. By default, routable types read with `read-pages`, which the default policy grants to `everyone`, and other types with `read-nodes`, which editors, admins and superusers hold; every write needs `edit-nodes`. `read` covers published, undeleted nodes, while any other state takes the type's `change` permission.
+A node type maps the actions `read`, `create`, `change` and `delete` to permissions. By default, routable types read with `read-pages`, which the default policy grants to `everyone`, and other types with `read-nodes`, which editors, admins and superusers hold; every write needs `edit-nodes`. `read` covers published, undeleted nodes, while any other state takes the type's `change` permission. A record is never published, so only `change` reads it.
 
 ```php
 #[Permission(['read' => 'read-pages'])] // a type without a route that anyone may read

@@ -214,7 +214,7 @@ final class TitleMaterializationTest extends IntegrationTestCase
 		$context = $this->createContext();
 		$cms = new Cms($context, Services::withDefaults());
 
-		return new Rebuild($context, $cms, $this->titleLocales(), $this->conn(), new Types())->run();
+		return new Rebuild($context, $cms, $this->titleLocales(), new Types())->run();
 	}
 
 	private function titleLocales(): Locales
@@ -250,8 +250,8 @@ final class TitleMaterializationTest extends IntegrationTestCase
 	private function historyCount(string $uid): int
 	{
 		return (int) $this->db()->execute(
-			'SELECT count(*) AS c FROM cms.nodes_history h
-				JOIN cms.nodes n ON n.node = h.node WHERE n.uid = :uid',
+			'SELECT count(*) AS c FROM cms.events e
+				JOIN cms.nodes n ON n.node = e.node WHERE n.uid = :uid',
 			['uid' => $uid],
 		)->one()['c'];
 	}

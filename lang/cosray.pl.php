@@ -485,6 +485,7 @@ return [
 		'node:locked-descendant' => 'Jeden z wpisów podrzędnych jest zablokowany.',
 		'node:new-entry' => 'Nowy wpis:',
 		'node:parent-not-string' => 'Wpis nadrzędny musi być podany jako uid w postaci ciągu znaków',
+		'node:record-publication' => 'Rekord nie jest publikowany.',
 		'node:reserved-path' => 'Ścieżka URL :path jest zarezerwowana przez system; wybierz inną',
 		'node:uid-immutable' => 'Nie można zmienić uid wpisu',
 		'node:unpublished' => 'Nieopublikowany',

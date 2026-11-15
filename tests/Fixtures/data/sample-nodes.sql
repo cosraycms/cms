@@ -15,12 +15,10 @@ BEGIN
     SELECT type INTO test_block_type FROM cms.types WHERE handle = 'test-block' LIMIT 1;
 
     -- Test homepage
-    INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, content)
+    INSERT INTO cms.nodes (uid, parent, locked, type, creator, editor, content)
     VALUES (
         'test-homepage',
         NULL,
-        true,
-        false,
         false,
         test_home_type,
         1,  -- System user
@@ -56,12 +54,10 @@ BEGIN
     ON CONFLICT DO NOTHING;
 
     -- Test article 1 (published)
-    INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, content)
+    INSERT INTO cms.nodes (uid, parent, locked, type, creator, editor, content)
     VALUES (
         'test-article-1',
         NULL,
-        true,
-        false,
         false,
         test_article_type,
         1,
@@ -86,12 +82,10 @@ BEGIN
     ON CONFLICT (uid) DO NOTHING;
 
     -- Test article 2 (unpublished/draft)
-    INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, content)
+    INSERT INTO cms.nodes (uid, parent, locked, type, creator, editor, content)
     VALUES (
         'test-article-2',
         NULL,
-        false,  -- unpublished
-        false,
         false,
         test_article_type,
         1,
@@ -116,12 +110,10 @@ BEGIN
     ON CONFLICT (uid) DO NOTHING;
 
     -- Test block
-    INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, content)
+    INSERT INTO cms.nodes (uid, parent, locked, type, creator, editor, content)
     VALUES (
         'test-block-1',
         NULL,
-        true,
-        false,
         false,
         test_block_type,
         1,
@@ -137,4 +129,8 @@ BEGIN
         )
     )
     ON CONFLICT (uid) DO NOTHING;
+
+    INSERT INTO cms.publications (node, published, hidden)
+    SELECT n.node, v.published, v.hidden FROM cms.nodes n
+    JOIN (VALUES ('test-homepage', true, false), ('test-article-1', true, false), ('test-article-2', false, false), ('test-block-1', true, false)) AS v(uid, published, hidden) ON v.uid = n.uid;
 END $$;

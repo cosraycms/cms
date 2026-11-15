@@ -16,6 +16,9 @@ use Cosray\User;
  * `create`, `change` and `delete` to permissions through `#[Permission]`;
  * actions it leaves out keep the defaults. `read` covers published,
  * undeleted nodes; any other state takes the type's `change` permission.
+ * A record is never published, so only `change` reads it: its missing
+ * publication row keeps it out of live queries, and the type check here
+ * keeps it out even where a stale row is left.
  */
 final class NodeAccess
 {
@@ -89,7 +92,7 @@ final class NodeAccess
 	{
 		$inner = Wrapper::unwrap($node);
 
-		return $this->allows($user, self::live($inner) ? self::READ : self::CHANGE, $inner::class);
+		return $this->allows($user, $this->live($inner) ? self::READ : self::CHANGE, $inner::class);
 	}
 
 	/**
@@ -106,7 +109,7 @@ final class NodeAccess
 		foreach ($this->registered() as $handle => $class) {
 			if ($this->allows($user, self::CHANGE, $class)) {
 				$any[] = $handle;
-			} elseif ($this->allows($user, self::READ, $class)) {
+			} elseif (!$this->record($class) && $this->allows($user, self::READ, $class)) {
 				$live[] = $handle;
 			}
 		}
@@ -147,8 +150,18 @@ final class NodeAccess
 		return is_string($declared) && $declared !== '' || is_array($declared) && ($declared[self::READ] ?? '') !== '';
 	}
 
-	private static function live(object $node): bool
+	private function live(object $node): bool
 	{
-		return (bool) Factory::meta($node, 'published') && Factory::meta($node, 'deleted') === null;
+		return (
+			!$this->record($node::class)
+				&& (bool) Factory::meta($node, 'published')
+				&& Factory::meta($node, 'deleted') === null
+		);
+	}
+
+	/** @param class-string $class */
+	private function record(string $class): bool
+	{
+		return (bool) $this->types->get($class, 'record', false);
 	}
 }

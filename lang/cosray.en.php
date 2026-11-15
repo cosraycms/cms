@@ -469,6 +469,7 @@ return [
 		'node:locked-descendant' => 'An entry below this one is locked.',
 		'node:new-entry' => 'New entry:',
 		'node:parent-not-string' => 'Parent must be a uid string',
+		'node:record-publication' => 'A record is not published.',
 		'node:reserved-path' => 'The URL path :path is reserved by the system; choose another one',
 		'node:uid-immutable' => 'The uid of an entry cannot be changed',
 		'node:unpublished' => 'Unpublished',

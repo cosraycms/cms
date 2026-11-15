@@ -16,6 +16,6 @@ SELECT
 	) AS paths
 FROM
 	/*:cms.prefix:*/nodes n
-	LEFT JOIN /*:cms.prefix:*/node_handles h ON h.node = n.node
+	LEFT JOIN /*:cms.prefix:*/handles h ON h.node = n.node
 WHERE
 	n.node = :node;

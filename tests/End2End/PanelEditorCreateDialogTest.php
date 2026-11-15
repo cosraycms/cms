@@ -57,7 +57,8 @@ final class PanelEditorCreateDialogTest extends End2EndTestCase
 		$this->assertSame('#main', $location['target']);
 		$this->assertStringStartsWith('/panel/node/dialog-created', $location['path']);
 		$row = $this->db()->execute(
-			"SELECT n.published, d.node AS draft FROM cms.nodes n LEFT JOIN cms.drafts d ON d.node = n.node
+			"SELECT p.published, d.node AS draft FROM cms.nodes n LEFT JOIN cms.drafts d ON d.node = n.node
+				LEFT JOIN cms.publications p ON p.node = n.node
 				WHERE n.uid = 'dialog-created'",
 		)->one();
 		$this->assertFalse((bool) $row['published']);

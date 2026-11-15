@@ -51,7 +51,7 @@ The field schema lists every field with its `name`, its `type` (the field class 
 
 ## Nodes
 
-A node carries `uid`, `type` (the type handle), `handle`, `parent` (a uid), `locale`, `title`, `path` (in the locale or its fallbacks), `paths` by locale, `published`, `hidden`, and `created`, `changed` and `deleted` as UTC RFC 3339 times. Paths leave out `app.url_prefix`. No user data appears.
+A node carries `uid`, `type` (the type handle), `handle`, `parent` (a uid), `locale`, `title`, `path` (in the locale or its fallbacks), `paths` by locale, `published`, `hidden`, and `created`, `changed` and `deleted` as UTC RFC 3339 times. Paths leave out `app.url_prefix`. No user data appears. A [record](content.md#publication) has no publication and carries neither `published` nor `hidden`.
 
 The resolved view, the default, adds `fields`: every value resolved for the locale, ready to render. `view=source` adds `content` instead: the stored values of every locale, without the field class, in the shape writes accept. `fields=title,teaser` limits either view to the named fields; names a node lacks are skipped.
 
@@ -117,13 +117,13 @@ URLs are root-relative and include `app.url_prefix`. An image the resize pipelin
 | `limit`, `offset` | 50 and 0 by default; at most 1000 per page |
 | `fields`, `view` | As for a single node |
 
-A list contains only nodes the client may read, whatever it asks for: anonymous clients never see an unpublished node.
+A list contains only nodes the client may read, whatever it asks for: anonymous clients never see an unpublished node. Records are never published, so only a client with their type's `change` permission reads them, and `published=false` or `published=any` lists them with the unpublished nodes.
 
 `order` defaults to the title. A leading minus sorts descending; `:number`, `:date` and `:datetime` sort a content field by its type instead of as text. Builtins are `uid`, `handle`, `type`, `title`, `created`, `changed`, `published` and `hidden`; `position` follows the manual order among siblings. The uid breaks ties, so pages stay stable.
 
 ### Syncing
 
-`changedSince=2026-10-24T08:00:00Z` starts a sync. The response lists what changed after that time, oldest change first: nodes that pass the state filters come as `items`, while nodes of the readable types that no longer pass them, because they were unpublished, hidden or deleted, come under `removed` with only their `uid`, `type` and `changed`, for the client to drop. `limit` counts both, and the response adds `cursor` and `more` instead of `total` and `offset`. While `more` is true, ask again right away with `cursor=` in place of `changedSince`; once it is false, keep the cursor and send it next time to get what changed since. A client keeping a copy, such as a static site build, needs nothing else.
+`changedSince=2026-10-24T08:00:00Z` starts a sync. The response lists what changed after that time, oldest change first: nodes that pass the state filters come as `items`, while nodes of the readable types that no longer pass them, because they were unpublished, hidden or deleted, come under `removed` with only their `uid`, `type` and `changed`, for the client to drop. A client that reads only live nodes learns nothing of records, not even under `removed`. `limit` counts both, and the response adds `cursor` and `more` instead of `total` and `offset`. While `more` is true, ask again right away with `cursor=` in place of `changedSince`; once it is false, keep the cursor and send it next time to get what changed since. A client keeping a copy, such as a static site build, needs nothing else.
 
 A sync takes the other listing parameters but `order` and `offset`: it runs in change order, to the microsecond, with the uid breaking ties, so nodes changed at the same moment are neither skipped nor repeated. A change is stamped when it is written, not when its transaction commits, so a long-running write can commit behind a cursor that already passed its time; a client that must not miss such a change starts a new sync from an earlier time now and then.
 
@@ -153,7 +153,7 @@ A filter is an object whose members must all hold. A member maps a field to a va
 
 ## Writing nodes
 
-Writes send JSON in the source view: `content` maps fields to their stored values without the field class, and `handle`, `parent`, `published`, `hidden` and `paths` set the node's members. The derived members of a read, such as `title` or `changed`, are ignored, so a node read with `view=source` can be written back as it is. Unknown members and unknown fields are refused. Writes are attributed to the token's user and go live; the response is the written node, in the view the request's `view` names, with its `ETag`.
+Writes send JSON in the source view: `content` maps fields to their stored values without the field class, and `handle`, `parent`, `published`, `hidden` and `paths` set the node's members. The derived members of a read, such as `title` or `changed`, are ignored, so a node read with `view=source` can be written back as it is. Unknown members and unknown fields are refused, and so are `published` and `hidden` for a record. Writes are attributed to the token's user and go live; the response is the written node, in the view the request's `view` names, with its `ETag`.
 
 ```json
 {
@@ -227,7 +227,7 @@ Webhooks tell other systems that content changed, such as a static site build or
 ],
 ```
 
-Events are `node.created`, `node.updated` for a live write, publishing and unpublishing included, `node.draft` when an editor's working copy is saved or dropped, and `node.deleted`; `events` takes names, `node.*` or `*`, the default. Each event is a `POST` of `{"id", "event", "at", "uid", "type"}` with `X-Cosray-Event` and `X-Cosray-Delivery` headers; with a `secret`, `X-Cosray-Signature` carries `sha256=` and the HMAC-SHA256 of the body. Read the node through the API for its new state.
+Events are `node.created`, `node.updated` for a write to the main version, publishing, listing and moving included, `node.draft` when an editor's working copy is saved or dropped, and `node.deleted`. A write fires each event once, however many changes it makes, and a creation fires only `node.created`; `events` takes names, `node.*` or `*`, the default. Each event is a `POST` of `{"id", "event", "at", "uid", "type"}` with `X-Cosray-Event` and `X-Cosray-Delivery` headers; with a `secret`, `X-Cosray-Signature` carries `sha256=` and the HMAC-SHA256 of the body. Read the node through the API for its new state.
 
 Each event becomes one job per hook on the [job queue](queue.md), under the name `webhooks`, pushed in the write's transaction: it exists only if the write commits, also when site code wraps the write in a transaction of its own or makes it in a job or a console command. By default, a request runs due jobs once its response is sent. A delivery waits two seconds for the connection and five in all. Without a response, or with a server error, a timeout (`408`) or a rate limit (`429`), it runs again later like any job, and is logged as a warning; a hook that answers with another client error fails it at once. Retried events can arrive out of order, so compare their `at`. Deliveries give up after their last attempt, so a hook that needs every change should also sync with [`changedSince`](#syncing) now and then.
 

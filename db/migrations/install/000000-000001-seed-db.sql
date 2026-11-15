@@ -57,6 +57,7 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000035-draft-history-outlives-drafts.sql', now()),
 	('000000-000036-fulltext[pgsql].sql', now()),
 	('000000-000039-user-roles-and-types.sql', now()),
+	('000000-000040-block-positions[pgsql].php', now()),
 	('000000-000041-text-blocks-to-richtext[pgsql].php', now()),
 	('000000-000042-node-positions.sql', now()),
 	('000000-000043-api-tokens.sql', now()),
@@ -67,4 +68,5 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000050-autosaves.sql', now()),
 	('000000-000051-fulltext-partial[pgsql].sql', now()),
 	('000000-000052-node-edited.sql', now()),
-	('000000-000053-draft-outcome-applied.sql', now());
+	('000000-000053-draft-outcome-applied.sql', now()),
+	('000000-000054-publications-events[pgsql].php', now());

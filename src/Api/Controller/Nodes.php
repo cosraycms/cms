@@ -267,7 +267,7 @@ final class Nodes
 			->published(null)
 			->hidden(null)
 			->deleted(null)
-			->readable([], [...$readable['live'], ...$readable['any']]);
+			->readable($readable['live'], $readable['any'], removals: true);
 
 		[$items, $removed, $last, $more] = $this->guarded($request, function () use (
 			$nodes,

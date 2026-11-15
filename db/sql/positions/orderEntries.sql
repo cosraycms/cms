@@ -2,11 +2,11 @@
 -- 1..n. Rows of entries missing from the list go, so those sort after the
 -- positioned ones again.
 DELETE FROM
-	/*:cms.prefix:*/node_positions
+	/*:cms.prefix:*/positions
 WHERE
 	collection = :collection;
 
-INSERT INTO /*:cms.prefix:*/node_positions (node, collection, position)
+INSERT INTO /*:cms.prefix:*/positions (node, collection, position)
 SELECT
 	n.node,
 	:collection,

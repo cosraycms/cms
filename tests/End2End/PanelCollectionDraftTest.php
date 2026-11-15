@@ -217,7 +217,7 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 
 	private function published(string $uid): bool
 	{
-		return (bool) $this->db()->execute('SELECT published FROM cms.nodes WHERE uid = :uid', [
+		return (bool) $this->db()->execute('SELECT p.published FROM cms.nodes n LEFT JOIN cms.publications p ON p.node = n.node WHERE n.uid = :uid', [
 			'uid' => $uid,
 		])->one()['published'];
 	}

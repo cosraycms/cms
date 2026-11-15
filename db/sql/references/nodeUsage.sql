@@ -2,7 +2,7 @@ SELECT
 	r.owner_type AS "ownerType",
 	r.owner_uid AS "ownerUid",
 	t.handle AS "nodeType",
-	n.published,
+	p.published,
 	COALESCE(
 		n.content -> 'title' -> 'value',
 		m.data -> 'title',
@@ -12,6 +12,7 @@ FROM
 	/*:cms.prefix:*/node_references r
 	LEFT JOIN /*:cms.prefix:*/nodes n ON r.owner_type IN ('node', 'draft') AND n.uid = r.owner_uid
 	LEFT JOIN /*:cms.prefix:*/types t ON t.type = n.type
+	LEFT JOIN /*:cms.prefix:*/publications p ON p.node = n.node
 	LEFT JOIN /*:cms.prefix:*/menu_items m ON r.owner_type = 'menu' AND m.item = r.owner_uid
 	LEFT JOIN /*:cms.prefix:*/users u ON r.owner_type = 'user' AND u.uid = r.owner_uid
 WHERE

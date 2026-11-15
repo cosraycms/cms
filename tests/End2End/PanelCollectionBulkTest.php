@@ -564,10 +564,11 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		);
 
 		$copy = $this->db()->execute(
-			"SELECT n.uid, n.published, n.locked, n.parent,
+			"SELECT n.uid, p.published, n.locked, n.parent,
 				n.content->'title'->'value'->>'en' AS title_en,
 				n.content->'title'->'value'->>'de' AS title_de
 			FROM cms.nodes n
+			LEFT JOIN cms.publications p ON p.node = n.node
 			WHERE n.type = :type AND n.uid <> 'bulk-dup-source'",
 			['type' => $this->parentTypeId],
 		)->one();
@@ -579,7 +580,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->assertSame('Dup Source (Copy)', $copy['title_en']);
 		$this->assertSame('Dup Quelle (Kopie)', $copy['title_de']);
 		$handles = $this->db()->execute(
-			"SELECT count(*) AS count FROM cms.node_handles WHERE handle LIKE 'bulk-dup-source%'",
+			"SELECT count(*) AS count FROM cms.handles WHERE handle LIKE 'bulk-dup-source%'",
 		)->one();
 		$this->assertSame(1, (int) $handles['count']);
 	}
@@ -611,9 +612,9 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			['type' => $this->parentTypeId],
 		)->one();
 		$childCopy = $this->db()->execute(
-			"SELECT node, published,
-				content->'title'->'value'->>'en' AS title
-			FROM cms.nodes WHERE parent = :parent",
+			"SELECT n.node, p.published,
+				n.content->'title'->'value'->>'en' AS title
+			FROM cms.nodes n LEFT JOIN cms.publications p ON p.node = n.node WHERE n.parent = :parent",
 			['parent' => $rootCopy['node']],
 		)->one();
 		$grandchildCopy = $this->db()->execute(
@@ -848,7 +849,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 	private function nodeFlag(string $uid, string $flag): bool
 	{
 		$row = $this->db()->execute(
-			"SELECT {$flag} FROM cms.nodes WHERE uid = :uid",
+			"SELECT {$flag} FROM cms.nodes n LEFT JOIN cms.publications p ON p.node = n.node WHERE n.uid = :uid",
 			['uid' => $uid],
 		)->one();
 

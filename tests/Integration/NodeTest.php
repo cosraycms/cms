@@ -30,7 +30,7 @@ final class NodeTest extends IntegrationTestCase
 		]);
 
 		$node = $this->db()->execute(
-			'SELECT * FROM cms.nodes WHERE node = :id',
+			'SELECT n.*, p.published, p.hidden FROM cms.nodes n LEFT JOIN cms.publications p USING (node) WHERE n.node = :id',
 			['id' => $nodeId],
 		)->one();
 
@@ -54,7 +54,7 @@ final class NodeTest extends IntegrationTestCase
 		]);
 
 		$node = $this->db()->execute(
-			'SELECT * FROM cms.nodes WHERE node = :id',
+			'SELECT n.*, p.published, p.hidden FROM cms.nodes n LEFT JOIN cms.publications p USING (node) WHERE n.node = :id',
 			['id' => $nodeId],
 		)->one();
 
@@ -153,7 +153,7 @@ final class NodeTest extends IntegrationTestCase
 		$this->createTestNode(['uid' => 'query-node-3', 'type' => $typeId, 'published' => false]);
 
 		$nodes = $this->db()->execute(
-			'SELECT * FROM cms.nodes WHERE type = :type AND published = true ORDER BY node',
+			'SELECT n.* FROM cms.nodes n JOIN cms.publications p USING (node) WHERE n.type = :type AND p.published = true ORDER BY node',
 			['type' => $typeId],
 		)->all();
 

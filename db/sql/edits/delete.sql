@@ -1,5 +1,5 @@
 DELETE FROM
-	/*:cms.prefix:*/autosaves
+	/*:cms.prefix:*/edits
 WHERE
 	node = :node
 	AND editor = :editor;

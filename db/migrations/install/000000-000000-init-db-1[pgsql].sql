@@ -1,3 +1,8 @@
+-- Table names: a table is named by what one row is, in the plural, without
+-- an owner prefix (`nodes`, `revisions`, `events`, `handles`). A link table
+-- names both sides (`node_tags`), and a qualifier stays where the bare noun
+-- misleads (`url_paths`, `full_text`, `auth_tokens`).
+
 -- Statement time, not transaction time: the history tables key their rows
 -- by `changed`, and two writes to one row inside a transaction must both
 -- keep theirs.
@@ -175,16 +180,15 @@ CREATE TABLE /*:cms.prefix:*/nodes (
 	uid text NOT NULL,
 	parent bigint,
 	version integer NOT NULL DEFAULT 1,
-	published boolean DEFAULT false NOT NULL,
-	hidden boolean DEFAULT false NOT NULL,
 	locked boolean DEFAULT false NOT NULL,
 	type bigint NOT NULL,
 	creator bigint NOT NULL,
 	editor bigint NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
+	-- The time of the last action on the node, which API clients sync by.
+	-- The store sets it and `edited`, when the main version changed last,
+	-- from the events it records.
 	changed timestamp with time zone NOT NULL DEFAULT now(),
-	-- When the content, title, parent or deletion changed last; publishing,
-	-- listing and locking leave it alone. Unsaved edits are based on it.
 	edited timestamp with time zone NOT NULL DEFAULT now(),
 	deleted timestamp with time zone,
 	content jsonb NOT NULL,
@@ -215,69 +219,45 @@ CREATE INDEX /*:cms.obj:*/ix_nodes_content ON /*:cms.prefix:*/nodes USING GIN (c
 -- Manual orders. A row places a node either among the children of
 -- `parent` or at the top level of the collection with the handle
 -- `collection`; every scope keeps its own order, so one node can hold a
--- position in several. Positions are structure rather than content: they
--- are written outside `nodes`, so reordering creates no history row and
--- leaves `changed` alone. Collections live in code, hence the plain
+-- position in several. Positions are structure rather than content:
+-- reordering records no event and leaves `changed` alone. Collections live in code, hence the plain
 -- handle without a foreign key.
-CREATE TABLE /*:cms.prefix:*/node_positions (
+CREATE TABLE /*:cms.prefix:*/positions (
 	node bigint NOT NULL,
 	parent bigint,
 	collection text,
 	position integer NOT NULL,
-	CONSTRAINT /*:cms.obj:*/fk_node_positions_nodes FOREIGN KEY (node)
+	CONSTRAINT /*:cms.obj:*/fk_positions_nodes FOREIGN KEY (node)
 		REFERENCES /*:cms.prefix:*/nodes (node) ON DELETE CASCADE,
-	CONSTRAINT /*:cms.obj:*/fk_node_positions_parent FOREIGN KEY (parent)
+	CONSTRAINT /*:cms.obj:*/fk_positions_parent FOREIGN KEY (parent)
 		REFERENCES /*:cms.prefix:*/nodes (node) ON DELETE CASCADE,
-	CONSTRAINT /*:cms.obj:*/ck_node_positions_scope CHECK ((parent IS NULL) <> (collection IS NULL))
+	CONSTRAINT /*:cms.obj:*/ck_positions_scope CHECK ((parent IS NULL) <> (collection IS NULL))
 );
-CREATE UNIQUE INDEX /*:cms.obj:*/ux_node_positions_parent
-	ON /*:cms.prefix:*/node_positions (parent, node) WHERE parent IS NOT NULL;
-CREATE UNIQUE INDEX /*:cms.obj:*/ux_node_positions_collection
-	ON /*:cms.prefix:*/node_positions (collection, node) WHERE collection IS NOT NULL;
-CREATE INDEX /*:cms.obj:*/ix_node_positions_node ON /*:cms.prefix:*/node_positions (node);
+CREATE UNIQUE INDEX /*:cms.obj:*/ux_positions_parent
+	ON /*:cms.prefix:*/positions (parent, node) WHERE parent IS NOT NULL;
+CREATE UNIQUE INDEX /*:cms.obj:*/ux_positions_collection
+	ON /*:cms.prefix:*/positions (collection, node) WHERE collection IS NOT NULL;
+CREATE INDEX /*:cms.obj:*/ix_positions_node ON /*:cms.prefix:*/positions (node);
 
 
-CREATE TABLE /*:cms.prefix:*/node_handles (
+CREATE TABLE /*:cms.prefix:*/handles (
 	handle text NOT NULL,
 	node bigint NOT NULL,
 	creator bigint NOT NULL,
-	editor bigint NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
-	changed timestamp with time zone NOT NULL DEFAULT now(),
-	CONSTRAINT /*:cms.obj:*/pk_node_handles PRIMARY KEY (handle),
-	CONSTRAINT /*:cms.obj:*/uc_node_handles_node UNIQUE (node),
-	CONSTRAINT /*:cms.obj:*/fk_node_handles_nodes FOREIGN KEY (node)
+	CONSTRAINT /*:cms.obj:*/pk_handles PRIMARY KEY (handle),
+	CONSTRAINT /*:cms.obj:*/uc_handles_node UNIQUE (node),
+	CONSTRAINT /*:cms.obj:*/fk_handles_nodes FOREIGN KEY (node)
 		REFERENCES /*:cms.prefix:*/nodes (node) ON DELETE CASCADE,
-	CONSTRAINT /*:cms.obj:*/fk_node_handles_users_creator FOREIGN KEY (creator)
+	CONSTRAINT /*:cms.obj:*/fk_handles_users_creator FOREIGN KEY (creator)
 		REFERENCES /*:cms.prefix:*/users (usr),
-	CONSTRAINT /*:cms.obj:*/fk_node_handles_users_editor FOREIGN KEY (editor)
-		REFERENCES /*:cms.prefix:*/users (usr),
-	CONSTRAINT /*:cms.obj:*/ck_node_handles_handle CHECK (
+	CONSTRAINT /*:cms.obj:*/ck_handles_handle CHECK (
 		-- Handles can become filesystem directory names, so keep them path-safe and block "..".
 		handle ~ '^(?!.*[.][.])[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?$'
 	)
 );
-CREATE TRIGGER /*:cms.obj:*/node_handles_trigger_01_change BEFORE UPDATE ON /*:cms.prefix:*/node_handles
-	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_changed_column();
 
 
-CREATE FUNCTION /*:cms.prefix:*/record_node_history()
-	RETURNS TRIGGER AS $$
-BEGIN
-	INSERT INTO /*:cms.prefix:*/nodes_history (
-		node, parent, version, changed, published, hidden, locked,
-		type, editor, deleted, content
-	) VALUES (
-		OLD.node, OLD.parent, OLD.version, OLD.changed, OLD.published, OLD.hidden, OLD.locked,
-		OLD.type, OLD.editor, OLD.deleted, OLD.content
-	);
-
-	RETURN OLD;
-EXCEPTION WHEN unique_violation THEN
-	RAISE WARNING 'Duplicate node history row skipped. node: %, changed: %', OLD.node, OLD.changed;
-	RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
 CREATE FUNCTION /*:cms.prefix:*/prevent_node_uid_update()
 	RETURNS TRIGGER AS $$
 BEGIN
@@ -290,29 +270,42 @@ END;
 $$ LANGUAGE plpgsql;
 CREATE TRIGGER /*:cms.obj:*/nodes_trigger_01_uid BEFORE UPDATE OF uid ON /*:cms.prefix:*/nodes
 	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/prevent_node_uid_update();
-CREATE TRIGGER /*:cms.obj:*/nodes_trigger_02_change BEFORE UPDATE ON /*:cms.prefix:*/nodes
-	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_changed_column();
-CREATE FUNCTION /*:cms.prefix:*/update_node_edited()
-	RETURNS TRIGGER AS $$
-BEGIN
-	IF (NEW.parent, NEW.type, NEW.content, NEW.title, NEW.deleted)
-		IS NOT DISTINCT FROM (OLD.parent, OLD.type, OLD.content, OLD.title, OLD.deleted)
-		AND (NEW.published, NEW.hidden, NEW.locked) IS DISTINCT FROM (OLD.published, OLD.hidden, OLD.locked)
-	THEN
-		NEW.edited = OLD.edited;
-	ELSE
-		NEW.edited = NEW.changed;
-	END IF;
 
-	RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
--- Runs after the change trigger, whose time it takes.
-CREATE TRIGGER /*:cms.obj:*/nodes_trigger_04_edited BEFORE UPDATE ON /*:cms.prefix:*/nodes
-	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_node_edited();
-CREATE TRIGGER /*:cms.obj:*/nodes_trigger_03_history AFTER UPDATE
-	ON /*:cms.prefix:*/nodes FOR EACH ROW EXECUTE FUNCTION
-	/*:cms.prefix:*/record_node_history();
+
+-- Publication of the nodes of every type that has it: a record has no row.
+-- A node without a row reads as neither published nor hidden.
+CREATE TABLE /*:cms.prefix:*/publications (
+	node bigint NOT NULL,
+	published boolean NOT NULL DEFAULT false,
+	hidden boolean NOT NULL DEFAULT false,
+	CONSTRAINT /*:cms.obj:*/pk_publications PRIMARY KEY (node),
+	CONSTRAINT /*:cms.obj:*/fk_publications_nodes FOREIGN KEY (node)
+		REFERENCES /*:cms.prefix:*/nodes (node) ON DELETE CASCADE
+);
+
+
+-- Who did what to a node when, one row per action, written by the store
+-- with the change it records. `data` holds what the action needs besides,
+-- such as the parents of a move.
+CREATE TABLE /*:cms.prefix:*/events (
+	event bigint GENERATED ALWAYS AS IDENTITY,
+	node bigint NOT NULL,
+	at timestamp with time zone NOT NULL DEFAULT clock_timestamp(),
+	actor bigint NOT NULL,
+	action text NOT NULL,
+	data jsonb NOT NULL DEFAULT '{}',
+	CONSTRAINT /*:cms.obj:*/pk_events PRIMARY KEY (event),
+	CONSTRAINT /*:cms.obj:*/fk_events_nodes FOREIGN KEY (node)
+		REFERENCES /*:cms.prefix:*/nodes (node) ON DELETE CASCADE,
+	CONSTRAINT /*:cms.obj:*/fk_events_users FOREIGN KEY (actor)
+		REFERENCES /*:cms.prefix:*/users (usr),
+	CONSTRAINT /*:cms.obj:*/ck_events_action CHECK (action IN (
+		'created', 'saved', 'drafted', 'applied', 'discarded',
+		'published', 'unpublished', 'hidden', 'shown',
+		'moved', 'deleted', 'restored', 'locked', 'unlocked'
+	))
+);
+CREATE INDEX /*:cms.obj:*/ix_events_node ON /*:cms.prefix:*/events (node, event);
 
 
 CREATE TABLE /*:cms.prefix:*/full_text (
@@ -487,22 +480,22 @@ CREATE TRIGGER /*:cms.obj:*/drafts_trigger_01_history AFTER UPDATE OR DELETE
 -- never live. `content` and `settings` keep the shapes of the `drafts`
 -- columns, so content migrations rewrite them the same way. `base` is the
 -- `changed` of the node or working copy the edits started from.
-CREATE TABLE /*:cms.prefix:*/autosaves (
+CREATE TABLE /*:cms.prefix:*/edits (
 	node bigint NOT NULL,
 	editor bigint NOT NULL,
 	changed timestamp with time zone NOT NULL DEFAULT now(),
 	base timestamp with time zone NOT NULL,
 	content jsonb NOT NULL,
 	settings jsonb NOT NULL DEFAULT '{}',
-	CONSTRAINT /*:cms.obj:*/pk_autosaves PRIMARY KEY (node, editor),
-	CONSTRAINT /*:cms.obj:*/fk_autosaves_nodes FOREIGN KEY (node)
+	CONSTRAINT /*:cms.obj:*/pk_edits PRIMARY KEY (node, editor),
+	CONSTRAINT /*:cms.obj:*/fk_edits_nodes FOREIGN KEY (node)
 		REFERENCES /*:cms.prefix:*/nodes (node) ON DELETE CASCADE,
-	CONSTRAINT /*:cms.obj:*/fk_autosaves_users FOREIGN KEY (editor)
+	CONSTRAINT /*:cms.obj:*/fk_edits_users FOREIGN KEY (editor)
 		REFERENCES /*:cms.prefix:*/users (usr) ON DELETE CASCADE
 );
-CREATE INDEX /*:cms.obj:*/ix_autosaves_changed ON /*:cms.prefix:*/autosaves (changed);
-CREATE TRIGGER /*:cms.obj:*/autosaves_trigger_01_change BEFORE UPDATE
-	ON /*:cms.prefix:*/autosaves
+CREATE INDEX /*:cms.obj:*/ix_edits_changed ON /*:cms.prefix:*/edits (changed);
+CREATE TRIGGER /*:cms.obj:*/edits_trigger_01_change BEFORE UPDATE
+	ON /*:cms.prefix:*/edits
 	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_changed_column();
 
 

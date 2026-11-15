@@ -95,7 +95,7 @@ final class NodeWriterTest extends IntegrationTestCase
 
 		$result = $writer->create($prepared);
 		$stored = $this->db()->execute(
-			'SELECT uid, published, content FROM cms.nodes WHERE uid = :uid',
+			'SELECT n.uid, p.published, n.content FROM cms.nodes n LEFT JOIN cms.publications p ON p.node = n.node WHERE n.uid = :uid',
 			['uid' => 'writer-console-node'],
 		)->one();
 		$content = json_decode((string) $stored['content'], true);
@@ -126,7 +126,7 @@ final class NodeWriterTest extends IntegrationTestCase
 		return ['system default' => [false], 'explicit actor' => [true]];
 	}
 
-	public function testHistoricalMetadataSurvivesCreationAndEntersHistoryOnEdit(): void
+	public function testHistoricalMetadataSurvivesCreationAndDatesTheEvents(): void
 	{
 		$creator = new Actor($this->createTestUser(['uid' => 'writer-creator']));
 		$editor = new Actor($this->createTestUser(['uid' => 'writer-editor']));
@@ -142,12 +142,13 @@ final class NodeWriterTest extends IntegrationTestCase
 		$this->assertEquals($created, new DateTimeImmutable($row['created']));
 		$this->assertEquals($changed, new DateTimeImmutable($row['changed']));
 		$this->assertSame(
-			[],
-			$this->db()->execute(
-				'SELECT * FROM cms.nodes_history WHERE node = :node',
-				['node' => $row['node']],
-			)->all(),
+			[['action' => 'created', 'actor' => $editor->id]],
+			array_map(
+				static fn(array $event): array => ['action' => $event['action'], 'actor' => $event['actor']],
+				$this->events($row['node']),
+			),
 		);
+		$this->assertEquals($created, new DateTimeImmutable($this->events($row['node'])[0]['at']));
 
 		$factory = $this->cms->nodeFactory();
 		$node = $factory->create(PlainBlock::class, $this->context, $this->cms, [
@@ -173,14 +174,20 @@ final class NodeWriterTest extends IntegrationTestCase
 		$this->assertSame($row['created'], $edited['created']);
 		$this->assertSame(Actor::system()->id, $edited['editor']);
 		$this->assertGreaterThanOrEqual(new DateTimeImmutable($before), new DateTimeImmutable($edited['changed']));
-		$history = $this->db()->execute(
-			'SELECT editor, changed, content FROM cms.nodes_history WHERE node = :node',
-			['node' => $row['node']],
+		$events = $this->events($row['node']);
+		$this->assertSame(['created', 'saved'], array_column($events, 'action'));
+		$this->assertSame(Actor::system()->id, $events[1]['actor']);
+		$this->assertSame($edited['changed'], $events[1]['at']);
+		$this->assertSame($edited['changed'], $edited['edited']);
+	}
+
+	/** @return list<array<string, mixed>> */
+	private function events(int $node): array
+	{
+		return $this->db()->execute(
+			'SELECT action, actor, at FROM cms.events WHERE node = :node ORDER BY event',
+			['node' => $node],
 		)->all();
-		$this->assertCount(1, $history);
-		$this->assertSame($editor->id, $history[0]['editor']);
-		$this->assertSame($row['changed'], $history[0]['changed']);
-		$this->assertSame('Imported', json_decode($history[0]['content'], true)['content']['value']['zxx']);
 	}
 
 	public function testCreatorOverrideLeavesTheDefaultEditorAndDatesAlone(): void
@@ -254,7 +261,7 @@ final class NodeWriterTest extends IntegrationTestCase
 		$this->assertSame(
 			'footer',
 			$this->db()->execute(
-				'SELECT handle FROM cms.node_handles WHERE node = (SELECT node FROM cms.nodes WHERE uid = :uid)',
+				'SELECT handle FROM cms.handles WHERE node = (SELECT node FROM cms.nodes WHERE uid = :uid)',
 				['uid' => 'writer-handle'],
 			)->one()['handle'],
 		);

@@ -1,4 +1,4 @@
 DELETE FROM
-	/*:cms.prefix:*/autosaves
+	/*:cms.prefix:*/edits
 WHERE
 	changed < now() - make_interval(days => :days);

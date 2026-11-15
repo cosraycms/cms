@@ -183,7 +183,7 @@ final class NodePositionsTest extends IntegrationTestCase
 	private function rows(): array
 	{
 		return $this->db()->execute(
-			'SELECT n.uid AS node, p.position FROM cms.node_positions p
+			'SELECT n.uid AS node, p.position FROM cms.positions p
 			INNER JOIN cms.nodes n ON n.node = p.node
 			ORDER BY p.position',
 		)->all();

@@ -61,8 +61,9 @@ final class Nodes implements Iterator
 			'deleted' => 'n.deleted',
 			'id' => 'n.uid',
 			'locked' => 'n.locked',
-			'published' => 'n.published',
-			'hidden' => 'n.hidden',
+			// A node without a publication row, a record, is neither.
+			'published' => 'coalesce(p.published, false)',
+			'hidden' => 'coalesce(p.hidden, false)',
 			'parent' => 'np.uid',
 			'routable' => $this->typeFlagExpression(
 				/** @param class-string $class */
@@ -102,12 +103,14 @@ final class Nodes implements Iterator
 
 	/**
 	 * Only what a reader may see: nodes of the `$any` types in every state,
-	 * nodes of the `$live` types when published and not deleted.
+	 * nodes of the `$live` types when published and not deleted. With
+	 * `$removals`, the `$live` types' nodes come in every state as long as
+	 * they have publication, so a sync can report those that went away.
 	 *
 	 * @param list<string> $live type handles
 	 * @param list<string> $any type handles
 	 */
-	public function readable(array $live, array $any): self
+	public function readable(array $live, array $any, bool $removals = false): self
 	{
 		$in = fn(array $handles): string => (
 			't.handle IN ('
@@ -121,7 +124,8 @@ final class Nodes implements Iterator
 		}
 
 		if ($live !== []) {
-			$conditions[] = '(' . $in($live) . ' AND n.published AND n.deleted IS NULL)';
+			$conditions[] =
+				'(' . $in($live) . ($removals ? ' AND p.node IS NOT NULL)' : ' AND p.published AND n.deleted IS NULL)');
 		}
 
 		$this->addWhere($conditions === [] ? 'FALSE' : '(' . implode(' OR ', $conditions) . ')');
@@ -351,16 +355,15 @@ final class Nodes implements Iterator
 
 	/**
 	 * Narrows to the nodes in one stage of the panel's status: `draft` for a
-	 * working copy, `mine` for the user's own autosave, and `unpublished`
-	 * for a node visitors do not see. Records have no publication.
+	 * working copy, `mine` for the user's own unsaved edits, and
+	 * `unpublished` for a node with publication that visitors do not see.
 	 */
 	public function stage(string $stage, int $user): self
 	{
-		$record = $this->recordExpression();
 		$this->addWhere(match ($stage) {
 			'draft' => 'd.node IS NOT NULL',
-			'mine' => "EXISTS (SELECT 1 FROM /*:cms.prefix:*/autosaves m WHERE m.node = n.node AND m.editor = {$user})",
-			'unpublished' => "(NOT n.published AND NOT ({$record}))",
+			'mine' => "EXISTS (SELECT 1 FROM /*:cms.prefix:*/edits m WHERE m.node = n.node AND m.editor = {$user})",
+			'unpublished' => 'p.published = false',
 			default => throw new RuntimeException("Unknown status stage '{$stage}'"),
 		});
 

@@ -32,6 +32,27 @@ class Store
 {
 	private const int CREATE_UID_ATTEMPTS = 5;
 
+	/** The webhook event each action fires. */
+	private const array HOOKS = [
+		'created' => 'node.created',
+		'saved' => 'node.updated',
+		'applied' => 'node.updated',
+		'published' => 'node.updated',
+		'unpublished' => 'node.updated',
+		'hidden' => 'node.updated',
+		'shown' => 'node.updated',
+		'moved' => 'node.updated',
+		'drafted' => 'node.draft',
+		'discarded' => 'node.draft',
+		'deleted' => 'node.deleted',
+	];
+
+	/** Actions that leave `changed` alone. */
+	private const array UNDATED = ['drafted', 'discarded', 'locked', 'unlocked'];
+
+	/** Actions that change the main version, and so `edited`. */
+	private const array EDITS = ['created', 'saved', 'applied'];
+
 	private readonly RoutePathGenerator $routePathGenerator;
 	private readonly References\Scanner $scanner;
 	private readonly References\Sync $sync;
@@ -65,28 +86,25 @@ class Store
 	}
 
 	/**
-	 * Writes the live row. A pending working copy is left alone: this is
-	 * the API path, and the editor's publish() is what supersedes a draft.
+	 * Writes the main version directly. A pending working copy is left
+	 * alone: this is the API path, and the editor's apply() is what
+	 * supersedes a draft.
 	 *
 	 * @param array<string, mixed> $data
 	 * @return array{success: true, uid: string}
 	 */
-	public function save(
-		object $node,
-		array $data,
-		Locales $locales,
-		Actor $actor,
-		bool $create = false,
-	): array {
+	public function save(object $node, array $data, Locales $locales, Actor $actor): array
+	{
 		$this->fulltext->validate($locales);
-		$data = $this->prepare($node, $data, $locales, $create);
+		$data = $this->prepare($node, $data, $locales);
 
-		$this->transaction(function () use ($node, $data, $actor, $locales, $create): void {
+		$this->transaction(function () use ($node, $data, $actor, $locales): void {
 			$this->lock($data['uid']);
-
-			if ($this->persist($node, $data, $actor->id, $locales, $create)) {
-				$this->event($create ? 'node.created' : 'node.updated', $node, $data['uid']);
-			}
+			$changes = $this->persist($node, $data, $actor->id, $locales);
+			$this->record($node, $changes['node'], $data['uid'], $actor, [
+				...($changes['edited'] ? [['saved']] : []),
+				...$changes['actions'],
+			]);
 		}, 'Error while saving: ');
 
 		return ['success' => true, 'uid' => $data['uid']];
@@ -108,16 +126,18 @@ class Store
 
 		$this->transaction(function () use ($node, $data, $locales, $actor, $nodeId): void {
 			$this->lock($data['uid']);
-			$changed = $this->persist($node, $data, $actor->id, $locales);
+			$changes = $this->persist($node, $data, $actor->id, $locales);
+			$edited = $changes['edited'];
 
 			if ($this->drafts->delete($nodeId, applied: true)) {
 				$this->sync->remove('draft', $data['uid']);
-				$changed = true;
+				$edited = true;
 			}
 
-			if ($changed) {
-				$this->event('node.updated', $node, $data['uid']);
-			}
+			$this->record($node, $nodeId, $data['uid'], $actor, [
+				...($edited ? [[$this->holdsDrafts($node) ? 'applied' : 'saved']] : []),
+				...$changes['actions'],
+			]);
 		}, 'Error while applying: ');
 
 		return ['success' => true, 'uid' => $data['uid']];
@@ -149,43 +169,30 @@ class Store
 			$this->lock($data['uid']);
 
 			if ($this->drafts->matchesLive($nodeId, $content, $handle, $paths)) {
-				$changed = $this->drafts->delete($nodeId);
-
-				if ($changed) {
+				if ($this->drafts->delete($nodeId)) {
 					$this->sync->remove('draft', $data['uid']);
+					$this->record($node, $nodeId, $data['uid'], $actor, [['discarded']]);
 				}
-			} else {
-				$changed = $this->drafts->save(
-					$nodeId,
-					$content,
-					['handle' => $handle, 'paths' => $paths],
-					$actor->id,
-				);
-
-				if ($changed) {
-					$this->sync->replace('draft', $data['uid'], $this->scanner->scan($content));
-				}
-			}
-
-			if ($changed) {
-				$this->event('node.draft', $node, $data['uid']);
+			} elseif ($this->drafts->save($nodeId, $content, ['handle' => $handle, 'paths' => $paths], $actor->id)) {
+				$this->sync->replace('draft', $data['uid'], $this->scanner->scan($content));
+				$this->record($node, $nodeId, $data['uid'], $actor, [['drafted']]);
 			}
 		}, 'Error while saving the working copy: ');
 
 		return ['success' => true, 'uid' => $data['uid']];
 	}
 
-	public function discard(object $node): void
+	public function discard(object $node, Actor $actor): void
 	{
 		$nodeId = $this->nodeId($node);
 		$uid = (string) Factory::meta($node, 'uid');
 
-		$this->transaction(function () use ($node, $nodeId, $uid): void {
+		$this->transaction(function () use ($node, $nodeId, $uid, $actor): void {
 			$this->lock($uid);
 
 			if ($this->drafts->delete($nodeId)) {
 				$this->sync->remove('draft', $uid);
-				$this->event('node.draft', $node, $uid);
+				$this->record($node, $nodeId, $uid, $actor, [['discarded']]);
 			}
 		}, 'Error while discarding: ');
 	}
@@ -193,29 +200,28 @@ class Store
 	/** Publishes the node or withdraws it, leaving its content and working copy alone. */
 	public function published(object $node, bool $published, Actor $actor): void
 	{
-		$uid = (string) Factory::meta($node, 'uid');
-
-		$this->transaction(function () use ($node, $uid, $published, $actor): void {
-			$this->lock($uid);
-			$this->db->nodes->setPublished(['uid' => $uid, 'published' => $published, 'editor' => $actor->id])->run();
-			$this->event('node.updated', $node, $uid);
-		}, 'Error while publishing: ');
+		$this->switch($node, $actor, published: $published);
 	}
 
 	/** Hides the node from listings or shows it again, applied immediately. */
 	public function hide(object $node, bool $hidden, Actor $actor): void
 	{
-		$uid = (string) Factory::meta($node, 'uid');
+		$this->switch($node, $actor, hidden: $hidden);
+	}
 
-		$this->transaction(function () use ($node, $uid, $hidden, $actor): void {
+	private function switch(object $node, Actor $actor, ?bool $published = null, ?bool $hidden = null): void
+	{
+		$this->assertPublication($node, (bool) $published, (bool) $hidden);
+		$uid = (string) Factory::meta($node, 'uid');
+		$nodeId = $this->nodeId($node);
+
+		$this->transaction(function () use ($node, $uid, $nodeId, $published, $hidden, $actor): void {
 			$this->lock($uid);
-			$this->db->nodes->setHidden([
-				'node' => $this->nodeId($node),
-				'hidden' => $hidden,
-				'editor' => $actor->id,
-			])->run();
-			$this->event('node.updated', $node, $uid);
-		}, 'Error while hiding the node: ');
+
+			if ($this->hasPublication($node)) {
+				$this->record($node, $nodeId, $uid, $actor, $this->persistPublication($nodeId, $published, $hidden));
+			}
+		}, 'Error while publishing: ');
 	}
 
 	/**
@@ -330,17 +336,113 @@ class Store
 	}
 
 	/**
-	 * Queues the webhook deliveries of a write inside its transaction, so
-	 * they commit or roll back with it. A descendant deleted with its parent
-	 * is reported with the parent's type.
+	 * Records the actions of a write as events, all at the same time, and
+	 * dates the node by it; `edited` and the editor move only with the main
+	 * version.
+	 * The webhook deliveries are queued in the same transaction, each event
+	 * once per write; a node's creation stands for its other changes. A
+	 * descendant deleted with its parent is reported with the parent's type.
+	 *
+	 * @param list<array{0: string, 1?: array<string, mixed>}> $actions
+	 * @param ?string $at the time of the actions, the current time without it
+	 * @param ?string $stamp the time the node is dated by instead, for imports
 	 */
-	private function event(string $event, object $node, string $uid): void
-	{
+	private function record(
+		object $node,
+		int $nodeId,
+		string $uid,
+		Actor $actor,
+		array $actions,
+		?string $at = null,
+		?string $stamp = null,
+	): void {
+		$hooks = [];
+
+		foreach ($actions as $action) {
+			$at = (string) $this->db->events->record([
+				'node' => $nodeId,
+				'actor' => $actor->id,
+				'action' => $action[0],
+				'data' => json_encode((object) ($action[1] ?? [])),
+				'at' => $at,
+			])->one()['at'];
+			$hooks[self::HOOKS[$action[0]] ?? ''] = true;
+		}
+
+		$names = array_column($actions, 0);
+
+		if ($at !== null && array_diff($names, self::UNDATED) !== []) {
+			$this->db->nodes->stamp([
+				'node' => $nodeId,
+				'at' => $stamp ?? $at,
+				'edited' => array_intersect($names, self::EDITS) !== [],
+				'editor' => $actor->id,
+			])->run();
+		}
+
+		unset($hooks['']);
+
+		if (isset($hooks['node.created'])) {
+			$hooks = ['node.created' => true];
+		}
+
 		$container = $this->context?->container;
 		$webhooks = $container !== null && $container->has(Webhooks::class) ? $container->get(Webhooks::class) : null;
 
-		if ($webhooks instanceof Webhooks) {
-			$webhooks->record($event, ['uid' => $uid, 'type' => (string) $this->types->get($node::class, 'handle')]);
+		if (!$webhooks instanceof Webhooks) {
+			return;
+		}
+
+		foreach (array_keys($hooks) as $hook) {
+			$webhooks->record($hook, ['uid' => $uid, 'type' => (string) $this->types->get($node::class, 'handle')]);
+		}
+	}
+
+	/**
+	 * Writes the node's publication and returns the actions it took: a
+	 * null value keeps the stored one.
+	 *
+	 * @return list<array{0: string}>
+	 */
+	private function persistPublication(int $nodeId, ?bool $published, ?bool $hidden): array
+	{
+		$row = $this->db
+			->publications
+			->save([
+				'node' => $nodeId,
+				'published' => $published,
+				'hidden' => $hidden,
+			])
+			->first();
+
+		if ($row === null) {
+			return [];
+		}
+
+		$actions = [];
+		$was = static fn(mixed $value): bool => (bool) $value;
+
+		if ((bool) $row['published'] !== $was($row['was_published'])) {
+			$actions[] = [(bool) $row['published'] ? 'published' : 'unpublished'];
+		}
+
+		if ((bool) $row['hidden'] !== $was($row['was_hidden'])) {
+			$actions[] = [(bool) $row['hidden'] ? 'hidden' : 'shown'];
+		}
+
+		return $actions;
+	}
+
+	/** Records have no publication: they are private and never live. */
+	public function hasPublication(object $node): bool
+	{
+		return !(bool) $this->types->get($node::class, 'record', false);
+	}
+
+	private function assertPublication(object $node, bool $published, bool $hidden): void
+	{
+		if (($published || $hidden) && !$this->hasPublication($node)) {
+			throw new HttpBadRequest(payload: ['message' => __('node:record-publication')]);
 		}
 	}
 
@@ -406,8 +508,23 @@ class Store
 				$prepared = $this->prepare($node, $data, $locales, create: true);
 				$this->transaction(function () use ($node, $prepared, $actor, $locales, $metadata): void {
 					$this->lock($prepared['uid']);
-					$this->persist($node, $prepared, $actor->id, $locales, create: true, metadata: $metadata);
-					$this->event('node.created', $node, $prepared['uid']);
+					$changes = $this->persist(
+						$node,
+						$prepared,
+						$actor->id,
+						$locales,
+						create: true,
+						metadata: $metadata,
+					);
+					$this->record(
+						$node,
+						$changes['node'],
+						$prepared['uid'],
+						$actor,
+						[['created'], ...$changes['actions']],
+						at: $changes['created'][0] ?? null,
+						stamp: $changes['created'][1] ?? null,
+					);
 				}, 'Error while saving: ');
 
 				return ['success' => true, 'uid' => $prepared['uid']];
@@ -444,11 +561,12 @@ class Store
 			$this->lock($uid);
 
 			foreach ($uids as $deleteUid) {
+				$nodeId = (int) $this->db->nodes->id(['uid' => $deleteUid])->one()['node'];
 				$this->db->nodes->delete([
 					'uid' => $deleteUid,
 					'editor' => $actor->id,
 				])->run();
-				$this->event('node.deleted', $node, $deleteUid);
+				$this->record($node, $nodeId, $deleteUid, $actor, [['deleted']]);
 			}
 		}, 'Error while deleting: ');
 
@@ -527,11 +645,13 @@ class Store
 	}
 
 	/**
-	 * Writes what differs from the stored node and says whether anything
-	 * did: the row, the handle or a URL path.
+	 * Writes what differs from the stored node: whether the main version
+	 * changed (content, title, handle or a URL path), and the actions of the
+	 * other changes, a move and the publication.
 	 *
 	 * @param array{creator?: int, created?: ?string, changed?: ?string} $metadata
 	 * @param array<mixed> $data
+	 * @return array{node: int, created: ?array{string, string}, edited: bool, actions: list<array{0: string, 1?: array<string, mixed>}>}
 	 */
 	private function persist(
 		object $node,
@@ -540,17 +660,36 @@ class Store
 		Locales $locales,
 		bool $create = false,
 		array $metadata = [],
-	): bool {
+	): array {
+		$this->assertPublication($node, (bool) ($data['published'] ?? false), (bool) ($data['hidden'] ?? false));
 		$parentUid = $this->resolveParentUid($node, $data);
 		$parentId = $this->resolveParentId($parentUid);
 		$handle = $this->resolveHandle($data);
 
-		// Materialize the title alongside the content so both ride one UPDATE
-		// (a single change/history record instead of two).
+		// Materialize the title alongside the content so both ride one UPDATE.
 		$data['title'] = $this->materializeTitle($node, $data, $locales);
 
-		[$nodeId, $rowChanged] = $this->persistNode($node, $data, $editor, $parentId, $create, $metadata);
+		[$nodeId, $rowChanged, $left, $created] = $this->persistNode(
+			$node,
+			$data,
+			$editor,
+			$parentId,
+			$create,
+			$metadata,
+		);
 		$handleChanged = $this->persistHandle($nodeId, $handle, $editor);
+		$actions = $left === false ? [] : [['moved', ['from' => $left, 'to' => $parentUid]]];
+
+		if ($this->hasPublication($node)) {
+			$actions = [
+				...$actions,
+				...$this->persistPublication(
+					$nodeId,
+					(bool) ($data['published'] ?? false),
+					(bool) ($data['hidden'] ?? false),
+				),
+			];
+		}
 
 		if (!$create) {
 			$this->db->positions->leaveParent(['node' => $nodeId, 'parent' => $parentId])->run();
@@ -578,12 +717,12 @@ class Store
 			$pathsChanged = $this->pathManager->persist($this->db, $data, $editor, $nodeId, $locales);
 		}
 
-		// `changed` dates the whole node, which API clients sync by.
-		if (!$rowChanged && ($handleChanged || $pathsChanged)) {
-			$this->db->nodes->touch(['node' => $nodeId, 'editor' => $editor])->run();
-		}
-
-		return $rowChanged || $handleChanged || $pathsChanged;
+		return [
+			'node' => $nodeId,
+			'created' => $created,
+			'edited' => $rowChanged || $handleChanged || $pathsChanged,
+			'actions' => $actions,
+		];
 	}
 
 	/**
@@ -661,11 +800,13 @@ class Store
 	}
 
 	/**
-	 * The node id, and whether the row changed.
+	 * The node id, whether the content or title changed, the uid of the
+	 * parent the node left, null for the top level, or false when it
+	 * stayed, and the creation and change time of a new node.
 	 *
 	 * @param array{creator?: int, created?: ?string, changed?: ?string} $metadata
 	 * @param array<mixed> $data
-	 * @return array{int, bool}
+	 * @return array{int, bool, string|null|false, ?array{string, string}}
 	 */
 	private function persistNode(
 		object $node,
@@ -681,8 +822,6 @@ class Store
 		$params = [
 			'uid' => $data['uid'],
 			'parent' => $parent,
-			'hidden' => $data['hidden'],
-			'published' => $data['published'],
 			'locked' => $data['locked'],
 			'type' => $handle,
 			'content' => json_encode($data['content']),
@@ -697,16 +836,19 @@ class Store
 				->save([
 					'node' => $nodeId,
 					'parent' => $params['parent'],
-					'hidden' => $params['hidden'],
-					'published' => $params['published'],
 					'locked' => $params['locked'],
 					'content' => $params['content'],
 					'title' => $params['title'],
-					'editor' => $params['editor'],
 				])
 				->first();
 
-			return [$nodeId, $saved !== null];
+			if ($saved === null) {
+				return [$nodeId, false, false, null];
+			}
+
+			$left = is_string($saved['left']) ? $saved['left'] : null;
+
+			return [$nodeId, (bool) $saved['edited'], (bool) $saved['moved'] ? $left : false, null];
 		}
 
 		$result = $this->db
@@ -725,7 +867,7 @@ class Store
 			]);
 		}
 
-		return [(int) $result['node'], true];
+		return [(int) $result['node'], true, false, [(string) $result['created'], (string) $result['changed']]];
 	}
 
 	/** Whether the handle changed. */

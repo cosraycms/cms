@@ -251,7 +251,7 @@ final class ApiReadTest extends End2EndTestCase
 			'title' => ['type' => Text::class, 'value' => ['zxx' => 'Parent']],
 		]);
 		$this->db()->execute(
-			"INSERT INTO cms.node_handles (node, handle, creator, editor) VALUES (:node, 'the-parent', 1, 1)",
+			"INSERT INTO cms.handles (node, handle, creator) VALUES (:node, 'the-parent', 1)",
 			['node' => $parent],
 		)->run();
 		$this->createTestNode([
