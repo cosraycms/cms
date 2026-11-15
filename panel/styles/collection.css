@@ -64,9 +64,9 @@
 
 		/* Like a chosen status filter, so a narrowed list says so at a glance. */
 		&[data-active] {
-			border-color: var(--cms-color-text);
-			background: var(--cms-color-text);
-			color: var(--cms-color-surface);
+			border-color: var(--cms-color-accent);
+			background: var(--cms-color-surface);
+			box-shadow: inset 0 0 0 0.5px var(--cms-color-accent);
 		}
 	}
 

@@ -729,22 +729,11 @@ button.cms-status-dots .cms-status-dots-tooltip {
 			outline-offset: var(--cms-focus-offset);
 		}
 
+		/* Outlined like a selected item elsewhere in the panel. */
 		&[aria-current='true'] {
-			border-color: var(--cms-color-text);
-			background: var(--cms-color-text);
-			color: var(--cms-color-surface);
-
-			/* The chip inverts the theme: the mark keeps the page's surface under
-			   its tint so it reads as it does everywhere else. */
-			& .cms-stage-mark {
-				background-color: var(--cms-color-surface);
-				background-image: linear-gradient(var(--fill) 0 0);
-			}
-
-			& .cms-stage-filters-count {
-				color: inherit;
-				opacity: 0.75;
-			}
+			border-color: var(--cms-color-accent);
+			background: var(--cms-color-surface);
+			box-shadow: inset 0 0 0 0.5px var(--cms-color-accent);
 		}
 	}
 
