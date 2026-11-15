@@ -588,7 +588,9 @@
 		background: none;
 	}
 
-	&:hover .cms-list-title {
+	& .cms-list-row.is-rail-head .cms-list-title::after,
+	& .cms-list-row.is-rail-lit .cms-list-title::before,
+	& .cms-list-guide.is-lit {
 		--line: var(--cms-color-text-faint);
 	}
 

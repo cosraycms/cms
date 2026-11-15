@@ -46,6 +46,7 @@ import { install as installContentLocales } from './behaviors/content-locales.js
 import { install as installCsrf } from './behaviors/csrf.js';
 import { install as installDialogs } from './behaviors/dialogs.js';
 import { install as installTransport } from './behaviors/transport.js';
+import { install as installTreeRail } from './behaviors/tree-rail.js';
 import { install as installVisibility } from './behaviors/visibility.js';
 import { install as installWhen } from './behaviors/when.js';
 import { install as installYoutube } from './behaviors/youtube.js';
@@ -146,6 +147,7 @@ installFallbacks();
 installPaths();
 installBulk();
 installCollectionOrder();
+installTreeRail();
 installMenu();
 installMenuTree();
 installMenuKeys();

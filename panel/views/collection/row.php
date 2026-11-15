@@ -75,7 +75,7 @@ $titleGrip = $bulk ? '' : $grip;
 				<div class="cms-list-title<?= $treeMode ? '' : ' is-flat' ?>">
 					<?php if ($treeMode): ?>
 						<?php foreach ((array) ($row['guides'] ?? []) as $guide): ?>
-							<span class="cms-list-guide" style="--guide-depth: <?= (int) $guide ?>" aria-hidden="true"></span>
+							<span class="cms-list-guide" style="--guide-depth: <?= (int) $guide ?>" data-guide="<?= (int) $guide ?>" aria-hidden="true"></span>
 						<?php endforeach ?>
 						<?php if ($row['childrenUrl'] !== null): ?>
 							<a
