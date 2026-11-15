@@ -32,12 +32,12 @@ final class TestSortedCollection implements Columns, Entries
 			Column::new('Name', static fn(Wrapper $node): string => $node->lastName . ', ' . $node->firstName)
 				->sort('name', fields: ['lastName', 'firstName'], default: true),
 			Column::new('Amount', 'amount')->sort('amount', fields: [SortField::number('amount')]),
-			Column::new('Start', 'start')->date(true)->sort(
+			Column::date('Start', 'start')->sort(
 				'start',
 				fields: [SortField::dateTime('start')],
 				direction: 'desc',
 			),
-			Column::new('Created', 'meta.created')->date(true)->sort('created', direction: 'desc'),
+			Column::created('Created'),
 			Column::editor(),
 		];
 	}

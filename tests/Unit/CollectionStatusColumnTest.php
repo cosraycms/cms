@@ -162,7 +162,7 @@ final class CollectionStatusColumnTest extends TestCase
 		);
 	}
 
-	/** @param list<Column|StatusColumn> $columns */
+	/** @param list<Column> $columns */
 	private function table(
 		array $columns,
 		bool $draft = false,
@@ -186,7 +186,7 @@ final class CollectionStatusColumnTest extends TestCase
 				'mine' => $mine ? ['changed' => '2026-08-11 22:35:00+00', 'base' => 1] : null,
 			],
 			'columns' => array_map(
-				static fn(Column|StatusColumn $column): array => $column instanceof Column ? ['value' => 'Entry'] : [],
+				static fn(Column $column): array => $column instanceof StatusColumn ? [] : ['value' => 'Entry'],
 				$columns,
 			),
 		];

@@ -103,7 +103,7 @@ final class CollectionUserColumnTest extends TestCase
 		return Column::user('Editor', static fn(): Avatar => $avatar);
 	}
 
-	/** @param list<Column|UserColumn> $columns */
+	/** @param list<Column> $columns */
 	private function table(array $columns): CollectionTable
 	{
 		$node = new Wrapper(new stdClass(), [], new Types());
@@ -113,7 +113,7 @@ final class CollectionUserColumnTest extends TestCase
 			[[
 				'uid' => 'entry',
 				'columns' => array_map(
-					static fn(Column|UserColumn $column): array => (
+					static fn(Column $column): array => (
 						$column instanceof UserColumn
 							? $column->get($node)
 							: ['value' => 'Entry']

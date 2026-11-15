@@ -49,7 +49,7 @@ final class CollectionTable
 	) {}
 
 	/**
-	 * @param iterable<Column|StatusColumn|UserColumn> $columns
+	 * @param iterable<Column> $columns
 	 * @param iterable<mixed> $nodes
 	 */
 	public static function from(
@@ -82,7 +82,7 @@ final class CollectionTable
 	 * has a slot for each of its stages, but none for drafts in a
 	 * collection of types without them.
 	 *
-	 * @param iterable<Column|StatusColumn|UserColumn> $columns
+	 * @param iterable<Column> $columns
 	 * @return list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}>
 	 */
 	private static function headers(
@@ -96,7 +96,7 @@ final class CollectionTable
 
 		foreach ($columns as $column) {
 			if ($column instanceof StatusColumn) {
-				$label = $column->label();
+				$label = $column->title;
 				$headers[] = [
 					'label' => $label,
 					'name' => $label !== '' ? $label : __('collection:status'),
@@ -122,7 +122,7 @@ final class CollectionTable
 
 			$label = $column->title;
 			// A manually ordered top level has no column order to offer.
-			$sort = $arranged || !$column instanceof Column ? null : $column->sort;
+			$sort = $arranged ? null : $column->sort;
 			$isSorted = $sort !== null && $sort->key === $urls->query->sort;
 			$nextDir = $sort?->direction;
 			$ariaSort = null;
@@ -334,7 +334,7 @@ final class CollectionTable
 				'label' => $label,
 				'value' => self::displayValue(
 					$value,
-					(bool) ($column['date'] ?? false),
+					$header !== null && $header['kind'] === 'date',
 					$locale,
 					$timezone,
 				),

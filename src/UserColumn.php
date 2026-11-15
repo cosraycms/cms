@@ -7,13 +7,14 @@ namespace Cosray;
 use Closure;
 use Cosray\Node\Wrapper;
 use Cosray\User\Avatar;
+use Override;
 
 /**
  * A listing column of a user, made by Column::editor(), Column::creator()
  * or Column::user(): the avatar and the name, or either alone. As the first
  * column, which links the entry, it shows the name alone.
  */
-final class UserColumn
+final class UserColumn extends Column
 {
 	/** What the cells show: avatar and name, or either alone. */
 	public private(set) string $look = 'both';
@@ -22,9 +23,11 @@ final class UserColumn
 
 	/** @param 'editor'|'creator'|Closure(Wrapper): (User|Avatar|null) $user */
 	public function __construct(
-		public readonly string $title,
+		string $title,
 		private readonly string|Closure $user,
-	) {}
+	) {
+		$this->title = $title;
+	}
 
 	/** The avatar alone, the name its tooltip and accessible name. */
 	public function avatar(): self
@@ -56,12 +59,14 @@ final class UserColumn
 		return $this;
 	}
 
+	#[Override]
 	public function kind(): string
 	{
 		return 'user';
 	}
 
 	/** @return array{value: ?Avatar, bold: bool, italic: bool} */
+	#[Override]
 	public function get(Wrapper $node): array
 	{
 		return ['value' => $this->value($node), 'bold' => $this->bold, 'italic' => $this->italic];

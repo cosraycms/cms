@@ -29,15 +29,11 @@ final class AllContent implements Entries, Columns
 	public function columns(): array
 	{
 		return [
-			Column::new(__('collection:column-title'), 'title')->bold(true)->sort('title'),
+			Column::new(__('collection:column-title'), 'title')->bold()->sort('title'),
 			Column::new(__('collection:column-type'), 'meta.name'),
 			Column::editor(),
-			Column::new(__('collection:column-created'), 'meta.created')
-				->date(true)
-				->sort('created', direction: 'desc'),
-			Column::new(__('collection:column-changed'), 'meta.changed')
-				->date(true)
-				->sort('changed', direction: 'desc', default: true),
+			Column::created(),
+			Column::changed()->sort('changed', direction: 'desc', default: true),
 		];
 	}
 }

@@ -6,38 +6,46 @@ namespace Cosray;
 
 use Closure;
 use Cosray\Collection\Sort;
-use Cosray\Finder\SortField;
-use Cosray\Node\Factory;
 use Cosray\Node\Wrapper;
+use Cosray\User\Avatar;
 
-final class Column
+/**
+ * A listing column of a collection. The factories pick its kind: text,
+ * date, user or status.
+ */
+abstract class Column
 {
-	private bool|Closure $bold = false;
-	private bool|Closure $italic = false;
-	private bool|Closure $badge = false;
-	private bool|Closure $date = false;
-	public private(set) ?Sort $sort = null;
-	private string $color = '';
+	public protected(set) string $title;
+	public protected(set) ?Sort $sort = null;
 
-	public function __construct(
-		public readonly string $title,
-		public readonly string|Closure $field,
-	) {}
-
-	public static function new(
-		string $title,
-		string|Closure $field,
-	): self {
-		return new self($title, $field);
+	/** @param string|Closure(Wrapper): mixed $field */
+	public static function new(string $title, string|Closure $field): TextColumn
+	{
+		return new TextColumn($title, $field);
 	}
 
-	/**
-	 * A column of a node's stages, all of them unless named. Placed
-	 * anywhere, it replaces the one a listing adds after its first column.
-	 */
-	public static function status(Stage ...$stages): StatusColumn
+	/** @param string|Closure(Wrapper): mixed $field */
+	public static function date(string $title, string|Closure $field): DateColumn
 	{
-		return new StatusColumn(...$stages);
+		return new DateColumn($title, $field);
+	}
+
+	/** When the entry was last changed, latest first when sorted by it. */
+	public static function changed(?string $title = null): DateColumn
+	{
+		return new DateColumn($title ?? __('collection:column-changed'), 'meta.changed')->sort(
+			'changed',
+			direction: 'desc',
+		);
+	}
+
+	/** When the entry was created, latest first when sorted by it. */
+	public static function created(?string $title = null): DateColumn
+	{
+		return new DateColumn($title ?? __('collection:column-created'), 'meta.created')->sort(
+			'created',
+			direction: 'desc',
+		);
 	}
 
 	/** The user who last changed the entry. */
@@ -52,10 +60,19 @@ final class Column
 		return new UserColumn($title ?? __('collection:column-creator'), 'creator');
 	}
 
-	/** @param Closure(Wrapper): (User|User\Avatar|null) $user */
+	/** @param Closure(Wrapper): (User|Avatar|null) $user */
 	public static function user(string $title, Closure $user): UserColumn
 	{
 		return new UserColumn($title, $user);
+	}
+
+	/**
+	 * A column of a node's stages, all of them unless named. Placed
+	 * anywhere, it replaces the one a listing adds after its first column.
+	 */
+	public static function status(Stage ...$stages): StatusColumn
+	{
+		return new StatusColumn(...$stages);
 	}
 
 	/**
@@ -67,124 +84,18 @@ final class Column
 	public static function defaults(): array
 	{
 		return [
-			self::new(__('collection:column-title'), 'title')->bold(true)->sort('title'),
-			self::new(__('collection:column-changed'), 'meta.changed')
-				->date(true)
-				->sort(
-					'changed',
-					direction: 'desc',
-				),
+			self::new(__('collection:column-title'), 'title')->bold()->sort('title'),
+			self::changed(),
 		];
 	}
 
-	public function bold(bool|Closure $bold): self
-	{
-		$this->bold = $bold;
-
-		return $this;
-	}
-
-	public function italic(bool|Closure $italic): self
-	{
-		$this->italic = $italic;
-
-		return $this;
-	}
-
-	public function badge(bool|Closure $badge): self
-	{
-		$this->badge = $badge;
-
-		return $this;
-	}
-
-	public function date(bool|Closure $date): self
-	{
-		$this->date = $date;
-
-		return $this;
-	}
+	/** What the column holds, for the listing to size its track and format its cells by. */
+	abstract public function kind(): string;
 
 	/**
-	 * @param non-empty-list<string|SortField>|null $fields
-	 * @param bool $default Whether the listing starts in this order; without
-	 *                      a flagged column it starts in the first sortable one
+	 * The cell of a node: its value and styles.
+	 *
+	 * @return array<string, mixed>
 	 */
-	public function sort(
-		?string $key,
-		?array $fields = null,
-		string $direction = 'asc',
-		bool $default = false,
-	): self {
-		$this->sort = $key === null ? null : new Sort(trim($key), $fields, $direction, $default);
-
-		return $this;
-	}
-
-	/**
-	 * What the column holds, for the listing to size its track by. A date needs
-	 * room a number does not, and a badge sizes to its own text. Flags resolved
-	 * per node cannot be answered for the column as a whole, so they count as
-	 * text — the safe assumption, since text is what shrinks gracefully.
-	 */
-	public function kind(): string
-	{
-		if ($this->date === true) {
-			return 'date';
-		}
-
-		if ($this->badge === true) {
-			return 'badge';
-		}
-
-		return 'text';
-	}
-
-	/** @return array<string, mixed> */
-	public function get(Wrapper $node): array
-	{
-		return [
-			'value' => is_string($this->field)
-				? $this->getValue($node, $this->field)
-				: ($this->field)($node),
-			'bold' => is_bool($this->bold) ? $this->bold : ($this->bold)($node),
-			'italic' => is_bool($this->italic) ? $this->italic : ($this->italic)($node),
-			'badge' => is_bool($this->badge) ? $this->badge : ($this->badge)($node),
-			'date' => is_bool($this->date) ? $this->date : ($this->date)($node),
-			'color' => $this->color,
-		];
-	}
-
-	private function getValue(Wrapper $node, string $field): mixed
-	{
-		$inner = Wrapper::unwrap($node);
-
-		switch ($field) {
-			case 'title':
-				return $node->label();
-			case 'meta.name':
-				return $node->meta->name;
-			case 'meta.uid':
-			case 'meta.published':
-			case 'meta.hidden':
-			case 'meta.locked':
-			case 'meta.created':
-			case 'meta.changed':
-			case 'meta.deleted':
-			case 'meta.content':
-			case 'meta.handle':
-				$key = explode('.', $field)[1];
-
-				return $node->meta->get($key);
-			case 'meta.class':
-				return $inner::class;
-			case 'meta.classname':
-				return basename(str_replace('\\', '/', $inner::class));
-			default:
-				$fieldObj = Factory::fieldFor($inner, $field);
-				$value = $fieldObj->value();
-
-				return $value->isset() ? (string) $value : null;
-		}
-	}
+	abstract public function get(Wrapper $node): array;
 }

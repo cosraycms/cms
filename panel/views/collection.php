@@ -9,7 +9,7 @@ $this->layout('layer/main');
 
 $page = u($page);
 
-// Track sizing per column kind. Badges and row actions size to their content
+// Track sizing per column kind. Status pills and row actions size to their content
 // because the translation decides a pill's width; the title absorbs the slack,
 // and past the sum of the floors the list scrolls sideways.
 $hasRowActions = false;
@@ -32,7 +32,7 @@ $columns = $bulk ? 'var(--cms-list-select-width)' : '';
 foreach ($page->table->headers as $header) {
 	$columns .= $header['lead'] ? ' minmax(12rem, 2fr)' : match ($header['kind']) {
 		'date' => ' minmax(9rem, auto)',
-		'badge', 'status' => ' max-content',
+		'status' => ' max-content',
 		'user' => $header['look'] === 'avatar' ? ' max-content' : ' minmax(7rem, auto)',
 		default => ' minmax(7rem, auto)',
 	};

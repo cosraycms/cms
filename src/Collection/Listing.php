@@ -17,7 +17,6 @@ use Cosray\Node\Positions;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 use Cosray\StatusColumn;
-use Cosray\UserColumn;
 
 /**
  * A registered collection as the panel lists it: its entries, columns,
@@ -29,7 +28,7 @@ use Cosray\UserColumn;
  */
 final class Listing
 {
-	/** @var list<Column|StatusColumn|UserColumn> */
+	/** @var list<Column> */
 	public readonly array $columns;
 	/** @var array<string, Sort> */
 	public readonly array $sorts;
@@ -51,9 +50,6 @@ final class Listing
 		));
 		$sorts = [];
 		foreach ($this->columns as $column) {
-			if (!$column instanceof Column) {
-				continue;
-			}
 			$sort = $column->sort;
 			if ($sort === null) {
 				continue;
@@ -72,7 +68,7 @@ final class Listing
 	 * collection placed them itself.
 	 *
 	 * @param list<mixed> $columns
-	 * @return list<Column|StatusColumn|UserColumn>
+	 * @return list<Column>
 	 */
 	private static function withStatus(array $columns): array
 	{
@@ -80,8 +76,8 @@ final class Listing
 		$placed = false;
 
 		foreach ($columns as $column) {
-			if (!$column instanceof Column && !$column instanceof StatusColumn && !$column instanceof UserColumn) {
-				throw new RuntimeException('Collection columns must be Column, StatusColumn or UserColumn objects');
+			if (!$column instanceof Column) {
+				throw new RuntimeException('Collection columns must be Column objects');
 			}
 
 			$checked[] = $column;
@@ -357,7 +353,7 @@ final class Listing
 			: [];
 
 		foreach ($this->columns as $column) {
-			$columns[] = $column instanceof StatusColumn ? [] : $column->get($node);
+			$columns[] = $column->get($node);
 		}
 
 		return [

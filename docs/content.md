@@ -203,6 +203,18 @@ The default listing shows title, the [status column](#status-columns), and last 
 
 A collection implementing `Columns` declares its own columns. `Column::defaults()` returns the default title and last-changed columns, so `[...Column::defaults(), $column]` extends them.
 
+The factory decides what a column shows:
+
+| Factory | Shows |
+| --- | --- |
+| `Column::new($title, $field)` | a field, a meta value like `meta.name`, or a closure's result, as text |
+| `Column::date($title, $field)` | the same, formatted as a date |
+| `Column::changed()`, `Column::created()` | when the entry was last changed or created, sortable latest first |
+| `Column::editor()`, `Column::creator()`, `Column::user()` | a [user](#user-columns) |
+| `Column::status()` | the entry's [stages](#status-columns) |
+
+`changed()`, `created()`, `editor()` and `creator()` take an optional title and default to a translated heading. Text, date and user columns take `bold()` and `italic()`.
+
 A column declares its own allowed sort key, order fields, and initial direction. Without `fields`, the key is also the order field. Without `direction`, the initial direction is ascending. `default: true` makes a column's sort the listing's initial order; without a flagged sort, the listing starts in the first sortable column's order:
 
 ```php
@@ -215,9 +227,8 @@ public function columns(): array
     return [
         Column::new(__('Name'), static fn(Wrapper $node): string =>
             $node->lastName . ', ' . $node->firstName
-        )->bold(true)->sort('name', fields: ['lastName', 'firstName']),
-        Column::new(__('Last changed'), 'meta.changed')
-            ->date(true)->sort('changed', direction: 'desc', default: true),
+        )->bold()->sort('name', fields: ['lastName', 'firstName']),
+        Column::changed()->sort('changed', direction: 'desc', default: true),
         Column::editor(),
     ];
 }
@@ -230,12 +241,10 @@ Declare numeric and date semantics explicitly for custom fields. Plain field str
 ```php
 Column::new(__('Amount'), 'amount')
     ->sort('amount', fields: [SortField::number('amount')]);
-Column::new(__('Publication date'), 'date')->date(true)
+Column::date(__('Publication date'), 'date')
     ->sort('date', fields: [SortField::date('date')], direction: 'desc');
-Column::new(__('Start'), 'start')->date(true)
+Column::date(__('Start'), 'start')
     ->sort('start', fields: [SortField::dateTime('start')], direction: 'desc');
-Column::new(__('Created'), 'meta.created')->date(true)
-    ->sort('created', direction: 'desc');
 ```
 
 #### User columns
@@ -265,9 +274,8 @@ public function columns(): array
 {
     return [
         Column::status(Stage::Main)->title(''),
-        Column::new(__('Title'), 'title')->bold(true)->sort('title'),
-        Column::new(__('Last changed'), 'meta.changed')
-            ->date(true)->sort('changed', direction: 'desc'),
+        Column::new(__('Title'), 'title')->bold()->sort('title'),
+        Column::changed(),
         Column::status(Stage::Draft, Stage::Mine)->title(__('Changes'))->dots(),
     ];
 }
