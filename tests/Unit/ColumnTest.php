@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Celema\Verba\Translator;
+use Celema\Verba\Verba;
 use Cosray\Column;
 use Cosray\DateColumn;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
+use Cosray\Tests\Fixtures\Node\TestHierarchyChild;
 use Cosray\Tests\TestCase;
 use stdClass;
 
@@ -24,6 +27,28 @@ final class ColumnTest extends TestCase
 			['value' => 'value', 'bold' => true, 'italic' => true],
 			$column->get(new Wrapper(new stdClass(), [], new Types())),
 		);
+	}
+
+	public function testATypeColumnShowsTheTranslatedLabel(): void
+	{
+		$dir = sys_get_temp_dir() . '/cosray-column-' . bin2hex(random_bytes(4));
+		mkdir($dir);
+		file_put_contents(
+			$dir . '/app.de.php',
+			"<?php return ['messages' => ['Hierarchy Child' => 'Hierarchie-Kind']];",
+		);
+		Verba::activate(new Translator('de', ['app' => $dir]));
+
+		try {
+			$this->assertSame(
+				'Hierarchie-Kind',
+				Column::text('Type', 'meta.name')->get(new Wrapper(new TestHierarchyChild(), [], new Types()))['value'],
+			);
+		} finally {
+			Verba::deactivate();
+			unlink($dir . '/app.de.php');
+			rmdir($dir);
+		}
 	}
 
 	public function testKindFollowsTheColumnType(): void

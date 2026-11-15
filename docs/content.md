@@ -207,7 +207,7 @@ The factory decides what a column shows:
 
 | Factory | Shows |
 | --- | --- |
-| `Column::text($title, $field)` | a field, a meta value like `meta.name`, or a closure's result, as text |
+| `Column::text($title, $field)` | a field, a meta value like `meta.name` (the type's translated label), or a closure's result, as text |
 | `Column::number($title, $field)` | the same as a number, right-aligned |
 | `Column::date($title, $field)` | the same as a date |
 | `Column::dateTime($title, $field)` | the same as a date and time |

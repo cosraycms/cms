@@ -105,7 +105,8 @@ class TextColumn extends Column
 			case 'title':
 				return $node->label();
 			case 'meta.name':
-				return $node->meta->name;
+				// A type's label is a message id, translated like everywhere else in the panel.
+				return __((string) $node->meta->name);
 			case 'meta.uid':
 			case 'meta.published':
 			case 'meta.hidden':
