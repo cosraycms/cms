@@ -59,32 +59,31 @@ $label = is_array($account) && $account['name'] === null
 						<?php endif ?>
 					</div>
 					<hr />
-					<?php if (count($panelLocales) > 1): ?>
-						<form
-							method="post"
-							action="<?= $panelPath ?>/locale"
-							hx-boost="false"
-							role="group"
-							aria-label="<?= escape(__('nav:language')) ?>">
-							<?php $this->include('component/csrf') ?>
-							<span class="cms-masthead-group-label" aria-hidden="true"><?= escape(__('nav:language')) ?></span>
-							<?php foreach ($panelLocales as $id => $title): ?>
-								<button
-									type="submit"
-									name="locale"
-									value="<?= escape($id) ?>"
-									role="menuitemradio"
-									aria-checked="<?= $id === $localeId ? 'true' : 'false' ?>"><?= escape($title) ?></button>
-							<?php endforeach ?>
-						</form>
-						<hr />
-					<?php endif ?>
 					<a href="<?= $panelPath ?>/profile" role="menuitem" hx-target="#frame"><?= escape(__('nav:profile')) ?></a>
 					<hr />
 					<form method="post" action="<?= $panelPath ?>/logout" hx-boost="false">
 						<?php $this->include('component/csrf') ?>
 						<button type="submit"><?= escape(__('nav:logout')) ?></button>
 					</form>
+					<?php if (count($panelLocales) > 1): ?>
+						<hr />
+						<form
+							class="cms-masthead-locale"
+							method="post"
+							action="<?= $panelPath ?>/locale"
+							hx-boost="false"
+							data-autosubmit>
+							<?php $this->include('component/csrf') ?>
+							<label class="cms-masthead-group-label" for="cms-masthead-locale"><?= escape(__('nav:language')) ?></label>
+							<select class="cms-select" id="cms-masthead-locale" name="locale">
+								<?php foreach ($panelLocales as $id => $title): ?>
+									<?php $selected = $id === $localeId ? ' selected' : '' ?>
+									<option value="<?= escape($id) ?>" lang="<?= escape($id) ?>"<?= $selected ?>><?= escape($title) ?></option>
+								<?php endforeach ?>
+							</select>
+							<noscript><button class="cms-button" type="submit"><?= escape(__('common:apply')) ?></button></noscript>
+						</form>
+					<?php endif ?>
 				</div>
 			</div>
 		<?php endif ?>

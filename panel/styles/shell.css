@@ -282,15 +282,12 @@
 
 	& .cms-masthead-account-menu {
 		--width: 16rem;
+	}
 
-		& [aria-checked='true'] {
-			font-weight: 500;
-
-			&::after {
-				content: '✓' / '';
-				margin-inline-start: auto;
-			}
-		}
+	& .cms-masthead-locale {
+		display: grid;
+		gap: var(--cms-space-1);
+		padding-bottom: var(--cms-space-0-5);
 	}
 
 	& .cms-masthead-identity {

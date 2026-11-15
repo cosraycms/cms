@@ -83,6 +83,7 @@ export function placement(anchor, menu, align = 'start', inside = false) {
 }
 
 const MENU = '[data-action-menu]';
+const CHOICE = 'button, a[href], select';
 let id = 0;
 /** @typedef {'first' | 'last' | false} Focus */
 
@@ -107,7 +108,7 @@ function surface(trigger) {
  * @returns {HTMLElement[]}
  */
 function choices(menu) {
-	return Array.from(menu.querySelectorAll('button, a[href]'))
+	return Array.from(menu.querySelectorAll(CHOICE))
 		.filter((item) => item instanceof HTMLElement)
 		.filter(
 			(item) =>
@@ -204,10 +205,11 @@ function toggle(event) {
 	menu.setAttribute('role', 'menu');
 	menu.setAttribute('aria-labelledby', trigger.id);
 	menu.tabIndex = -1;
-	for (const item of /** @type {NodeListOf<HTMLElement>} */ (
-		menu.querySelectorAll('button, a[href]')
-	)) {
-		if (!['menuitemcheckbox', 'menuitemradio'].includes(item.getAttribute('role') ?? ''))
+	for (const item of /** @type {NodeListOf<HTMLElement>} */ (menu.querySelectorAll(CHOICE))) {
+		if (
+			!(item instanceof HTMLSelectElement) &&
+			!['menuitemcheckbox', 'menuitemradio'].includes(item.getAttribute('role') ?? '')
+		)
 			item.setAttribute('role', 'menuitem');
 		item.tabIndex = -1;
 	}
@@ -328,6 +330,8 @@ function keydown(event) {
 				return;
 			case 'Enter':
 			case ' ':
+				// A select opens its own list on these keys.
+				if (document.activeElement instanceof HTMLSelectElement) return;
 				event.preventDefault();
 				items[index]?.click();
 				return;
