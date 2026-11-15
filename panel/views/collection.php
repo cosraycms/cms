@@ -9,8 +9,8 @@ $this->layout('layer/main');
 
 $page = u($page);
 
-// Status pills and row actions size to their content because the translation decides
-// a pill's width. The title stops at a cap so the `auto` columns share the spare width;
+// Status pills and avatars start from their content width, since the translation or the
+// user decides it. The title stops at a cap so the `auto` columns share the spare width;
 // with fewer than two, where one would only move the gap, the last column takes it.
 $hasRowActions = false;
 
@@ -36,8 +36,8 @@ foreach ($page->table->headers as $header) {
 		'datetime' => 'minmax(9rem, auto)',
 		'date' => 'minmax(7rem, auto)',
 		'number' => 'minmax(5rem, auto)',
-		'status' => 'max-content',
-		'user' => $header['look'] === 'avatar' ? 'max-content' : 'minmax(7rem, auto)',
+		'status' => 'minmax(max-content, auto)',
+		'user' => $header['look'] === 'avatar' ? 'minmax(max-content, auto)' : 'minmax(7rem, auto)',
 		default => 'minmax(7rem, auto)',
 	};
 }
