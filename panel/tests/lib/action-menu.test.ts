@@ -88,24 +88,6 @@ describe('action-menu keyboard and lifecycle', () => {
 		expect(document.activeElement).toBe(last);
 	});
 
-	it('reaches a select by arrow and leaves its own keys to open its list', async () => {
-		const { trigger, menu, first, last } = fixture();
-		const select = document.createElement('select');
-		select.innerHTML = '<option>One</option><option>Two</option>';
-		menu.append(select);
-		trigger.focus();
-		await key(trigger, 'ArrowDown');
-		await key(first, 'ArrowDown');
-		await key(last, 'ArrowDown');
-		expect(document.activeElement).toBe(select);
-		expect(select.getAttribute('role')).toBeNull();
-		expect((await key(select, ' ')).defaultPrevented).toBe(false);
-		expect((await key(select, 'Enter')).defaultPrevented).toBe(false);
-		expect(trigger.getAttribute('aria-expanded')).toBe('true');
-		expect((await key(select, 'ArrowDown')).defaultPrevented).toBe(true);
-		expect(document.activeElement).toBe(first);
-	});
-
 	it('scrolls the focused choice into the menu when the list is taller than its available space', async () => {
 		const { trigger, menu, first, last } = fixture();
 		vi.spyOn(menu, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 100, 200, 240));

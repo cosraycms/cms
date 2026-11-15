@@ -39,27 +39,28 @@ $label = is_array($account) && $account['name'] === null
 				<button
 					type="button"
 					class="cms-masthead-account-trigger"
-					popovertarget="cms-account-menu"
-					aria-haspopup="menu"<?php if ($label !== null): ?> aria-label="<?= escape($label) ?>"<?php endif ?>>
+					popovertarget="cms-account-menu"<?php if ($label !== null): ?> aria-label="<?= escape($label) ?>"<?php endif ?>>
 					<span class="cms-masthead-avatar" aria-hidden="true"><?= escape($account['initials']) ?></span>
 					<?php if ($account['name'] !== null): ?>
 						<span class="cms-masthead-name"><?= escape($account['name']) ?></span>
 					<?php endif ?>
 				</button>
-				<div id="cms-account-menu" class="cms-action-menu cms-masthead-account-menu" popover="auto" data-action-menu data-align="end">
-					<?php
-
-					// The trigger already names the menu; menus may only hold items,
-					// groups and separators, so the identity is visual only.
-					?>
-					<div class="cms-masthead-identity" aria-hidden="true">
-						<span class="cms-masthead-identity-title"><?= escape($account['title']) ?></span>
+				<div
+					id="cms-account-menu"
+					class="cms-action-menu cms-masthead-account-menu"
+					popover="auto"
+					role="dialog"
+					aria-labelledby="cms-account-title"
+					data-confirm
+					data-align="end">
+					<div class="cms-masthead-identity">
+						<span id="cms-account-title" class="cms-masthead-identity-title"><?= escape($account['title']) ?></span>
 						<?php if ($account['detail'] !== ''): ?>
 							<span class="cms-masthead-identity-detail"><?= escape($account['detail']) ?></span>
 						<?php endif ?>
 					</div>
 					<hr />
-					<a href="<?= $panelPath ?>/profile" role="menuitem" hx-target="#frame"><?= escape(__('nav:profile')) ?></a>
+					<a href="<?= $panelPath ?>/profile" hx-target="#frame" data-confirm-focus><?= escape(__('nav:profile')) ?></a>
 					<hr />
 					<form method="post" action="<?= $panelPath ?>/logout" hx-boost="false">
 						<?php $this->include('component/csrf') ?>

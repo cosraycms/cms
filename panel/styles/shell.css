@@ -255,7 +255,7 @@
 		}
 
 		&:hover,
-		&[aria-expanded='true'] {
+		&:has(+ :popover-open) {
 			border-color: var(--cms-color-border-strong);
 		}
 	}

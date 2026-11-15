@@ -3,7 +3,8 @@
 // it, aligned to its start or, with data-align="end", its end. It follows
 // the button while open and closes once the button scrolls away. Cancel
 // closes it, and so does its submit button on the way to the form it
-// names; focus goes back to the button either way.
+// names, and so does a link it holds; focus goes back to the button either
+// way.
 
 import { placement } from '../lib/action-menu.js';
 
@@ -50,7 +51,10 @@ function click(event) {
 
 	const popover = target?.closest(POPOVER);
 
-	if (popover instanceof HTMLElement && target?.closest('[data-confirm-cancel], [type="submit"]')) {
+	if (
+		popover instanceof HTMLElement &&
+		target?.closest('[data-confirm-cancel], [type="submit"], a[href]')
+	) {
 		close(popover);
 	}
 }
