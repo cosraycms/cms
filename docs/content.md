@@ -197,11 +197,11 @@ final class Alerts implements Entries
 
 ### Columns and panel ordering
 
-The default listing shows title, the [status column](#status-columns), the [editor](#user-columns), and last changed. Its initial order is title ascending. Type and created are opt-in columns; type and editor have no built-in display-name sort. Finder's `type` and `editor` fields mean type handle and editor UID, not the labels displayed in those columns.
+The default listing shows title, the [status column](#status-columns), type, the [editor](#user-columns), and last changed. Its initial order is title ascending. Created is an opt-in column; type and editor have no built-in display-name sort. Finder's `type` and `editor` fields mean type handle and editor UID, not the labels displayed in those columns.
 
 `#[Types]` and `entries()` define collection membership. The panel replaces any Finder `order()` set in `entries()` with the selected column order, before applying pagination. Declare the panel's initial order on a column, not in `entries()`.
 
-A collection implementing `Columns` declares its own columns. `Column::defaults()` returns the default title, editor, and last-changed columns, so `[...Column::defaults(), $column]` extends them.
+A collection implementing `Columns` declares its own columns. `Column::defaults()` returns the default title, type, editor, and last-changed columns, so `[...Column::defaults(), $column]` extends them.
 
 The factory decides what a column shows:
 
