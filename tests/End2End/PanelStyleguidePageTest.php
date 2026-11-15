@@ -83,7 +83,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertStringContainsString('<th class="cms-list-col-actions" role="columnheader"></th>', $html);
-		$this->assertStringContainsString('class="cms-list-chip is-create"', $html);
+		$this->assertHtmlNodeExists('//td[contains(@class, "cms-list-col-actions")]//a[@data-create-dialog]', $html);
 		$this->assertStringContainsString('class="cms-entries"', $html);
 		$this->assertStringContainsString('data-repeater-add="App\\Styleguide\\Quote"', $html);
 		// Blocks: the quiet one-column list and the twelve-column grid, each a

@@ -209,6 +209,29 @@ describe('focus after a move', () => {
 		expect(document.activeElement).toBe(row('b').querySelector('[data-order-move="up"] button'));
 	});
 
+	it('returns to the menu trigger when the move sat in the row’s menu', () => {
+		const inMenu = (uid: string): void => {
+			const actions = row(uid).querySelector('.cms-list-row-actions')!;
+			const menu = document.createElement('div');
+			menu.id = `row-${uid}-more`;
+			menu.setAttribute('popover', 'auto');
+			menu.append(...actions.querySelectorAll('form[data-order-move]'));
+			actions.innerHTML = `<button type="button" popovertarget="row-${uid}-more"></button>`;
+			actions.append(menu);
+		};
+
+		inMenu('b');
+		const button = row('b').querySelector<HTMLButtonElement>('[data-order-move="up"] button')!;
+		button.focus();
+		button.form!.requestSubmit(button);
+
+		render('b');
+		inMenu('b');
+		document.dispatchEvent(new CustomEvent('htmx:after:swap'));
+
+		expect(document.activeElement).toBe(row('b').querySelector('[popovertarget="row-b-more"]'));
+	});
+
 	it('leaves focus alone after a drag', () => {
 		fold(row('c'));
 		row('a').before(row('c'));

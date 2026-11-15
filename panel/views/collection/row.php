@@ -21,6 +21,8 @@ $grip = $group === null
 	? ''
 	: '<span class="cms-list-grip" data-order-grip aria-hidden="true">' . \Cosray\Panel\Icon::render('grip-vertical') . '</span>';
 $titleGrip = $bulk ? '' : $grip;
+$creates = (array) $row['childCreateLinks'];
+$menuId = 'row-' . (string) $row['uid'];
 ?>
 <tr
 	class="cms-list-row<?= $treeMode ? ' is-tree' : '' ?>"
@@ -123,44 +125,61 @@ $titleGrip = $bulk ? '' : $grip;
 	<?php if ($hasRowActions): ?>
 		<td class="cms-list-cell cms-list-col-actions" role="cell">
 			<span class="cms-list-row-actions">
-				<?php if ($group !== null): ?>
-					<?php foreach (['up' => $row['moveUp'], 'down' => $row['moveDown']] as $direction => $enabled): ?>
-						<form class="cms-list-move" method="post" action="<?= escape($positionUrl) ?>" data-order-move="<?= $direction ?>">
-							<?php $this->include('component/csrf') ?>
-							<input type="hidden" name="node" value="<?= escape((string) $row['uid']) ?>" />
-							<input type="hidden" name="move" value="<?= $direction ?>" />
-							<button
-								type="submit"
-								class="cms-list-chip is-icon"
-								aria-label="<?= escape($direction === 'up'
-									? __('collection:move-up', ['name' => $name])
-									: __('collection:move-down', ['name' => $name])) ?>"
-								<?= $enabled ? '' : 'disabled' ?>>
-								<?= \Cosray\Panel\Icon::render($direction === 'up' ? 'chevron-up' : 'chevron-down') ?>
-							</button>
-						</form>
-					<?php endforeach ?>
-				<?php endif ?>
-				<?php if ($row['focusedChildrenUrl'] !== null): ?>
+				<?php if (count($creates) === 1): ?>
 					<a
-						class="cms-list-chip"
-						href="<?= escape((string) $row['focusedChildrenUrl']) ?>">
-						<?= escape(__('collection:children')) ?>
-					</a>
-				<?php endif ?>
-				<?php foreach ((array) $row['childCreateLinks'] as $link): ?>
-					<a
-						class="cms-list-chip is-create"
-						href="<?= escape((string) $link['url']) ?>"
+						class="cms-list-action is-add"
+						href="<?= escape((string) $creates[0]['url']) ?>"
 						data-create-dialog
 						hx-boost="false"
+						title="<?= escape((string) $creates[0]['name']) ?>"
 						aria-label="<?= escape(__('collection:create-under', [
-							'type' => $link['name'],
+							'type' => $creates[0]['name'],
 							'name' => $name,
-						])) ?>">
-						<?= \Cosray\Panel\Icon::render('plus') ?> <?= escape((string) $link['name']) ?>
-					</a>
-				<?php endforeach ?>
+						])) ?>"><?= \Cosray\Panel\Icon::render('plus') ?></a>
+				<?php elseif (count($creates) > 1): ?>
+					<button
+						type="button"
+						class="cms-list-action is-add"
+						popovertarget="<?= escape($menuId) ?>-create"
+						aria-haspopup="menu"
+						aria-label="<?= escape(__('collection:create-child', ['name' => $name])) ?>"><?= \Cosray\Panel\Icon::render(
+							'plus',
+						) ?></button>
+					<div id="<?= escape($menuId) ?>-create" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
+						<?php foreach ($creates as $link): ?>
+							<a href="<?= escape((string) $link['url']) ?>" data-create-dialog hx-boost="false"><?= escape(
+								(string) $link['name'],
+							) ?></a>
+						<?php endforeach ?>
+					</div>
+				<?php endif ?>
+				<?php if ($row['focusedChildrenUrl'] !== null || $group !== null): ?>
+					<button
+						type="button"
+						class="cms-list-action"
+						popovertarget="<?= escape($menuId) ?>-more"
+						aria-haspopup="menu"
+						aria-label="<?= escape(__('collection:row-actions', ['name' => $name])) ?>"><?= \Cosray\Panel\Icon::render(
+							'three-dots-vertical',
+						) ?></button>
+					<div id="<?= escape($menuId) ?>-more" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
+						<?php if ($row['focusedChildrenUrl'] !== null): ?>
+							<a href="<?= escape((string) $row['focusedChildrenUrl']) ?>"><?= escape(__('collection:children')) ?></a>
+						<?php endif ?>
+						<?php if ($group !== null): ?>
+							<?php foreach (['up' => $row['moveUp'], 'down' => $row['moveDown']] as $direction => $enabled): ?>
+								<form method="post" action="<?= escape($positionUrl) ?>" data-order-move="<?= $direction ?>">
+									<?php $this->include('component/csrf') ?>
+									<input type="hidden" name="node" value="<?= escape((string) $row['uid']) ?>" />
+									<input type="hidden" name="move" value="<?= $direction ?>" />
+									<button type="submit" <?= $enabled ? '' : 'disabled' ?>><?= escape($direction === 'up'
+										? __('collection:move-up')
+										: __('collection:move-down')) ?></button>
+								</form>
+							<?php endforeach ?>
+						<?php endif ?>
+					</div>
+				<?php endif ?>
 			</span>
 		</td>
 	<?php endif ?>

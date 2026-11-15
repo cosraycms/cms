@@ -312,9 +312,13 @@ function restoreFocus() {
 	}
 
 	const button = row.querySelector(`form[data-order-move="${kind}"] button`);
+	// A move offered in a closed menu hands focus to the menu's trigger.
+	const menu = button?.closest('[popover]');
 	const target =
 		button instanceof HTMLButtonElement && !button.disabled
-			? button
+			? menu
+				? row.querySelector(`[popovertarget="${menu.id}"]`)
+				: button
 			: row.querySelector('a.cms-list-value');
 
 	if (target instanceof HTMLElement) {
