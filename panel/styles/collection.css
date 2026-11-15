@@ -554,7 +554,7 @@
 	}
 
 	& .cms-list-row[data-last='true'] .cms-list-title::before {
-		bottom: var(--cms-space-1);
+		bottom: 50%;
 	}
 
 	& .cms-list-row[data-depth='0'] .cms-list-title::before {
