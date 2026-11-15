@@ -213,6 +213,60 @@ class IntegrationTestCase extends TestCase
 		}
 
 		$this->normalizeStoredNodeContent();
+		$this->reviseStoredNodes();
+	}
+
+	/**
+	 * Gives a node a working copy with this content, as the store would.
+	 *
+	 * @param array<string, mixed> $content
+	 * @param array<string, mixed> $settings
+	 */
+	protected function createTestDraft(int $node, array $content, array $settings = [], int $editor = 1): void
+	{
+		$this->db()->execute(
+			'WITH revision AS (
+				INSERT INTO cms.revisions (node, base, editor, content, settings)
+				SELECT node, revision, :editor, :content::jsonb, :settings::jsonb FROM cms.nodes WHERE node = :node
+				RETURNING revision, node, base
+			)
+			INSERT INTO cms.drafts (node, revision, base, created)
+			SELECT node, revision, base, clock_timestamp() FROM revision',
+			[
+				'node' => $node,
+				'editor' => $editor,
+				'content' => json_encode($content === [] ? new \stdClass() : $content),
+				'settings' => json_encode((object) $settings),
+			],
+		)->run();
+	}
+
+	/**
+	 * Gives nodes written with plain SQL, as fixtures are, the main
+	 * revision of their stored state that the store would have written.
+	 */
+	protected function reviseStoredNodes(): void
+	{
+		$this->db()->execute(
+			"WITH revision AS (
+				INSERT INTO cms.revisions (node, editor, created, content, settings)
+				SELECT n.node, n.creator, n.edited, n.content, jsonb_build_object(
+					'handle', h.handle,
+					'paths', coalesce((
+						SELECT jsonb_object_agg(p.locale, p.path) FROM cms.url_paths p
+						WHERE p.node = n.node AND p.inactive IS NULL
+					), '{}')
+				)
+				FROM cms.nodes n
+				LEFT JOIN cms.handles h ON h.node = n.node
+				WHERE n.revision IS NULL
+				RETURNING revision, node, editor
+			), event AS (
+				INSERT INTO cms.events (node, actor, action, revision)
+				SELECT node, editor, 'created', revision FROM revision
+			)
+			UPDATE cms.nodes n SET revision = revision.revision FROM revision WHERE n.node = revision.node",
+		)->run();
 	}
 
 	/**
@@ -302,9 +356,11 @@ class IntegrationTestCase extends TestCase
 			$data['title'] = json_encode((object) $data['title']);
 		}
 
-		$sql = 'INSERT INTO cms.nodes (uid, parent, locked, type, creator, editor, created, changed, edited, content, title)
-				VALUES (:uid, :parent, :locked, :type, :creator, :editor, :created, :changed, :changed, :content::jsonb, :title::jsonb)
+		$sql = 'INSERT INTO cms.nodes (uid, parent, locked, type, creator, created, changed, edited, content, title)
+				VALUES (:uid, :parent, :locked, :type, :creator, :created, :changed, :changed, :content::jsonb, :title::jsonb)
 				RETURNING node';
+		$editor = $data['editor'];
+		unset($data['editor']);
 
 		$nodeId = $this->db()->execute($sql, $data)->one()['node'];
 
@@ -321,6 +377,22 @@ class IntegrationTestCase extends TestCase
 				['node' => $nodeId, 'handle' => trim($handle)],
 			)->run();
 		}
+
+		$revision = $this->db()->execute(
+			"INSERT INTO cms.revisions (node, editor, created, content, settings)
+				SELECT node, :editor, edited, content, jsonb_build_object('handle', :handle::text, 'paths', '{}'::jsonb)
+				FROM cms.nodes WHERE node = :node
+				RETURNING revision",
+			['node' => $nodeId, 'editor' => $editor, 'handle' => is_string($handle) ? trim($handle) : null],
+		)->one()['revision'];
+		$this->db()->execute('UPDATE cms.nodes SET revision = :revision WHERE node = :node', [
+			'node' => $nodeId,
+			'revision' => $revision,
+		])->run();
+		$this->db()->execute(
+			"INSERT INTO cms.events (node, actor, action, revision) VALUES (:node, :actor, 'created', :revision)",
+			['node' => $nodeId, 'actor' => $editor, 'revision' => $revision],
+		)->run();
 
 		return $nodeId;
 	}

@@ -15,16 +15,16 @@ use PHPUnit\Framework\Attributes\DataProvider;
  */
 final class PanelNodeStatusTest extends TestCase
 {
-	private const string BEFORE = '2026-11-10 10:00:00+00';
 	private const string CHANGED = '2026-11-10 12:00:00+00';
 	private const string AFTER = '2026-11-10 13:00:00+00';
 
 	/** @return iterable<string, array{array<string, mixed>, string, bool, string}> */
 	public static function combinations(): iterable
 	{
-		$draft = ['changed' => self::CHANGED, 'editorName' => 'Ada'];
-		$mine = ['changed' => self::AFTER, 'base' => self::CHANGED];
-		$stale = ['changed' => self::AFTER, 'base' => self::BEFORE];
+		// Revision 1 is the main version, 2 the draft.
+		$draft = ['changed' => self::CHANGED, 'editorName' => 'Ada', 'revision' => 2];
+		$mine = ['changed' => self::AFTER, 'base' => 2];
+		$stale = ['changed' => self::AFTER, 'base' => 1];
 
 		yield 'published, nothing pending' => [['published' => true], 'published', false, 'none'];
 		yield 'published with draft and mine' => [
@@ -35,7 +35,12 @@ final class PanelNodeStatusTest extends TestCase
 		];
 		yield 'unpublished, just created' => [['published' => false], 'unpublished', false, 'none'];
 		yield 'unpublished with draft' => [['published' => false, 'draft' => $draft], 'unpublished', true, 'none'];
-		yield 'unpublished with mine' => [['published' => false, 'autosave' => $mine], 'unpublished', false, 'present'];
+		yield 'unpublished with mine' => [
+			['published' => false, 'autosave' => ['changed' => self::AFTER, 'base' => 1]],
+			'unpublished',
+			false,
+			'present',
+		];
 		yield 'mine older than the draft' => [
 			['published' => true, 'draft' => $draft, 'autosave' => $stale],
 			'published',
@@ -43,7 +48,13 @@ final class PanelNodeStatusTest extends TestCase
 			'conflict',
 		];
 		yield 'mine older than the main version' => [
-			['published' => true, 'autosave' => $stale],
+			['published' => true, 'autosave' => ['changed' => self::AFTER, 'base' => 0]],
+			'published',
+			false,
+			'conflict',
+		];
+		yield 'mine from an unknown state' => [
+			['published' => true, 'autosave' => ['changed' => self::AFTER, 'base' => null]],
 			'published',
 			false,
 			'conflict',
@@ -77,7 +88,7 @@ final class PanelNodeStatusTest extends TestCase
 		$status = $this->derive([
 			'record' => true,
 			'published' => true,
-			'autosave' => ['changed' => self::AFTER, 'base' => self::CHANGED],
+			'autosave' => ['changed' => self::AFTER, 'base' => 1],
 		]);
 
 		$this->assertTrue($status->record);
@@ -126,6 +137,7 @@ final class PanelNodeStatusTest extends TestCase
 			editor: $facts['editor'] ?? null,
 			draft: $facts['draft'] ?? null,
 			autosave: $facts['autosave'] ?? null,
+			revision: 1,
 		);
 	}
 

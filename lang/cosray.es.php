@@ -472,6 +472,7 @@ return [
 		'node:record-publication' => 'Un registro no se publica.',
 		'node:reserved-path' => 'La ruta de URL :path está reservada por el sistema; elige otra',
 		'node:uid-immutable' => 'El uid de una entrada no se puede cambiar',
+		'node:unknown-revision' => 'Esta versión no pertenece a la entrada.',
 		'node:unpublished' => 'Sin publicar',
 		'panel:logo' => 'Logotipo de la administración del sitio',
 		'panel:navigation' => 'Navegación de la administración del sitio',

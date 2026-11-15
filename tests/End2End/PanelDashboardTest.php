@@ -232,9 +232,9 @@ final class PanelDashboardTest extends End2EndTestCase
 		$this->db()->execute(
 			'WITH n AS (
 				INSERT INTO cms.nodes
-					(uid, locked, type, creator, editor, created, changed, edited, deleted, content, title)
+					(uid, locked, type, creator, created, changed, edited, deleted, content, title)
 				VALUES
-					(:uid, false, :type, 1, 1, :changed, :changed, :changed, :deleted, :content::jsonb, :title::jsonb)
+					(:uid, false, :type, 1, :changed, :changed, :changed, :deleted, :content::jsonb, :title::jsonb)
 				RETURNING node
 			)
 			INSERT INTO cms.publications (node, published) SELECT node, :published FROM n',
@@ -248,13 +248,17 @@ final class PanelDashboardTest extends End2EndTestCase
 				'title' => json_encode(['en' => $title]),
 			],
 		)->run();
+		$this->reviseStoredNodes();
 	}
 
 	private function createDraft(string $uid, DateTimeImmutable $changed): void
 	{
 		$this->db()->execute(
-			"INSERT INTO cms.drafts (node, editor, content, changed)
-			 SELECT node, 1, '{}'::jsonb, :changed FROM cms.nodes WHERE uid = :uid",
+			"WITH r AS (
+				INSERT INTO cms.revisions (node, editor, created, content)
+				SELECT node, 1, :changed, '{}'::jsonb FROM cms.nodes WHERE uid = :uid RETURNING revision, node
+			)
+			INSERT INTO cms.drafts (node, revision, created) SELECT node, revision, :changed FROM r",
 			['uid' => $uid, 'changed' => $changed->format(DATE_ATOM)],
 		)->run();
 	}

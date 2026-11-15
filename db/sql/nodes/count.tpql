@@ -16,8 +16,10 @@ FROM
 		d.node = n.node
 	INNER JOIN /*:cms.prefix:*/users uc ON
 		uc.usr = n.creator
-	INNER JOIN /*:cms.prefix:*/users ue ON
-		ue.usr = n.editor
+	LEFT JOIN /*:cms.prefix:*/revisions mr ON
+		mr.revision = n.revision
+	LEFT JOIN /*:cms.prefix:*/users ue ON
+		ue.usr = mr.editor
 WHERE
 	1 = 1
 <?php if (isset($fulltext)) : ?>

@@ -7,8 +7,9 @@ namespace Cosray\Node;
 use Celema\Quma\Database;
 
 /**
- * The working copies of nodes: one row per node, content in the shape of
- * `nodes.content`, plus the drafted handle and URL paths.
+ * The working copies of nodes: one row per node pointing at the revision
+ * it holds, content in the shape of `nodes.content` plus the drafted
+ * handle and URL paths.
  */
 final class Drafts
 {
@@ -19,6 +20,8 @@ final class Drafts
 	/**
 	 * @return ?array{
 	 *     node: int,
+	 *     revision: int,
+	 *     base: ?int,
 	 *     content: array<string, mixed>,
 	 *     settings: array{handle?: ?string, paths?: array<string, string>},
 	 *     created: string,
@@ -39,6 +42,8 @@ final class Drafts
 
 		return [
 			'node' => (int) $row['node'],
+			'revision' => (int) $row['revision'],
+			'base' => $row['base'] === null ? null : (int) $row['base'],
 			'content' => is_array($content) ? $content : [],
 			'settings' => is_array($settings) ? $settings : [],
 			'created' => (string) $row['created'],
@@ -48,23 +53,50 @@ final class Drafts
 	}
 
 	/**
-	 * Whether the working copy changed: saving the state it already holds
-	 * writes nothing.
+	 * Saves the state as a new revision and points the working copy at it,
+	 * unless the copy holds this state already. Returns the new revision.
+	 * `$main` is the main revision the copy is up to date with; a later
+	 * save keeps the first one's unless `$rebase` says the main version
+	 * took the same change.
 	 *
 	 * @param array<string, mixed> $content
 	 * @param array{handle?: ?string, paths?: array<string, string>} $settings
 	 */
-	public function save(int $node, array $content, array $settings, int $editor): bool
-	{
-		return $this->db
-			->drafts
-			->upsert([
-				'node' => $node,
-				'content' => json_encode($content),
-				'settings' => json_encode((object) $settings),
-				'editor' => $editor,
-			])
-			->first() !== null;
+	public function save(
+		int $node,
+		array $content,
+		array $settings,
+		int $editor,
+		?int $main,
+		bool $rebase = false,
+	): ?int {
+		$current = $this->db->drafts->get(['node' => $node])->first();
+		// Paths stay an object when empty, as in the main revisions.
+		$params = [
+			'content' => json_encode($content),
+			'settings' => json_encode(['paths' => (object) ($settings['paths'] ?? [])] + $settings),
+		];
+
+		if (
+			$current
+			&& (bool) $this->db->revisions->holds(['revision' => $current['revision'], ...$params])->one()['holds']
+		) {
+			if ($rebase) {
+				$this->point($node, (int) $current['revision'], $main, true);
+			}
+
+			return null;
+		}
+
+		$revision = (int) $this->db->revisions->create([
+			'node' => $node,
+			'base' => $current ? (int) $current['revision'] : $main,
+			'editor' => $editor,
+			...$params,
+		])->one()['revision'];
+		$this->point($node, $revision, $main, $rebase);
+
+		return $revision;
 	}
 
 	/**
@@ -88,19 +120,23 @@ final class Drafts
 	}
 
 	/**
-	 * Deletes the working copy, if there is one, and says whether there was;
-	 * its history keeps the last state and, when the caller says it was
-	 * applied to the main version, records it as applied rather than
-	 * discarded. Must run
-	 * inside the caller's transaction: the reason travels as a
-	 * transaction-local setting the history trigger reads.
+	 * Drops the working copy, if there is one, and returns the revision it
+	 * held, which stays in the history.
 	 */
-	public function delete(int $node, bool $applied = false): bool
+	public function delete(int $node): ?int
 	{
-		// Set either way: an earlier delete in the same transaction may have
-		// left `applied` behind.
-		$this->db->drafts->outcome(['outcome' => $applied ? 'applied' : 'discarded'])->run();
+		$row = $this->db->drafts->delete(['node' => $node])->first();
 
-		return $this->db->drafts->delete(['node' => $node])->first() !== null;
+		return $row ? (int) $row['revision'] : null;
+	}
+
+	private function point(int $node, int $revision, ?int $main, bool $rebase): void
+	{
+		$this->db->drafts->upsert([
+			'node' => $node,
+			'revision' => $revision,
+			'base' => $main,
+			'rebase' => $rebase,
+		])->run();
 	}
 }

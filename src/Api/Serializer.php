@@ -116,8 +116,14 @@ final class Serializer
 	public static function etag(object $node): string
 	{
 		$data = Factory::dataFor(Wrapper::unwrap($node));
-		$draft = is_array($data['draft'] ?? null) ? $data['draft']['changed'] ?? '' : '';
-		$version = implode('|', [$data['uid'] ?? '', $data['changed'] ?? '', $data['deleted'] ?? '', $draft]);
+		$draft = is_array($data['draft'] ?? null) ? $data['draft']['revision'] ?? '' : '';
+		$version = implode('|', [
+			$data['uid'] ?? '',
+			$data['revision'] ?? '',
+			$draft,
+			$data['changed'] ?? '',
+			$data['deleted'] ?? '',
+		]);
 
 		return '"' . substr(hash('sha256', $version), 0, 32) . '"';
 	}

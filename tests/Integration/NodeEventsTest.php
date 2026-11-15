@@ -160,7 +160,7 @@ final class NodeEventsTest extends IntegrationTestCase
 			Actor::system(),
 		);
 
-		$events = $this->events('together-page');
+		$events = array_slice($this->events('together-page'), 1);
 
 		$this->assertSame(['applied', 'published'], array_column($events, 'action'));
 		$this->assertSame($events[0]['at'], $events[1]['at']);
@@ -221,9 +221,7 @@ final class NodeEventsTest extends IntegrationTestCase
 		$this->createTestNode(['uid' => 'sync-record', 'type' => $this->recordType, 'published' => true]);
 		$this->createTestNode(['uid' => 'sync-page', 'type' => $this->pageType, 'published' => null]);
 		$this->createTestNode(['uid' => 'sync-kept', 'type' => $this->pageType, 'published' => true]);
-		$this->db()->execute(
-			"INSERT INTO cms.drafts (node, editor, content) SELECT node, 1, '{}' FROM cms.nodes WHERE uid = 'sync-record'",
-		)->run();
+		$this->createTestDraft($this->nodeId('sync-record'), []);
 		$publications = new Publications($this->db(), $this->services->types, [
 			'test-draft-page' => TestDraftPage::class,
 			'test-submission' => TestSubmission::class,
@@ -324,10 +322,18 @@ final class NodeEventsTest extends IntegrationTestCase
 		return Wrapper::unwrap($node);
 	}
 
+	private function nodeId(string $uid): int
+	{
+		return (int) $this->nodeRow($uid)['node'];
+	}
+
 	/** @return array<string, mixed> */
 	private function nodeRow(string $uid): array
 	{
-		return $this->db()->execute('SELECT * FROM cms.nodes WHERE uid = :uid', ['uid' => $uid])->one();
+		return $this->db()->execute(
+			'SELECT n.*, r.editor FROM cms.nodes n LEFT JOIN cms.revisions r ON r.revision = n.revision WHERE n.uid = :uid',
+			['uid' => $uid],
+		)->one();
 	}
 
 	/** @return array<string, mixed> */

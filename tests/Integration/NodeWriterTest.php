@@ -56,8 +56,8 @@ final class NodeWriterTest extends IntegrationTestCase
 	private function storedNode(string $uid): array
 	{
 		return $this->db()->execute(
-			'SELECT *, created = now() AS created_now, changed = now() AS changed_now
-			FROM cms.nodes WHERE uid = :uid',
+			'SELECT n.*, r.editor, n.created = now() AS created_now, n.changed = now() AS changed_now
+			FROM cms.nodes n LEFT JOIN cms.revisions r ON r.revision = n.revision WHERE n.uid = :uid',
 			['uid' => $uid],
 		)->one();
 	}

@@ -206,13 +206,7 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 			return;
 		}
 
-		$this->db()->execute(
-			'INSERT INTO cms.drafts (node, editor, content) VALUES (:node, 1, :content::jsonb)',
-			[
-				'node' => $nodeId,
-				'content' => json_encode(['title' => ['type' => Text::class, 'value' => ['en' => $draftTitle]]]),
-			],
-		)->run();
+		$this->createTestDraft($nodeId, ['title' => ['type' => Text::class, 'value' => ['en' => $draftTitle]]]);
 	}
 
 	private function published(string $uid): bool

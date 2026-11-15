@@ -89,7 +89,7 @@ class Node
 
 		$data['content'] = json_decode($data['content'], true);
 		$data['title'] = json_decode($data['title'], true);
-		$data['editor_data'] = json_decode($data['editor_data'], true);
+		$data['editor_data'] = json_decode((string) $data['editor_data'], true);
 		$data['creator_data'] = json_decode($data['creator_data'], true);
 		$data['paths'] = json_decode($data['paths'], true);
 		$data = self::foldDraft($data);
@@ -129,6 +129,9 @@ class Node
 		$hasDraft = (bool) ($data['has_draft'] ?? false);
 		$data['draft'] = $hasDraft
 			? [
+				'revision' => (int) $data['draft_revision'],
+				// The main revision it is up to date with; another one means it is stale.
+				'base' => $data['draft_base'] === null ? null : (int) $data['draft_base'],
 				'created' => $data['draft_created'],
 				'changed' => $data['draft_changed'],
 				'editor' => (int) $data['draft_editor'],
@@ -139,13 +142,18 @@ class Node
 		if (array_key_exists('mine_changed', $data)) {
 			$data['mine'] = $data['mine_changed'] === null
 				? null
-				: ['changed' => (string) $data['mine_changed'], 'base' => (string) $data['mine_base']];
+				: [
+					'changed' => (string) $data['mine_changed'],
+					'base' => $data['mine_base'] === null ? null : (int) $data['mine_base'],
+				];
 			unset($data['mine_changed'], $data['mine_base']);
 		}
 
 		$settings = json_decode((string) ($data['draft_settings'] ?? ''), true);
 		unset(
 			$data['has_draft'],
+			$data['draft_revision'],
+			$data['draft_base'],
 			$data['draft_created'],
 			$data['draft_changed'],
 			$data['draft_editor'],

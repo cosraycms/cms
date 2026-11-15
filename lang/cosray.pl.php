@@ -488,6 +488,7 @@ return [
 		'node:record-publication' => 'Rekord nie jest publikowany.',
 		'node:reserved-path' => 'Ścieżka URL :path jest zarezerwowana przez system; wybierz inną',
 		'node:uid-immutable' => 'Nie można zmienić uid wpisu',
+		'node:unknown-revision' => 'Ta wersja nie należy do wpisu.',
 		'node:unpublished' => 'Nieopublikowany',
 		'panel:logo' => 'Logo administracji witryny',
 		'panel:navigation' => 'Nawigacja administracji witryny',

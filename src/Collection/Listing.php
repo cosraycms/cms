@@ -377,32 +377,17 @@ final class Listing
 		return [
 			'record' => (bool) $this->types->get(Wrapper::unwrap($node)::class, 'record', false),
 			'edited' => (string) $node->meta->get('edited'),
-			'editor' => self::userLabel(
-				$node->meta->get('editor_data'),
-				$node->meta->get('editor_username'),
-				$node->meta->get('editor_email'),
-			),
+			'revision' => is_int($revision = $node->meta->get('revision')) ? $revision : null,
+			'editor' => is_string($applier = $node->meta->get('applier_name')) ? $applier : null,
 			'draft' => is_array($draft)
 				? [
 					'changed' => (string) ($draft['changed'] ?? ''),
 					'editorName' => is_string($draft['editorName'] ?? null) ? $draft['editorName'] : null,
+					'revision' => is_int($draft['revision'] ?? null) ? $draft['revision'] : null,
 				]
 				: null,
 			'mine' => is_array($mine) ? $mine : null,
 		];
-	}
-
-	private static function userLabel(mixed $data, mixed $username, mixed $email): ?string
-	{
-		$data = is_string($data) ? json_decode($data, true) : $data;
-
-		foreach ([is_array($data) ? $data['name'] ?? null : null, $username, $email] as $candidate) {
-			if (is_string($candidate) && trim($candidate) !== '') {
-				return $candidate;
-			}
-		}
-
-		return null;
 	}
 
 	/**

@@ -1,22 +1,17 @@
--- Returns no row when the working copy already holds this state, so an
--- unchanged save writes no history row.
+-- Points the working copy at a revision. The first one dates when the
+-- copy diverged and the main revision it is up to date with; later ones
+-- keep both unless `rebase` moves the base onto the given one.
 INSERT INTO /*:cms.prefix:*/drafts (
 	node,
-	content,
-	settings,
-	editor
+	revision,
+	base,
+	created
 ) VALUES (
 	:node,
-	:content::jsonb,
-	:settings::jsonb,
-	:editor
+	:revision,
+	:base,
+	clock_timestamp()
 )
 ON CONFLICT (node) DO UPDATE SET
-	content = EXCLUDED.content,
-	settings = EXCLUDED.settings,
-	editor = EXCLUDED.editor
-WHERE
-	(/*:cms.prefix:*/drafts.content, /*:cms.prefix:*/drafts.settings)
-		IS DISTINCT FROM (EXCLUDED.content, EXCLUDED.settings)
-
-RETURNING node;
+	revision = EXCLUDED.revision,
+	base = CASE WHEN :rebase::boolean THEN EXCLUDED.base ELSE /*:cms.prefix:*/drafts.base END;

@@ -54,7 +54,8 @@ final class NodeTest extends IntegrationTestCase
 		]);
 
 		$node = $this->db()->execute(
-			'SELECT n.*, p.published, p.hidden FROM cms.nodes n LEFT JOIN cms.publications p USING (node) WHERE n.node = :id',
+			'SELECT n.*, p.published, p.hidden, r.editor FROM cms.nodes n LEFT JOIN cms.publications p USING (node)
+				LEFT JOIN cms.revisions r ON r.revision = n.revision WHERE n.node = :id',
 			['id' => $nodeId],
 		)->one();
 

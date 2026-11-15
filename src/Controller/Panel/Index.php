@@ -123,16 +123,21 @@ final class Index extends Panel
 						'stages' => [
 							'record' => in_array($type, $records, true),
 							'edited' => (string) ($row['edited'] ?? ''),
-							'editor' => $row['editor_name'] ?? null,
+							'revision' => $row['revision'] === null ? null : (int) $row['revision'],
+							'editor' => $row['applier_name'] ?? null,
 							'draft' => $row['draft_changed'] === null
 								? null
 								: [
 									'changed' => (string) $row['draft_changed'],
 									'editorName' => $row['draft_editor_name'] ?? null,
+									'revision' => (int) $row['draft_revision'],
 								],
 							'mine' => $row['mine_changed'] === null
 								? null
-								: ['changed' => (string) $row['mine_changed'], 'base' => (string) $row['mine_base']],
+								: [
+									'changed' => (string) $row['mine_changed'],
+									'base' => $row['mine_base'] === null ? null : (int) $row['mine_base'],
+								],
 						],
 					],
 					$this->localeId(),

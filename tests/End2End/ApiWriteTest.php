@@ -226,7 +226,8 @@ final class ApiWriteTest extends End2EndTestCase
 		$this->authenticateAs('editor');
 		$this->json($this->send('PATCH', '/api/nodes/anonymous-target', ['hidden' => true]));
 		$editor = $this->db()->execute(
-			"SELECT u.uid FROM cms.nodes n JOIN cms.users u ON u.usr = n.editor WHERE n.uid = 'anonymous-target'",
+			"SELECT u.uid FROM cms.events e JOIN cms.nodes n ON n.node = e.node JOIN cms.users u ON u.usr = e.actor
+				WHERE n.uid = 'anonymous-target' AND e.action = 'hidden'",
 		)->one()['uid'];
 		$this->assertStringStartsWith('test-auth-', $editor);
 	}
@@ -307,16 +308,16 @@ final class ApiWriteTest extends End2EndTestCase
 	/** @param array<string, string> $title */
 	private function draft(int $nodeId, array $title): void
 	{
-		$this->db()->execute(
-			'INSERT INTO cms.drafts (node, editor, content) VALUES (:node, 1, :content::jsonb)',
-			['node' => $nodeId, 'content' => json_encode(['title' => ['type' => Text::class, 'value' => $title]])],
-		)->run();
+		$this->createTestDraft($nodeId, ['title' => ['type' => Text::class, 'value' => $title]]);
 	}
 
 	/** @return ?array<string, string> */
 	private function draftTitle(int $nodeId): ?array
 	{
-		$row = $this->db()->execute('SELECT content FROM cms.drafts WHERE node = :node', ['node' => $nodeId])->first();
+		$row = $this->db()->execute(
+			'SELECT r.content FROM cms.drafts d JOIN cms.revisions r ON r.revision = d.revision WHERE d.node = :node',
+			['node' => $nodeId],
+		)->first();
 
 		return $row === null ? null : json_decode($row['content'], true)['title']['value'];
 	}

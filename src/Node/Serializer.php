@@ -61,6 +61,7 @@ class Serializer
 			'created' => $rawData['created'],
 			'changed' => $rawData['changed'],
 			'edited' => $rawData['edited'] ?? $rawData['changed'],
+			'revision' => isset($rawData['revision']) ? (int) $rawData['revision'] : null,
 			'deleted' => $rawData['deleted'],
 			'paths' => $rawData['paths'],
 			'parent' => $rawData['parent'] ?? null,
@@ -71,6 +72,8 @@ class Serializer
 				'username' => $rawData['editor_username'],
 				'data' => $rawData['editor_data'],
 			],
+			// Who made the main version main: it may have been drafted by someone else.
+			'applier' => $rawData['applier_name'] ?? null,
 			'creator' => [
 				'uid' => $rawData['creator_uid'],
 				'email' => $rawData['creator_email'],

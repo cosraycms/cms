@@ -361,7 +361,7 @@ An injected [Node\View](../src/Node/View.php) renders the node's own view: `rend
 
 ## Working copies
 
-A node is its main version, the row in `nodes`, and that version is published or not: visitors, listings, menus, and search see it only when it is published. A new node starts as an unpublished main version. From then on the panel saves edits into a working copy, the draft, published or not; a `#[Record]` has no draft and is always edited directly. Content, handle, and URL paths are drafted.
+A node is its main version, the [revision](#history) `nodes` points at and materializes, and that version is published or not: visitors, listings, menus, and search see it only when it is published. A new node starts as an unpublished main version. From then on the panel saves edits into a working copy, the draft, published or not; a `#[Record]` has no draft and is always edited directly. Content, handle, and URL paths are drafted.
 
 Applying writes the working copy into the main version and removes the copy, which leaves the main version published or unpublished as it was, unless the editor applies and publishes in one step. Discarding removes the copy without changing the main version. Publication and listing are switches of their own: they apply at once and leave content and working copy alone. A working copy exists only while it differs from the main version.
 
@@ -369,7 +369,8 @@ Applying writes the working copy into the main version and removes the copy, whi
 - `Node\Store::save()` is a direct API write and does not update an existing working copy. Applying that copy later can supersede it.
 - `draft()`, `apply()`, `discard()`, and `applyDraft()` select explicit working-copy transitions; `published()` and `hide()` switch the node's state.
 - `meta->draft` describes pending changes; Finder's `changes` filter selects them.
-- Duplication copies the main version, unpublished. Draft references are indexed separately; draft history survives applying or discarding.
+- `revert($node, $revision, $locales, $actor)` copies an earlier revision into the working copy, or into the main version of a node without drafts, as a new revision.
+- Duplication copies the main version, unpublished. Draft references are indexed separately; a draft's revisions stay in the history when it is applied or discarded.
 
 See [Node\Store](../src/Node/Store.php), [Node\Drafts](../src/Node/Drafts.php), and [panel draft tests](../tests/End2End/PanelEditorDraftTest.php) for transition details.
 
@@ -381,9 +382,13 @@ The rows follow a type flag known only in PHP, so a type that becomes a record, 
 
 ### History
 
-Every write through `Node\Store` records what it did in `events`, one row per action, with the user who did it and the time: `created`, `saved` (the main version written directly, by the API, PHP code or for a record), `drafted`, `applied`, `discarded`, `published`, `unpublished`, `hidden`, `shown`, `moved` (with the parents in `data`) and `deleted`. The actions of one write share its time. No database trigger keeps these books, so a write that bypasses the store records nothing and leaves `changed` alone.
+What a node holds is kept apart from what was done to it. Every state of its content, handle and URL paths is a revision in `revisions`, written once and never changed: the main version, each saved draft and every main version before. `nodes.revision` names the main one, whose content and title `nodes` materializes for queries, and a working copy is a pointer to its revision in `drafts`, with `base`, the main revision it is up to date with. A draft whose base is no longer the main revision, after an API write for example, is stale. Each revision names its author and the revision it was edited from. Applying a working copy unchanged makes its revision main; otherwise the prepared state, with generated paths, becomes a new revision. Publication, listing, moves, trash and positions are switches and write no revision. A deferred database check fails a transaction that leaves a node's content different from its main revision's.
 
-`meta->changed` is the time of the last action other than a draft being saved or dropped, which API clients sync by. `meta->edited` is when the main version changed last, with `created`, `saved` and `applied`; publishing, listing, a move or deletion leave it alone. `meta->editor` is who wrote the main version, not who published it. Positions and the [title rebuild](#materialized-titles) record nothing.
+Every write through `Node\Store` records what it did in `events`, one row per action, with the user who did it, the time, and the revision it concerns: `created`, `saved` (the main version written directly, by the API, PHP code or for a record), `drafted`, `applied`, `discarded`, `published`, `unpublished`, `hidden`, `shown`, `moved` (with the parents in `data`) and `deleted`. A revert says so in `data`. The actions of one write share its time. No database trigger keeps these books, so a write that bypasses the store records nothing and leaves `changed` alone. There is no retention yet: revisions and events are kept.
+
+`meta->changed` is the time of the last action other than a draft being saved or dropped, which API clients sync by. `meta->edited` is when the main version became main, with `created`, `saved` and `applied`; publishing, listing, a move or deletion leave it alone. `meta->editor` is the author of the main revision, not who applied or published it; the panel's status names who made it main. Positions and the [title rebuild](#materialized-titles) record nothing.
+
+A content migration that changes the shape of stored content rewrites every revision, the main versions they materialize and the users' unsaved edits together, through the internal [Migration\Content](../src/Migration/Content.php) helper, which keeps the dates and records no event. Nodes are created through the store, which writes the revision, the publication row and the event a raw `INSERT` would miss.
 
 ## Menus
 

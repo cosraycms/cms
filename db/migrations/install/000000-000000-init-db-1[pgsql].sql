@@ -3,9 +3,8 @@
 -- names both sides (`node_tags`), and a qualifier stays where the bare noun
 -- misleads (`url_paths`, `full_text`, `auth_tokens`).
 
--- Statement time, not transaction time: the history tables key their rows
--- by `changed`, and two writes to one row inside a transaction must both
--- keep theirs.
+-- Statement time, not transaction time: two writes to one row inside a
+-- transaction each keep their own time.
 CREATE FUNCTION /*:cms.prefix:*/update_changed_column()
 	RETURNS TRIGGER AS $$
 BEGIN
@@ -179,11 +178,12 @@ CREATE TABLE /*:cms.prefix:*/nodes (
 	node bigint GENERATED ALWAYS AS IDENTITY,
 	uid text NOT NULL,
 	parent bigint,
-	version integer NOT NULL DEFAULT 1,
 	locked boolean DEFAULT false NOT NULL,
 	type bigint NOT NULL,
 	creator bigint NOT NULL,
-	editor bigint NOT NULL,
+	-- The main version. Content and title are materialized from it for
+	-- queries; a deferred trigger keeps the content equal to it.
+	revision bigint,
 	created timestamp with time zone NOT NULL DEFAULT now(),
 	-- The time of the last action on the node, which API clients sync by.
 	-- The store sets it and `edited`, when the main version changed last,
@@ -202,15 +202,12 @@ CREATE TABLE /*:cms.prefix:*/nodes (
 		REFERENCES /*:cms.prefix:*/users (usr),
 	CONSTRAINT /*:cms.obj:*/fk_nodes_nodes FOREIGN KEY (parent)
 		REFERENCES /*:cms.prefix:*/nodes (node),
-	CONSTRAINT /*:cms.obj:*/fk_nodes_users_editor FOREIGN KEY (editor)
-		REFERENCES /*:cms.prefix:*/users (usr),
 	CONSTRAINT /*:cms.obj:*/fk_nodes_types FOREIGN KEY (type)
 		REFERENCES /*:cms.prefix:*/types (type) ON UPDATE CASCADE ON DELETE NO ACTION,
 	CONSTRAINT /*:cms.obj:*/ck_nodes_uid CHECK (
 		-- UIDs can become filesystem directory names, so keep them path-safe and block "..".
 		uid ~ '^(?!.*[.][.])[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?$'
-	),
-	CONSTRAINT /*:cms.obj:*/ck_nodes_version CHECK (version > 0)
+	)
 );
 CREATE INDEX /*:cms.obj:*/ix_nodes_type ON /*:cms.prefix:*/nodes USING btree (type);
 CREATE INDEX /*:cms.obj:*/ix_nodes_content ON /*:cms.prefix:*/nodes USING GIN (content);
@@ -272,6 +269,77 @@ CREATE TRIGGER /*:cms.obj:*/nodes_trigger_01_uid BEFORE UPDATE OF uid ON /*:cms.
 	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/prevent_node_uid_update();
 
 
+-- Every state of a node's content, handle and paths, never changed once
+-- written: the main version, working copies and what they were before.
+-- `content` keeps the shape of nodes.content so content migrations rewrite
+-- them the same way; `settings` holds the handle and URL paths
+-- ({"handle": ?text, "paths": {locale: path}}). `base` is the state it
+-- was edited from.
+CREATE TABLE /*:cms.prefix:*/revisions (
+	revision bigint GENERATED ALWAYS AS IDENTITY,
+	node bigint NOT NULL,
+	base bigint,
+	editor bigint NOT NULL,
+	created timestamp with time zone NOT NULL DEFAULT clock_timestamp(),
+	content jsonb NOT NULL,
+	settings jsonb NOT NULL DEFAULT '{}',
+	CONSTRAINT /*:cms.obj:*/pk_revisions PRIMARY KEY (revision),
+	CONSTRAINT /*:cms.obj:*/fk_revisions_nodes FOREIGN KEY (node)
+		REFERENCES /*:cms.prefix:*/nodes (node) ON DELETE CASCADE,
+	CONSTRAINT /*:cms.obj:*/fk_revisions_revisions FOREIGN KEY (base)
+		REFERENCES /*:cms.prefix:*/revisions (revision) ON DELETE SET NULL,
+	CONSTRAINT /*:cms.obj:*/fk_revisions_users FOREIGN KEY (editor)
+		REFERENCES /*:cms.prefix:*/users (usr)
+);
+CREATE INDEX /*:cms.obj:*/ix_revisions_node ON /*:cms.prefix:*/revisions (node, revision);
+-- Nodes and their first revision reference each other.
+ALTER TABLE /*:cms.prefix:*/nodes
+	ADD CONSTRAINT /*:cms.obj:*/fk_nodes_revisions FOREIGN KEY (revision)
+		REFERENCES /*:cms.prefix:*/revisions (revision) DEFERRABLE INITIALLY DEFERRED;
+
+-- Raises at commit unless a node holds the content of its main revision:
+-- a write that changes one without the other fails instead of diverging.
+CREATE FUNCTION /*:cms.prefix:*/check_node_revision()
+	RETURNS TRIGGER AS $$
+BEGIN
+	IF EXISTS (
+		SELECT FROM /*:cms.prefix:*/nodes n
+		LEFT JOIN /*:cms.prefix:*/revisions r ON r.revision = n.revision AND r.node = n.node
+		WHERE n.node = NEW.node AND (r.revision IS NULL OR r.content IS DISTINCT FROM n.content)
+	) THEN
+		RAISE EXCEPTION 'Node % does not hold the content of its main revision', NEW.node
+			USING ERRCODE = 'integrity_constraint_violation';
+	END IF;
+
+	RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+CREATE CONSTRAINT TRIGGER /*:cms.obj:*/nodes_trigger_02_revision
+	AFTER INSERT OR UPDATE OF content, revision ON /*:cms.prefix:*/nodes
+	DEFERRABLE INITIALLY DEFERRED
+	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/check_node_revision();
+
+CREATE FUNCTION /*:cms.prefix:*/check_revision_content()
+	RETURNS TRIGGER AS $$
+BEGIN
+	IF EXISTS (
+		SELECT FROM /*:cms.prefix:*/nodes n
+		JOIN /*:cms.prefix:*/revisions r ON r.revision = n.revision
+		WHERE n.revision = NEW.revision AND r.content IS DISTINCT FROM n.content
+	) THEN
+		RAISE EXCEPTION 'Revision % is the main version of a node with other content', NEW.revision
+			USING ERRCODE = 'integrity_constraint_violation';
+	END IF;
+
+	RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+CREATE CONSTRAINT TRIGGER /*:cms.obj:*/revisions_trigger_01_main
+	AFTER UPDATE OF content ON /*:cms.prefix:*/revisions
+	DEFERRABLE INITIALLY DEFERRED
+	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/check_revision_content();
+
+
 -- Publication of the nodes of every type that has it: a record has no row.
 -- A node without a row reads as neither published nor hidden.
 CREATE TABLE /*:cms.prefix:*/publications (
@@ -293,10 +361,15 @@ CREATE TABLE /*:cms.prefix:*/events (
 	at timestamp with time zone NOT NULL DEFAULT clock_timestamp(),
 	actor bigint NOT NULL,
 	action text NOT NULL,
+	-- The revision the action concerns: the one it made main or drafted,
+	-- or the main one when publishing.
+	revision bigint,
 	data jsonb NOT NULL DEFAULT '{}',
 	CONSTRAINT /*:cms.obj:*/pk_events PRIMARY KEY (event),
 	CONSTRAINT /*:cms.obj:*/fk_events_nodes FOREIGN KEY (node)
 		REFERENCES /*:cms.prefix:*/nodes (node) ON DELETE CASCADE,
+	CONSTRAINT /*:cms.obj:*/fk_events_revisions FOREIGN KEY (revision)
+		REFERENCES /*:cms.prefix:*/revisions (revision) ON DELETE SET NULL,
 	CONSTRAINT /*:cms.obj:*/fk_events_users FOREIGN KEY (actor)
 		REFERENCES /*:cms.prefix:*/users (usr),
 	CONSTRAINT /*:cms.obj:*/ck_events_action CHECK (action IN (
@@ -306,6 +379,7 @@ CREATE TABLE /*:cms.prefix:*/events (
 	))
 );
 CREATE INDEX /*:cms.obj:*/ix_events_node ON /*:cms.prefix:*/events (node, event);
+CREATE INDEX /*:cms.obj:*/ix_events_revision ON /*:cms.prefix:*/events (revision) WHERE revision IS NOT NULL;
 
 
 CREATE TABLE /*:cms.prefix:*/full_text (
@@ -426,77 +500,45 @@ CREATE UNIQUE INDEX /*:cms.obj:*/ux_url_paths_locale ON /*:cms.prefix:*/url_path
 	USING btree (node, locale) WHERE (inactive IS NULL);
 
 
--- Working copies of nodes. `content` keeps the exact shape of
--- nodes.content so content migrations rewrite both tables the same way;
--- `settings` holds the drafted handle and URL paths
--- ({"handle": ?text, "paths": {locale: path}}). `created` is when the
--- working copy diverged from the live row.
+-- Working copies of nodes: a pointer to the revision the copy holds.
+-- `base` is the main revision it is up to date with, `created` when it
+-- diverged from the main version.
 CREATE TABLE /*:cms.prefix:*/drafts (
 	node bigint NOT NULL,
-	created timestamp with time zone NOT NULL DEFAULT now(),
-	changed timestamp with time zone NOT NULL DEFAULT now(),
-	editor bigint NOT NULL,
-	content jsonb NOT NULL,
-	settings jsonb NOT NULL DEFAULT '{}',
+	revision bigint NOT NULL,
+	base bigint,
+	created timestamp with time zone NOT NULL,
 	CONSTRAINT /*:cms.obj:*/pk_drafts PRIMARY KEY (node),
-	CONSTRAINT /*:cms.obj:*/fk_drafts_nodes FOREIGN KEY (node) REFERENCES /*:cms.prefix:*/nodes (node),
-	CONSTRAINT /*:cms.obj:*/fk_drafts_users_editor FOREIGN KEY (editor)
-		REFERENCES /*:cms.prefix:*/users (usr)
+	CONSTRAINT /*:cms.obj:*/fk_drafts_nodes FOREIGN KEY (node)
+		REFERENCES /*:cms.prefix:*/nodes (node) ON DELETE CASCADE,
+	CONSTRAINT /*:cms.obj:*/fk_drafts_revisions FOREIGN KEY (revision)
+		REFERENCES /*:cms.prefix:*/revisions (revision),
+	CONSTRAINT /*:cms.obj:*/fk_drafts_revisions_base FOREIGN KEY (base)
+		REFERENCES /*:cms.prefix:*/revisions (revision) ON DELETE SET NULL
 );
-CREATE TRIGGER /*:cms.obj:*/drafts_trigger_02_change BEFORE UPDATE
-	ON /*:cms.prefix:*/drafts
-	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_changed_column();
--- Records every superseded state of a working copy, and its last state
--- when publishing or discarding deletes the row, so the history outlives
--- the working copy. The row written on delete says why the draft went:
--- `applied` when the store says so through the transaction-local
--- setting `cosray.draft_outcome`, `discarded` otherwise.
-CREATE FUNCTION /*:cms.prefix:*/record_draft_history()
-	RETURNS TRIGGER AS $$
-BEGIN
-	INSERT INTO /*:cms.prefix:*/drafts_history (
-		node, created, changed, editor, content, settings, outcome
-	) VALUES (
-		OLD.node, OLD.created, OLD.changed, OLD.editor, OLD.content, OLD.settings,
-		CASE WHEN TG_OP = 'DELETE'
-			THEN coalesce(nullif(current_setting('cosray.draft_outcome', true), ''), 'discarded')
-			ELSE 'saved'
-		END
-	);
-
-	RETURN OLD;
-EXCEPTION WHEN unique_violation THEN
-	RAISE WARNING 'Duplicate draft history row skipped. draft: %, changed: %', OLD.node, OLD.changed;
-	RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-CREATE TRIGGER /*:cms.obj:*/drafts_trigger_01_history AFTER UPDATE OR DELETE
-	ON /*:cms.prefix:*/drafts FOR EACH ROW EXECUTE FUNCTION
-	/*:cms.prefix:*/record_draft_history();
 
 
 -- An editor's unsaved edits of a node, kept for restoring after a reload,
 -- a closed tab or a crash: one row per node and user, never validated and
--- never live. `content` and `settings` keep the shapes of the `drafts`
+-- never live. `content` and `settings` keep the shapes of the revision
 -- columns, so content migrations rewrite them the same way. `base` is the
--- `changed` of the node or working copy the edits started from.
+-- revision the edits started from; edits without one are a conflict.
 CREATE TABLE /*:cms.prefix:*/edits (
 	node bigint NOT NULL,
 	editor bigint NOT NULL,
 	changed timestamp with time zone NOT NULL DEFAULT now(),
-	base timestamp with time zone NOT NULL,
+	base bigint,
 	content jsonb NOT NULL,
 	settings jsonb NOT NULL DEFAULT '{}',
 	CONSTRAINT /*:cms.obj:*/pk_edits PRIMARY KEY (node, editor),
 	CONSTRAINT /*:cms.obj:*/fk_edits_nodes FOREIGN KEY (node)
 		REFERENCES /*:cms.prefix:*/nodes (node) ON DELETE CASCADE,
 	CONSTRAINT /*:cms.obj:*/fk_edits_users FOREIGN KEY (editor)
-		REFERENCES /*:cms.prefix:*/users (usr) ON DELETE CASCADE
+		REFERENCES /*:cms.prefix:*/users (usr) ON DELETE CASCADE,
+	CONSTRAINT /*:cms.obj:*/fk_edits_revisions FOREIGN KEY (base)
+		REFERENCES /*:cms.prefix:*/revisions (revision) ON DELETE SET NULL
 );
 CREATE INDEX /*:cms.obj:*/ix_edits_changed ON /*:cms.prefix:*/edits (changed);
-CREATE TRIGGER /*:cms.obj:*/edits_trigger_01_change BEFORE UPDATE
-	ON /*:cms.prefix:*/edits
-	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_changed_column();
 
 
 CREATE TABLE /*:cms.prefix:*/menus (
@@ -597,46 +639,6 @@ CREATE TABLE /*:cms.prefix:*/node_tags (
 		REFERENCES /*:cms.prefix:*/nodes (node),
 	CONSTRAINT /*:cms.obj:*/fk_node_tags_tags FOREIGN KEY (tag)
 		REFERENCES /*:cms.prefix:*/tags (tag)
-);
-
-
-CREATE TABLE /*:cms.prefix:*/nodes_history (
-	node bigint NOT NULL,
-	parent bigint,
-	version integer NOT NULL,
-	changed timestamp with time zone NOT NULL,
-	published boolean NOT NULL,
-	hidden boolean NOT NULL,
-	locked boolean NOT NULL,
-	type bigint NOT NULL,
-	editor bigint NOT NULL,
-	deleted timestamp with time zone,
-	content jsonb NOT NULL,
-	CONSTRAINT /*:cms.obj:*/pk_nodes_history PRIMARY KEY (node, changed),
-	CONSTRAINT /*:cms.obj:*/fk_nodes_history_nodes FOREIGN KEY (node)
-		REFERENCES /*:cms.prefix:*/nodes (node)
-);
-
-
--- `created` is copied from the draft row and keys the rows of one working
--- copy together; `outcome` is `saved` for a row superseded by the next
--- save and, on the row written when the draft is deleted, `applied` or
--- `discarded`.
-CREATE TABLE /*:cms.prefix:*/drafts_history (
-	node bigint NOT NULL,
-	created timestamp with time zone NOT NULL DEFAULT now(),
-	changed timestamp with time zone NOT NULL,
-	editor bigint NOT NULL,
-	content jsonb NOT NULL,
-	settings jsonb NOT NULL DEFAULT '{}',
-	outcome text NOT NULL DEFAULT 'saved',
-	CONSTRAINT /*:cms.obj:*/pk_drafts_history PRIMARY KEY (node, changed),
-	-- Keyed to the node, not the working copy: the history stays when
-	-- applying or discarding deletes the drafts row.
-	CONSTRAINT /*:cms.obj:*/fk_drafts_history_nodes FOREIGN KEY (node)
-		REFERENCES /*:cms.prefix:*/nodes (node),
-	CONSTRAINT /*:cms.obj:*/ck_drafts_history_outcome
-		CHECK (outcome IN ('saved', 'applied', 'discarded'))
 );
 
 

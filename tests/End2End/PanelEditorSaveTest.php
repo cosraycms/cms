@@ -812,7 +812,8 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			'editor',
 			$this->db()->execute(
 				"SELECT u.roles[1] AS role FROM cms.nodes n
-				JOIN cms.users u ON u.usr = n.editor
+				JOIN cms.revisions r ON r.revision = n.revision
+				JOIN cms.users u ON u.usr = r.editor
 				WHERE n.uid = 'panel-save-editor'",
 			)->one()['role'],
 		);
@@ -1306,8 +1307,9 @@ final class PanelEditorSaveTest extends End2EndTestCase
 	private function nodeContent(string $uid): array
 	{
 		$row = $this->db()->execute(
-			'SELECT coalesce(d.content, n.content) AS content
-				FROM cms.nodes n LEFT JOIN cms.drafts d ON d.node = n.node WHERE n.uid = :uid',
+			'SELECT coalesce(r.content, n.content) AS content
+				FROM cms.nodes n LEFT JOIN cms.drafts d ON d.node = n.node
+				LEFT JOIN cms.revisions r ON r.revision = d.revision WHERE n.uid = :uid',
 			['uid' => $uid],
 		)->one();
 		$this->assertNotEmpty($row);

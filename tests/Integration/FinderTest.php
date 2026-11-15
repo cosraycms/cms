@@ -709,15 +709,11 @@ final class FinderTest extends IntegrationTestCase
 			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Live']]],
 		]);
 		$this->createTestPath($nodeId, '/finder-live');
-		$this->db()->execute(
-			'INSERT INTO cms.drafts (node, editor, content, settings)
-			VALUES (:node, 1, :content::jsonb, :settings::jsonb)',
-			[
-				'node' => $nodeId,
-				'content' => json_encode(['title' => ['type' => 'text', 'value' => ['en' => 'Working']]]),
-				'settings' => json_encode(['handle' => 'drafted', 'paths' => ['en' => '/finder-drafted']]),
-			],
-		)->run();
+		$this->createTestDraft(
+			$nodeId,
+			['title' => ['type' => 'text', 'value' => ['en' => 'Working']]],
+			['handle' => 'drafted', 'paths' => ['en' => '/finder-drafted']],
+		);
 		$cms = $this->createCms();
 
 		$live = $cms->node->byUid('finder-working-node');
@@ -740,10 +736,7 @@ final class FinderTest extends IntegrationTestCase
 		$typeId = $this->createTestType('renderable-test-page');
 		$this->createTestNode(['uid' => 'finder-changes-clean', 'type' => $typeId]);
 		$nodeId = $this->createTestNode(['uid' => 'finder-changes-dirty', 'type' => $typeId]);
-		$this->db()->execute(
-			"INSERT INTO cms.drafts (node, editor, content) VALUES (:node, 1, '{}'::jsonb)",
-			['node' => $nodeId],
-		)->run();
+		$this->createTestDraft($nodeId, []);
 		$finder = $this->createCms();
 
 		$dirty = $finder->nodes()->types('renderable-test-page')->filter('changes = true');

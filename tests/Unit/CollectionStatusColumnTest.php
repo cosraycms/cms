@@ -177,9 +177,12 @@ final class CollectionStatusColumnTest extends TestCase
 			'stages' => [
 				'record' => $record,
 				'edited' => '2026-08-11 22:25:00+00',
+				'revision' => 1,
 				'editor' => 'Ada',
-				'draft' => $draft ? ['changed' => '2026-08-11 22:30:00+00', 'editorName' => 'Ada'] : null,
-				'mine' => $mine ? ['changed' => '2026-08-11 22:35:00+00', 'base' => '2026-08-11 22:25:00+00'] : null,
+				'draft' => $draft
+					? ['changed' => '2026-08-11 22:30:00+00', 'editorName' => 'Ada', 'revision' => 2]
+					: null,
+				'mine' => $mine ? ['changed' => '2026-08-11 22:35:00+00', 'base' => 1] : null,
 			],
 			'columns' => array_map(
 				static fn(Column|StatusColumn $column): array => $column instanceof Column ? ['value' => 'Entry'] : [],

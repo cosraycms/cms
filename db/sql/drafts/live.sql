@@ -1,5 +1,6 @@
 -- The live state a working copy is compared with.
 SELECT
+	n.revision,
 	n.content,
 	h.handle,
 	coalesce(

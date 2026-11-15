@@ -8,11 +8,13 @@ INSERT INTO /*:cms.prefix:*/edits (
 ) VALUES (
 	:node,
 	:editor,
-	:base::timestamptz,
+	-- A revision of another node, or none at all, is no base.
+	(SELECT r.revision FROM /*:cms.prefix:*/revisions r WHERE r.revision = :base::bigint AND r.node = :node),
 	:content::jsonb,
 	:settings::jsonb
 )
 ON CONFLICT (node, editor) DO UPDATE SET
+	changed = clock_timestamp(),
 	base = EXCLUDED.base,
 	content = EXCLUDED.content,
 	settings = EXCLUDED.settings

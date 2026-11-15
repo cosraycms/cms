@@ -441,10 +441,15 @@ final class CollectionTable
 				: [
 					'changed' => (string) ($draft['changed'] ?? ''),
 					'editorName' => is_string($draft['editorName'] ?? null) ? $draft['editorName'] : null,
+					'revision' => is_int($draft['revision'] ?? null) ? $draft['revision'] : null,
 				],
 			autosave: $mine === null
 				? null
-				: ['changed' => (string) ($mine['changed'] ?? ''), 'base' => (string) ($mine['base'] ?? '')],
+				: [
+					'changed' => (string) ($mine['changed'] ?? ''),
+					'base' => is_int($mine['base'] ?? null) ? $mine['base'] : null,
+				],
+			revision: is_int($facts['revision'] ?? null) ? $facts['revision'] : null,
 		)->stages(NodeStatus::dates($locale, $timezone));
 		$stages = $fixed ? $stages : NodeStatus::chain($stages);
 

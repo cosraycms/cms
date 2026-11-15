@@ -23,7 +23,7 @@ final class Edits
 	/**
 	 * @return ?array{
 	 *     changed: string,
-	 *     base: string,
+	 *     base: ?int,
 	 *     content: array<string, mixed>,
 	 *     settings: array<string, mixed>,
 	 * }
@@ -41,7 +41,7 @@ final class Edits
 
 		return [
 			'changed' => (string) $row['changed'],
-			'base' => (string) $row['base'],
+			'base' => $row['base'] === null ? null : (int) $row['base'],
 			'content' => is_array($content) ? $content : [],
 			'settings' => is_array($settings) ? $settings : [],
 		];
@@ -51,7 +51,7 @@ final class Edits
 	 * @param array<string, mixed> $content
 	 * @param array<string, mixed> $settings
 	 */
-	public function save(int $node, int $editor, string $base, array $content, array $settings): void
+	public function save(int $node, int $editor, ?int $base, array $content, array $settings): void
 	{
 		$saved = $this->db
 			->edits
@@ -72,5 +72,11 @@ final class Edits
 	public function delete(int $node, int $editor): void
 	{
 		$this->db->edits->delete(['node' => $node, 'editor' => $editor])->run();
+	}
+
+	/** Moves the user's edits from one revision onto another, when they started from the first. */
+	public function rebase(int $node, int $editor, int $from, int $to): void
+	{
+		$this->db->edits->rebase(['node' => $node, 'editor' => $editor, 'from' => $from, 'to' => $to])->run();
 	}
 }

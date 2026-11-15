@@ -1423,21 +1423,24 @@ final class Styleguide extends Panel
 	private function stageSamples(): array
 	{
 		$dates = NodeStatus::dates($this->localeId(), $this->config->app->timezone);
-		$sample = static fn(bool $published, ?string $draft, ?string $base): array => NodeStatus::of(
+		// Revision 1 is the main version, 2 and 3 are drafts saved at these times.
+		$saved = [2 => '2026-08-11 22:30:00+00', 3 => '2026-08-11 22:40:00+00'];
+		$sample = static fn(bool $published, ?int $draft, ?int $base): array => NodeStatus::of(
 			record: false,
 			published: $published,
 			edited: '2026-08-11 22:25:00+00',
 			editor: 'Ada',
-			draft: $draft === null ? null : ['changed' => $draft, 'editorName' => 'Ada'],
+			draft: $draft === null ? null : ['changed' => $saved[$draft], 'editorName' => 'Ada', 'revision' => $draft],
 			autosave: $base === null ? null : ['changed' => '2026-08-11 22:45:00+00', 'base' => $base],
+			revision: 1,
 		)->stages($dates);
 
 		return [
 			$sample(true, null, null),
-			$sample(false, '2026-08-11 22:30:00+00', null),
-			$sample(true, null, '2026-08-11 22:25:00+00'),
-			$sample(true, '2026-08-11 22:30:00+00', '2026-08-11 22:30:00+00'),
-			$sample(true, '2026-08-11 22:40:00+00', '2026-08-11 22:30:00+00'),
+			$sample(false, 2, null),
+			$sample(true, null, 1),
+			$sample(true, 2, 2),
+			$sample(true, 3, 2),
 		];
 	}
 
@@ -1458,8 +1461,9 @@ final class Styleguide extends Panel
 				published: $published,
 				edited: '2026-08-11 22:25:00+00',
 				editor: 'Ada',
-				draft: $draft === null ? null : ['changed' => $draft, 'editorName' => 'Ada'],
-				autosave: $mine === null ? null : ['changed' => $mine, 'base' => '2026-08-11 22:25:00+00'],
+				draft: $draft === null ? null : ['changed' => $draft, 'editorName' => 'Ada', 'revision' => 2],
+				autosave: $mine === null ? null : ['changed' => $mine, 'base' => 1],
+				revision: 1,
 			)->stages($dates);
 			$stages = NodeStatus::chain($stages);
 

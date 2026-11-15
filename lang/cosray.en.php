@@ -472,6 +472,7 @@ return [
 		'node:record-publication' => 'A record is not published.',
 		'node:reserved-path' => 'The URL path :path is reserved by the system; choose another one',
 		'node:uid-immutable' => 'The uid of an entry cannot be changed',
+		'node:unknown-revision' => 'This revision does not belong to the entry.',
 		'node:unpublished' => 'Unpublished',
 		'panel:logo' => 'Panel logo',
 		'panel:navigation' => 'Panel navigation',

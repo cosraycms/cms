@@ -472,6 +472,7 @@ return [
 		'node:record-publication' => 'Un record non viene pubblicato.',
 		'node:reserved-path' => 'Il percorso URL :path è riservato al sistema; sceglierne un altro',
 		'node:uid-immutable' => 'L’uid di un contenuto non può essere modificato',
+		'node:unknown-revision' => 'Questa versione non appartiene alla voce.',
 		'node:unpublished' => 'Non pubblicato',
 		'panel:logo' => 'Logo dell’amministrazione del sito',
 		'panel:navigation' => 'Navigazione dell’amministrazione del sito',

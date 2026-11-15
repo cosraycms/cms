@@ -68,7 +68,8 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$this->assertSame('Live', $this->liveTitle('drafts-page'));
 		$this->assertSame('Second', $this->draftTitle('drafts-page'));
 		$this->assertSame(1, $this->rows('drafts', 'drafts-page'));
-		$this->assertSame(1, $this->rows('drafts_history', 'drafts-page'));
+		$this->assertSame(['created', 'drafted', 'drafted'], array_column($this->events('drafts-page'), 'action'));
+		$this->assertSame(3, $this->rows('revisions', 'drafts-page'));
 	}
 
 	public function testDraftCarriesHandleAndPathsUntilPublished(): void
@@ -82,7 +83,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 
 		$this->store->draft($this->node('drafts-settings'), $payload, $this->locales(), Actor::system());
 
-		$settings = json_decode((string) $this->row('drafts', 'drafts-settings')['settings'], true);
+		$settings = json_decode((string) $this->draft('drafts-settings')['settings'], true);
 		$this->assertSame('drafted-handle', $settings['handle']);
 		$this->assertSame(['en' => '/drafted-path'], $settings['paths']);
 		$this->assertNull($this->handle('drafts-settings'));
@@ -121,7 +122,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$this->store->draft($this->node('drafts-match'), $live, $this->locales(), Actor::system());
 
 		$this->assertSame(0, $this->rows('drafts', 'drafts-match'));
-		$this->assertSame('discarded', $this->row('drafts_history', 'drafts-match')['outcome']);
+		$this->assertSame('discarded', array_last($this->events('drafts-match'))['action']);
 		$this->assertSame('/live-path', $this->activePath('drafts-match'));
 		$this->assertSame('live-handle', $this->handle('drafts-match'));
 	}
@@ -202,20 +203,30 @@ final class NodeDraftsTest extends IntegrationTestCase
 		);
 		$this->store->applyDraft($this->node('drafts-timeline'), $this->locales(), Actor::system());
 
-		$history = $this->db()->execute(
-			'SELECT h.editor, h.content, h.settings, h.outcome, h.created FROM cms.drafts_history h
-				JOIN cms.nodes n ON n.node = h.node WHERE n.uid = :uid ORDER BY h.changed',
+		$revisions = $this->db()->execute(
+			'SELECT r.revision, r.base, r.editor, r.content, r.settings FROM cms.revisions r
+				JOIN cms.nodes n ON n.node = r.node WHERE n.uid = :uid ORDER BY r.revision',
 			['uid' => 'drafts-timeline'],
 		)->all();
-		$this->assertCount(2, $history);
+		$events = $this->events('drafts-timeline');
+
+		$this->assertCount(4, $revisions);
 		$this->assertSame(
-			[$writer, $photographer],
-			array_map(static fn(array $row): int => (int) $row['editor'], $history),
+			[1, $writer, $photographer, 1],
+			array_map(static fn(array $row): int => (int) $row['editor'], $revisions),
 		);
-		$this->assertSame('Pictures added', json_decode((string) $history[1]['content'], true)['title']['value']['en']);
-		$this->assertSame('timeline', json_decode((string) $history[1]['settings'], true)['handle']);
-		$this->assertSame(['saved', 'applied'], array_column($history, 'outcome'));
-		$this->assertSame($history[0]['created'], $history[1]['created']);
+		$this->assertSame(
+			[null, $revisions[0]['revision'], $revisions[1]['revision'], $revisions[2]['revision']],
+			array_column($revisions, 'base'),
+		);
+		$this->assertSame(
+			'Pictures added',
+			json_decode((string) $revisions[2]['content'], true)['title']['value']['en'],
+		);
+		$this->assertSame('timeline', json_decode((string) $revisions[2]['settings'], true)['handle']);
+		$this->assertSame(['created', 'drafted', 'drafted', 'applied'], array_column($events, 'action'));
+		$this->assertSame(array_column($revisions, 'revision'), array_column($events, 'revision'));
+		$this->assertSame($revisions[3]['revision'], $this->row('nodes', 'drafts-timeline')['revision']);
 		$this->assertSame('Pictures added', $this->liveTitle('drafts-timeline'));
 	}
 
@@ -231,13 +242,16 @@ final class NodeDraftsTest extends IntegrationTestCase
 
 		$this->store->discard($this->node('drafts-discard-history'), Actor::system());
 
+		$discarded = array_last($this->events('drafts-discard-history'));
+
 		$this->assertSame(0, $this->rows('drafts', 'drafts-discard-history'));
-		$this->assertSame(1, $this->rows('drafts_history', 'drafts-discard-history'));
-		$this->assertSame('discarded', $this->row('drafts_history', 'drafts-discard-history')['outcome']);
+		$this->assertSame('discarded', $discarded['action']);
 		$this->assertSame(
 			'Thrown away',
 			json_decode(
-				(string) $this->row('drafts_history', 'drafts-discard-history')['content'],
+				(string) $this->db()->execute('SELECT content FROM cms.revisions WHERE revision = :revision', [
+					'revision' => $discarded['revision'],
+				])->one()['content'],
 				true,
 			)['title']['value']['en'],
 		);
@@ -398,12 +412,13 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$this->createPage('unchanged-draft', 'Live');
 		$payload = $this->payload('unchanged-draft', 'Drafted');
 		$this->store->draft($this->node('unchanged-draft'), $payload, $this->locales(), Actor::system());
-		$changed = $this->row('drafts', 'unchanged-draft')['changed'];
+		$revision = $this->draft('unchanged-draft')['revision'];
+		$revisions = $this->rows('revisions', 'unchanged-draft');
 
 		$this->store->draft($this->node('unchanged-draft'), $payload, $this->locales(), Actor::system());
 
-		$this->assertSame($changed, $this->row('drafts', 'unchanged-draft')['changed']);
-		$this->assertSame(0, $this->rows('drafts_history', 'unchanged-draft'));
+		$this->assertSame($revision, $this->draft('unchanged-draft')['revision']);
+		$this->assertSame($revisions, $this->rows('revisions', 'unchanged-draft'));
 	}
 
 	public function testAChangeOfOnlyTheHandleOrAPathDatesTheNode(): void
@@ -493,6 +508,30 @@ final class NodeDraftsTest extends IntegrationTestCase
 		return $row;
 	}
 
+	/** @return array<string, mixed> */
+	private function draft(string $uid): array
+	{
+		$row = $this->db()->execute(
+			'SELECT d.revision, d.base, r.content, r.settings FROM cms.drafts d
+				JOIN cms.nodes n ON n.node = d.node JOIN cms.revisions r ON r.revision = d.revision
+				WHERE n.uid = :uid',
+			['uid' => $uid],
+		)->first();
+		$this->assertNotNull($row, "No working copy for {$uid}");
+
+		return $row;
+	}
+
+	/** @return list<array<string, mixed>> */
+	private function events(string $uid): array
+	{
+		return $this->db()->execute(
+			'SELECT e.action, e.revision FROM cms.events e JOIN cms.nodes n ON n.node = e.node
+				WHERE n.uid = :uid ORDER BY e.event',
+			['uid' => $uid],
+		)->all();
+	}
+
 	private function rows(string $table, string $uid): int
 	{
 		return (int) $this->db()->execute(
@@ -508,7 +547,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 
 	private function draftTitle(string $uid): string
 	{
-		return json_decode((string) $this->row('drafts', $uid)['content'], true)['title']['value']['en'];
+		return json_decode((string) $this->draft($uid)['content'], true)['title']['value']['en'];
 	}
 
 	private function handle(string $uid): ?string

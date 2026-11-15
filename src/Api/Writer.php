@@ -119,7 +119,8 @@ final class Writer
 
 	/**
 	 * Applies a JSON Merge Patch to the live node and to an editor's working
-	 * copy alike, so publishing that copy later does not undo the patch.
+	 * copy alike, so applying that copy later does not undo the patch; the
+	 * copy stays up to date with the main version.
 	 *
 	 * @param array<array-key, mixed> $patch
 	 */
@@ -141,8 +142,9 @@ final class Writer
 			}
 
 			$draft = Wrapper::unwrap($working);
-			$this->store->draft($draft, $this->patched($draft, $patch), $locales, $actor);
+			$patched = $this->patched($draft, $patch);
 			$this->store->save($inner, $live, $locales, $actor);
+			$this->store->draft($draft, $patched, $locales, $actor, rebase: true);
 		});
 	}
 

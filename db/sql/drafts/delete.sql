@@ -3,4 +3,4 @@ DELETE FROM
 WHERE
 	node = :node
 
-RETURNING node;
+RETURNING revision;

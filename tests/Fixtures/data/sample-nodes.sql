@@ -15,14 +15,13 @@ BEGIN
     SELECT type INTO test_block_type FROM cms.types WHERE handle = 'test-block' LIMIT 1;
 
     -- Test homepage
-    INSERT INTO cms.nodes (uid, parent, locked, type, creator, editor, content)
+    INSERT INTO cms.nodes (uid, parent, locked, type, creator, content)
     VALUES (
         'test-homepage',
         NULL,
         false,
         test_home_type,
         1,  -- System user
-        1,
         jsonb_build_object(
             'title', jsonb_build_object(
                 'type', 'text',
@@ -54,13 +53,12 @@ BEGIN
     ON CONFLICT DO NOTHING;
 
     -- Test article 1 (published)
-    INSERT INTO cms.nodes (uid, parent, locked, type, creator, editor, content)
+    INSERT INTO cms.nodes (uid, parent, locked, type, creator, content)
     VALUES (
         'test-article-1',
         NULL,
         false,
         test_article_type,
-        1,
         1,
         jsonb_build_object(
             'title', jsonb_build_object(
@@ -82,13 +80,12 @@ BEGIN
     ON CONFLICT (uid) DO NOTHING;
 
     -- Test article 2 (unpublished/draft)
-    INSERT INTO cms.nodes (uid, parent, locked, type, creator, editor, content)
+    INSERT INTO cms.nodes (uid, parent, locked, type, creator, content)
     VALUES (
         'test-article-2',
         NULL,
         false,
         test_article_type,
-        1,
         1,
         jsonb_build_object(
             'title', jsonb_build_object(
@@ -110,13 +107,12 @@ BEGIN
     ON CONFLICT (uid) DO NOTHING;
 
     -- Test block
-    INSERT INTO cms.nodes (uid, parent, locked, type, creator, editor, content)
+    INSERT INTO cms.nodes (uid, parent, locked, type, creator, content)
     VALUES (
         'test-block-1',
         NULL,
         false,
         test_block_type,
-        1,
         1,
         jsonb_build_object(
             'content', jsonb_build_object(

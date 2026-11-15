@@ -475,6 +475,7 @@ return [
 		'node:record-publication' => 'Ein Datensatz wird nicht veröffentlicht.',
 		'node:reserved-path' => 'Der URL-Pfad :path ist vom System reserviert; bitte einen anderen wählen',
 		'node:uid-immutable' => 'Die uid eines Eintrags kann nicht geändert werden',
+		'node:unknown-revision' => 'Diese Version gehört nicht zu diesem Eintrag.',
 		'node:unpublished' => 'Unveröffentlicht',
 		'panel:logo' => 'Logo der Website-Verwaltung',
 		'panel:navigation' => 'Navigation der Website-Verwaltung',

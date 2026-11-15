@@ -472,6 +472,7 @@ return [
 		'node:record-publication' => 'Un enregistrement n’est pas publié.',
 		'node:reserved-path' => 'Le chemin d’URL :path est réservé par le système ; choisissez-en un autre',
 		'node:uid-immutable' => 'L’uid d’une entrée ne peut pas être modifié',
+		'node:unknown-revision' => 'Cette version n’appartient pas à l’entrée.',
 		'node:unpublished' => 'Non publié',
 		'panel:logo' => 'Logo de l’administration du site',
 		'panel:navigation' => 'Navigation de l’administration du site',

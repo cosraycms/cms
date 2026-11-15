@@ -46,13 +46,15 @@ final readonly class NodeStatus
 	) {}
 
 	/**
-	 * An autosave that started from an older state than the working one,
-	 * the draft or else the main version, is a conflict.
+	 * Edits that started from another revision than the working one, the
+	 * draft's or else the main version's, are a conflict, and so are edits
+	 * that do not know theirs.
 	 *
-	 * @param string $edited when the main version's content changed last
-	 * @param ?string $editor who changed it
-	 * @param ?array{changed: string, editorName?: ?string} $draft the working copy
-	 * @param ?array{changed: string, base: string} $autosave the user's
+	 * @param string $edited when the main version became main
+	 * @param ?string $editor who made it main
+	 * @param ?int $revision the main revision
+	 * @param ?array{changed: string, editorName?: ?string, revision?: ?int} $draft the working copy
+	 * @param ?array{changed: string, base: ?int} $autosave the user's
 	 */
 	public static function of(
 		bool $record,
@@ -61,10 +63,12 @@ final readonly class NodeStatus
 		?string $editor,
 		?array $draft,
 		?array $autosave,
+		?int $revision = null,
 	): self {
+		$working = $draft['revision'] ?? $revision;
 		$mine = match (true) {
 			$autosave === null => 'none',
-			self::before($autosave['base'], $draft['changed'] ?? $edited) => 'conflict',
+			$autosave['base'] === null || $working !== null && $autosave['base'] !== $working => 'conflict',
 			default => 'present',
 		};
 
@@ -227,14 +231,5 @@ final readonly class NodeStatus
 			),
 			$stages,
 		));
-	}
-
-	private static function before(string $base, string $working): bool
-	{
-		try {
-			return new DateTimeImmutable($base) < new DateTimeImmutable($working);
-		} catch (Throwable) {
-			return false;
-		}
 	}
 }

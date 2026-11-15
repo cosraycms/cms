@@ -69,4 +69,5 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000051-fulltext-partial[pgsql].sql', now()),
 	('000000-000052-node-edited.sql', now()),
 	('000000-000053-draft-outcome-applied.sql', now()),
-	('000000-000054-publications-events[pgsql].php', now());
+	('000000-000054-publications-events[pgsql].php', now()),
+	('000000-000055-revisions.sql', now());

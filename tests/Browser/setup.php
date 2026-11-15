@@ -68,13 +68,15 @@ $db->prepare(
 	"INSERT INTO cms.users (uid, username, email, password, roles, active, data, creator, editor)
 	VALUES ('browsertester', 'tester', 'tester@example.com', :password, ARRAY['admin'], true, '{\"name\": \"Tester\"}', 1, 1)",
 )->execute(['password' => password_hash('browser-tests-password', PASSWORD_ARGON2ID)]);
+// A node and its main revision are written together.
+$db->beginTransaction();
 $type = (int) $db->query("INSERT INTO cms.types (handle) VALUES ('media-page') RETURNING type")->fetchColumn();
 
 foreach (['focal', 'crop', 'texts', 'strict', 'gallery', 'video', 'restore', 'later', 'stages'] as $name) {
 	$node = $db->prepare(
 		'WITH n AS (
-			INSERT INTO cms.nodes (uid, locked, type, creator, editor, content, title)
-			VALUES (:uid, false, :type, 1, 1, :content, :title) RETURNING node
+			INSERT INTO cms.nodes (uid, locked, type, creator, content, title)
+			VALUES (:uid, false, :type, 1, :content, :title) RETURNING node
 		), p AS (INSERT INTO cms.publications (node, published) SELECT node, true FROM n)
 		SELECT node FROM n',
 	);
@@ -91,8 +93,8 @@ foreach (['focal', 'crop', 'texts', 'strict', 'gallery', 'video', 'restore', 'la
 $type = (int) $db->query("INSERT INTO cms.types (handle) VALUES ('article') RETURNING type")->fetchColumn();
 $node = $db->prepare(
 	'WITH n AS (
-		INSERT INTO cms.nodes (uid, locked, type, creator, editor, content, title)
-		VALUES (:uid, false, :type, 1, 1, :content, :title) RETURNING node
+		INSERT INTO cms.nodes (uid, locked, type, creator, content, title)
+		VALUES (:uid, false, :type, 1, :content, :title) RETURNING node
 	), p AS (INSERT INTO cms.publications (node, published) SELECT node, true FROM n)
 	SELECT node FROM n',
 );
@@ -107,6 +109,19 @@ $node->execute([
 ]);
 $db->prepare("INSERT INTO cms.url_paths (node, path, locale, creator, editor) VALUES (:node, '/article', 'en', 1, 1)")
 	->execute(['node' => (int) $node->fetchColumn()]);
+
+$db->exec(
+	"WITH revision AS (
+		INSERT INTO cms.revisions (node, editor, content, settings)
+		SELECT n.node, n.creator, n.content, jsonb_build_object('handle', NULL, 'paths', coalesce((
+			SELECT jsonb_object_agg(p.locale, p.path) FROM cms.url_paths p WHERE p.node = n.node AND p.inactive IS NULL
+		), '{}'))
+		FROM cms.nodes n WHERE n.revision IS NULL
+		RETURNING revision, node
+	)
+	UPDATE cms.nodes n SET revision = revision.revision FROM revision WHERE n.node = revision.node",
+);
+$db->commit();
 
 /** Four colored quarters, so a cut shows in the pixels. */
 $photo = static function (string $file, int $width, int $height, int $tint = 0): void {

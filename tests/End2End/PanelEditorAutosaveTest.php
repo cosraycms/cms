@@ -34,7 +34,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		$this->assertSame('Edited', $this->autosavedTitle('autosave-kept'));
 		$this->assertSame('Live', $this->liveTitle('autosave-kept'));
 		$this->assertSame(0, $this->rows('drafts', 'autosave-kept'));
-		$this->assertSame(0, $this->rows('events', 'autosave-kept'));
+		$this->assertSame(1, $this->rows('events', 'autosave-kept'), 'only its creation');
 	}
 
 	public function testEditsBackToTheStoredStateLeaveNoAutosave(): void
@@ -107,7 +107,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 	public function testAnAutosaveFromBeforeTheLastSaveIsAConflict(): void
 	{
 		$this->createPage('autosave-stale', 'Live');
-		$this->autosave('autosave-stale', 'Edited', base: '2000-01-01T00:00:00Z');
+		$this->autosave('autosave-stale', 'Edited', base: 'none');
 
 		$editor = $this->editor('autosave-stale');
 
@@ -121,7 +121,7 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeExists('//*[@id="editor-discard-mine"]//button[@form="editor-autosave-discard"]', $editor);
 		$this->assertHtmlNodeExists('//*[@data-save-label][contains(., "Save anyway")]', $editor);
-		$this->assertHtmlNodeExists('//input[@name="_base"][starts-with(@value, "2000-01-01")]', $editor);
+		$this->assertHtmlNodeExists('//input[@name="_base"][@value="none"]', $editor);
 	}
 
 	public function testTheUsersOwnSwitchLeavesCurrentEditsNoConflict(): void
@@ -156,8 +156,14 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		$this->assertHtmlNodeMissing("//*[@data-state='conflict']", $this->editor('autosave-foreign'));
 
 		$this->db()->execute(
-			"UPDATE cms.nodes SET content = jsonb_set(content, '{title,value,en}', '\"Theirs\"'), "
-				. "edited = clock_timestamp() WHERE uid = 'autosave-foreign'",
+			"WITH theirs AS (
+				INSERT INTO cms.revisions (node, base, editor, content)
+				SELECT node, revision, 1, jsonb_set(content, '{title,value,en}', '\"Theirs\"')
+				FROM cms.nodes WHERE uid = 'autosave-foreign'
+				RETURNING revision, node, content
+			)
+			UPDATE cms.nodes n SET content = theirs.content, revision = theirs.revision
+			FROM theirs WHERE n.node = theirs.node",
 		)->run();
 
 		$this->assertHtmlNodeExists("//*[@data-state='conflict']", $this->editor('autosave-foreign'));

@@ -411,7 +411,9 @@ final class PanelEditorDraftTest extends End2EndTestCase
 	{
 		return (
 			$this->db()->execute(
-				'SELECT d.* FROM cms.drafts d JOIN cms.nodes n ON n.node = d.node WHERE n.uid = :uid',
+				'SELECT d.*, r.content, r.settings, r.editor, r.created AS changed FROM cms.drafts d
+					JOIN cms.nodes n ON n.node = d.node JOIN cms.revisions r ON r.revision = d.revision
+					WHERE n.uid = :uid',
 				['uid' => $uid],
 			)->first() ?: null
 		);

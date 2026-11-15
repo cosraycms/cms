@@ -390,7 +390,7 @@ final class Nodes implements Iterator
 
 		$row['content'] = json_decode($row['content'], true);
 		$row['title'] = json_decode($row['title'], true);
-		$row['editor_data'] = json_decode($row['editor_data'], true);
+		$row['editor_data'] = json_decode((string) $row['editor_data'], true);
 		$row['creator_data'] = json_decode($row['creator_data'], true);
 		$row['paths'] = json_decode($row['paths'], true);
 		$row = Node::foldDraft($row);

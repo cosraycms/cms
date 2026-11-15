@@ -361,14 +361,14 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 
 		// Insert nodes with specific dates
 		$this->db()->execute(
-			"INSERT INTO cms.nodes (uid, type, creator, editor, created, content)
-			 VALUES ('old-node', :type, 1, 1, '2023-01-01', '{}'::jsonb)",
+			"INSERT INTO cms.nodes (uid, type, creator, created, content)
+			 VALUES ('old-node', :type, 1, '2023-01-01', '{}'::jsonb)",
 			['type' => $typeId],
 		)->run();
 
 		$this->db()->execute(
-			"INSERT INTO cms.nodes (uid, type, creator, editor, created, content)
-			 VALUES ('recent-node', :type, 1, 1, '2024-06-15', '{}'::jsonb)",
+			"INSERT INTO cms.nodes (uid, type, creator, created, content)
+			 VALUES ('recent-node', :type, 1, '2024-06-15', '{}'::jsonb)",
 			['type' => $typeId],
 		)->run();
 

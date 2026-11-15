@@ -27,13 +27,7 @@ final class PreviewTest extends End2EndTestCase
 	public function testPreviewRendersTheWorkingCopyOfAPublishedNode(): void
 	{
 		$nodeId = $this->createPage('preview-working', 'Live title', published: true);
-		$this->db()->execute(
-			'INSERT INTO cms.drafts (node, editor, content) VALUES (:node, 1, :content::jsonb)',
-			[
-				'node' => $nodeId,
-				'content' => json_encode(['title' => ['type' => Text::class, 'value' => ['en' => 'Working title']]]),
-			],
-		)->run();
+		$this->createTestDraft($nodeId, ['title' => ['type' => Text::class, 'value' => ['en' => 'Working title']]]);
 		$this->authenticateAs('editor');
 
 		$response = $this->makeRequest('GET', '/preview/preview-working');
@@ -79,8 +73,8 @@ final class PreviewTest extends End2EndTestCase
 		$other = $this->createTestUser(['uid' => 'preview-other-user', 'username' => 'preview-other-user']);
 		$edits = new Edits($this->db());
 		$content = static fn(string $title): array => ['title' => ['type' => Text::class, 'value' => ['en' => $title]]];
-		$edits->save($node, $user, '2026-01-01T00:00:00Z', $content('Mine'), []);
-		$edits->save($node, $other, '2026-01-01T00:00:00Z', $content('Theirs'), []);
+		$edits->save($node, $user, null, $content('Mine'), []);
+		$edits->save($node, $other, null, $content('Theirs'), []);
 		$this->assertResponseStatus(303, $this->makeRequest('POST', '/panel/login', [
 			'body' => ['login' => 'preview-mine-user', 'password' => 'password', 'next' => '/panel'],
 		]));

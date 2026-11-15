@@ -475,6 +475,7 @@ return [
 		'node:record-publication' => 'Een record wordt niet gepubliceerd.',
 		'node:reserved-path' => 'Het URL-pad :path is gereserveerd door het systeem; kies een ander pad',
 		'node:uid-immutable' => 'De uid van een item kan niet worden gewijzigd',
+		'node:unknown-revision' => 'Deze versie hoort niet bij het item.',
 		'node:unpublished' => 'Niet gepubliceerd',
 		'panel:logo' => 'Logo van het websitebeheer',
 		'panel:navigation' => 'Navigatie van het websitebeheer',

@@ -1,6 +1,7 @@
 SELECT
 	n.node,
 	n.uid,
+	n.revision,
 	h.handle,
 	np.uid AS parent,
 	p.published,
@@ -11,11 +12,11 @@ SELECT
 	n.edited,
 	n.deleted,
 <?php if (isset($working) && $working && isset($autosave)) : ?>
-	coalesce(a.content, d.content, n.content) AS content,
-	coalesce(d.settings, '{}'::jsonb) AS draft_settings,
+	coalesce(a.content, dr.content, n.content) AS content,
+	coalesce(dr.settings, '{}'::jsonb) AS draft_settings,
 <?php elseif (isset($working) && $working) : ?>
-	coalesce(d.content, n.content) AS content,
-	coalesce(d.settings, '{}'::jsonb) AS draft_settings,
+	coalesce(dr.content, n.content) AS content,
+	coalesce(dr.settings, '{}'::jsonb) AS draft_settings,
 <?php else: ?>
 	n.content,
 <?php endif ?>
@@ -54,10 +55,13 @@ SELECT
 	(SELECT m.base FROM /*:cms.prefix:*/edits m WHERE m.node = n.node AND m.editor = :mine) AS mine_base,
 <?php endif ?>
 	d.node IS NOT NULL AS has_draft,
+	d.revision AS draft_revision,
+	d.base AS draft_base,
 	d.created AS draft_created,
-	d.changed AS draft_changed,
-	d.editor AS draft_editor,
+	dr.created AS draft_changed,
+	dr.editor AS draft_editor,
 	coalesce(ud.data->>'name', ud.username, ud.email) AS draft_editor_name,
+	coalesce(ua.data->>'name', ua.username, ua.email) AS applier_name,
 	t.handle AS type_handle,
 	uc.uid AS creator_uid,
 	uc.email AS creator_email,
@@ -85,16 +89,35 @@ FROM
 		np.node = n.parent
 	LEFT JOIN /*:cms.prefix:*/drafts d ON
 		d.node = n.node
+	LEFT JOIN /*:cms.prefix:*/revisions dr ON
+		dr.revision = d.revision
+	LEFT JOIN /*:cms.prefix:*/revisions mr ON
+		mr.revision = n.revision
+<?php // Who made the main revision main: it may have been drafted by someone else. ?>
+	LEFT JOIN LATERAL (
+		SELECT
+			e.actor
+		FROM
+			/*:cms.prefix:*/events e
+		WHERE
+			e.revision = n.revision
+			AND e.action IN ('created', 'saved', 'applied')
+		ORDER BY
+			e.event DESC
+		LIMIT 1
+	) ea ON true
+	LEFT JOIN /*:cms.prefix:*/users ua ON
+		ua.usr = ea.actor
 <?php if (isset($working) && $working && isset($autosave)) : ?>
 	LEFT JOIN /*:cms.prefix:*/edits a ON
 		a.node = n.node AND a.editor = :autosave
 <?php endif ?>
 	LEFT JOIN /*:cms.prefix:*/users ud ON
-		ud.usr = d.editor
+		ud.usr = dr.editor
 	INNER JOIN /*:cms.prefix:*/users uc ON
 		uc.usr = n.creator
-	INNER JOIN /*:cms.prefix:*/users ue ON
-		ue.usr = n.editor
+	LEFT JOIN /*:cms.prefix:*/users ue ON
+		ue.usr = mr.editor
 	LEFT JOIN /*:cms.prefix:*/url_paths up ON
 		up.node = n.node
 	LEFT JOIN (
@@ -176,6 +199,8 @@ GROUP BY
 	n.node,
 	p.node,
 	d.node,
+	dr.revision,
+	ua.usr,
 <?php if (isset($working) && $working && isset($autosave)) : ?>
 	a.node,
 	a.editor,

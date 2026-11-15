@@ -42,7 +42,7 @@ use Throwable;
 /**
  * @phpstan-type AutosaveState array{
  *     url: string,
- *     base: string,
+ *     base: ?int,
  *     restored: ?array{fields: list<string>, settings: list<string>},
  * }
  */
@@ -182,14 +182,17 @@ final class Editor extends Panel
 			return false;
 		}
 
-		$base = $form['_base'] ?? null;
-		$edits->save(
-			$nodeId,
-			$this->actor()->id,
-			is_string($base) && $this->timestamp($base) !== null ? $base : $this->workingChanged($data),
-			$edited['content'],
-			$settings,
-		);
+		$base = $this->editsBase($data, $form);
+		$stored = $edits->get($nodeId, $this->actor()->id);
+
+		// Edits already moved onto the working revision stay there: a form
+		// sent before the move, as when the user discarded the draft they
+		// started from, names the one they left.
+		if ($stored !== null && $stored['base'] !== null && $stored['base'] === $this->workingRevision($data)) {
+			$base = $stored['base'];
+		}
+
+		$edits->save($nodeId, $this->actor()->id, $base, $edited['content'], $settings);
 
 		return true;
 	}
@@ -351,7 +354,7 @@ final class Editor extends Panel
 					? null
 					: [
 						'url' => $links->autosave($node),
-						'base' => $this->workingChanged(NodeFactory::dataFor(Wrapper::unwrap($saved))),
+						'base' => $this->workingRevision(NodeFactory::dataFor(Wrapper::unwrap($saved))),
 						'restored' => null,
 					],
 		];
@@ -375,10 +378,15 @@ final class Editor extends Panel
 
 		$links = $this->origin()['links'];
 		$nodeObj = Wrapper::unwrap($result);
-		$this->nodeStore($context, $cms)->discard($nodeObj, $this->actor());
+		$dropped = $this->nodeStore($context, $cms)->discard($nodeObj, $this->actor());
+		$edits = new Edits($context->db);
+		$main = NodeFactory::meta($nodeObj, 'revision');
 
 		if (($this->formData()['mine'] ?? null) === 'discard') {
-			new Edits($context->db)->delete($this->nodeId($nodeObj), $this->actor()->id);
+			$edits->delete($this->nodeId($nodeObj), $this->actor()->id);
+		} elseif ($dropped !== null && is_int($main)) {
+			// The edits the user keeps go on from the main version.
+			$edits->rebase($this->nodeId($nodeObj), $this->actor()->id, $dropped, $main);
 		}
 		$response = Response::create($factory);
 
@@ -413,24 +421,43 @@ final class Editor extends Panel
 	}
 
 	/**
-	 * Whether the edits started from an older state than the working one,
-	 * which someone saved meanwhile, and the user did not say to save anyway.
-	 * Applying such edits is refused either way.
+	 * Whether the edits started from another state than the working one,
+	 * which someone saved meanwhile, or from one they no longer know, and
+	 * the user did not say to save anyway. Applying such edits is refused
+	 * either way.
 	 *
 	 * @param array<string, mixed> $data the stored working state
 	 * @param array<array-key, mixed> $form
 	 */
 	private function conflicts(array $data, array $form): bool
 	{
-		$base = $this->timestamp(is_string($form['_base'] ?? null) ? $form['_base'] : '');
-		$working = $this->timestamp($this->workingChanged($data));
+		$base = $form['_base'] ?? null;
 
 		return (
-			$base !== null
-				&& $working !== null
-				&& $base < $working
+			is_string($base)
+				&& $base !== ''
+				&& $base !== (string) $this->workingRevision($data)
 				&& (($form['force'] ?? null) !== '1' || ($form['apply'] ?? null) !== null)
 		);
+	}
+
+	/**
+	 * The revision unsaved edits start from: the one the form names, the
+	 * working one when it names none, and no revision when it names
+	 * something else, such as `none`, which keeps a conflict.
+	 *
+	 * @param array<string, mixed> $data the stored working state
+	 * @param array<array-key, mixed> $form
+	 */
+	private function editsBase(array $data, array $form): ?int
+	{
+		$base = $form['_base'] ?? null;
+
+		return match (true) {
+			$base === null || $base === '' => $this->workingRevision($data),
+			is_string($base) && ctype_digit($base) => (int) $base,
+			default => null,
+		};
 	}
 
 	/**
@@ -548,7 +575,7 @@ final class Editor extends Panel
 	 * and what the head and the inspector offer for them.
 	 *
 	 * @param array<string, mixed> $data the serialized working state
-	 * @param ?array{changed: string, base: string} $autosave the user's
+	 * @param ?array{changed: string, base: ?int} $autosave the user's
 	 * @return array<string, mixed>
 	 */
 	private function statusView(Context $context, Cms $cms, array $data, ?array $autosave, bool $autosaves): array
@@ -560,14 +587,16 @@ final class Editor extends Panel
 			record: $record,
 			published: (bool) ($data['published'] ?? false),
 			edited: (string) ($data['edited'] ?? ''),
-			editor: $this->userLabel($data['editor'] ?? null),
+			editor: is_string($data['applier'] ?? null) ? $data['applier'] : null,
 			draft: $draft === null
 				? null
 				: [
 					'changed' => (string) ($draft['changed'] ?? ''),
 					'editorName' => is_string($draft['editorName'] ?? null) ? $draft['editorName'] : null,
+					'revision' => is_int($draft['revision'] ?? null) ? $draft['revision'] : null,
 				],
 			autosave: $autosave === null ? null : ['changed' => $autosave['changed'], 'base' => $autosave['base']],
+			revision: is_int($data['revision'] ?? null) ? $data['revision'] : null,
 		);
 		$stages = $status->stages(
 			fn(string $value, bool $time): string => (
@@ -579,7 +608,7 @@ final class Editor extends Panel
 		);
 
 		$editor = match (true) {
-			$draft === null => $this->userLabel($data['editor'] ?? null),
+			$draft === null => is_string($data['applier'] ?? null) ? $data['applier'] : null,
 			is_string($draft['editorName'] ?? null) => $draft['editorName'],
 			default => null,
 		};
@@ -1462,14 +1491,14 @@ final class Editor extends Panel
 	 * until a save.
 	 *
 	 * @param array<string, mixed> $data
-	 * @param ?array{changed: string, base: string, content: array<string, mixed>, settings: array<string, mixed>} $saved
+	 * @param ?array{changed: string, base: ?int, content: array<string, mixed>, settings: array<string, mixed>} $saved
 	 * @return array{array<string, mixed>, AutosaveState}
 	 */
 	private function autosaveState(Serializer $serializer, string $uid, array $data, ?array $saved): array
 	{
 		$state = [
 			'url' => $this->origin()['links']->autosave($uid),
-			'base' => $saved['base'] ?? $this->workingChanged($data),
+			'base' => $saved === null ? $this->workingRevision($data) : $saved['base'],
 			'restored' => null,
 		];
 
@@ -1550,17 +1579,17 @@ final class Editor extends Panel
 		return is_string($changed) ? $changed : '';
 	}
 
-	private function timestamp(string $value): ?DateTimeImmutable
+	/**
+	 * The revision the editor shows: its working copy's, or the main one.
+	 *
+	 * @param array<array-key, mixed> $data
+	 */
+	private function workingRevision(array $data): ?int
 	{
-		if (trim($value) === '') {
-			return null;
-		}
+		$draft = $data['draft'] ?? null;
+		$revision = is_array($draft) ? $draft['revision'] ?? null : $data['revision'] ?? null;
 
-		try {
-			return new DateTimeImmutable($value);
-		} catch (Throwable) {
-			return null;
-		}
+		return is_int($revision) ? $revision : null;
 	}
 
 	private function nodeId(object $node): int
