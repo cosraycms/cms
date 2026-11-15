@@ -391,7 +391,7 @@
 		background: var(--row-bg);
 
 		&:hover {
-			--row-bg: var(--cms-color-hover);
+			--row-bg: var(--cms-list-row-hover);
 		}
 	}
 

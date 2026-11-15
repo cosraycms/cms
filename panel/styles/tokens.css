@@ -554,6 +554,7 @@
 	 * Component — list
 	 */
 	--cms-list-header-bg: light-dark(var(--cms-color-neutral-100), var(--cms-color-neutral-950));
+	--cms-list-row-hover: light-dark(var(--cms-color-neutral-50), var(--cms-color-neutral-850));
 
 	/**
 	 * Component — stage marks
