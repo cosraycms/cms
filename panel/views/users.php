@@ -65,7 +65,7 @@ $listUrl = (string) $listUrl;
 		<div class="cms-page-toolbar">
 			<form class="cms-page-search" method="get" action="<?= escape($listUrl) ?>">
 				<label class="cms-sr-only" for="users-search"><?= escape(__('user:search')) ?></label>
-				<span class="cms-page-search-icon" aria-hidden="true">⌕</span>
+				<?= \Cosray\Panel\Icon::render('search', 'cms-page-search-icon') ?>
 				<input
 					id="users-search"
 					class="cms-input"

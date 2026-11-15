@@ -49,6 +49,8 @@ Modified letter bindings match `event.code` because macOS Option can change `eve
 
 ## Collection listings
 
+`/` focuses the search field outside a text input. The search runs a moment after typing pauses, Enter runs it at once, and focus stays in the field while the results change.
+
 Rows of a manually ordered level offer move up/down in their row actions menu, which opens from the row's menu button like any [action menu](#action-menus). Ctrl/Cmd+Shift+Up/Down, the menu tree's keys for moving among siblings, moves the row that holds focus. Afterwards focus returns to the moved row: to the menu button when the menu moved it, otherwise to its title link. The move at either end of the group is disabled, and the keys then do nothing. Dragging by the grip is the pointer alternative; see [manual order](content.md#manual-order). [collection-order.js](../panel/src/behaviors/collection-order.js) implements both.
 
 ## Action menus

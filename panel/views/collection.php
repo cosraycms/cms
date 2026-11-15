@@ -121,11 +121,13 @@ $columns = ltrim($columns . ' ' . implode(' ', $tracks));
 			<form
 				class="cms-page-search"
 				method="get"
-				action="<?= escape($page->search->action) ?>">
+				action="<?= escape($page->search->action) ?>"
+				data-live-search
+				hx-replace-url="true">
 				<label class="cms-sr-only" for="collection-search"><?= escape(
 					__('collection:search', ['name' => $page->name]),
 				) ?></label>
-				<span class="cms-page-search-icon" aria-hidden="true">⌕</span>
+				<?= Icon::render('search', 'cms-page-search-icon') ?>
 				<input
 					id="collection-search"
 					class="cms-input"
@@ -133,6 +135,13 @@ $columns = ltrim($columns . ' ' . implode(' ', $tracks));
 					type="search"
 					value="<?= escape($page->search->value) ?>"
 					placeholder="<?= escape(__('collection:search-placeholder')) ?>" />
+				<?php if ($page->search->clearUrl !== null): ?>
+					<a
+						class="cms-page-search-clear"
+						href="<?= escape($page->search->clearUrl) ?>"
+						aria-label="<?= escape(__('collection:clear-search')) ?>"
+						title="<?= escape(__('collection:clear-search')) ?>"><?= Icon::render('x-lg') ?></a>
+				<?php endif ?>
 				<?php foreach ($page->search->fields as $field): ?>
 					<input
 						type="hidden"
@@ -140,12 +149,6 @@ $columns = ltrim($columns . ' ' . implode(' ', $tracks));
 						value="<?= escape($field['value']) ?>" />
 				<?php endforeach ?>
 			</form>
-
-			<?php if ($page->search->clearUrl !== null): ?>
-				<a class="cms-button cms-button-secondary" href="<?= escape($page->search->clearUrl) ?>"><?= escape(
-					__('collection:clear-search'),
-				) ?></a>
-			<?php endif ?>
 
 			<?php if ($page->parent !== null): ?>
 				<div class="cms-collection-parent-context">

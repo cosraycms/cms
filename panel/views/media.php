@@ -71,7 +71,7 @@ unset($search['page']);
 						<?php foreach ($search as $name => $value): ?>
 							<input type="hidden" name="<?= escape($name) ?>" value="<?= escape($value) ?>" />
 						<?php endforeach ?>
-						<span class="cms-page-search-icon" aria-hidden="true">⌕</span>
+						<?= Icon::render('search', 'cms-page-search-icon') ?>
 						<input
 							class="cms-input"
 							type="search"
