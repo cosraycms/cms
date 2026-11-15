@@ -553,6 +553,19 @@
 			left: var(--line-x);
 		}
 
+		/* An open parent starts its children's rail under its own toggle. */
+		&:not(.is-flat):has(> .cms-list-toggle.is-open)::after {
+			position: absolute;
+			top: calc(50% + var(--toggle) / 2);
+			bottom: calc(-1 * var(--cms-space-2) - 1px);
+			left: calc(var(--tree-depth, 0) * var(--step) + var(--toggle) / 2);
+			width: var(--line-width);
+			margin-left: calc(var(--line-width) / -2);
+			background: var(--line);
+			content: '';
+			pointer-events: none;
+		}
+
 		& .cms-list-guide {
 			left: calc((var(--guide-depth) - 1) * var(--step) + var(--toggle) / 2);
 		}
@@ -846,7 +859,8 @@
 			padding-left: 0;
 			flex-wrap: wrap;
 
-			&::before {
+			&::before,
+			&::after {
 				display: none;
 			}
 		}
