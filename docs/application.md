@@ -315,7 +315,7 @@ $app->allow('role:shop', 'panel', 'edit-orders');
 $policy->permits($user, 'edit-orders');
 ```
 
-Routes use `#[Permission(...)]` middleware; panel controllers can call `$this->permits(...)`. The Users area needs `edit-users`. Its write policy prevents editors from granting access beyond their own, changing their own roles/state, or removing the last active superuser. Password changes end other sessions and remembered logins. The profile page allows self-service account changes, with the current password required for a new one.
+Routes use `#[Permission(...)]` middleware; panel controllers can call `$this->permits(...)`. The masthead's gear opens the system area for every panel user; its rail lists only the entries the user may open, Users with `edit-users` and everyone's profile. The Users screens need `edit-users`. Their write policy prevents editors from granting access beyond their own, changing their own roles/state, or removing the last active superuser. Password changes end other sessions and remembered logins. The profile page allows self-service account changes, with the current password required for a new one.
 
 Users have an email login and optional username without `@`. A subclass of [Cosray\User](../src/User.php), registered through `$app->user()`, adds fields like a node class. `#[Roles(...)]` limits assignable roles; `#[Roles]` allows none. Fields are neutral-locale values stored under `content` in `users.data`, without working copies, and hydrate on demand through [User\Fields](../src/User/Fields.php). See [User\Types](../src/User/Types.php) and its tests for type registration and default-type replacement.
 

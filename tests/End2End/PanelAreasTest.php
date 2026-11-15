@@ -8,9 +8,12 @@ use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
+use DOMDocument;
+use DOMElement;
+use DOMXPath;
 
 /**
- * The masthead's three areas and the rail that belongs to one of them.
+ * The masthead's areas, the gear opening the system area, and their rails.
  *
  * @internal
  *
@@ -89,6 +92,25 @@ final class PanelAreasTest extends End2EndTestCase
 		$this->assertStringContainsString('hx-target:inherited="#frame"', $html);
 	}
 
+	public function testEverySignedInUserOpensTheSystemAreaAtTheirFirstEntry(): void
+	{
+		$this->assertHtmlNodeExists('//a[@id="system-link" and @href="/panel/profile"]', $this->html('/panel'));
+		$this->assertSame(['/panel/profile'], $this->systemEntries($this->html('/panel/profile')));
+
+		$this->authenticateAs('admin');
+
+		$this->assertHtmlNodeExists('//a[@id="system-link" and @href="/panel/users"]', $this->html('/panel'));
+		$this->assertSame(['/panel/users', '/panel/profile'], $this->systemEntries($this->html('/panel/profile')));
+	}
+
+	public function testTheProfileEntryStaysCurrentOnItsTokenScreen(): void
+	{
+		$html = $this->html('/panel/profile/tokens');
+
+		$this->assertHtmlNodeExists('//a[@id="system-link" and @aria-current="page"]', $html);
+		$this->assertHtmlNodeExists('//*[@id="system-nav"]//a[@href="/panel/profile" and @aria-current="page"]', $html);
+	}
+
 	/** The account menu's language select has to show the language the panel is showing. */
 	public function testTheLanguageSwitcherSelectsTheActiveLocale(): void
 	{
@@ -120,6 +142,25 @@ final class PanelAreasTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 
 		return $this->getHtmlResponse($response);
+	}
+
+	/** @return list<string> the system rail's links, in rail order */
+	private function systemEntries(string $html): array
+	{
+		$document = new DOMDocument();
+		$previous = libxml_use_internal_errors(true);
+		$document->loadHTML($html);
+		libxml_clear_errors();
+		libxml_use_internal_errors($previous);
+		$links = [];
+
+		foreach (new DOMXPath($document)->query('//*[@id="system-nav"]//a') ?: [] as $link) {
+			if ($link instanceof DOMElement) {
+				$links[] = $link->getAttribute('href');
+			}
+		}
+
+		return $links;
 	}
 
 	/** The opening tag of the masthead area pointing at `$href`. */

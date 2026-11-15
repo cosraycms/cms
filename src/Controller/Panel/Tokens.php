@@ -17,7 +17,7 @@ use ValueError;
 /** The API tokens of the signed-in user, who manages only their own. */
 final class Tokens extends Panel
 {
-	protected const string AREA = 'profile';
+	protected const string AREA = 'system';
 
 	public function __construct(
 		Config $config,

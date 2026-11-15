@@ -42,9 +42,9 @@ use DateTimeZone;
 abstract class Panel
 {
 	/**
-	 * Which masthead area this screen belongs to. The rail renders only for
-	 * `content`, which is the default because a project's own panel pages put
-	 * their entry in that rail without knowing this constant exists.
+	 * Which masthead area this screen belongs to. `content` and `system` render
+	 * their rail here; `content` is the default because a project's own panel
+	 * pages put their entry in that rail without knowing this constant exists.
 	 */
 	protected const string AREA = 'content';
 
@@ -87,6 +87,7 @@ abstract class Panel
 		$panelPath = $this->panelPath();
 		$localeId = $this->localeId();
 		$collections = $this->collections();
+		$systemNav = $this->systemNav();
 		$layer = $this->layer();
 
 		return array_merge(
@@ -102,7 +103,8 @@ abstract class Panel
 				'homeUrl' => $this->homeUrl(),
 				'contentUrl' => $this->firstUrl($collections),
 				'menusUrl' => $this->menusUrl($panelPath),
-				'systemUrl' => $this->permits('edit-users') ? $panelPath . '/users' : null,
+				'systemUrl' => $systemNav[0]['url'] ?? null,
+				'systemNav' => $systemNav,
 				'logo' => $this->logo(),
 				'localeId' => $localeId,
 				'formatLocale' => $this->formatLocale(),
@@ -121,7 +123,11 @@ abstract class Panel
 				// Only a full document loads the entry; a swap reuses the modules.
 				'modulePreloads' => $layer === 'document' ? $this->client()->preloads() : [],
 				'collections' => $collections,
-				'rail' => static::AREA === 'content' && $collections !== [],
+				'rail' => match (static::AREA) {
+					'content' => $collections !== [],
+					'system' => $systemNav !== [],
+					default => false,
+				},
 				'messages' => $this->messages(),
 				'panelCookie' => $this->panelCookie(),
 			],
@@ -437,6 +443,44 @@ abstract class Panel
 		}
 
 		return null;
+	}
+
+	/**
+	 * The system rail, whose first entry the masthead's gear opens. Every
+	 * signed-in user has at least the profile. Cosmetic gating only, like
+	 * menusUrl(): the routes enforce their permissions themselves.
+	 *
+	 * @return list<array{label: string, url: string, icon: string, active: bool}>
+	 */
+	private function systemNav(): array
+	{
+		if (!$this->request->get('user', null) instanceof User) {
+			return [];
+		}
+
+		$panelPath = $this->panelPath();
+		$entries = [];
+
+		if ($this->permits('edit-users')) {
+			$entries[] = $this->systemEntry(__('nav:users'), $panelPath . '/users', 'people');
+		}
+
+		$entries[] = $this->systemEntry(__('nav:profile'), $panelPath . '/profile', 'person');
+
+		return $entries;
+	}
+
+	/** @return array{label: string, url: string, icon: string, active: bool} */
+	private function systemEntry(string $label, string $url, string $icon): array
+	{
+		$path = $this->request->uri()->getPath();
+
+		return [
+			'label' => $label,
+			'url' => $url,
+			'icon' => $icon,
+			'active' => $path === $url || str_starts_with($path, $url . '/'),
+		];
 	}
 
 	/**

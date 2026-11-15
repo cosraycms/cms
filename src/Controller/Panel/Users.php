@@ -28,7 +28,6 @@ use Cosray\User\Types;
 use Cosray\Users as UserStore;
 use Cosray\Validation\Account;
 use Locale as PhpLocale;
-use Override;
 use Psr\Log\LoggerInterface as Logger;
 
 /** @phpstan-import-type UserValues from \Cosray\Users */
@@ -49,31 +48,6 @@ final class Users extends Panel
 		private readonly Logger $logger,
 	) {
 		parent::__construct($config, $container, $request);
-	}
-
-	/**
-	 * Every screen in the area renders the rail, so its entries ride the
-	 * shared context. The profile screen sits outside the area and turns
-	 * the rail off in its own data.
-	 *
-	 * @param array<string, mixed> $data
-	 * @return array<string, mixed>
-	 */
-	#[Override]
-	protected function context(array $data = []): array
-	{
-		$url = $this->url();
-		$path = $this->request->uri()->getPath();
-
-		return parent::context(array_merge([
-			'systemNav' => [[
-				'label' => __('nav:users'),
-				'url' => $url,
-				'icon' => 'people',
-				'active' => $path === $url || str_starts_with($path, $url . '/'),
-			]],
-			'rail' => true,
-		], $data));
 	}
 
 	/** @return array<string, mixed> */
@@ -230,8 +204,6 @@ final class Users extends Panel
 		$self = $this->isSelf($user);
 
 		return $this->context([
-			'area' => $profile ? 'profile' : self::AREA,
-			'rail' => !$profile,
 			'profile' => $profile,
 			'exists' => $exists,
 			'action' => match (true) {
