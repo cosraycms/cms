@@ -31,15 +31,8 @@ final class CollectionSearch
 	/** @return list<array{name: string, value: string}> */
 	private static function fields(CollectionQuery $query): array
 	{
+		// No sort: a new search ranks its hits by relevance until a column is chosen.
 		$fields = [];
-
-		if ($query->sort !== '') {
-			$fields[] = ['name' => 'sort', 'value' => $query->sort];
-		}
-
-		if ($query->dir !== '') {
-			$fields[] = ['name' => 'dir', 'value' => $query->dir];
-		}
 
 		if ($query->limit !== 50) {
 			$fields[] = ['name' => 'limit', 'value' => (string) $query->limit];

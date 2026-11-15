@@ -309,6 +309,55 @@ final class FulltextFinderTest extends FulltextTestCase
 		];
 	}
 
+	public function testASearchCanAlsoMatchTheDocument(): void
+	{
+		$this->page('fts-combo-title', 'Zebra');
+		$this->page('fts-combo-body', 'Other', 'A zebra crossing');
+		$this->page('fts-combo-zebra-uid', 'Something else');
+		$this->page('fts-combo-none', 'Nothing');
+		$finder = fn(): Nodes => $this->cms->nodes()->search('zebra', ['uid', 'title'], fulltext: true);
+
+		self::assertSame(3, $finder()->count());
+		$uids = $this->uids($finder());
+		self::assertSame('fts-combo-title', $uids[0]);
+		self::assertEqualsCanonicalizing(['fts-combo-title', 'fts-combo-body', 'fts-combo-zebra-uid'], $uids);
+		// Only the document explains the body hit.
+		self::assertSame(
+			['fts-combo-body'],
+			$this->uids($this->cms->nodes()->search('crossing', ['uid', 'title'], fulltext: true)),
+		);
+		// Without full text, the fields alone decide.
+		self::assertEqualsCanonicalizing(
+			['fts-combo-title', 'fts-combo-zebra-uid'],
+			$this->uids($this->cms->nodes()->search('zebra', ['uid', 'title'])),
+		);
+	}
+
+	public function testACombinedSearchNeedsNoActiveUrlAndOrdersTiesByTitle(): void
+	{
+		$this->writer->create(
+			$this->writer->prepare(FulltextDocument::class, ['body' => 'quiet words'])->uid(
+				'fts-combo-doc-b',
+			),
+		);
+		$this->writer->create(
+			$this->writer->prepare(FulltextDocument::class, ['body' => 'quiet words'])->uid(
+				'fts-combo-doc-a',
+			),
+		);
+
+		self::assertSame([], $this->uids($this->cms->nodes()->published(null)->fulltext('quiet')));
+		// A type without a title map scores no title words instead of failing.
+		self::assertCount(
+			2,
+			$this->uids($this->cms->nodes()->published(null)->activeUrl(false)->fulltext('quiet', partial: true)),
+		);
+		self::assertSame(
+			['fts-combo-doc-a', 'fts-combo-doc-b'],
+			$this->uids($this->cms->nodes()->published(null)->search('quiet', ['uid'], fulltext: true)),
+		);
+	}
+
 	public function testFulltextRemainsAnOrdinaryFieldNameInTheFinderDsl(): void
 	{
 		$this->createTestNode([

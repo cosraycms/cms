@@ -28,6 +28,9 @@ use Cosray\StatusColumn;
  */
 final class Listing
 {
+	/** About how many characters of context a snippet keeps before its first match. */
+	private const int SNIPPET_LEAD = 40;
+
 	/** @var list<Column> */
 	public readonly array $columns;
 	/** @var array<string, Sort> */
@@ -143,6 +146,8 @@ final class Listing
 		?int $user = null,
 		string $type = '',
 	): array {
+		// A search ranks its hits by relevance until a column is chosen.
+		$relevance = trim($q) !== '' && trim($sort) === '';
 		[$sort, $dir, $order] = $this->resolveOrder($sort, $dir);
 		$parent = $this->meta->showChildren ? trim((string) $parent) : '';
 		$q = trim($q);
@@ -170,7 +175,12 @@ final class Listing
 			$order = [$this->positionOrder($scope)];
 		}
 
-		$nodes->order(...$order);
+		if ($relevance) {
+			$sort = '';
+			$dir = '';
+		} else {
+			$nodes->order(...$order);
+		}
 
 		$total = $nodes->count();
 		$nodes->offset($offset)->limit($limit);
@@ -190,6 +200,7 @@ final class Listing
 				$offset,
 				$total,
 				$filtered && $this->meta->showChildren && $parent === '' ? $this->paths($pageNodes) : [],
+				$q,
 			),
 		];
 	}
@@ -277,7 +288,7 @@ final class Listing
 		}
 
 		if ($q !== '') {
-			$nodes->search($q, $this->schema->search);
+			$nodes->search($q, $this->schema->search, fulltext: true);
 		}
 
 		return $nodes;
@@ -359,8 +370,14 @@ final class Listing
 	 * @param array<string, list<string>> $paths ancestor titles by uid, outermost first
 	 * @return list<array<string, mixed>>
 	 */
-	private function rows(array $nodes, ?string $group, int $offset, int $total, array $paths = []): array
-	{
+	private function rows(
+		array $nodes,
+		?string $group,
+		int $offset,
+		int $total,
+		array $paths = [],
+		string $q = '',
+	): array {
 		$result = [];
 		$hasChildren = $this->meta->showChildren
 			? $this->hasChildrenMap($nodes)
@@ -371,6 +388,7 @@ final class Listing
 			$result[] = [
 				...$this->row($node, $hasChildren[$node->meta->uid] ?? false),
 				'path' => $paths[$node->meta->uid] ?? [],
+				'snippet' => $this->snippet($node, $q),
 				'group' => $group,
 				'moveUp' => $group !== null && $position > 0,
 				'moveDown' => $group !== null && $position < ($total - 1),
@@ -431,6 +449,49 @@ final class Listing
 		}
 
 		return $paths;
+	}
+
+	/**
+	 * Where a search hit matched in its content, when its title does not
+	 * already show every word of the query.
+	 *
+	 * @return list<array{text: string, match: bool}>
+	 */
+	private function snippet(Wrapper $node, string $q): array
+	{
+		if ($q === '' || !isset($node->meta->search)) {
+			return [];
+		}
+
+		$title = (string) $node->title();
+		$words = array_filter(
+			preg_split('/\s+/u', str_replace('"', ' ', $q), -1, PREG_SPLIT_NO_EMPTY) ?: [],
+			static fn(string $word): bool => !str_starts_with($word, '-') && strcasecmp($word, 'OR') !== 0,
+		);
+		$explained =
+			$words !== [] && array_all($words, static fn(string $word): bool => mb_stripos($title, $word) !== false);
+		$segments = $node->meta->search->snippet->segments;
+
+		if ($explained || !array_any($segments, static fn(array $segment): bool => $segment['match'])) {
+			return [];
+		}
+
+		// The line is cut at the column's edge, so it starts shortly before the first match.
+		$first = (int) array_find_key($segments, static fn(array $segment): bool => $segment['match']);
+		$before =
+			preg_replace('/\s+/u', ' ', implode('', array_column(array_slice($segments, 0, $first), 'text'))) ?? '';
+
+		if (mb_strlen($before) > self::SNIPPET_LEAD) {
+			$before = '… ' . ltrim((string) preg_replace('/^\S*\s/u', '', mb_substr($before, -self::SNIPPET_LEAD)));
+		}
+
+		$snippet = $before === '' ? [] : [['text' => $before, 'match' => false]];
+
+		foreach (array_slice($segments, $first) as $segment) {
+			$snippet[] = ['text' => (string) $segment['text'], 'match' => (bool) $segment['match']];
+		}
+
+		return $snippet;
 	}
 
 	/** @return array<string, mixed> */

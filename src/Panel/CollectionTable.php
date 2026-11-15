@@ -32,6 +32,7 @@ final class CollectionTable
 	 *     published: bool,
 	 *     hasChildren: bool,
 	 *     path: list<string>,
+	 *     snippet: list<array{text: string, match: bool}>,
 	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, avatarOnly: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
@@ -185,6 +186,7 @@ final class CollectionTable
 	 *     published: bool,
 	 *     hasChildren: bool,
 	 *     path: list<string>,
+	 *     snippet: list<array{text: string, match: bool}>,
 	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, avatarOnly: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
@@ -229,6 +231,7 @@ final class CollectionTable
 				'published' => (bool) ($node['published'] ?? false),
 				'hasChildren' => $hasChildren,
 				'path' => array_values(array_filter((array) ($node['path'] ?? []), 'is_string')),
+				'snippet' => self::snippet($node['snippet'] ?? []),
 				'cells' => self::cells($node, $headers, $urls, $meta, $locale, $timezone),
 				'childrenUrl' => $childrenUrl,
 				'focusedChildrenUrl' =>
@@ -246,6 +249,20 @@ final class CollectionTable
 		}
 
 		return $rows;
+	}
+
+	/** @return list<array{text: string, match: bool}> */
+	private static function snippet(mixed $segments): array
+	{
+		$snippet = [];
+
+		foreach (is_array($segments) ? $segments : [] as $segment) {
+			if (is_array($segment) && is_string($segment['text'] ?? null)) {
+				$snippet[] = ['text' => $segment['text'], 'match' => (bool) ($segment['match'] ?? false)];
+			}
+		}
+
+		return $snippet;
 	}
 
 	/**

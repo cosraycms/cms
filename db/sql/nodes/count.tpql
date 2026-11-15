@@ -7,7 +7,7 @@ FROM
 	/*:cms.prefix:*/nodes n
 	INNER JOIN /*:cms.prefix:*/types t USING(type)
 <?php if (isset($fulltext)) : ?>
-	INNER JOIN /*:cms.prefix:*/full_text ft ON ft.node = n.node AND ft.locale = :search_locale
+	<?= isset($fulltext_or) ? 'LEFT' : 'INNER' ?> JOIN /*:cms.prefix:*/full_text ft ON ft.node = n.node AND ft.locale = :search_locale
 <?php endif ?>
 	LEFT JOIN /*:cms.prefix:*/publications p ON
 		p.node = n.node
@@ -44,6 +44,9 @@ WHERE
 			)
 <?php endforeach ?>
 		)
+<?php endif ?>
+<?php if (isset($fulltext_or)) : ?>
+		OR (<?= $fulltext_or ?>)
 <?php endif ?>
 	)
 <?php endif ?>

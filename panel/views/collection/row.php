@@ -23,6 +23,7 @@ $grip = $group === null
 $titleGrip = $bulk ? '' : $grip;
 $creates = (array) $row['childCreateLinks'];
 $path = (array) ($row['path'] ?? []);
+$snippet = (array) ($row['snippet'] ?? []);
 $menuId = 'row-' . (string) $row['uid'];
 ?>
 <tr
@@ -74,7 +75,7 @@ $menuId = 'row-' . (string) $row['uid'];
 						) ?></span>
 					<?php endforeach ?>
 				</div>
-			<?php elseif ($isLead && $showChildren): ?>
+			<?php elseif ($isLead && ($showChildren || $snippet !== [])): ?>
 				<div class="cms-list-title<?= $treeMode ? '' : ' is-flat' ?>">
 					<?php if ($treeMode): ?>
 						<?php foreach ((array) ($row['guides'] ?? []) as $guide): ?>
@@ -111,6 +112,11 @@ $menuId = 'row-' . (string) $row['uid'];
 						</a>
 					<?php else: ?>
 						<span class="cms-list-value"><?= escape((string) $cell['value']) ?></span>
+					<?php endif ?>
+					<?php if ($snippet !== []): ?>
+						<span class="cms-list-snippet"><?php foreach ($snippet as $segment): ?><?= $segment['match']
+							? '<mark>' . escape((string) $segment['text']) . '</mark>'
+							: escape((string) $segment['text']) ?><?php endforeach ?></span>
 					<?php endif ?>
 				</div>
 			<?php elseif ($cell['editUrl'] !== null): ?>

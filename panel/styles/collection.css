@@ -536,6 +536,28 @@
 		white-space: nowrap;
 	}
 
+	/* A search hit found in its content shows where, on a line below its title. */
+	& .cms-list-title:has(.cms-list-snippet) {
+		flex-wrap: wrap;
+		row-gap: 0;
+	}
+
+	& .cms-list-snippet {
+		flex: 1 0 100%;
+		min-width: 0;
+		overflow: hidden;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		& mark {
+			border-radius: 2px;
+			background: var(--cms-color-warning-surface);
+			color: var(--cms-color-text);
+		}
+	}
+
 	/* A hit's ancestors give way before its own title does. */
 	& .cms-list-path {
 		display: flex;

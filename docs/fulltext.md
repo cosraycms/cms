@@ -1,6 +1,6 @@
 # Full-text search
 
-Cosray provides PostgreSQL full-text search for public websites through `Nodes::fulltext()`. Applications supply their own search page or endpoint. Existing panel collection searches, reference pickers, `search()` and `searchTitle()` remain substring searches.
+Cosray provides PostgreSQL full-text search for public websites through `Nodes::fulltext()`. Applications supply their own search page or endpoint. The panel's collection search also matches the index; reference pickers and `searchTitle()` remain substring searches.
 
 This is the current implementation, not a frozen search API. [Fulltext/](../src/Fulltext/), [Finder\Nodes](../src/Finder/Nodes.php), and their tests are the starting points for changes; the data-safety and deployment considerations below still apply when revisiting the design.
 
@@ -118,6 +118,12 @@ Ranking uses `ts_rank_cd`, PostgreSQL's default A–D weights (`1.0`, `0.4`, `0.
 
 Contributions keep document order and are joined with PostgreSQL's vector concatenation operator. A phrase can span two contributions, such as the end of a title and the start of a summary, just as it can span sentences inside one text. The snippet source keeps a separator at each contribution boundary.
 
+### Combined with a field search
+
+`search($query, $fields, fulltext: true)` matches a node when every word occurs in one of the fields, as `search()` does, **or** its document matches as with `fulltext($query, partial: true)`. A node without a document can still match through its fields. Results order by relevance, then title, unless `order()` is set, so field-only matches follow document matches in title order. Unlike `fulltext()`, it does not require an active URL; call `activeUrl()` to add that gate.
+
+The panel's collection search works this way in the request locale, the default content locale unless the panel request selects another. A hit found only in its document shows a snippet below its title. Text that exists only in an unpublished working copy is not found, because the index holds live content.
+
 ### Public eligibility
 
 By default, results must be published, visible and undeleted, and have an active public URL in the requested locale or its fallback chain. The node's current type must be routable. Flags and paths are read at query time; changing them does not depend on a vector rebuild.
@@ -190,4 +196,4 @@ Cosray does not truncate selected documents to make indexing succeed. PostgreSQL
 
 ## Current limits
 
-Panel FTS, working-copy search, panel-only fields with a separate vector/source, class-level defaults, autocomplete, typo tolerance, attachment extraction, and ranking customization are not implemented. These are possible directions, not permanent exclusions. Public extraction and storage do not enforce panel permissions; extensions need their own authorization assessment.
+Working-copy search, searching every locale at once, panel-only fields with a separate vector/source, class-level defaults, autocomplete, typo tolerance, attachment extraction, and ranking customization are not implemented. These are possible directions, not permanent exclusions. Public extraction and storage do not enforce panel permissions; extensions need their own authorization assessment.

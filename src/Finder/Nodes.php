@@ -32,6 +32,7 @@ final class Nodes implements Iterator
 	private ?int $limit = null;
 	private ?int $offset = null;
 	private ?string $fulltext = null;
+	private ?string $fulltextOr = null;
 	private bool $partial = false;
 	private ?bool $activeUrl = null;
 	private readonly Configurations $configurations;
@@ -138,6 +139,7 @@ final class Nodes implements Iterator
 	{
 		$this->fulltext = $query;
 		$this->partial = $partial;
+		$this->fulltextOr = null;
 
 		return $this;
 	}
@@ -149,8 +151,16 @@ final class Nodes implements Iterator
 		return $this;
 	}
 
-	/** @param array<string> $fields */
-	public function search(string $query, array $fields): self
+	/**
+	 * A substring search on `$fields`, every word somewhere in one of them.
+	 * With `$fulltext`, a node also matches through its full-text document
+	 * in the current locale, words inside longer ones included, and results
+	 * order by relevance unless order() is set; unlike fulltext(), it does
+	 * not require an active URL unless activeUrl() asks for one.
+	 *
+	 * @param array<string> $fields
+	 */
+	public function search(string $query, array $fields, bool $fulltext = false): self
 	{
 		$query = trim($query);
 
@@ -161,7 +171,7 @@ final class Nodes implements Iterator
 		$fields = array_values(array_filter(array_map('trim', $fields)));
 
 		if ($fields === []) {
-			return $this;
+			return $fulltext ? $this->fulltext($query, partial: true)->activeUrl($this->activeUrl ?? false) : $this;
 		}
 
 		$terms = preg_split('/\s+/u', $query, -1, PREG_SPLIT_NO_EMPTY);
@@ -186,7 +196,15 @@ final class Nodes implements Iterator
 			$termClauses[] = '(' . implode(' OR ', $fieldClauses) . ')';
 		}
 
-		$this->addWhere(implode(' AND ', $termClauses));
+		if (!$fulltext) {
+			$this->addWhere(implode(' AND ', $termClauses));
+
+			return $this;
+		}
+
+		$this->fulltext($query, partial: true);
+		$this->fulltextOr = implode(' AND ', $termClauses);
+		$this->activeUrl ??= false;
 
 		return $this;
 	}
@@ -466,6 +484,10 @@ final class Nodes implements Iterator
 		if ($this->order) {
 			$params['order'] = $this->order;
 			$params = [...$params, ...$this->orderParams];
+		} elseif ($this->fulltextOr !== null) {
+			// Nodes found only through the searched fields score alike, so the title orders them.
+			$title = $this->context->titleSort()->order($this->context->locale(), 'n.title');
+			$params['order'] = "search_score DESC, {$title} ASC, n.uid ASC";
 		} elseif ($this->fulltext !== null) {
 			$params['order'] = 'search_score DESC, n.uid ASC';
 		}
@@ -522,6 +544,12 @@ final class Nodes implements Iterator
 
 		if ($this->fulltext !== null) {
 			$params['fulltext'] = $this->fulltext;
+
+			// The substring alternative: a node without a matching document still qualifies.
+			if ($this->fulltextOr !== null) {
+				$params['fulltext_or'] = $this->fulltextOr;
+			}
+
 			$params['search_locale'] = $this->context->localeId();
 			$params['search_config'] = $this->configurations->for($this->context->locale());
 			$params = [...$params, ...$this->partialParams($this->fulltext)];
