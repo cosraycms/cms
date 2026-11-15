@@ -454,15 +454,6 @@
 		padding-left: var(--cms-space-6);
 	}
 
-	/* A manually ordered listing widens the gutter left of the checkboxes for its grips. */
-	&:has([data-order-grip]) {
-		--cms-list-select-width: 3.25rem;
-
-		& .cms-list-col-select {
-			padding-left: var(--cms-space-8);
-		}
-	}
-
 	& input[type='checkbox'] {
 		margin: 0;
 	}
@@ -644,7 +635,7 @@
 	& .cms-list-col-select > .cms-list-grip {
 		position: absolute;
 		top: 50%;
-		left: var(--cms-space-2);
+		left: var(--cms-space-1);
 		height: 1.75rem;
 		margin: 0;
 		translate: 0 -50%;
