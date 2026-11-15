@@ -12,7 +12,7 @@ $message = u($message ?? null);
 ]) ?>
 <?php $this->include('node/status', ['status' => $status, 'oob' => true]) ?>
 <?php $this->include('node/discard', ['status' => $status, 'oob' => true]) ?>
-<?php if (!($status['record'] ?? false)): ?>
+<?php if ($status['drafts'] ?? true): ?>
 	<?php $this->include('node/apply', ['status' => $status, 'oob' => true]) ?>
 <?php endif ?>
 <?php if (is_string($message) && $message !== ''): ?>

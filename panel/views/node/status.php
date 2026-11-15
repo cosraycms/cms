@@ -19,15 +19,21 @@ use function Cosray\escape;
 $status = (array) u($status);
 $oob = (bool) (u($oob ?? null) ?? false);
 $stages = (array) ($status['stages'] ?? []);
-$record = (bool) ($status['record'] ?? false);
+$drafts = (bool) ($status['drafts'] ?? true);
+$publication = (bool) ($status['publication'] ?? true);
+$routable = (bool) ($status['routable'] ?? true);
 $visibility = is_array($status['visibility'] ?? null) ? $status['visibility'] : null;
 $conflict = is_array($status['conflict'] ?? null) ? $status['conflict'] : null;
 $mine = (string) ($status['mine'] ?? 'none');
 $draft = (bool) ($status['draft'] ?? false);
 $autosave = (bool) ($status['autosave'] ?? false);
 $published = (bool) ($visibility['published'] ?? false);
+$switches = static fn(bool $on): string => match (true) {
+	$routable => $on ? 'status:apply-online' : 'status:apply-offline',
+	default => $on ? 'status:apply-active' : 'status:apply-inactive',
+};
 $saveLabel = match (true) {
-	$record => 'editor:save',
+	!$drafts => 'editor:save',
 	$draft => 'status:save-into',
 	default => 'status:save-as-draft',
 };
@@ -37,9 +43,10 @@ $target = static fn(string $stage, string $state): string => (
 	. '</span>'
 );
 $saveHelp = match (true) {
-	$record => 'status:save-record-help',
-	$draft => 'status:save-into-help',
-	default => 'status:save-help',
+	!$publication => __('status:save-record-help'),
+	!$drafts => __('status:apply-mine') . ' · ' . __($switches($published)),
+	$draft => __('status:save-into-help'),
+	default => __('status:save-help'),
 };
 ?>
 <div id="editor-status-panel" class="cms-status-pipeline" <?= $oob ? 'hx-swap-oob="true"' : '' ?>>
@@ -75,7 +82,11 @@ $saveHelp = match (true) {
 							form="node-editor-form"
 							data-editor-submit
 							data-needs="mine">
-							<?= $record ? $target('saved', 'saved') : $target('draft', 'present') ?>
+							<?= match (true) {
+								!$publication => $target('saved', 'saved'),
+								!$drafts => $target('main', $published ? 'published' : 'unpublished'),
+								default => $target('draft', 'present'),
+							} ?>
 							<span
 								data-save-label
 								data-normal="<?= escape(__($saveLabel)) ?>"
@@ -83,7 +94,7 @@ $saveHelp = match (true) {
 								$mine === 'conflict' ? 'editor:save-anyway' : $saveLabel,
 							)) ?></span>
 						</button>
-						<p class="cms-status-pipeline-help"><?= escape(__($saveHelp)) ?></p>
+						<p class="cms-status-pipeline-help"><?= escape($saveHelp) ?></p>
 					</div>
 				</li>
 			<?php endif ?>
@@ -127,7 +138,7 @@ $saveHelp = match (true) {
 					<?php endif ?>
 				</div>
 			</li>
-			<?php if ($key === 'main'): ?>
+			<?php if ($key === 'main' && $drafts): ?>
 				<li class="cms-status-pipeline-item cms-status-pipeline-step" data-step="apply" <?= $draft || $mine !== 'none' ? '' : 'hidden' ?>>
 					<span class="cms-status-pipeline-arrow"><?= Icon::render('arrow-up') ?></span>
 					<div class="cms-status-pipeline-body">
@@ -149,7 +160,7 @@ $saveHelp = match (true) {
 									$draft => 'status:apply-draft',
 									default => 'status:apply-mine',
 								})) ?></span>
-							· <?= escape(__($published ? 'status:apply-online' : 'status:apply-offline')) ?>
+							· <?= escape(__($switches($published))) ?>
 						</p>
 					</div>
 				</li>
@@ -158,7 +169,7 @@ $saveHelp = match (true) {
 	</ol>
 	<?php if ($autosave): ?>
 		<p class="cms-status-pipeline-hint" data-idle-hint <?= $mine === 'none' ? '' : 'hidden' ?>>
-			<?= escape(__($record ? 'status:idle-record' : 'status:idle')) ?>
+			<?= escape(__($drafts ? 'status:idle' : 'status:idle-record')) ?>
 		</p>
 	<?php endif ?>
 	<?php if ($visibility !== null): ?>
@@ -169,8 +180,11 @@ $saveHelp = match (true) {
 			</div>
 			<label class="cms-inspector-toggle">
 				<span class="cms-inspector-copy">
-					<span class="cms-inspector-title"><?= escape(__('editor:published-label')) ?></span>
-					<span class="cms-inspector-help"><?= escape(__('editor:published-help')) ?></span>
+					<span class="cms-inspector-title"><?= escape(__($routable ? 'editor:published-label' : 'editor:active-label')) ?></span>
+					<span class="cms-inspector-help"><?= escape(__(match (true) {
+						$routable => $drafts ? 'editor:published-help' : 'editor:published-help-saved',
+						default => $drafts ? 'editor:active-help' : 'editor:active-help-saved',
+					})) ?></span>
 				</span>
 				<input
 					id="editor-published-switch"

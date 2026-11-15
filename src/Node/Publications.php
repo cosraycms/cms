@@ -62,6 +62,22 @@ final class Publications
 		return $records;
 	}
 
+	/** @return list<string> handles of the registered types without drafts, records among them */
+	public function undrafted(): array
+	{
+		$handles = [];
+
+		foreach ($this->registered as $handle => $class) {
+			if (!(bool) $this->types->get($class, 'drafts', true)) {
+				$handles[] = $handle;
+			}
+		}
+
+		sort($handles);
+
+		return $handles;
+	}
+
 	/** @return list<string> handles of the registered types with publication */
 	public function publishable(): array
 	{
@@ -73,7 +89,8 @@ final class Publications
 
 	/**
 	 * What does not match the types: rows of record types, nodes of other
-	 * registered types without a row, and working copies left on records.
+	 * registered types without a row, and working copies left on types
+	 * without drafts, which their editor no longer shows.
 	 *
 	 * @return array{stale: list<array{uid: string, type: string}>, missing: list<array{uid: string, type: string}>, drafts: list<array{uid: string, type: string}>}
 	 */
@@ -87,7 +104,7 @@ final class Publications
 		return [
 			'stale' => $rows($this->db->publications->stale(['types' => $this->list($this->records())])->all()),
 			'missing' => $rows($this->db->publications->missing(['types' => $this->list($this->publishable())])->all()),
-			'drafts' => $rows($this->db->publications->drafts(['types' => $this->list($this->records())])->all()),
+			'drafts' => $rows($this->db->publications->drafts(['types' => $this->list($this->undrafted())])->all()),
 		];
 	}
 

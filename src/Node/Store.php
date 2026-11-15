@@ -118,9 +118,9 @@ class Store
 		$this->transaction(function () use ($node, $data, $locales, $actor, $nodeId): void {
 			$this->lock($data['uid']);
 			$at = $this->now();
-			$working = $this->drafts->get($nodeId);
+			$working = $this->holdsDrafts($node) ? $this->drafts->get($nodeId) : null;
 			$changes = $this->persist($node, $data, $actor->id, $locales);
-			$actions = [];
+			$actions = $this->dropLeftover($node, $nodeId, $data['uid']);
 
 			if ($working !== null) {
 				$this->drafts->delete($nodeId);
@@ -221,11 +221,12 @@ class Store
 
 	/**
 	 * Applies the working copy, if there is one, to the main version and,
-	 * asked to, publishes the node with it.
+	 * asked to, publishes the node with it. A working copy left on a type
+	 * without drafts is not applied.
 	 */
 	public function applyDraft(object $node, Locales $locales, Actor $actor, bool $publish = false): bool
 	{
-		$draft = $this->drafts->get($this->nodeId($node));
+		$draft = $this->holdsDrafts($node) ? $this->drafts->get($this->nodeId($node)) : null;
 
 		if ($draft === null) {
 			return false;
@@ -251,13 +252,16 @@ class Store
 			$this->lock($data['uid']);
 			$at = $this->now();
 			$changes = $this->persist($node, $data, $actor->id, $locales);
-			$actions = $changes['edited']
-				? [[
+			$actions = $this->dropLeftover($node, $changes['node'], $data['uid']);
+
+			if ($changes['edited']) {
+				$actions[] = [
 					'action' => 'saved',
 					'revision' => $this->revise($changes['node'], $changes['revision'], $actor, $at),
 					'data' => $cause,
-				]]
-				: [];
+				];
+			}
+
 			$this->record($node, $changes['node'], $data['uid'], $actor, [...$actions, ...$changes['actions']], $at);
 		}, 'Error while saving: ');
 
@@ -278,7 +282,7 @@ class Store
 		array $cause = [],
 	): array {
 		if (!$this->holdsDrafts($node)) {
-			throw new RuntimeException('Only a stored node that is no record can hold a working copy');
+			throw new RuntimeException('Only a stored node of a type with drafts can hold a working copy');
 		}
 
 		$data = $this->prepare($node, $data, $locales);
@@ -357,6 +361,29 @@ class Store
 		}, 'Error while publishing: ');
 	}
 
+	/**
+	 * Drops a working copy left on a node of a type without drafts, as a
+	 * type that turned into one keeps it, when the main version is saved.
+	 *
+	 * @return list<Action>
+	 */
+	private function dropLeftover(object $node, int $nodeId, string $uid): array
+	{
+		if ($this->holdsDrafts($node) || Factory::meta($node, 'draft') === null) {
+			return [];
+		}
+
+		$dropped = $this->drafts->delete($nodeId);
+
+		if ($dropped === null) {
+			return [];
+		}
+
+		$this->sync->remove('draft', $uid);
+
+		return [['action' => 'discarded', 'revision' => $dropped]];
+	}
+
 	/** The time of a write, which its revision, its events and the node's dates share. */
 	private function now(): string
 	{
@@ -410,14 +437,12 @@ class Store
 
 	/**
 	 * Every stored node keeps its changes in a working copy until they are
-	 * applied, except a record, which is saved directly.
+	 * applied, except one of a type without drafts, a record among them,
+	 * which is saved directly.
 	 */
 	public function holdsDrafts(object $node): bool
 	{
-		return (
-			!(bool) $this->types->get($node::class, 'record', false)
-				&& Factory::meta($node, 'deleted') === null
-		);
+		return (bool) $this->types->get($node::class, 'drafts', true) && Factory::meta($node, 'deleted') === null;
 	}
 
 	/**

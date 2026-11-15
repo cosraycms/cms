@@ -295,7 +295,7 @@ final class Editor extends Panel
 		$links = $this->origin()['links'];
 		$htmx = $this->request->hasHeader('HX-Request');
 
-		// Applying takes the edits into the main version; a record has nothing else.
+		// Applying takes the edits into the main version; a type without drafts has nothing else.
 		$applies = in_array($form['apply'] ?? null, ['1', 'publish'], true);
 
 		try {
@@ -337,13 +337,7 @@ final class Editor extends Panel
 			);
 		return [
 			'saved' => true,
-			'message' => match (true) {
-				(bool) ($data['type']['record'] ?? false) => __('editor:saved'),
-				($form['apply'] ?? null) === 'publish' => __('editor:applied-published'),
-				$applies && (bool) ($data['published'] ?? false) => __('editor:applied-public'),
-				$applies => __('editor:applied-private'),
-				default => __('editor:draft-saved'),
-			},
+			'message' => $this->savedMessage($data, $form, $applies),
 			'status' =>
 				$savedData === null || $this->origin()['embed'] !== null
 					? null
@@ -358,6 +352,31 @@ final class Editor extends Panel
 						'restored' => null,
 					],
 		];
+	}
+
+	/**
+	 * What a save says it did, worded for pages or for entries the website
+	 * uses.
+	 *
+	 * @param array<string, mixed> $data
+	 * @param array<array-key, mixed> $form
+	 */
+	private function savedMessage(array $data, array $form, bool $applies): string
+	{
+		$type = is_array($data['type'] ?? null) ? $data['type'] : [];
+		$routable = (bool) ($type['routable'] ?? false);
+
+		return __(match (true) {
+			!(bool) ($type['drafts'] ?? true) => 'editor:saved',
+			($form['apply'] ?? null) === 'publish' => $routable
+				? 'editor:applied-published'
+				: 'editor:applied-activated',
+			$applies && (bool) ($data['published'] ?? false) => $routable
+				? 'editor:applied-public'
+				: 'editor:applied-active',
+			$applies => $routable ? 'editor:applied-private' : 'editor:applied-inactive',
+			default => 'editor:draft-saved',
+		});
 	}
 
 	/**
@@ -517,14 +536,19 @@ final class Editor extends Panel
 		if ($published !== (bool) NodeFactory::meta($nodeObj, 'published')) {
 			$store->published($nodeObj, $published, $actor);
 
+			$routable = (bool) $this->types()->get($nodeObj::class, 'routable', false);
+
 			// Visitors get the main version, not the pending working copy.
-			if ($published && NodeFactory::meta($nodeObj, 'draft') !== null) {
+			if ($published && $store->holdsDrafts($nodeObj) && NodeFactory::meta($nodeObj, 'draft') !== null) {
 				$kind = 'info';
-				$message = __('editor:published-draft', [
+				$message = __($routable ? 'editor:published-draft' : 'editor:activated-draft', [
 					'date' => $this->displayDate(NodeFactory::meta($nodeObj, 'changed')) ?? '',
 				]);
 			} else {
-				$message = __($published ? 'editor:published-done' : 'editor:withdrawn-done');
+				$message = __(match (true) {
+					$routable => $published ? 'editor:published-done' : 'editor:withdrawn-done',
+					default => $published ? 'editor:activated-done' : 'editor:deactivated-done',
+				});
 			}
 		}
 
@@ -581,10 +605,13 @@ final class Editor extends Panel
 	private function statusView(Context $context, Cms $cms, array $data, ?array $autosave, bool $autosaves): array
 	{
 		$type = is_array($data['type'] ?? null) ? $data['type'] : [];
-		$record = (bool) ($type['record'] ?? false);
-		$draft = is_array($data['draft'] ?? null) ? $data['draft'] : null;
+		$publication = !(bool) ($type['record'] ?? false);
+		$drafts = (bool) ($type['drafts'] ?? true);
+		$routable = (bool) ($type['routable'] ?? false);
+		$draft = $this->draftOf($data);
 		$status = NodeStatus::of(
-			record: $record,
+			drafts: $drafts,
+			publication: $publication,
 			published: (bool) ($data['published'] ?? false),
 			edited: (string) ($data['edited'] ?? ''),
 			editor: is_string($data['applier'] ?? null) ? $data['applier'] : null,
@@ -597,6 +624,7 @@ final class Editor extends Panel
 				],
 			autosave: $autosave === null ? null : ['changed' => $autosave['changed'], 'base' => $autosave['base']],
 			revision: is_int($data['revision'] ?? null) ? $data['revision'] : null,
+			routable: $routable,
 		);
 		$stages = $status->stages(
 			fn(string $value, bool $time): string => (
@@ -614,7 +642,9 @@ final class Editor extends Panel
 		};
 
 		return [
-			'record' => $record,
+			'drafts' => $drafts,
+			'publication' => $publication,
+			'routable' => $routable,
 			'stages' => $stages,
 			'sentence' => NodeStatus::sentence(array_values(array_filter(
 				$stages,
@@ -632,10 +662,10 @@ final class Editor extends Panel
 			'mine' => $status->mine,
 			'discardDraft' => $draft !== null,
 			'autosave' => $autosaves,
-			'liveUrl' => $status->main === 'published' && (bool) ($type['routable'] ?? false)
+			'liveUrl' => $status->main === 'published' && $routable
 				? $this->liveUrl($context, $cms, $data)
 				: null,
-			'visibility' => $record
+			'visibility' => !$publication
 				? null
 				: [
 					'published' => (bool) ($data['published'] ?? false),
@@ -1094,8 +1124,9 @@ final class Editor extends Panel
 		}
 
 		// Publication and listing are switches of their own; only applying
-		// with `publish` publishes the node with the save.
-		if (($form['apply'] ?? null) === 'publish') {
+		// with `publish` publishes the node with the save, and a record has
+		// no publication to switch.
+		if (($form['apply'] ?? null) === 'publish' && !(bool) ($data['type']['record'] ?? false)) {
 			$data['published'] = true;
 		}
 
@@ -1573,8 +1604,8 @@ final class Editor extends Panel
 	 */
 	private function workingChanged(array $data): string
 	{
-		$draft = $data['draft'] ?? null;
-		$changed = is_array($draft) ? $draft['changed'] ?? null : $data['edited'] ?? null;
+		$draft = $this->draftOf($data);
+		$changed = $draft !== null ? $draft['changed'] ?? null : $data['edited'] ?? null;
 
 		return is_string($changed) ? $changed : '';
 	}
@@ -1586,10 +1617,25 @@ final class Editor extends Panel
 	 */
 	private function workingRevision(array $data): ?int
 	{
-		$draft = $data['draft'] ?? null;
-		$revision = is_array($draft) ? $draft['revision'] ?? null : $data['revision'] ?? null;
+		$draft = $this->draftOf($data);
+		$revision = $draft !== null ? $draft['revision'] ?? null : $data['revision'] ?? null;
 
 		return is_int($revision) ? $revision : null;
+	}
+
+	/**
+	 * The working copy the editor shows: none for a type without drafts,
+	 * whatever was left over from when it had them.
+	 *
+	 * @param array<array-key, mixed> $data
+	 * @return ?array<array-key, mixed>
+	 */
+	private function draftOf(array $data): ?array
+	{
+		$type = is_array($data['type'] ?? null) ? $data['type'] : [];
+		$draft = $data['draft'] ?? null;
+
+		return (bool) ($type['drafts'] ?? true) && is_array($draft) ? $draft : null;
 	}
 
 	private function nodeId(object $node): int

@@ -162,6 +162,8 @@ class IntegrationTestCase extends TestCase
 			->add('test-media-document', \Cosray\Tests\Fixtures\Node\TestMediaDocument::class);
 		$container->tag(Bootstrap::NODE_TAG)
 			->add('test-draft-page', \Cosray\Tests\Fixtures\Node\TestDraftPage::class);
+		$container->tag(Bootstrap::NODE_TAG)
+			->add('test-setting', \Cosray\Tests\Fixtures\Node\TestSetting::class);
 
 		// Register dynamically created test types (reuse TestPage for all page types)
 		$container->tag(Bootstrap::NODE_TAG)

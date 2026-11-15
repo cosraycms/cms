@@ -9,6 +9,7 @@ use Cosray\Exception\NoSuchProperty;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Definitions;
 use Cosray\Node\Schema\Registry;
+use Cosray\Schema\Drafts as DraftsAttribute;
 use Cosray\Schema\Title;
 use ReflectionClass;
 
@@ -96,6 +97,19 @@ class Schema
 			if ($handler !== null) {
 				$resolved = array_merge($resolved, $handler->resolve($instance, $this->nodeClass));
 			}
+		}
+
+		// A record saves directly; whichever attribute comes first.
+		if ($resolved['record'] ?? false) {
+			foreach ($reflection->getAttributes(DraftsAttribute::class) as $drafts) {
+				if ($drafts->newInstance()->value) {
+					throw new RuntimeException(
+						"Node '{$this->nodeClass}' is a #[Record] and cannot also declare #[Drafts].",
+					);
+				}
+			}
+
+			$resolved['drafts'] = false;
 		}
 
 		// A record is never online, so a URL or renderer would serve nothing.

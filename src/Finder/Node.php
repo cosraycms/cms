@@ -58,8 +58,8 @@ class Node
 	}
 
 	/**
-	 * The node as the editor sees it: the working copy where one exists,
-	 * the live row otherwise. Published or not, never deleted. Given a user,
+	 * The node as the editor sees it: the working copy where one exists and
+	 * the type has drafts, the live row otherwise. Published or not, never deleted. Given a user,
 	 * that user's autosave goes on top, as a preview of their edits.
 	 */
 	public function working(string $uid, ?int $autosave = null): ?Wrapper
@@ -69,6 +69,12 @@ class Node
 			'published' => null,
 			'deleted' => false,
 			'working' => true,
+			// A working copy left on a type without drafts is not shown.
+			'drafted' => Nodes::flagged(
+				$this->context,
+				/** @param class-string $class */
+				fn(string $class): bool => (bool) $this->types->get($class, 'drafts', true),
+			),
 			...($autosave === null ? [] : ['autosave' => $autosave]),
 		]);
 	}

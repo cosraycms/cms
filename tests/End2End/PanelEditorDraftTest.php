@@ -334,6 +334,7 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->createTestNode([
 			'uid' => 'draft-record-head',
 			'type' => $this->createTestType('test-submission'),
+			'published' => null,
 			'content' => ['title' => ['type' => Text::class, 'value' => ['zxx' => 'Entry']]],
 		]);
 
@@ -359,6 +360,38 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->assertNotSame('/panel/node/draft-original', $location['path']);
 		$copy = $this->nodeRow(substr($location['path'], strlen('/panel/node/')));
 		$this->assertFalse((bool) $copy['published']);
+	}
+
+	public function testATypeWithoutDraftsSavesToItsMainVersionAndIsActiveOrNot(): void
+	{
+		$nodeId = $this->createTestNode([
+			'uid' => 'draft-setting',
+			'type' => $this->createTestType('test-setting'),
+			'published' => false,
+			'content' => ['title' => ['type' => Text::class, 'value' => ['zxx' => 'Stored']]],
+		]);
+		// A working copy from before the type dropped its drafts.
+		$this->createTestDraft($nodeId, ['title' => ['type' => Text::class, 'value' => ['zxx' => 'Left over']]]);
+
+		$editor = $this->getHtmlResponse($this->makeRequest('GET', '/panel/node/draft-setting'));
+
+		$this->assertHtmlNodeExists('//input[@name="content[title][value][zxx]"][@value="Stored"]', $editor);
+		$this->assertHtmlNodeExists($this->stage('main', 'unpublished'), $editor);
+		$this->assertHtmlNodeMissing("//*[@id='editor-status-dots']/*[@data-stage='draft']", $editor);
+		$this->assertHtmlNodeMissing('//*[@id="editor-apply"]', $editor);
+		$this->assertHtmlNodeExists('//*[@id="editor-published-switch"]', $editor);
+		$this->assertHtmlNodeExists('//*[@class="cms-inspector-title"][normalize-space()="Active"]', $editor);
+
+		$saved = $this->save('draft-setting', ['content' => ['title' => ['value' => ['zxx' => 'Edited']]]]);
+
+		$this->assertHtmlNodeExists('//*[@data-toast="success"]', $this->getHtmlResponse($saved));
+		$this->assertNull($this->draftRow('draft-setting'));
+		$this->assertStringContainsString('Edited', (string) $this->nodeRow('draft-setting')['content']);
+
+		$switched = $this->getHtmlResponse($this->visibility('draft-setting', ['published' => '1', 'listed' => '1']));
+
+		$this->assertTrue((bool) $this->nodeRow('draft-setting')['published']);
+		$this->assertStringContainsString('Activated – the website uses the entry', $switched);
 	}
 
 	/** The head's dot of a stage in a state. */

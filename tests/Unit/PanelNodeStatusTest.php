@@ -67,7 +67,7 @@ final class PanelNodeStatusTest extends TestCase
 	{
 		$status = $this->derive($facts);
 
-		$this->assertFalse($status->record);
+		$this->assertTrue($status->publication);
 		$this->assertSame($main, $status->main);
 		$this->assertSame($draft, $status->draft);
 		$this->assertSame($mine, $status->mine);
@@ -91,7 +91,7 @@ final class PanelNodeStatusTest extends TestCase
 			'autosave' => ['changed' => self::AFTER, 'base' => 1],
 		]);
 
-		$this->assertTrue($status->record);
+		$this->assertFalse($status->publication);
 		$this->assertFalse($status->draft);
 		$this->assertSame('present', $status->mine);
 		$this->assertSame(['saved', 'mine'], array_column($status->stages($this->date(...)), 'key'));
@@ -105,6 +105,25 @@ final class PanelNodeStatusTest extends TestCase
 		$this->assertNotSame('', $online[0]['badge']);
 		$this->assertNotSame($online[0]['badge'], $offline[0]['badge']);
 		$this->assertSame(['', ''], [$online[1]['badge'], $online[2]['badge']]);
+	}
+
+	public function testATypeWithoutDraftsSavesToItsMainVersion(): void
+	{
+		$status = $this->derive([
+			'drafts' => false,
+			'published' => false,
+			'routable' => false,
+			'editor' => 'Ada',
+			'draft' => ['changed' => self::CHANGED, 'editorName' => 'Grace', 'revision' => 2],
+			'autosave' => ['changed' => self::AFTER, 'base' => 1],
+		]);
+		$stages = $status->stages($this->date(...));
+
+		$this->assertSame(['main', 'mine'], array_column($stages, 'key'));
+		$this->assertFalse($status->draft, 'a working copy left over is not shown');
+		$this->assertSame('present', $status->mine);
+		$this->assertSame('status:inactive', $stages[0]['badge']);
+		$this->assertSame('Ada', $status->savedBy);
 	}
 
 	public function testTheSentenceNamesEveryStageWithItsBadge(): void
@@ -131,13 +150,15 @@ final class PanelNodeStatusTest extends TestCase
 	private function derive(array $facts): NodeStatus
 	{
 		return NodeStatus::of(
-			record: (bool) ($facts['record'] ?? false),
+			drafts: !($facts['record'] ?? false) && ($facts['drafts'] ?? true),
+			publication: !($facts['record'] ?? false),
 			published: (bool) ($facts['published'] ?? false),
 			edited: self::CHANGED,
 			editor: $facts['editor'] ?? null,
 			draft: $facts['draft'] ?? null,
 			autosave: $facts['autosave'] ?? null,
 			revision: 1,
+			routable: $facts['routable'] ?? true,
 		);
 	}
 

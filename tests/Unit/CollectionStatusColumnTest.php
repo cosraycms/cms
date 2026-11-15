@@ -144,11 +144,11 @@ final class CollectionStatusColumnTest extends TestCase
 	public function testRecordsAloneHaveNoDraftSlot(): void
 	{
 		$columns = [Column::new('Title', 'title'), Column::status()];
-		$table = $this->table($columns, record: true, mine: true, publishable: false);
+		$table = $this->table($columns, record: true, mine: true, drafts: false);
 		$fixed = $this->table(
 			[Column::new('Title', 'title'), Column::status()->fixed()],
 			record: true,
-			publishable: false,
+			drafts: false,
 		);
 
 		$this->assertSame(['main', 'mine'], $table->headers[1]['stages']);
@@ -168,14 +168,15 @@ final class CollectionStatusColumnTest extends TestCase
 		bool $draft = false,
 		bool $record = false,
 		bool $mine = false,
-		bool $publishable = true,
+		bool $drafts = true,
 	): CollectionTable {
 		$node = [
 			'uid' => 'entry',
 			'published' => true,
 			'hidden' => true,
 			'stages' => [
-				'record' => $record,
+				'drafts' => !$record,
+				'publication' => !$record,
 				'edited' => '2026-08-11 22:25:00+00',
 				'revision' => 1,
 				'editor' => 'Ada',
@@ -197,7 +198,7 @@ final class CollectionStatusColumnTest extends TestCase
 			new CollectionListMeta(showHidden: true),
 			'en',
 			new DateTimeZone('UTC'),
-			publishable: $publishable,
+			drafts: $drafts,
 		);
 	}
 

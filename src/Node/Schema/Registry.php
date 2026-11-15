@@ -6,6 +6,7 @@ namespace Cosray\Node\Schema;
 
 use Cosray\Schema\Children;
 use Cosray\Schema\Deletable;
+use Cosray\Schema\Drafts;
 use Cosray\Schema\Editor;
 use Cosray\Schema\FieldOrder;
 use Cosray\Schema\Handle;
@@ -93,6 +94,7 @@ class Registry
 		$registry->register(Children::class, new ChildrenHandler());
 		$registry->register(Editor::class, new EditorHandler());
 		$registry->register(Record::class, new RecordHandler());
+		$registry->register(Drafts::class, new DraftsHandler());
 
 		return $registry;
 	}
@@ -126,6 +128,10 @@ class Registry
 		$this->default('fieldOrder', static fn(string $nodeClass, array $properties): ?array => null);
 		$this->default('deletable', static fn(string $nodeClass, array $properties): bool => true);
 		$this->default('record', static fn(string $nodeClass, array $properties): bool => false);
+		$this->default(
+			'drafts',
+			static fn(string $nodeClass, array $properties): bool => !($properties['record'] ?? false),
+		);
 		$this->default('children', static fn(string $nodeClass, array $properties): array => []);
 		$this->default('sortableChildren', static fn(string $nodeClass, array $properties): bool => false);
 	}

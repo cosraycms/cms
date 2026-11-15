@@ -190,8 +190,9 @@ final class Listing
 
 	/**
 	 * How many entries of the listing's scope each status stage holds, for
-	 * the filters above the list, `all` included. Records know only the
-	 * user's own edits, so without publishable entries the other stages go.
+	 * the filters above the list, `all` included. Drafts count only where
+	 * types keep them, unpublished entries only where entries have
+	 * publication; everyone's own edits count everywhere.
 	 *
 	 * @return array<string, int>
 	 */
@@ -200,9 +201,11 @@ final class Listing
 		$parent = $this->meta->showChildren ? trim((string) $parent) : '';
 		$q = trim($q);
 		$counts = ['all' => $this->scoped($parent, $q)->count()];
-		$stages = $this->scoped($parent, $q)->publishable()->count() > 0
-			? ['draft', 'mine', 'unpublished']
-			: ['mine'];
+		$stages = [
+			...($this->scoped($parent, $q)->withDrafts()->count() > 0 ? ['draft'] : []),
+			'mine',
+			...($this->scoped($parent, $q)->withPublication()->count() > 0 ? ['unpublished'] : []),
+		];
 
 		foreach ($stages as $stage) {
 			$counts[$stage] = $this->scoped($parent, $q)->stage($stage, $user)->count();
@@ -211,10 +214,16 @@ final class Listing
 		return $counts;
 	}
 
-	/** Whether the listing holds entries that are no records, which publication concerns. */
-	public function publishable(): bool
+	/** Whether the listing holds entries with publication, which a record has not. */
+	public function publication(): bool
 	{
-		return $this->entries()->publishable()->count() > 0;
+		return $this->entries()->withPublication()->count() > 0;
+	}
+
+	/** Whether the listing holds entries of types that keep working copies. */
+	public function drafts(): bool
+	{
+		return $this->entries()->withDrafts()->count() > 0;
 	}
 
 	/** The entries a listing page draws from: one level of a hierarchy, matching a search. */
@@ -375,7 +384,9 @@ final class Listing
 		$mine = $node->meta->get('mine');
 
 		return [
-			'record' => (bool) $this->types->get(Wrapper::unwrap($node)::class, 'record', false),
+			'drafts' => (bool) $this->types->get(Wrapper::unwrap($node)::class, 'drafts', true),
+			'publication' => !(bool) $this->types->get(Wrapper::unwrap($node)::class, 'record', false),
+			'routable' => (bool) $this->types->get(Wrapper::unwrap($node)::class, 'routable', false),
 			'edited' => (string) $node->meta->get('edited'),
 			'revision' => is_int($revision = $node->meta->get('revision')) ? $revision : null,
 			'editor' => is_string($applier = $node->meta->get('applier_name')) ? $applier : null,

@@ -16,7 +16,7 @@ final class CollectionPage
 	/**
 	 * @param list<array{label: string, url: string, active: bool}> $viewLinks
 	 * @param list<array{slug: string, name: string, url: string}> $createLinks
-	 * @param array{publishUrl: string, deleteUrl: string, duplicateUrl: string, publishable: bool} $bulk
+	 * @param array{publishUrl: string, deleteUrl: string, duplicateUrl: string, publication: bool, drafts: bool} $bulk
 	 * @param list<array{key: string, label: string, count: int, url: string, active: bool}> $stages
 	 */
 	private function __construct(
@@ -40,7 +40,8 @@ final class CollectionPage
 	 * @param iterable<mixed>|null $parentStatus
 	 * @param ?array{stages: list<array<string, string>>, sentence: string} $parentDots
 	 * @param array<string, int> $stages how many entries each status stage holds
-	 * @param bool $publishable whether the collection holds entries that are no records
+	 * @param bool $publication whether the collection holds entries with publication, which records have not
+	 * @param bool $drafts whether the collection holds entries of types that keep working copies
 	 */
 	public static function from(
 		string $name,
@@ -60,7 +61,8 @@ final class CollectionPage
 		bool $arranged = false,
 		string $moved = '',
 		array $stages = [],
-		bool $publishable = true,
+		bool $publication = true,
+		bool $drafts = true,
 	): self {
 		$query = $urls->query;
 		$nodes = self::items($nodes);
@@ -92,14 +94,15 @@ final class CollectionPage
 				timezone: $timezone,
 				arranged: $arranged,
 				moved: $moved,
-				publishable: $publishable,
+				drafts: $drafts,
 			),
 			pager: CollectionPager::from($total, count($nodes), $urls),
 			bulk: [
 				'publishUrl' => $urls->bulk('publish'),
 				'deleteUrl' => $urls->bulk('delete'),
 				'duplicateUrl' => $urls->bulk('duplicate'),
-				'publishable' => $publishable,
+				'publication' => $publication,
+				'drafts' => $drafts,
 			],
 			stages: self::stages($stages, $query, $urls),
 		);

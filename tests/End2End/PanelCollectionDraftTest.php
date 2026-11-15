@@ -9,6 +9,7 @@ use Cosray\Config;
 use Cosray\Field\Text;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestDraftPagesCollection;
+use Cosray\Tests\Fixtures\Collection\TestSettingsCollection;
 use Cosray\Tests\Fixtures\Collection\TestSubmissionsCollection;
 use Cosray\Tests\Fixtures\Node\TestDraftPage;
 
@@ -38,6 +39,7 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 		$plugin->node(TestDraftPage::class);
 		$plugin->section('Inhalt')->collection(TestDraftPagesCollection::class);
 		$plugin->section('Inhalt')->collection(TestSubmissionsCollection::class);
+		$plugin->section('Inhalt')->collection(TestSettingsCollection::class);
 
 		return $plugin;
 	}
@@ -145,6 +147,7 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 		$this->createTestNode([
 			'uid' => 'listed-record',
 			'type' => $this->createTestType('test-submission'),
+			'published' => null,
 			'content' => ['title' => ['type' => Text::class, 'value' => ['zxx' => 'Entry']]],
 		]);
 
@@ -158,6 +161,40 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeMissing('//button[@data-bulk-open="publish"]', $html);
+	}
+
+	public function testAListWithoutDraftsHasNoDraftSlotButPublication(): void
+	{
+		$type = $this->createTestType('test-setting');
+		$this->createTestNode([
+			'uid' => 'listed-setting',
+			'type' => $type,
+			'published' => false,
+			'content' => ['title' => ['type' => Text::class, 'value' => ['zxx' => 'Setting']]],
+		]);
+		$this->createTestDraft(
+			$this->createTestNode([
+				'uid' => 'listed-leftover',
+				'type' => $type,
+				'content' => ['title' => ['type' => Text::class, 'value' => ['zxx' => 'Leftover']]],
+			]),
+			['title' => ['type' => Text::class, 'value' => ['zxx' => 'Drafted before']]],
+		);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/collection/test-settings'));
+
+		$this->assertHtmlNodeExists($this->dot('listed-setting', 'main', 'unpublished'), $html);
+		$this->assertHtmlNodeMissing("//tr[@data-uid='listed-leftover']//*[@data-stage='draft']", $html);
+		$this->assertHtmlNodeMissing(
+			'//nav[contains(@class, "cms-stage-filters")]/a[contains(., "With draft")]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//nav[contains(@class, "cms-stage-filters")]/a[contains(., "Unpublished")]/*[@class="cms-stage-filters-count"][.="1"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists('//button[@data-bulk-open="publish"]', $html);
+		$this->assertHtmlNodeMissing('//dialog[@data-dialog="bulk-publish"]//input[@name="changes"]', $html);
 	}
 
 	public function testBulkPublishingLeavesRecordsAlone(): void

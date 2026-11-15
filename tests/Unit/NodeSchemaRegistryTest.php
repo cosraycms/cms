@@ -32,6 +32,7 @@ use Cosray\Schema\Route;
 use Cosray\Schema\Title;
 use Cosray\Tests\Fixtures\Node\CustomIcon;
 use Cosray\Tests\Fixtures\Node\CustomIconHandler;
+use Cosray\Tests\Fixtures\Node\DraftedRecord;
 use Cosray\Tests\Fixtures\Node\NodeWithAmbiguousEmbeddedTitles;
 use Cosray\Tests\Fixtures\Node\NodeWithChildrenAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithCustomAttribute;
@@ -53,6 +54,9 @@ use Cosray\Tests\Fixtures\Node\PlainPage;
 use Cosray\Tests\Fixtures\Node\RecordNode;
 use Cosray\Tests\Fixtures\Node\RoutedRecord;
 use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
+use Cosray\Tests\Fixtures\Node\TestPage;
+use Cosray\Tests\Fixtures\Node\TestSetting;
+use Cosray\Tests\Fixtures\Node\UndraftedRecord;
 use Cosray\Tests\TestCase;
 use ValueError;
 
@@ -333,6 +337,25 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->expectExceptionMessage('cannot also declare #[Route] or #[Render]');
 
 		new Schema(RoutedRecord::class, Registry::withDefaults());
+	}
+
+	public function testDraftsAreTheDefaultAndRecordsHaveNone(): void
+	{
+		$registry = Registry::withDefaults();
+
+		$this->assertTrue(new Schema(TestPage::class, $registry)->get('drafts'));
+		$this->assertFalse(new Schema(TestSetting::class, $registry)->get('drafts'));
+		$this->assertFalse(new Schema(TestSetting::class, $registry)->get('record'));
+		$this->assertFalse(new Schema(RecordNode::class, $registry)->get('drafts'));
+		$this->assertFalse(new Schema(UndraftedRecord::class, $registry)->get('drafts'));
+	}
+
+	public function testSchemaRefusesARecordWithDrafts(): void
+	{
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('cannot also declare #[Drafts]');
+
+		new Schema(DraftedRecord::class, Registry::withDefaults());
 	}
 
 	public function testSchemaResolvesChildrenAttributeFromClass(): void

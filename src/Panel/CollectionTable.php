@@ -59,10 +59,10 @@ final class CollectionTable
 		DateTimeZone $timezone,
 		bool $arranged = false,
 		string $moved = '',
-		bool $publishable = true,
+		bool $drafts = true,
 	): self {
 		$nodes = self::items($nodes);
-		$headers = self::headers($columns, $urls, $arranged, $publishable);
+		$headers = self::headers($columns, $urls, $arranged, $drafts);
 
 		return new self(
 			showChildren: $meta->showChildren,
@@ -78,7 +78,7 @@ final class CollectionTable
 	 * and carries the tree. Hidden and locked badges join the stages of
 	 * the main version, or else the first stages shown. A status column
 	 * has a slot for each of its stages, but none for drafts in a
-	 * collection of records only, which never have one.
+	 * collection of types without them.
 	 *
 	 * @param iterable<Column|StatusColumn> $columns
 	 * @return list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}>
@@ -87,7 +87,7 @@ final class CollectionTable
 		iterable $columns,
 		CollectionUrls $urls,
 		bool $arranged,
-		bool $publishable,
+		bool $drafts,
 	): array {
 		$headers = [];
 		$lead = false;
@@ -107,7 +107,7 @@ final class CollectionTable
 						static fn(Stage $stage): string => $stage->value,
 						array_filter(
 							$column->stages,
-							static fn(Stage $stage): bool => $publishable || $stage !== Stage::Draft,
+							static fn(Stage $stage): bool => $drafts || $stage !== Stage::Draft,
 						),
 					)),
 					'look' => $column->look,
@@ -342,8 +342,8 @@ final class CollectionTable
 	/**
 	 * A status column's share of a row's stages, one per slot of the column,
 	 * up to the last that holds something unless fixed. A record's saved
-	 * state fills the main version's slot; the draft slot, which a record
-	 * lacks, stays empty and out of the sentence.
+	 * state fills the main version's slot; the draft slot, which a type
+	 * without drafts lacks, stays empty and out of the sentence.
 	 *
 	 * @param array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool} $header
 	 * @param list<array{key: string, state: string, name: string, text: string, help: string, badge: string}> $stages
@@ -432,7 +432,8 @@ final class CollectionTable
 		$draft = is_array($facts['draft'] ?? null) ? $facts['draft'] : null;
 		$mine = is_array($facts['mine'] ?? null) ? $facts['mine'] : null;
 		$stages = NodeStatus::of(
-			record: (bool) ($facts['record'] ?? false),
+			drafts: (bool) ($facts['drafts'] ?? true),
+			publication: (bool) ($facts['publication'] ?? true),
 			published: (bool) ($node['published'] ?? false),
 			edited: (string) ($facts['edited'] ?? ''),
 			editor: is_string($facts['editor'] ?? null) ? $facts['editor'] : null,
@@ -450,6 +451,7 @@ final class CollectionTable
 					'base' => is_int($mine['base'] ?? null) ? $mine['base'] : null,
 				],
 			revision: is_int($facts['revision'] ?? null) ? $facts['revision'] : null,
+			routable: (bool) ($facts['routable'] ?? true),
 		)->stages(NodeStatus::dates($locale, $timezone));
 		$stages = $fixed ? $stages : NodeStatus::chain($stages);
 

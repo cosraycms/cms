@@ -34,7 +34,7 @@ $routable = (bool) ($type['routable'] ?? false);
 $renderable = (bool) ($type['renderable'] ?? false);
 $published = (bool) ($node['published'] ?? false);
 $deletable = (bool) ($node['deletable'] ?? false);
-$record = (bool) ($type['record'] ?? false);
+$drafts = (bool) ($type['drafts'] ?? true);
 $contentLocales = ContentLocales::used($fields, count($locales));
 $edit = $mode === 'edit';
 $showSettings = $routable || $renderable || $contentLocales || $edit;
@@ -189,10 +189,10 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 				<?php endif ?>
 				<?php
 				$mine = (string) ($status['mine'] ?? 'none');
-				$publishable = $edit && !$record;
+				$publishable = $edit && $drafts;
 				$saveLabel = $publishable ? 'editor:save-draft' : 'editor:save';
 				?>
-				<?php // A node's save keeps the edits as its draft; a record's saves them. ?>
+				<?php // A node's save keeps the edits as its draft; without drafts it saves them. ?>
 				<button
 					class="cms-button <?= $publishable ? 'cms-button-secondary' : 'cms-button-primary' ?>"
 					type="submit"
@@ -328,7 +328,7 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 				data-confirm-tone="danger"
 				hidden><?php $this->include('component/csrf') ?></form>
 		<?php endif ?>
-		<?php if (!$record): ?>
+		<?php if ($drafts): ?>
 			<?php // Discarding the working copy drops the unsaved edits too, unless the
 
 			// question says to keep them: the unsaved-changes guard stands aside. ?>

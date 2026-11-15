@@ -35,7 +35,11 @@ final class SyncPublications
 		$check = $this->publications->check();
 
 		foreach ($check['drafts'] as $node) {
-			$io->line('%s (%s) has a working copy; apply or discard it.', $node['uid'], $node['type']);
+			$io->line(
+				'%s (%s) has a working copy its type no longer shows; apply or discard it first.',
+				$node['uid'],
+				$node['type'],
+			);
 		}
 
 		if ($apply) {

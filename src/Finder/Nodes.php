@@ -345,10 +345,21 @@ final class Nodes implements Iterator
 		return $this;
 	}
 
-	/** Leaves out records, which have no publication. */
-	public function publishable(): self
+	/** Only nodes with publication: a record has none. */
+	public function withPublication(): self
 	{
-		$this->addWhere('NOT (' . $this->recordExpression() . ')');
+		$this->addWhere('p.node IS NOT NULL');
+
+		return $this;
+	}
+
+	/** Only nodes of types that keep working copies. */
+	public function withDrafts(): self
+	{
+		$this->addWhere($this->typeFlagExpression(
+			/** @param class-string $class */
+			fn(string $class): bool => (bool) $this->types->get($class, 'drafts', true),
+		));
 
 		return $this;
 	}
@@ -361,7 +372,11 @@ final class Nodes implements Iterator
 	public function stage(string $stage, int $user): self
 	{
 		$this->addWhere(match ($stage) {
-			'draft' => 'd.node IS NOT NULL',
+			'draft' => 'd.node IS NOT NULL AND '
+				. $this->typeFlagExpression(
+					/** @param class-string $class */
+					fn(string $class): bool => (bool) $this->types->get($class, 'drafts', true),
+				),
 			'mine' => "EXISTS (SELECT 1 FROM /*:cms.prefix:*/edits m WHERE m.node = n.node AND m.editor = {$user})",
 			'unpublished' => 'p.published = false',
 			default => throw new RuntimeException("Unknown status stage '{$stage}'"),
@@ -603,19 +618,22 @@ final class Nodes implements Iterator
 		};
 	}
 
-	private function recordExpression(): string
-	{
-		return $this->typeFlagExpression(
-			/** @param class-string $class */
-			fn(string $class): bool => (bool) $this->types->get($class, 'record', false),
-		);
-	}
-
 	/** @param callable(class-string): bool $flag */
 	private function typeFlagExpression(callable $flag): string
 	{
+		return self::flagged($this->context, $flag);
+	}
+
+	/**
+	 * A condition on `t.handle` that holds for the registered types the
+	 * flag holds for.
+	 *
+	 * @param callable(class-string): bool $flag
+	 */
+	public static function flagged(Context $context, callable $flag): string
+	{
 		$handles = [];
-		$types = $this->context->container->tag(Bootstrap::NODE_TAG);
+		$types = $context->container->tag(Bootstrap::NODE_TAG);
 
 		foreach ($types->entries() as $handle) {
 			$class = $types->entry($handle)->definition();
@@ -624,7 +642,7 @@ final class Nodes implements Iterator
 				continue;
 			}
 
-			$handles[] = $this->context->db->quote($handle);
+			$handles[] = $context->db->quote($handle);
 		}
 
 		sort($handles);

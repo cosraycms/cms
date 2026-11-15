@@ -14,6 +14,6 @@ class RecordHandler extends Handler
 	{
 		assert($meta instanceof Record, 'The registry maps #[Record] to this handler');
 
-		return ['record' => true];
+		return ['record' => true, 'drafts' => false];
 	}
 }

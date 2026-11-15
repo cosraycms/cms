@@ -194,7 +194,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 					) ?></button>
 				</div>
 				<div class="cms-collection-bulk-actions">
-					<?php if ($page->bulk['publishable']): ?>
+					<?php if ($page->bulk['publication']): ?>
 						<button type="button" class="cms-collection-bulk-action" data-bulk-open="publish">
 							<?= escape(__('bulk:publish')) ?>
 						</button>
@@ -378,7 +378,7 @@ $columns .= $hasRowActions ? ' max-content' : '';
 			</footer>
 		<?php $this->end() ?>
 
-		<?php if ($page->bulk['publishable']): ?>
+		<?php if ($page->bulk['publication']): ?>
 			<?php $this->component('component/dialog', ['name' => 'bulk-publish', 'size' => 'compact', 'title' => __('bulk:publish')]) ?>
 				<div class="cms-modal-body cms-confirm">
 				<p class="cms-confirm-question" data-bulk-question></p>
@@ -386,10 +386,12 @@ $columns .= $hasRowActions ? ' max-content' : '';
 					<input type="checkbox" name="children" value="1" form="collection-bulk" />
 					<span><?= escape(__('bulk:publish-children')) ?></span>
 				</label>
-				<label class="cms-confirm-option" data-bulk-option>
-					<input type="checkbox" name="changes" value="1" form="collection-bulk" />
-					<span><?= escape(__('bulk:publish-changes')) ?></span>
-				</label>
+				<?php if ($page->bulk['drafts']): ?>
+					<label class="cms-confirm-option" data-bulk-option>
+						<input type="checkbox" name="changes" value="1" form="collection-bulk" />
+						<span><?= escape(__('bulk:publish-changes')) ?></span>
+					</label>
+				<?php endif ?>
 				</div>
 				<footer class="cms-modal-footer">
 					<button type="button" class="cms-button cms-button-secondary" data-dialog-close data-dialog-focus><?= escape(

@@ -20,6 +20,7 @@ use Cosray\Node\ReservedPaths;
 use Cosray\Node\Store;
 use Cosray\Node\Wrapper;
 use Cosray\Tests\Fixtures\Node\TestDraftPage;
+use Cosray\Tests\Fixtures\Node\TestSetting;
 use Cosray\Tests\Fixtures\Node\TestSubmission;
 use Cosray\Tests\IntegrationTestCase;
 
@@ -242,6 +243,35 @@ final class NodeEventsTest extends IntegrationTestCase
 		$this->assertTrue((bool) $this->publication('sync-kept')['published']);
 		$this->assertSame([], $publications->check()['stale']);
 		$this->assertSame([], $publications->check()['missing']);
+	}
+
+	public function testATypeWithoutDraftsSavesDirectlyAndDropsALeftoverCopy(): void
+	{
+		$type = $this->createTestType('test-setting');
+		$nodeId = $this->createTestNode(['uid' => 'setting-entry', 'type' => $type, 'published' => false]);
+		$this->createTestDraft($nodeId, ['title' => ['type' => Text::class, 'value' => ['zxx' => 'Left over']]]);
+		$publications = new Publications($this->db(), $this->services->types, ['test-setting' => TestSetting::class]);
+
+		$this->assertSame([['uid' => 'setting-entry', 'type' => 'test-setting']], $publications->check()['drafts']);
+		$this->assertFalse($this->store->holdsDrafts($this->node('setting-entry')));
+		$this->assertFalse($this->store->applyDraft(
+			$this->node('setting-entry'),
+			$this->context->locales(),
+			Actor::system(),
+		));
+
+		$this->store->apply(
+			$this->node('setting-entry'),
+			$this->recordPayload('setting-entry', published: true),
+			$this->context->locales(),
+			Actor::system(),
+		);
+
+		$this->assertSame(
+			['created', 'discarded', 'saved', 'published'],
+			array_column($this->events('setting-entry'), 'action'),
+		);
+		$this->assertSame([], $publications->check()['drafts']);
 	}
 
 	public function testANodeWithoutPublicationReadsAsNeitherPublishedNorHidden(): void

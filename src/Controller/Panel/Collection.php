@@ -152,7 +152,8 @@ final class Collection extends Panel
 					),
 				createBlueprints: $parentNode === null ? null : $lister->childBlueprints($parentNode),
 				stages: $view === 'tree' ? [] : $lister->stageCounts($user, $listing['q'], $parentUid),
-				publishable: $lister->publishable(),
+				publication: $lister->publication(),
+				drafts: $lister->drafts(),
 			),
 		]);
 	}

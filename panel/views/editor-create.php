@@ -21,6 +21,8 @@ $pathSourceFields = (array) u($pathSourceFields ?? []);
 $type = (array) ($node['type'] ?? []);
 $uid = (string) ($node['uid'] ?? '');
 $record = (bool) ($type['record'] ?? false);
+$drafts = (bool) ($type['drafts'] ?? true);
+$routable = (bool) ($type['routable'] ?? false);
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
 <?php $this->include('component/modal-header', ['title' => (string) ($node['title'] ?? '')]) ?>
@@ -49,14 +51,18 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			'assets' => [],
 			'pathSourceFields' => $pathSourceFields,
 		]) ?>
-		<?php // What creating means: an unpublished main version, or a record saved directly. ?>
+		<?php // What creating means: an unpublished main version, with or without drafts, or a record saved directly. ?>
 		<div class="cms-create-hint">
 			<?php if (!$record): ?>
 				<span class="cms-status-dots is-sm" aria-hidden="true">
 					<span class="cms-stage-mark" data-stage="main" data-state="unpublished"><?= Icon::render(NodeStatus::icon('main', 'unpublished')) ?></span>
 				</span>
 			<?php endif ?>
-			<p><?= escape(__($record ? 'editor:create-record' : 'editor:create-entry')) ?></p>
+			<p><?= escape(__(match (true) {
+				$record => 'editor:create-record',
+				$drafts => $routable ? 'editor:create-entry' : 'editor:create-entry-inactive',
+				default => $routable ? 'editor:create-saved' : 'editor:create-saved-inactive',
+			})) ?></p>
 		</div>
 	</div>
 	<footer class="cms-modal-footer">

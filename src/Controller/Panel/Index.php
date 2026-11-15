@@ -94,7 +94,7 @@ final class Index extends Panel
 			IntlDateFormatter::NONE,
 			$this->config->app->timezone->getName(),
 		);
-		$records = $this->recordTypes($types);
+		$flags = $this->typeFlags($types);
 		$recent = [];
 		$rows = $db->dashboard->recent(['limit' => self::RECENT_LIMIT, 'mine' => $this->actor()->id])->all();
 
@@ -121,7 +121,7 @@ final class Index extends Panel
 					[
 						'published' => (bool) ($row['published'] ?? false),
 						'stages' => [
-							'record' => in_array($type, $records, true),
+							...($flags[$type] ?? []),
 							'edited' => (string) ($row['edited'] ?? ''),
 							'revision' => $row['revision'] === null ? null : (int) $row['revision'],
 							'editor' => $row['applier_name'] ?? null,
@@ -149,21 +149,25 @@ final class Index extends Panel
 		return $recent;
 	}
 
-	/** @return list<string> the handles of the record types */
-	private function recordTypes(Types $types): array
+	/** @return array<string, array{drafts: bool, publication: bool, routable: bool}> the status flags by type handle */
+	private function typeFlags(Types $types): array
 	{
 		$registered = $this->container->tag(Bootstrap::NODE_TAG);
-		$records = [];
+		$flags = [];
 
 		foreach ($registered->entries() as $handle) {
 			$class = $registered->entry($handle)->definition();
 
-			if (is_string($class) && class_exists($class) && (bool) $types->get($class, 'record', false)) {
-				$records[] = $handle;
+			if (is_string($class) && class_exists($class)) {
+				$flags[$handle] = [
+					'drafts' => (bool) $types->get($class, 'drafts', true),
+					'publication' => !(bool) $types->get($class, 'record', false),
+					'routable' => (bool) $types->get($class, 'routable', false),
+				];
 			}
 		}
 
-		return $records;
+		return $flags;
 	}
 
 	/** @return array<string, string> */

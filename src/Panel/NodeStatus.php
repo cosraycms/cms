@@ -16,9 +16,11 @@ use Throwable;
  *
  * A node has three stages: its main version (the stored node, published
  * or not), the draft (changes to the main version the editorial team
- * saved) and the current user's unsaved edits. A record has two: the
- * stored state and the user's edits. Saving and failing autosaves are
- * client states; the server knows none of them.
+ * saved) and the current user's unsaved edits. A type without drafts has
+ * no draft stage, and a record, which has no publication either, has its
+ * saved state in place of a main version. A type without a route is
+ * active or inactive rather than online or offline. Saving and failing
+ * autosaves are client states; the server knows none of them.
  */
 final readonly class NodeStatus
 {
@@ -30,11 +32,12 @@ final readonly class NodeStatus
 	];
 
 	/**
-	 * @param 'published'|'unpublished' $main
+	 * @param 'published'|'unpublished'|'saved' $main
 	 * @param 'none'|'present'|'conflict' $mine
 	 */
 	public function __construct(
-		public bool $record,
+		public bool $drafts,
+		public bool $publication,
 		public string $main,
 		public bool $draft,
 		public string $mine,
@@ -43,6 +46,7 @@ final readonly class NodeStatus
 		public ?string $savedBy = null,
 		public ?string $mineSaved = null,
 		public ?string $editor = null,
+		public bool $routable = true,
 	) {}
 
 	/**
@@ -50,6 +54,9 @@ final readonly class NodeStatus
 	 * draft's or else the main version's, are a conflict, and so are edits
 	 * that do not know theirs.
 	 *
+	 * @param bool $drafts whether the type keeps a working copy
+	 * @param bool $publication whether the type is published, which a record is not
+	 * @param bool $routable whether the type has pages, online or not, rather than entries the website uses
 	 * @param string $edited when the main version became main
 	 * @param ?string $editor who made it main
 	 * @param ?int $revision the main revision
@@ -57,14 +64,17 @@ final readonly class NodeStatus
 	 * @param ?array{changed: string, base: ?int} $autosave the user's
 	 */
 	public static function of(
-		bool $record,
+		bool $drafts,
+		bool $publication,
 		bool $published,
 		string $edited,
 		?string $editor,
 		?array $draft,
 		?array $autosave,
 		?int $revision = null,
+		bool $routable = true,
 	): self {
+		$draft = $drafts ? $draft : null;
 		$working = $draft['revision'] ?? $revision;
 		$mine = match (true) {
 			$autosave === null => 'none',
@@ -72,30 +82,22 @@ final readonly class NodeStatus
 			default => 'present',
 		};
 
-		if ($record) {
-			return new self(
-				true,
-				'published',
-				false,
-				$mine,
-				$edited,
-				$edited,
-				$editor,
-				$autosave['changed'] ?? null,
-				$editor,
-			);
-		}
-
 		return new self(
-			record: false,
-			main: $published ? 'published' : 'unpublished',
+			drafts: $drafts,
+			publication: $publication,
+			main: match (true) {
+				!$publication => 'saved',
+				$published => 'published',
+				default => 'unpublished',
+			},
 			draft: $draft !== null,
 			mine: $mine,
 			edited: $edited,
-			saved: $draft['changed'] ?? null,
-			savedBy: $draft['editorName'] ?? null,
+			saved: $drafts ? $draft['changed'] ?? null : $edited,
+			savedBy: $drafts ? $draft['editorName'] ?? null : $editor,
 			mineSaved: $autosave['changed'] ?? null,
 			editor: $editor,
+			routable: $routable,
 		);
 	}
 
@@ -126,7 +128,7 @@ final readonly class NodeStatus
 			'badge' => '',
 		];
 
-		if ($this->record) {
+		if (!$this->publication) {
 			return [
 				[
 					'key' => 'saved',
@@ -142,19 +144,31 @@ final readonly class NodeStatus
 
 		$published = $this->main === 'published';
 		$applied = $date($this->edited, true);
+		$main = [
+			'key' => 'main',
+			'state' => $this->main,
+			'name' => __('status:main'),
+			'text' => match (true) {
+				!$this->drafts => $stored(),
+				$this->editor !== null && $this->editor !== '' => __(
+					'status:main-applied-by',
+					['date' => $applied, 'editor' => $this->editor],
+				),
+				default => __('status:main-applied', ['date' => $applied]),
+			},
+			'help' => __($this->routable ? 'status:main-help' : 'status:main-help-active'),
+			'badge' => __(match (true) {
+				$this->routable => $published ? 'status:online' : 'status:offline',
+				default => $published ? 'status:active' : 'status:inactive',
+			}),
+		];
+
+		if (!$this->drafts) {
+			return [$main, $mine];
+		}
 
 		return [
-			[
-				'key' => 'main',
-				'state' => $this->main,
-				'name' => __('status:main'),
-				'text' =>
-					$this->editor !== null && $this->editor !== ''
-						? __('status:main-applied-by', ['date' => $applied, 'editor' => $this->editor])
-						: __('status:main-applied', ['date' => $applied]),
-				'help' => __('status:main-help'),
-				'badge' => __($published ? 'status:online' : 'status:offline'),
-			],
+			$main,
 			[
 				'key' => 'draft',
 				'state' => $this->draft ? 'present' : 'none',

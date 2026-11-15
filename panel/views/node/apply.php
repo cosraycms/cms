@@ -18,6 +18,7 @@ use function Cosray\escape;
 $status = (array) u($status);
 $oob = (bool) (u($oob ?? null) ?? false);
 $published = (bool) ($status['visibility']['published'] ?? false);
+$routable = (bool) ($status['routable'] ?? true);
 $pending = ($status['mine'] ?? 'none') !== 'none' || (bool) ($status['draft'] ?? false);
 $conflict = ($status['mine'] ?? 'none') === 'conflict';
 $stages = array_column((array) ($status['stages'] ?? []), null, 'key');
@@ -38,7 +39,7 @@ $items = ['draft' => NodeStatus::icon('draft'), 'mine' => NodeStatus::icon('mine
 			data-apply-when="idle"
 			<?= $pending ? 'hidden' : '' ?>>
 			<?= Icon::render('cloud-upload') ?>
-			<?= escape(__('editor:publish')) ?>
+			<?= escape(__($routable ? 'editor:publish' : 'editor:activate')) ?>
 		</button>
 	<?php endif ?>
 	<div
@@ -72,8 +73,10 @@ $items = ['draft' => NodeStatus::icon('draft'), 'mine' => NodeStatus::icon('mine
 				data-action-menu
 				data-align="end">
 				<button type="submit" form="node-editor-form" name="apply" value="publish" data-editor-submit>
-					<span><?= escape(__('editor:apply-publish')) ?></span>
-					<span class="cms-node-apply-help"><?= escape(__('editor:apply-publish-help')) ?></span>
+					<span><?= escape(__($routable ? 'editor:apply-publish' : 'editor:apply-activate')) ?></span>
+					<span class="cms-node-apply-help"><?= escape(__(
+						$routable ? 'editor:apply-publish-help' : 'editor:apply-activate-help',
+					)) ?></span>
 				</button>
 			</div>
 		<?php endif ?>
@@ -106,7 +109,10 @@ $items = ['draft' => NodeStatus::icon('draft'), 'mine' => NodeStatus::icon('mine
 		</ul>
 		<p class="cms-popconfirm-note <?= $published ? 'is-online' : 'is-offline' ?>">
 			<?= Icon::render(NodeStatus::icon('main', $published ? 'published' : 'unpublished')) ?>
-			<span><?= escape(__($published ? 'editor:apply-online' : 'editor:apply-offline')) ?></span>
+			<span><?= escape(__(match (true) {
+				$routable => $published ? 'editor:apply-online' : 'editor:apply-offline',
+				default => $published ? 'editor:apply-active' : 'editor:apply-inactive',
+			})) ?></span>
 		</p>
 		<div class="cms-popconfirm-buttons">
 			<button type="button" class="cms-button cms-button-secondary" data-confirm-cancel>

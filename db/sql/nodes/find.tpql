@@ -12,11 +12,11 @@ SELECT
 	n.edited,
 	n.deleted,
 <?php if (isset($working) && $working && isset($autosave)) : ?>
-	coalesce(a.content, dr.content, n.content) AS content,
-	coalesce(dr.settings, '{}'::jsonb) AS draft_settings,
+	coalesce(a.content, CASE WHEN <?= $drafted ?? 'TRUE' ?> THEN dr.content END, n.content) AS content,
+	coalesce(CASE WHEN <?= $drafted ?? 'TRUE' ?> THEN dr.settings END, '{}'::jsonb) AS draft_settings,
 <?php elseif (isset($working) && $working) : ?>
-	coalesce(dr.content, n.content) AS content,
-	coalesce(dr.settings, '{}'::jsonb) AS draft_settings,
+	coalesce(CASE WHEN <?= $drafted ?? 'TRUE' ?> THEN dr.content END, n.content) AS content,
+	coalesce(CASE WHEN <?= $drafted ?? 'TRUE' ?> THEN dr.settings END, '{}'::jsonb) AS draft_settings,
 <?php else: ?>
 	n.content,
 <?php endif ?>
