@@ -7,10 +7,12 @@ namespace Cosray\Tests\Unit;
 use Celema\Core\Factory\Factory;
 use Celema\Verba\Translator;
 use Celema\Verba\Verba;
+use Cosray\Exception\RuntimeException;
 use Cosray\Locales;
 use Cosray\Middleware\PanelLocale;
 use Cosray\Tests\TestCase;
 use Cosray\User;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -116,6 +118,41 @@ final class PanelLocaleMiddlewareTest extends TestCase
 		new PanelLocale($this->config())->process($request, $handler);
 
 		$this->assertSame('de', $this->translator($handler)->locale);
+	}
+
+	/** @return array<string, array{string, array<string, mixed>, string}> */
+	public static function formatLocaleProvider(): array
+	{
+		return [
+			'browser region of the panel language' => ['en-GB,en;q=0.9', [], 'en_GB'],
+			'first tag with a region' => ['en,en-AU;q=0.9,en-GB;q=0.8', [], 'en_AU'],
+			'region of another language ignored' => ['de-AT,en;q=0.9', ['panel.locale' => 'en'], 'en'],
+			'configured region without a browser region' => ['en', ['panel.region' => 'gb'], 'en_GB'],
+			'browser region before the configured one' => ['en-AU', ['panel.region' => 'GB'], 'en_AU'],
+			'language default' => ['en', [], 'en'],
+		];
+	}
+
+	/** @param array<string, mixed> $settings */
+	#[DataProvider('formatLocaleProvider')]
+	public function testFormatLocaleAddsTheRegion(string $accepted, array $settings, string $expected): void
+	{
+		$handler = $this->handler();
+		$request = $this->panelRequest()->withHeader('Accept-Language', $accepted);
+
+		new PanelLocale($this->config($settings))->process($request, $handler);
+
+		$this->assertSame($expected, $handler->request?->getAttribute('formatLocale'));
+	}
+
+	public function testAnInvalidRegionIsAConfigurationError(): void
+	{
+		$this->expectException(RuntimeException::class);
+
+		new PanelLocale($this->config(['panel.region' => 'Great Britain']))->process(
+			$this->panelRequest()->withHeader('Accept-Language', 'en'),
+			$this->handler(),
+		);
 	}
 
 	public function testUnmatchedBrowserDefaultsToEnglish(): void

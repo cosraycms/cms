@@ -104,6 +104,7 @@ abstract class Panel
 				'systemUrl' => $this->permits('edit-users') ? $panelPath . '/users' : null,
 				'logo' => $this->logo(),
 				'localeId' => $localeId,
+				'formatLocale' => $this->formatLocale(),
 				'panelLocales' => $this->panelLocales(),
 				'account' => $this->account(),
 				'config' => $this->config,
@@ -264,6 +265,14 @@ abstract class Panel
 	protected function formData(): array
 	{
 		return Form::body($this->request);
+	}
+
+	/** The locale dates and numbers are formatted in, like `en_GB`; see Middleware\PanelLocale::format(). */
+	protected function formatLocale(): string
+	{
+		$locale = $this->request->get('formatLocale', null);
+
+		return is_string($locale) ? $locale : $this->localeId();
 	}
 
 	protected function localeId(): string

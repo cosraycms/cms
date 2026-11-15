@@ -321,6 +321,8 @@ Users have an email login and optional username without `@`. A subclass of [Cosr
 
 The panel speaks each language for which both its catalogs, `cosray` and `panel`, ship a file. It takes the language a user saved in the profile or the account menu, then the one chosen on the sign-in pages, kept in the cookie `{app.name}_panel_locale`, then `panel.locale`, then the browser's `Accept-Language`, then English. The sign-in pages offer the choice once there is more than one language.
 
+Dates, times, and numbers in the panel follow the panel language and a region. The region comes from the browser's first `Accept-Language` tag in that language, so `en-GB` gets day-first dates and a 24-hour clock in the English panel. Without one, `panel.region` applies, like `'panel.region' => 'GB'`; without that, the language's own default, which is the United States for English.
+
 ### User commands
 
 Users can also be managed from the console:

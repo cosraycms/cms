@@ -136,7 +136,7 @@ final class Collection extends Panel
 				meta: $lister->meta,
 				arranged: $listing['arranged'],
 				moved: $this->stringParam('moved'),
-				locale: $this->localeId(),
+				locale: $this->formatLocale(),
 				timezone: $this->config->app->timezone,
 				parentTitle: $parentTitle,
 				parentType: $parentNode === null
@@ -147,7 +147,7 @@ final class Collection extends Panel
 					? null
 					: CollectionTable::dots(
 						['published' => $parentNode->meta->published, 'stages' => $lister->stages($parentNode)],
-						$this->localeId(),
+						$this->formatLocale(),
 						$this->config->app->timezone,
 					),
 				createBlueprints: $parentNode === null ? null : $lister->childBlueprints($parentNode),

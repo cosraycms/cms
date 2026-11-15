@@ -53,6 +53,7 @@ final class Media extends Panel
 				'screen' => $screen,
 				'listing' => $listing,
 				'localeId' => $this->localeId(),
+				'formatLocale' => $this->formatLocale(),
 			];
 		}
 
@@ -111,6 +112,7 @@ final class Media extends Panel
 				page: $screen->page,
 			),
 			'localeId' => $this->localeId(),
+			'formatLocale' => $this->formatLocale(),
 		];
 	}
 
@@ -238,6 +240,7 @@ final class Media extends Panel
 		return [
 			'screen' => $screen,
 			'localeId' => $this->localeId(),
+			'formatLocale' => $this->formatLocale(),
 			'asset' => $row ? Asset::fromRow($row, $this->config) : null,
 			'usage' => $row ? new Usage($db)->forAsset($uid) : [],
 			'contentLocales' => $system['locales'],

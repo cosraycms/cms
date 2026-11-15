@@ -47,7 +47,7 @@ final class Index extends Panel
 	private function cards(Context $context, Dashboard $dashboard): array
 	{
 		$cards = [];
-		$formatter = new NumberFormatter($this->localeId(), NumberFormatter::DECIMAL);
+		$formatter = new NumberFormatter($this->formatLocale(), NumberFormatter::DECIMAL);
 		$formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, 0);
 		$formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, 0);
 
@@ -89,7 +89,7 @@ final class Index extends Panel
 		$links = new NodeUrls($this->panelPath(), 'dashboard');
 		$titles = new TitleResolver($types);
 		$date = new IntlDateFormatter(
-			$this->localeId(),
+			$this->formatLocale(),
 			IntlDateFormatter::MEDIUM,
 			IntlDateFormatter::NONE,
 			$this->config->app->timezone->getName(),
@@ -140,7 +140,7 @@ final class Index extends Panel
 								],
 						],
 					],
-					$this->localeId(),
+					$this->formatLocale(),
 					$this->config->app->timezone,
 				),
 			];

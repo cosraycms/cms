@@ -16,7 +16,7 @@ $blocked = u($blocked ?? null);
 $saved = (bool) ($saved ?? false);
 $locales = (array) u($contentLocales);
 $defaultLocale = (string) $defaultLocale;
-$locale = (string) ($localeId ?? 'en');
+$locale = (string) ($formatLocale ?? $localeId ?? 'en');
 $closeUrl = $screen->url(['file' => null]);
 ?>
 <div id="media-detail" class="cms-media-detail" data-media-detail="<?= escape($asset->uid ?? '') ?>">

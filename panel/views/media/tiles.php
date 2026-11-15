@@ -13,7 +13,7 @@ use function Cosray\escape;
 $screen = u($screen);
 $listing = u($listing);
 $picker = (bool) ($picker ?? false);
-$locale = (string) ($localeId ?? 'en');
+$locale = (string) ($formatLocale ?? $localeId ?? 'en');
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
 <?php foreach ($listing->assets as $asset): ?>

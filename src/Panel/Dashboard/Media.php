@@ -36,7 +36,7 @@ final readonly class Media implements DashboardCard
 
 	private function locale(): string
 	{
-		$locale = $this->request->get('panelLocale', 'en');
+		$locale = $this->request->get('formatLocale', null) ?? $this->request->get('panelLocale', 'en');
 
 		return is_string($locale) ? $locale : 'en';
 	}

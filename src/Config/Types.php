@@ -45,6 +45,7 @@ namespace Cosray\Config;
  *     'panel.logo': ?string,
  *     'panel.dashboard': bool,
  *     'panel.locale': ?string,
+ *     'panel.region': ?string,
  *     'panel.embed': list<string>,
  *
  *     'api.path': ?string,
@@ -121,6 +122,7 @@ namespace Cosray\Config;
  *     'panel.logo'?: null|string,
  *     'panel.dashboard'?: bool,
  *     'panel.locale'?: null|string,
+ *     'panel.region'?: null|string,
  *     'error.enabled'?: bool,
  *     'error.renderer'?: mixed,
  *     'error.trusted'?: list<class-string>,

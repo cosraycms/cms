@@ -9,6 +9,7 @@ use Celema\Verba\Verba;
 use Cosray\Config;
 use Cosray\Locales;
 use Cosray\User;
+use Locale as PhpLocale;
 use Override;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -22,7 +23,8 @@ use Psr\Http\Server\RequestHandlerInterface as Handler;
  * then English. Activates a translator for the chosen locale with the
  * remaining panel locales as fallback chain and restores the content
  * translator afterwards. The content locale attributes stay untouched, so
- * editing and serialization are unaffected.
+ * editing and serialization are unaffected. Dates and numbers follow the
+ * `formatLocale` attribute, see format().
  */
 class PanelLocale implements Middleware
 {
@@ -54,6 +56,7 @@ class PanelLocale implements Middleware
 			return $handler->handle(
 				$request
 					->withAttribute('panelLocale', $id)
+					->withAttribute('formatLocale', $this->format($request, $id))
 					->withAttribute('panelLocales', $available)
 					->withAttribute('translator', $translator),
 			);
@@ -152,6 +155,31 @@ class PanelLocale implements Middleware
 		}
 
 		return null;
+	}
+
+	/**
+	 * The locale dates and numbers are formatted in: the panel language with
+	 * the region of the browser's first tag in that language, so `en-GB`
+	 * gets British dates in the English panel, else with `panel.region`,
+	 * else the language's own default.
+	 */
+	protected function format(Request $request, string $language): string
+	{
+		if ((string) PhpLocale::getRegion($language) !== '') {
+			return $language;
+		}
+
+		foreach ($this->acceptedLanguages($request) as $tag) {
+			$region = (string) PhpLocale::getRegion($tag);
+
+			if ($region !== '' && strtolower((string) PhpLocale::getPrimaryLanguage($tag)) === strtolower($language)) {
+				return $language . '_' . strtoupper($region);
+			}
+		}
+
+		$region = $this->config->panel->region;
+
+		return $region === null ? $language : "{$language}_{$region}";
 	}
 
 	/** @return list<string> Language tags in descending quality order. */

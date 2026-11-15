@@ -1670,7 +1670,7 @@ final class Editor extends Panel
 		}
 
 		$formatter = new IntlDateFormatter(
-			$this->localeId(),
+			$this->formatLocale(),
 			IntlDateFormatter::MEDIUM,
 			$time,
 			$timezone,

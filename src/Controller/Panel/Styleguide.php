@@ -1423,7 +1423,7 @@ final class Styleguide extends Panel
 	 */
 	private function stageSamples(): array
 	{
-		$dates = NodeStatus::dates($this->localeId(), $this->config->app->timezone);
+		$dates = NodeStatus::dates($this->formatLocale(), $this->config->app->timezone);
 		// Revision 1 is the main version, 2 and 3 are drafts saved at these times.
 		$saved = [2 => '2026-08-11 22:30:00+00', 3 => '2026-08-11 22:40:00+00'];
 		$sample = static fn(bool $published, ?int $draft, ?int $base): array => NodeStatus::of(
@@ -1456,7 +1456,7 @@ final class Styleguide extends Panel
 	 */
 	private function rows(): array
 	{
-		$dates = NodeStatus::dates($this->localeId(), $this->config->app->timezone);
+		$dates = NodeStatus::dates($this->formatLocale(), $this->config->app->timezone);
 		$dots = static function (bool $published, ?string $draft, ?string $mine) use ($dates): array {
 			$stages = NodeStatus::of(
 				drafts: true,
