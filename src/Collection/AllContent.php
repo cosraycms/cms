@@ -29,8 +29,8 @@ final class AllContent implements Entries, Columns
 	public function columns(): array
 	{
 		return [
-			Column::new(__('collection:column-title'), 'title')->bold()->sort('title'),
-			Column::new(__('collection:column-type'), 'meta.name'),
+			Column::text(__('collection:column-title'), 'title')->bold()->sort('title'),
+			Column::text(__('collection:column-type'), 'meta.name'),
 			Column::editor(),
 			Column::created(),
 			Column::changed()->sort('changed', direction: 'desc', default: true),

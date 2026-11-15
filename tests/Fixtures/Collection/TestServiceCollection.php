@@ -22,7 +22,7 @@ final class TestServiceCollection implements Columns
 	public function columns(): array
 	{
 		return [
-			Column::new('Listed in ' . $this->config->app->timezone->getName(), 'title')->sort('title'),
+			Column::text('Listed in ' . $this->config->app->timezone->getName(), 'title')->sort('title'),
 		];
 	}
 }

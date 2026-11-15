@@ -15,7 +15,9 @@ final class ColumnTest extends TestCase
 {
 	public function testATextColumnResolvesItsValueAndStyles(): void
 	{
-		$column = Column::new('Computed', static fn(Wrapper $node): string => 'value')->bold()->italic();
+		$column = Column::text('Computed', static fn(Wrapper $node): string => 'value')
+			->bold()
+			->italic();
 
 		$this->assertSame('Computed', $column->title);
 		$this->assertSame(
@@ -26,8 +28,10 @@ final class ColumnTest extends TestCase
 
 	public function testKindFollowsTheColumnType(): void
 	{
-		$this->assertSame('text', Column::new('Text', 'title')->kind());
+		$this->assertSame('text', Column::text('Text', 'title')->kind());
+		$this->assertSame('number', Column::number('Amount', 'amount')->kind());
 		$this->assertSame('date', Column::date('Date', 'start')->kind());
+		$this->assertSame('datetime', Column::dateTime('Start', 'start')->kind());
 		$this->assertSame('user', Column::editor()->kind());
 		$this->assertSame('status', Column::status()->kind());
 	}
@@ -45,9 +49,22 @@ final class ColumnTest extends TestCase
 		$this->assertNull(Column::changed()->sort(null)->sort);
 	}
 
+	public function testASortWithoutFieldsOrdersAsTheColumnsKind(): void
+	{
+		$this->assertSame('text', Column::text('Name', 'name')->sort('name')->sort?->fields[0]->type);
+		$this->assertSame('numeric', Column::number('Amount', 'amount')->sort('amount')->sort?->fields[0]->type);
+		$this->assertSame('date', Column::date('Day', 'day')->sort('day')->sort?->fields[0]->type);
+		$this->assertSame('timestamptz', Column::dateTime('Start', 'start')->sort('start')->sort?->fields[0]->type);
+		$this->assertSame('text', Column::changed()->sort?->fields[0]->type);
+		$this->assertSame(
+			'text',
+			Column::number('Amount', 'amount')->sort('amount', ['amount'])->sort?->fields[0]->type,
+		);
+	}
+
 	public function testFluentSortSetter(): void
 	{
-		$column = Column::new('Title', 'title')
+		$column = Column::text('Title', 'title')
 			->sort(' title ');
 
 		$this->assertSame('title', $column->sort?->key);
@@ -55,8 +72,7 @@ final class ColumnTest extends TestCase
 
 	public function testNullSortDisablesSorting(): void
 	{
-		$column = Column::new('Title', 'title')
-			->sort('title')->sort(null);
+		$column = Column::text('Title', 'title')->sort('title')->sort(null);
 
 		$this->assertNull($column->sort);
 	}

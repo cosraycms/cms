@@ -14,6 +14,7 @@ use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
 use IntlDateFormatter;
+use NumberFormatter;
 use Stringable;
 use Throwable;
 
@@ -141,7 +142,7 @@ final class CollectionTable
 				'url' => $sort === null
 					? null
 					: $urls->collection(['sort' => $sort->key, 'dir' => $nextDir, 'offset' => '']),
-				'class' => $class,
+				'class' => trim($class . ($column->kind() === 'number' ? ' cms-list-col-number' : '')),
 				'kind' => $column->kind(),
 				'ariaSort' => $ariaSort,
 				'lead' => !$lead,
@@ -325,6 +326,12 @@ final class CollectionTable
 				$classes[] = 'is-italic';
 			}
 
+			$kind = $header['kind'] ?? 'text';
+
+			if ($kind === 'number') {
+				$classes[] = 'cms-list-col-number';
+			}
+
 			$value = $column['value'] ?? '';
 			$look = $header !== null && $header['kind'] === 'user' ? $header['look'] : 'name';
 			// The first column links the entry by its name alone.
@@ -332,12 +339,7 @@ final class CollectionTable
 
 			$cells[] = [
 				'label' => $label,
-				'value' => self::displayValue(
-					$value,
-					$header !== null && $header['kind'] === 'date',
-					$locale,
-					$timezone,
-				),
+				'value' => self::displayValue($value, $kind, $locale, $timezone),
 				'class' => implode(' ', $classes),
 				'editUrl' => $lead && $uid !== '' ? $urls->edit($uid) : null,
 				'lead' => $lead,
@@ -524,12 +526,21 @@ final class CollectionTable
 
 	private static function displayValue(
 		mixed $value,
-		bool $date,
+		string $kind,
 		string $locale,
 		DateTimeZone $timezone,
 	): string {
+		$date = $kind === 'date' || $kind === 'datetime';
+		$time = $kind === 'datetime';
+
+		$numeric = is_int($value) || is_float($value) || is_string($value) && is_numeric(trim($value));
+
+		if ($kind === 'number' && $numeric) {
+			return self::formatNumber($value, $locale);
+		}
+
 		if ($date && $value instanceof DateTimeInterface) {
-			$formatted = self::formatDate($value, $locale, $timezone);
+			$formatted = self::formatDate($value, $locale, $timezone, $time);
 
 			if ($formatted !== null) {
 				return $formatted;
@@ -546,6 +557,7 @@ final class CollectionTable
 						new DateTimeImmutable($value, $timezone),
 						$locale,
 						$timezone,
+						$time,
 					);
 
 					if ($formatted !== null) {
@@ -578,16 +590,44 @@ final class CollectionTable
 		DateTimeInterface $value,
 		string $locale,
 		DateTimeZone $timezone,
+		bool $time,
 	): ?string {
 		$formatter = new IntlDateFormatter(
 			$locale,
 			IntlDateFormatter::MEDIUM,
-			IntlDateFormatter::SHORT,
+			$time ? IntlDateFormatter::SHORT : IntlDateFormatter::NONE,
 			$timezone,
 		);
 		$formatted = $formatter->format($value->getTimestamp());
 
 		return $formatted === false ? null : $formatted;
+	}
+
+	/**
+	 * Groups the integer digits and swaps in the locale's symbols, keeping
+	 * every decimal of a stored string, which a float would round.
+	 */
+	private static function formatNumber(int|float|string $value, string $locale): string
+	{
+		$formatter = new NumberFormatter($locale, NumberFormatter::DECIMAL);
+
+		if (!is_string($value)) {
+			$formatted = $formatter->format($value);
+
+			return $formatted === false ? (string) $value : $formatted;
+		}
+
+		if (preg_match('/^([+-]?)(\d+)(?:\.(\d+))?$/D', trim($value), $parts) !== 1 || strlen($parts[2]) > 15) {
+			return trim($value);
+		}
+
+		$integer = $formatter->format((int) $parts[2]);
+		$sign = $parts[1] === '-' ? $formatter->getSymbol(NumberFormatter::MINUS_SIGN_SYMBOL) : '';
+		$fraction = ($parts[3] ?? '') === ''
+			? ''
+			: $formatter->getSymbol(NumberFormatter::DECIMAL_SEPARATOR_SYMBOL) . $parts[3];
+
+		return $integer === false ? trim($value) : $sign . $integer . $fraction;
 	}
 
 	/** @return list<string> */

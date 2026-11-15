@@ -207,15 +207,17 @@ The factory decides what a column shows:
 
 | Factory | Shows |
 | --- | --- |
-| `Column::new($title, $field)` | a field, a meta value like `meta.name`, or a closure's result, as text |
-| `Column::date($title, $field)` | the same, formatted as a date |
+| `Column::text($title, $field)` | a field, a meta value like `meta.name`, or a closure's result, as text |
+| `Column::number($title, $field)` | the same as a number, right-aligned |
+| `Column::date($title, $field)` | the same as a date |
+| `Column::dateTime($title, $field)` | the same as a date and time |
 | `Column::changed()`, `Column::created()` | when the entry was last changed or created, sortable latest first |
 | `Column::editor()`, `Column::creator()`, `Column::user()` | a [user](#user-columns) |
 | `Column::status()` | the entry's [stages](#status-columns) |
 
-`changed()`, `created()`, `editor()` and `creator()` take an optional title and default to a translated heading. Text, date and user columns take `bold()` and `italic()`.
+`changed()`, `created()`, `editor()` and `creator()` take an optional title and default to a translated heading. Text, number, date and user columns take `bold()` and `italic()`. Numbers, dates and times follow the panel language and the user's region, see [users, roles and permissions](application.md#users-roles-and-permissions); a number keeps every decimal it was stored with.
 
-A column declares its own allowed sort key, order fields, and initial direction. Without `fields`, the key is also the order field. Without `direction`, the initial direction is ascending. `default: true` makes a column's sort the listing's initial order; without a flagged sort, the listing starts in the first sortable column's order:
+A column declares its own allowed sort key, order fields, and initial direction. Without `fields`, the key is also the order field, ordered as the column's kind: numerically in a number column, by date or instant in a date or date-time column, and as text otherwise. Meta values like `meta.created` keep their native order. Without `direction`, the initial direction is ascending. `default: true` makes a column's sort the listing's initial order; without a flagged sort, the listing starts in the first sortable column's order:
 
 ```php
 use Cosray\Column;
@@ -225,7 +227,7 @@ use Cosray\Node\Wrapper;
 public function columns(): array
 {
     return [
-        Column::new(__('Name'), static fn(Wrapper $node): string =>
+        Column::text(__('Name'), static fn(Wrapper $node): string =>
             $node->lastName . ', ' . $node->firstName
         )->bold()->sort('name', fields: ['lastName', 'firstName']),
         Column::changed()->sort('changed', direction: 'desc', default: true),
@@ -236,15 +238,13 @@ public function columns(): array
 
 Both fields in a compound sort follow the selected direction. UID ascending is appended as a unique final tie-breaker, not offered as a default user-facing sort. This makes pagination deterministic for unchanged data with equal names or dates.
 
-Declare numeric and date semantics explicitly for custom fields. Plain field strings sort as text; formatting a column as a date does not change its database ordering:
+A number, date or date-time column orders by its kind on its own; explicit fields declare other orders, like a text column of numbers or a compound sort:
 
 ```php
-Column::new(__('Amount'), 'amount')
-    ->sort('amount', fields: [SortField::number('amount')]);
-Column::date(__('Publication date'), 'date')
-    ->sort('date', fields: [SortField::date('date')], direction: 'desc');
-Column::date(__('Start'), 'start')
-    ->sort('start', fields: [SortField::dateTime('start')], direction: 'desc');
+Column::number(__('Amount'), 'amount')->sort('amount');
+Column::date(__('Publication date'), 'date')->sort('date', direction: 'desc');
+Column::dateTime(__('Start'), 'start')->sort('start', direction: 'desc');
+Column::text(__('Code'), 'code')->sort('code', fields: [SortField::number('code')]);
 ```
 
 #### User columns
@@ -274,7 +274,7 @@ public function columns(): array
 {
     return [
         Column::status(Stage::Main)->title(''),
-        Column::new(__('Title'), 'title')->bold()->sort('title'),
+        Column::text(__('Title'), 'title')->bold()->sort('title'),
         Column::changed(),
         Column::status(Stage::Draft, Stage::Mine)->title(__('Changes'))->dots(),
     ];

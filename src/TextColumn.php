@@ -13,7 +13,7 @@ use Override;
 
 /**
  * A listing column of a field, a node's meta value like `meta.created`, or
- * a closure's result, made by Column::new().
+ * a closure's result, made by Column::text().
  */
 class TextColumn extends Column
 {
@@ -43,7 +43,8 @@ class TextColumn extends Column
 	}
 
 	/**
-	 * @param non-empty-list<string|SortField>|null $fields
+	 * @param non-empty-list<string|SortField>|null $fields Without them, the
+	 *        key is the order field, ordered as the column's kind
 	 * @param bool $default Whether the listing starts in this order; without
 	 *                      a flagged column it starts in the first sortable one
 	 */
@@ -53,9 +54,23 @@ class TextColumn extends Column
 		string $direction = 'asc',
 		bool $default = false,
 	): static {
-		$this->sort = $key === null ? null : new Sort(trim($key), $fields, $direction, $default);
+		$this->sort = $key === null
+			? null
+			: new Sort(trim($key), $fields ?? [$this->sortField(trim($key))], $direction, $default);
 
 		return $this;
+	}
+
+	/** How the column orders by a key it was given without fields. */
+	protected function sortField(string $key): string|SortField
+	{
+		return $key;
+	}
+
+	/** Whether the column shows a meta value, which orders by its native type. */
+	protected function meta(): bool
+	{
+		return is_string($this->field) && str_starts_with($this->field, 'meta.');
 	}
 
 	#[Override]

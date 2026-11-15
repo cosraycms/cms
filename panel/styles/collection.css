@@ -445,6 +445,12 @@
 		}
 	}
 
+	& :is(th, .cms-list-cell).cms-list-col-number {
+		justify-content: flex-end;
+		font-variant-numeric: tabular-nums;
+		text-align: right;
+	}
+
 	/*
 	 * The selection column joins the pinned title: the checkbox pins at the
 	 * left edge and the title cell moves its pin right by the fixed column
@@ -796,6 +802,11 @@
 
 		& .cms-list-value {
 			white-space: normal;
+		}
+
+		& .cms-list-cell.cms-list-col-number {
+			justify-content: normal;
+			text-align: start;
 		}
 
 		& .cms-list-title {

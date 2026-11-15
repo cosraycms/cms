@@ -8,7 +8,6 @@ use Cosray\Column;
 use Cosray\Contract\Columns;
 use Cosray\Contract\Entries;
 use Cosray\Finder\Nodes;
-use Cosray\Finder\SortField;
 use Cosray\Node\Wrapper;
 use Cosray\Schema\Handle;
 use Cosray\Schema\Label;
@@ -29,14 +28,10 @@ final class TestSortedCollection implements Columns, Entries
 	{
 		$this->columnsCalls++;
 		return [
-			Column::new('Name', static fn(Wrapper $node): string => $node->lastName . ', ' . $node->firstName)
+			Column::text('Name', static fn(Wrapper $node): string => $node->lastName . ', ' . $node->firstName)
 				->sort('name', fields: ['lastName', 'firstName'], default: true),
-			Column::new('Amount', 'amount')->sort('amount', fields: [SortField::number('amount')]),
-			Column::date('Start', 'start')->sort(
-				'start',
-				fields: [SortField::dateTime('start')],
-				direction: 'desc',
-			),
+			Column::number('Amount', 'amount')->sort('amount'),
+			Column::dateTime('Start', 'start')->sort('start', direction: 'desc'),
 			Column::created('Created'),
 			Column::editor(),
 		];

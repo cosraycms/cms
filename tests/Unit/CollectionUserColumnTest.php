@@ -29,7 +29,7 @@ final class CollectionUserColumnTest extends TestCase
 	public function testAUserShowsAsAvatarAndName(): void
 	{
 		$ann = new Avatar(5, 'Ann Lee', 'ann', 'ann@example.com');
-		$table = $this->table([Column::new('Title', 'title'), $this->column($ann)]);
+		$table = $this->table([Column::text('Title', 'title'), $this->column($ann)]);
 		$cell = $table->rows[0]['cells'][1];
 
 		$this->assertSame($ann->array(), $cell['avatar']);
@@ -40,7 +40,7 @@ final class CollectionUserColumnTest extends TestCase
 	public function testAvatarShowsTheAvatarAlone(): void
 	{
 		$ann = new Avatar(5, 'Ann Lee', 'ann', 'ann@example.com');
-		$table = $this->table([Column::new('Title', 'title'), $this->column($ann)->avatar()]);
+		$table = $this->table([Column::text('Title', 'title'), $this->column($ann)->avatar()]);
 		$cell = $table->rows[0]['cells'][1];
 
 		$this->assertSame($ann->array(), $cell['avatar']);
@@ -50,7 +50,7 @@ final class CollectionUserColumnTest extends TestCase
 	public function testNameShowsTheNameAlone(): void
 	{
 		$table = $this->table([
-			Column::new('Title', 'title'),
+			Column::text('Title', 'title'),
 			$this
 				->column(new Avatar(5, 'Ann Lee', 'ann', 'ann@example.com'))
 				->name()
@@ -76,7 +76,7 @@ final class CollectionUserColumnTest extends TestCase
 			'changed' => '2024-01-01T00:00:00+00:00',
 			'deleted' => null,
 		]);
-		$table = $this->table([Column::new('Title', 'title'), Column::user('Owner', static fn(): User => $user)]);
+		$table = $this->table([Column::text('Title', 'title'), Column::user('Owner', static fn(): User => $user)]);
 
 		$this->assertSame($user->avatar()->array(), $table->rows[0]['cells'][1]['avatar']);
 	}
@@ -93,7 +93,7 @@ final class CollectionUserColumnTest extends TestCase
 
 	public function testUserColumnsOfferNoSort(): void
 	{
-		$table = $this->table([Column::new('Title', 'title')->sort('title'), Column::editor()]);
+		$table = $this->table([Column::text('Title', 'title')->sort('title'), Column::editor()]);
 
 		$this->assertNull($table->headers[1]['url']);
 	}

@@ -43,8 +43,8 @@ final class CollectionStatusColumnTest extends TestCase
 	{
 		$collection = new StatusColumnTestCollection();
 		$collection->configured = [
-			Column::new('Title', 'title')->sort('title'),
-			Column::new('Changed', 'meta.changed'),
+			Column::text('Title', 'title')->sort('title'),
+			Column::text('Changed', 'meta.changed'),
 		];
 		$columns = $this->listing($collection)->columns;
 
@@ -52,7 +52,7 @@ final class CollectionStatusColumnTest extends TestCase
 		$this->assertInstanceOf(StatusColumn::class, $columns[1]);
 
 		$placed = Column::status(Stage::Main);
-		$collection->configured = [$placed, Column::new('Title', 'title')->sort('title')];
+		$collection->configured = [$placed, Column::text('Title', 'title')->sort('title')];
 
 		$this->assertSame($placed, $this->listing($collection)->columns[0]);
 		$this->assertCount(2, $this->listing($collection)->columns);
@@ -63,7 +63,7 @@ final class CollectionStatusColumnTest extends TestCase
 		$table = $this->table(
 			[
 				Column::status(Stage::Main),
-				Column::new('Title', 'title'),
+				Column::text('Title', 'title'),
 				Column::status(Stage::Draft, Stage::Mine),
 			],
 			draft: true,
@@ -81,7 +81,7 @@ final class CollectionStatusColumnTest extends TestCase
 	{
 		$table = $this->table([
 			Column::status(Stage::Draft),
-			Column::new('Title', 'title'),
+			Column::text('Title', 'title'),
 			Column::status(Stage::Main),
 		]);
 		$cells = $table->rows[0]['cells'];
@@ -92,7 +92,7 @@ final class CollectionStatusColumnTest extends TestCase
 
 	public function testStagesRunUpToTheLastThatHoldsSomething(): void
 	{
-		$columns = [Column::new('Title', 'title'), Column::status()];
+		$columns = [Column::text('Title', 'title'), Column::status()];
 		$alone = $this->table($columns)->rows[0]['cells'][1]['status'] ?? [];
 		$mine = $this->table($columns, mine: true)->rows[0]['cells'][1]['status'] ?? [];
 
@@ -107,7 +107,7 @@ final class CollectionStatusColumnTest extends TestCase
 	public function testFixedColumnsShowEveryStage(): void
 	{
 		$cells = $this->table([
-			Column::new('Title', 'title'),
+			Column::text('Title', 'title'),
 			Column::status()->fixed(),
 			Column::status(Stage::Draft, Stage::Mine),
 		])->rows[0]['cells'];
@@ -119,7 +119,7 @@ final class CollectionStatusColumnTest extends TestCase
 	public function testARecordsSavedStateIsItsMainVersion(): void
 	{
 		$cells = $this->table([
-			Column::new('Title', 'title'),
+			Column::text('Title', 'title'),
 			Column::status(Stage::Main),
 		], record: true)->rows[0]['cells'];
 
@@ -129,7 +129,7 @@ final class CollectionStatusColumnTest extends TestCase
 	public function testARecordKeepsTheDraftSlotBesideNodes(): void
 	{
 		$status = $this->table(
-			[Column::new('Title', 'title'), Column::status()],
+			[Column::text('Title', 'title'), Column::status()],
 			record: true,
 			mine: true,
 		)->rows[0]['cells'][1]['status'] ?? [];
@@ -143,10 +143,10 @@ final class CollectionStatusColumnTest extends TestCase
 
 	public function testRecordsAloneHaveNoDraftSlot(): void
 	{
-		$columns = [Column::new('Title', 'title'), Column::status()];
+		$columns = [Column::text('Title', 'title'), Column::status()];
 		$table = $this->table($columns, record: true, mine: true, drafts: false);
 		$fixed = $this->table(
-			[Column::new('Title', 'title'), Column::status()->fixed()],
+			[Column::text('Title', 'title'), Column::status()->fixed()],
 			record: true,
 			drafts: false,
 		);

@@ -424,7 +424,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$column = Column::new('Title', 'title');
+		$column = Column::text('Title', 'title');
 		$row = $column->get($this->factory->proxy($node, $this->context));
 
 		$this->assertSame('Class Attribute Title', $row['value']);
@@ -444,7 +444,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		);
 
-		$column = Column::new('Title', 'title');
+		$column = Column::text('Title', 'title');
 		$row = $column->get($this->factory->proxy($node, $this->context));
 
 		$this->assertSame('Property Attribute Title', $row['value']);

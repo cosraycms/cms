@@ -19,7 +19,7 @@ final class TestStatusColumnsCollection implements Columns
 	{
 		return [
 			Column::status(Stage::Main)->title(''),
-			Column::new('Title', 'title')->bold(true)->sort('title'),
+			Column::text('Title', 'title')->bold(true)->sort('title'),
 			Column::status(Stage::Draft, Stage::Mine)->title('Changes')->dots(),
 		];
 	}

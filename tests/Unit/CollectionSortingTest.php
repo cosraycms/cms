@@ -46,8 +46,8 @@ final class CollectionSortingTest extends TestCase
 	{
 		$collection = new SortingTestCollection();
 		$collection->configured = [
-			Column::new('Title', 'title')->sort('title'),
-			Column::new('Again', 'title')->sort('title'),
+			Column::text('Title', 'title')->sort('title'),
+			Column::text('Again', 'title')->sort('title'),
 		];
 		$this->expectExceptionMessage("Duplicate collection sort key 'title'");
 		$this->listing($collection)->list();
@@ -57,16 +57,16 @@ final class CollectionSortingTest extends TestCase
 	{
 		yield 'flagged column' => [
 			[
-				Column::new('Title', 'title')->sort('title'),
-				Column::new('Changed', 'meta.changed')->sort('changed', direction: 'desc', default: true),
+				Column::text('Title', 'title')->sort('title'),
+				Column::text('Changed', 'meta.changed')->sort('changed', direction: 'desc', default: true),
 			],
 			'changed',
 		];
 		yield 'first sortable column' => [
 			[
 				Column::editor(),
-				Column::new('Name', 'title')->sort('name', ['title']),
-				Column::new('Changed', 'meta.changed')->sort('changed', direction: 'desc'),
+				Column::text('Name', 'title')->sort('name', ['title']),
+				Column::text('Changed', 'meta.changed')->sort('changed', direction: 'desc'),
 			],
 			'name',
 		];
@@ -84,8 +84,8 @@ final class CollectionSortingTest extends TestCase
 	{
 		$collection = new SortingTestCollection();
 		$collection->configured = [
-			Column::new('Title', 'title')->sort('title', default: true),
-			Column::new('Changed', 'meta.changed')->sort('changed', default: true),
+			Column::text('Title', 'title')->sort('title', default: true),
+			Column::text('Changed', 'meta.changed')->sort('changed', default: true),
 		];
 		$this->expectExceptionMessage("Only one collection sort can be the default, found 'title', 'changed'");
 		$this->listing($collection)->list();
@@ -94,7 +94,7 @@ final class CollectionSortingTest extends TestCase
 	public function testUnsortableListingsFailBeforeQuerying(): void
 	{
 		$collection = new SortingTestCollection();
-		$collection->configured = [Column::new('Title', 'title')];
+		$collection->configured = [Column::text('Title', 'title')];
 		$this->expectExceptionMessage('Collection listings need at least one sortable column');
 		$this->listing($collection)->list();
 	}
@@ -112,7 +112,7 @@ final class CollectionSortingTest extends TestCase
 		string $message,
 	): void {
 		$collection = new SortingTestCollection();
-		$collection->configured = [Column::new('Title', 'title')->sort('title')];
+		$collection->configured = [Column::text('Title', 'title')->sort('title')];
 		$this->expectExceptionMessage($message);
 		$this->listing($collection)->list(sort: $sort, dir: $direction);
 	}
@@ -150,9 +150,9 @@ final class CollectionSortingTest extends TestCase
 	public function testHeadersUseExplicitSortDefinitionsAndResetOffset(): void
 	{
 		$columns = [
-			Column::new('Title', 'title')->sort('title'),
-			Column::new('Changed', 'meta.changed')->sort('changed', direction: 'desc'),
-			Column::new('Unsorted title', 'title')->sort('title')->sort(null),
+			Column::text('Title', 'title')->sort('title'),
+			Column::text('Changed', 'meta.changed')->sort('changed', direction: 'desc'),
+			Column::text('Unsorted title', 'title')->sort('title')->sort(null),
 		];
 		$urls = new CollectionUrls(
 			'/panel',

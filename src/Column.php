@@ -11,7 +11,7 @@ use Cosray\User\Avatar;
 
 /**
  * A listing column of a collection. The factories pick its kind: text,
- * date, user or status.
+ * number, date, date and time, user, or status.
  */
 abstract class Column
 {
@@ -19,9 +19,15 @@ abstract class Column
 	public protected(set) ?Sort $sort = null;
 
 	/** @param string|Closure(Wrapper): mixed $field */
-	public static function new(string $title, string|Closure $field): TextColumn
+	public static function text(string $title, string|Closure $field): TextColumn
 	{
 		return new TextColumn($title, $field);
+	}
+
+	/** @param string|Closure(Wrapper): mixed $field */
+	public static function number(string $title, string|Closure $field): NumberColumn
+	{
+		return new NumberColumn($title, $field);
 	}
 
 	/** @param string|Closure(Wrapper): mixed $field */
@@ -30,10 +36,16 @@ abstract class Column
 		return new DateColumn($title, $field);
 	}
 
+	/** @param string|Closure(Wrapper): mixed $field */
+	public static function dateTime(string $title, string|Closure $field): DateColumn
+	{
+		return new DateColumn($title, $field, time: true);
+	}
+
 	/** When the entry was last changed, latest first when sorted by it. */
 	public static function changed(?string $title = null): DateColumn
 	{
-		return new DateColumn($title ?? __('collection:column-changed'), 'meta.changed')->sort(
+		return new DateColumn($title ?? __('collection:column-changed'), 'meta.changed', time: true)->sort(
 			'changed',
 			direction: 'desc',
 		);
@@ -42,7 +54,7 @@ abstract class Column
 	/** When the entry was created, latest first when sorted by it. */
 	public static function created(?string $title = null): DateColumn
 	{
-		return new DateColumn($title ?? __('collection:column-created'), 'meta.created')->sort(
+		return new DateColumn($title ?? __('collection:column-created'), 'meta.created', time: true)->sort(
 			'created',
 			direction: 'desc',
 		);
@@ -84,7 +96,7 @@ abstract class Column
 	public static function defaults(): array
 	{
 		return [
-			self::new(__('collection:column-title'), 'title')->bold()->sort('title'),
+			self::text(__('collection:column-title'), 'title')->bold()->sort('title'),
 			self::changed(),
 		];
 	}
