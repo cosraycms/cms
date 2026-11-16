@@ -24,6 +24,7 @@ use Cosray\Commands\CleanMedia;
 use Cosray\Commands\CreateToken;
 use Cosray\Commands\CreateUser;
 use Cosray\Commands\DeactivateUser;
+use Cosray\Commands\ExportTexts;
 use Cosray\Commands\Fulltext;
 use Cosray\Commands\ListenQueue;
 use Cosray\Commands\ListFailedJobs;
@@ -99,6 +100,7 @@ final class Commands
 			WarmMedia::class => fn(): WarmMedia => new WarmMedia($app->config, new Database($this->conn())),
 			RecreateSortIndex::class,
 			Titles::class,
+			ExportTexts::class,
 			SyncPublications::class => fn(): SyncPublications => new SyncPublications(
 				Publications::of($app->container(), new Database($this->conn())),
 			),

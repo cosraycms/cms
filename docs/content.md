@@ -415,6 +415,32 @@ Every write through `Node\Store` records what it did in `events`, one row per ac
 
 A content migration that changes the shape of stored content rewrites every revision, the main versions they materialize and the users' unsaved edits together, through the internal [Migration\Content](../src/Migration/Content.php) helper, which keeps the dates and records no event. Nodes are created through the store, which writes the revision, the publication row and the event a raw `INSERT` would miss.
 
+## Reading and editing texts
+
+[Text\Texts](../src/Text/Texts.php) reads the texts of the nodes a finder query selects: text and textarea values and rich text paragraphs and headings, also inside block and entry rows, of the fields a node's type declares and whose `#[When]` conditions hold. Code and iframe fields are left out. Each [Text](../src/Text/Text.php) carries its node's title and path in its locale, and a JSON pointer to where its value is stored:
+
+```php
+foreach ($texts->of($cms->nodes->types('beer', 'news')->published(true)) as $text) {
+    $text->id; $text->node; $text->type; $text->title; $text->path;
+    $text->field; $text->locale; $text->pointer; $text->value;
+}
+```
+
+Any finder query works: one node with `only($uid)`, a full-text search, a collection's entries. Nodes are read one at a time. `Text::id()` hashes node, field, locale, text and the text's occurrence among equal texts in its field, so an id that no longer resolves means the text changed or is gone.
+
+`php run texts:export --out=texts.jsonl` writes the texts of all published nodes as JSON lines with the keys `id`, `node`, `type`, `title`, `path`, `field`, `locale`, `pointer` and `text`. `--type` selects type handles and `--exclude` leaves them out; both repeat. Translation, accessibility or tone checks and agents that work on a site's texts read this file.
+
+[Text\Edits](../src/Text/Edits.php) opens a node's working copy to change its texts:
+
+```php
+$edit = $edits->open($uid);                         // null when the node is gone
+$current = $edit->text($pointer);                   // null once the field or row is gone
+$edit->replace($pointer, $start, $end, 'Golden');   // code points; keeps rich text marks
+$edit->save($actor, cause: ['source' => 'acme-proofreader', 'check' => $id]);
+```
+
+`save()` stores the change where the panel saves an edit: into the working copy of a type with drafts, else into the main version, and the history records the cause. An editor with unsaved edits of the node sees them as edits on an outdated state, as after another editor's save. Open the node again after a save to change it further. Neither service checks permissions; each caller checks them for its user, a panel route with `#[Permission]`, an API endpoint or a console command for whoever runs it.
+
 ## Menus
 
 `$cms->menu('main')` returns an iterable [Finder\Menu](../src/Finder/Menu.php); `html($class, $tag)` returns the escaped nested markup as `Cosray\Markup`. An existing empty menu renders nothing; an unknown handle raises an error.

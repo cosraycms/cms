@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
+use Cosray\Actor;
+use Cosray\Cms;
+use Cosray\Config;
+use Cosray\Context;
+use Cosray\Field\Services;
 use Cosray\Field\Text;
+use Cosray\Locales;
 use Cosray\Tests\End2EndTestCase;
+use Cosray\Text\Edits;
 
 /**
  * The editor's autosave: kept beside the node, back in the editor when it
@@ -167,6 +174,31 @@ final class PanelEditorAutosaveTest extends End2EndTestCase
 		)->run();
 
 		$this->assertHtmlNodeExists("//*[@data-state='conflict']", $this->editor('autosave-foreign'));
+	}
+
+	public function testATextEditSavedMeanwhileMakesCurrentEditsAConflict(): void
+	{
+		$this->createPage('autosave-text-edit', 'Live');
+		$this->autosave('autosave-text-edit', 'Edited');
+		$this->assertHtmlNodeMissing("//*[@data-state='conflict']", $this->editor('autosave-text-edit'));
+
+		$container = $this->app->container();
+		$context = Context::console(
+			$this->db(),
+			$container->get(Config::class),
+			$container,
+			$this->factory(),
+			$container->get(Locales::class),
+		);
+		$services = Services::withDefaults();
+		$edit = new Edits($context, new Cms($context, $services), $services->types)->open('autosave-text-edit');
+		$this->assertNotNull($edit);
+		$edit->replace('/title/value/en', 0, 4, 'Golden');
+		$edit->save(new Actor(1), ['source' => 'test']);
+
+		// As after another editor's save: the edits stay and the editor reports the conflict.
+		$this->assertSame('Edited', $this->autosavedTitle('autosave-text-edit'));
+		$this->assertHtmlNodeExists("//*[@data-state='conflict']", $this->editor('autosave-text-edit'));
 	}
 
 	public function testASaveOnAnOutdatedStateIsRefusedUnlessForced(): void

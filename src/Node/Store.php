@@ -207,6 +207,31 @@ class Store
 		$this->saveMain($node, $data, $locales, $actor, $cause);
 	}
 
+	/**
+	 * Saves changed content where the panel saves an edit: into the working
+	 * copy of a type with drafts, else into the main version. The node,
+	 * read with its working copy, supplies handle, paths and publication.
+	 *
+	 * @param array<string, mixed> $content
+	 * @param array<string, mixed> $cause what the event records as the cause
+	 */
+	public function amend(object $node, array $content, Locales $locales, Actor $actor, array $cause = []): void
+	{
+		$data = $this->workingData(
+			$node,
+			['content' => $content, 'settings' => []],
+			published: (bool) Factory::meta($node, 'published'),
+		);
+
+		if ($this->holdsDrafts($node)) {
+			$this->saveDraft($node, $data, $locales, $actor, cause: $cause);
+
+			return;
+		}
+
+		$this->saveMain($node, $data, $locales, $actor, $cause);
+	}
+
 	/** Publishes the node or withdraws it, leaving its content and working copy alone. */
 	public function published(object $node, bool $published, Actor $actor): void
 	{
