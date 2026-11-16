@@ -72,7 +72,7 @@ final class Button implements Block { /* … */ }
 // In the plugin's register():
 $cms->templates(__DIR__ . '/panel');
 $cms->assets(__DIR__ . '/panel/assets');
-$cms->css("{$cms->config->panel->path}/vendor/acme-button/button.css");
+$cms->css('button.css');
 ```
 
 ```php

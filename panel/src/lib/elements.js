@@ -1,4 +1,4 @@
-import { assetsBase, panelBase } from './runtime.js';
+import { assetsBase } from './runtime.js';
 
 /** @type {Map<string, Promise<unknown>>} */
 const modules = new Map();
@@ -10,7 +10,7 @@ const modules = new Map();
  *   plugin id), a module from the package's `src/elements/`.
  * - `https?://...` — used as-is.
  * - anything else — `{pluginId}/{file}`, served from the plugin's
- *   asset dir under the panel vendor route.
+ *   asset dir under the panel revision.
  *
  * @param {string} module
  * @returns {string}
@@ -24,7 +24,7 @@ export function moduleUrl(module) {
 		return module;
 	}
 
-	return `${panelBase()}vendor/${module}`;
+	return `${assetsBase()}plugins/${module}`;
 }
 
 /**

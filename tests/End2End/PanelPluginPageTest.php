@@ -39,8 +39,9 @@ final class PanelPluginPageTest extends End2EndTestCase
 		$this->assertStringContainsString('Test Plugin', $html);
 		$this->assertStringContainsString('href="/panel/test-plugin"', $html);
 		$this->assertStringContainsString('aria-current="page"', $html);
-		// Injected plugin stylesheet is linked from the chrome.
-		$this->assertStringContainsString('/panel/vendor/test-plugin/theme.css', $html);
+		// A relative stylesheet is served under the panel revision, a URL as it is.
+		$this->assertMatchesRegularExpression('~href="/panel/assets/[0-9a-z]+/plugins/test-plugin/theme\.css"~', $html);
+		$this->assertStringContainsString('href="/panel/vendor/test-plugin/theme.css"', $html);
 	}
 
 	public function testAPluginEntryJoinsTheSystemRailOfUsersWithItsPermission(): void
@@ -135,6 +136,21 @@ final class PanelPluginPageTest extends End2EndTestCase
 		$response = $this->makeRequest('GET', '/panel/test-plugin');
 
 		$this->assertSame(303, $response->getStatusCode());
+	}
+
+	public function testPluginAssetsAreServedUnderTheRevision(): void
+	{
+		$this->authenticateAs('editor');
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/test-plugin'));
+		preg_match('~href="(/panel/assets/[0-9a-z]+/plugins/test-plugin/theme\.css)"~', $html, $match);
+
+		$css = $this->makeRequest('GET', $match[1] ?? '');
+		$this->assertResponseOk($css);
+		$this->assertStringContainsString('immutable', $css->getHeaderLine('Cache-Control'));
+		$this->assertSame(
+			404,
+			$this->makeRequest('GET', '/panel/assets/dev/plugins/test-plugin/../TestPlugin.php')->getStatusCode(),
+		);
 	}
 
 	public function testPluginVendorAssetsAreServed(): void

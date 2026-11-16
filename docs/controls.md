@@ -262,7 +262,7 @@ Named controls resolve server-side; later registrations replace earlier ones, in
 
 | Form | Resolution |
 | --- | --- |
-| `{pluginId}/{file}` | Plugin asset directory; Registrar prefixes its ID automatically |
+| `{pluginId}/{file}` | Plugin asset directory, served under the panel revision; Registrar prefixes its ID automatically |
 | `cosray:{entry}` | Built-in panel element from `panel/src/elements/` |
 | `https?://...` | Used as supplied |
 

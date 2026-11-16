@@ -19,13 +19,9 @@ describe('module resolution', () => {
 		expect(moduleUrl('http://cdn.example.com/x.js')).toBe('http://cdn.example.com/x.js');
 	});
 
-	it('serves anything else from the plugin vendor route', () => {
-		expect(moduleUrl('acme-shop/map.js')).toBe('/panel/vendor/acme-shop/map.js');
-	});
+	it('serves anything else from the plugin assets under the panel revision', () => {
+		configureRuntime({ assetsBase: '/panel/assets/0123456789ab' });
 
-	it('follows a reconfigured panel base and normalizes its trailing slash', () => {
-		configureRuntime({ panelBase: '/panel' });
-
-		expect(moduleUrl('acme-shop/map.js')).toBe('/panel/vendor/acme-shop/map.js');
+		expect(moduleUrl('acme-shop/map.js')).toBe('/panel/assets/0123456789ab/plugins/acme-shop/map.js');
 	});
 });

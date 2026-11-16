@@ -45,6 +45,7 @@ final class TestPlugin implements Plugin
 			);
 			$panel->get('/sub', [PageController::class, 'index'], 'sub')->render('test-plugin:page');
 		});
+		$cms->css('theme.css');
 		$cms->css("{$cms->config->panel->path}/vendor/test-plugin/theme.css");
 		$cms->section('Test Plugin')->link('Test Page', $cms->panelUrl());
 		$cms->section('Test Plugin')->link('Other Page', $cms->panelUrl('/sub'));

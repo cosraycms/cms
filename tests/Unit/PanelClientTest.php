@@ -7,6 +7,7 @@ namespace Cosray\Tests\Unit;
 use Composer\InstalledVersions;
 use Cosray\Exception\RuntimeException;
 use Cosray\Panel\Client;
+use Cosray\Plugin\Assets as PluginAssets;
 use Cosray\Tests\TestCase;
 
 /**
@@ -263,6 +264,68 @@ final class PanelClientTest extends TestCase
 		}
 	}
 
+	public function testServesPluginAssetsUnderTheRevision(): void
+	{
+		$this->write('plugin/assets/shop.css', 'body {}');
+		$this->write('plugin/assets/fonts/shop.woff2', 'font');
+		$this->write('plugin/assets/notes.txt', 'private');
+		$this->write('plugin/secret.css', 'outside');
+		$plugins = new PluginAssets();
+		$plugins->add('acme-shop', $this->root . '/plugin/assets');
+		$client = $this->client(plugins: $plugins);
+
+		$this->assertSame(
+			"/panel/assets/{$client->version()}/plugins/acme-shop/shop.css",
+			$client->pluginUrl('acme-shop', 'shop.css'),
+		);
+		$this->assertSame(
+			realpath($this->root . '/plugin/assets/shop.css'),
+			$client->file('plugins/acme-shop/shop.css'),
+		);
+		$this->assertSame(
+			realpath($this->root . '/plugin/assets/fonts/shop.woff2'),
+			$client->file('plugins/acme-shop/fonts/shop.woff2'),
+		);
+
+		foreach ([
+			'plugins/acme-shop/notes.txt',
+			'plugins/acme-shop/../secret.css',
+			'plugins/other-shop/shop.css',
+			'plugins/acme-shop',
+		] as $slug) {
+			$this->assertNull($client->file($slug), $slug);
+		}
+
+		$files = iterator_to_array($client->files());
+		$this->assertArrayHasKey('plugins/acme-shop/shop.css', $files);
+		$this->assertArrayHasKey('plugins/acme-shop/fonts/shop.woff2', $files);
+		$this->assertArrayNotHasKey('plugins/acme-shop/notes.txt', $files);
+	}
+
+	public function testTheRevisionCoversPluginAssets(): void
+	{
+		$this->write('plugin/assets/shop.css', 'body {}');
+		$plugins = new PluginAssets();
+		$plugins->add('acme-shop', $this->root . '/plugin/assets');
+		$without = $this->client()->version();
+		$before = $this->client(plugins: $plugins)->version();
+
+		if ($without !== 'dev') {
+			$this->assertNotSame($without, $before);
+		}
+
+		$this->write('plugin/assets/shop.css', 'body { color: red }');
+
+		if ($before !== 'dev') {
+			$this->assertNotSame($before, $this->client(plugins: $plugins)->version());
+		}
+
+		$this->assertTrue(mkdir($this->root . '/.git'));
+		$before = $this->client(plugins: $plugins)->version();
+		$this->write('plugin/assets/shop.css', 'body { color: blue; }');
+		$this->assertNotSame($before, $this->client(plugins: $plugins)->version());
+	}
+
 	public function testSpriteTurnsEveryIconIntoASymbol(): void
 	{
 		$this->write(
@@ -282,9 +345,9 @@ final class PanelClientTest extends TestCase
 		$this->assertSame(1, substr_count($sprite, '<symbol'));
 	}
 
-	private function client(array $settings = [], bool $debug = false): Client
+	private function client(array $settings = [], bool $debug = false, ?PluginAssets $plugins = null): Client
 	{
-		return new Client($this->config($settings, $debug), $this->root . '/panel');
+		return new Client($this->config($settings, $debug), $this->root . '/panel', $plugins);
 	}
 
 	/** @param array<string, string> $modules */

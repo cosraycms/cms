@@ -14,6 +14,7 @@ use Cosray\Contract\Block;
 use Cosray\Contract\DashboardCard;
 use Cosray\Field\Schema\Handler as FieldHandler;
 use Cosray\Node\Schema\Handler as NodeHandler;
+use Cosray\Panel\Extras;
 use Cosray\Section;
 use Cosray\SystemNav;
 
@@ -143,8 +144,9 @@ final class Registrar
 	}
 
 	/**
-	 * Serve prebuilt plugin assets from $dir under
-	 * `{panel}/vendor/{pluginId}/...`.
+	 * Serve prebuilt plugin assets from $dir under the panel revision, at
+	 * `{panel}/assets/{revision}/plugins/{id}/...`, which `panel:publish`
+	 * copies with the panel's own files.
 	 */
 	public function assets(string $dir): void
 	{
@@ -165,12 +167,13 @@ final class Registrar
 	 * Register a named custom control rendered by a custom element.
 	 * Fields (from any plugin or the project) can then use the name in
 	 * their control() definition. Later registrations win, so a plugin
-	 * may replace a built-in editor. The module is served from this
-	 * plugin's asset dir.
+	 * may replace a built-in editor. The module is a path in this plugin's
+	 * asset dir, served under the panel revision, or an http(s) URL.
 	 */
 	public function control(string $name, string $tag, string $module): void
 	{
-		$this->bootstrap->controls()->register($name, $tag, "{$this->id}/{$module}");
+		$url = preg_match('~\Ahttps?://~', $module) === 1;
+		$this->bootstrap->controls()->register($name, $tag, $url ? $module : "{$this->id}/{$module}");
 	}
 
 	/**
@@ -202,23 +205,25 @@ final class Registrar
 	}
 
 	/**
-	 * A stylesheet loaded on every panel page. App-wide chrome styling
-	 * only — field controls load their assets lazily via element
-	 * descriptors.
+	 * A stylesheet loaded on every panel page: a path in this plugin's asset
+	 * directory, served under the panel revision, or a URL, which starts
+	 * with `/` or a scheme. App-wide chrome styling only — field controls
+	 * load their assets lazily via element descriptors.
 	 */
-	public function css(string $url): void
+	public function css(string $path): void
 	{
-		$this->bootstrap->panelExtras()->addCss($url);
+		$this->bootstrap->panelExtras()->addCss($path, Extras::isUrl($path) ? null : $this->id);
 	}
 
 	/**
 	 * A script loaded once per full panel document and NOT re-run across
 	 * htmx navigations: write delegated, idempotent listeners — see
-	 * "Panel scripts across navigation" in the README.
+	 * "Panel scripts across navigation" in the README. Paths resolve as
+	 * for css().
 	 */
-	public function js(string $url, bool $module = true): void
+	public function js(string $path, bool $module = true): void
 	{
-		$this->bootstrap->panelExtras()->addJs($url, $module);
+		$this->bootstrap->panelExtras()->addJs($path, $module, Extras::isUrl($path) ? null : $this->id);
 	}
 
 	/**

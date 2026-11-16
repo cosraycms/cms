@@ -49,6 +49,7 @@ use Cosray\I18n\SchemaScanner;
 use Cosray\MigrationFactory;
 use Cosray\Node\Publications;
 use Cosray\Panel\Client;
+use Cosray\Plugin\Assets as PluginAssets;
 use Cosray\Queue\Listener;
 use Cosray\Queue\Runner as JobRunner;
 
@@ -89,7 +90,7 @@ final class Commands
 			Fulltext::class,
 			PanelPublish::class => static fn(): PanelPublish => new PanelPublish(
 				$app->config,
-				new Client($app->config),
+				new Client($app->config, plugins: $app->container()->get(PluginAssets::class)),
 			),
 			References::class => fn(): References => new References($this->conn()),
 			StripLocation::class => fn(): StripLocation => new StripLocation($app->config, new Database($this->conn())),

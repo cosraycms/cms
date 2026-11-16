@@ -11,6 +11,7 @@ use Cosray\Commands\PanelPublish;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Panel\Client;
+use Cosray\Plugin\Assets as PluginAssets;
 use Cosray\Tests\TestCase;
 use FilesystemIterator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -82,6 +83,31 @@ final class PanelPublishTest extends TestCase
 		foreach (['views/private.php', 'src/private.json', 'modules/importmap.json'] as $private) {
 			$this->assertFileDoesNotExist($target . $private);
 		}
+	}
+
+	public function testPublishesPluginAssetsWithThePanelsFiles(): void
+	{
+		$plugin = $this->root . '/plugin';
+		mkdir($plugin . '/fonts', 0o777, true);
+		file_put_contents($plugin . '/shop.css', 'body {}');
+		file_put_contents($plugin . '/fonts/shop.woff2', 'font');
+		file_put_contents($plugin . '/notes.txt', 'private');
+		$plugins = new PluginAssets();
+		$plugins->add('acme-shop', $plugin);
+		$config = $this->settings(['panel.path' => '/panel']);
+		$client = new Client($config, $this->root . '/panel', $plugins);
+		$this->publish($config, $client);
+		$target = $config->path->public . $client->url();
+
+		$this->assertFileEquals($plugin . '/shop.css', $target . 'plugins/acme-shop/shop.css');
+		$this->assertFileEquals($plugin . '/fonts/shop.woff2', $target . 'plugins/acme-shop/fonts/shop.woff2');
+		$this->assertFileDoesNotExist($target . 'plugins/acme-shop/notes.txt');
+
+		unlink($plugin . '/notes.txt');
+		unlink($plugin . '/fonts/shop.woff2');
+		unlink($plugin . '/shop.css');
+		rmdir($plugin . '/fonts');
+		rmdir($plugin);
 	}
 
 	public static function panelPaths(): iterable

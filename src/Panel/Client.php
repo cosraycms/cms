@@ -7,6 +7,7 @@ namespace Cosray\Panel;
 use Composer\InstalledVersions;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
+use Cosray\Plugin\Assets as PluginAssets;
 use Cosray\Util\Path;
 use FilesystemIterator;
 use JsonException;
@@ -33,6 +34,23 @@ final class Client
 	/** The URL segment for modules that Composer packages ship. */
 	private const string COMPOSER = 'composer';
 
+	/** The URL segment for plugin assets, followed by the plugin id. */
+	private const string PLUGINS = 'plugins';
+
+	private const array PLUGIN_EXTENSIONS = [
+		'css',
+		'js',
+		'mjs',
+		'svg',
+		'png',
+		'jpg',
+		'jpeg',
+		'webp',
+		'woff2',
+		'json',
+		'map',
+	];
+
 	/**
 	 * A static `import … from '…'`, `import '…'` or `export … from '…'`. The
 	 * served modules are formatted, unminified source, where statements start
@@ -52,6 +70,7 @@ final class Client
 	public function __construct(
 		private readonly Config $config,
 		?string $dir = null,
+		private readonly ?PluginAssets $plugins = null,
 	) {
 		$this->dir = $dir ?? dirname(__DIR__, 2) . '/panel';
 	}
@@ -75,6 +94,12 @@ final class Client
 		return rtrim($this->config->panel->path, '/') . '/assets/' . $this->version() . '/' . ltrim($path, '/');
 	}
 
+	/** The URL of a file in a plugin's asset directory. */
+	public function pluginUrl(string $id, string $path): string
+	{
+		return $this->url(self::PLUGINS . '/' . $id . '/' . ltrim($path, '/'));
+	}
+
 	/**
 	 * Whether a response for a URL carrying `$version` may be cached forever.
 	 * Only the current revision qualifies, so a page rendered before an update
@@ -93,7 +118,7 @@ final class Client
 	{
 		$segments = explode('/', $slug);
 
-		if (count($segments) < 2 || !in_array($segments[0], [...self::DIRS, self::COMPOSER], true)) {
+		if (count($segments) < 2 || !in_array($segments[0], [...self::DIRS, self::COMPOSER, self::PLUGINS], true)) {
 			return null;
 		}
 
@@ -101,6 +126,10 @@ final class Client
 			if ($segment === '' || $segment === '.' || $segment === '..') {
 				return null;
 			}
+		}
+
+		if ($segments[0] === self::PLUGINS) {
+			return $this->pluginFile($segments[1], implode('/', array_slice($segments, 2)));
 		}
 
 		if (!in_array(strtolower(pathinfo($slug, PATHINFO_EXTENSION)), self::EXTENSIONS, true)) {
@@ -138,6 +167,10 @@ final class Client
 
 		foreach ($this->composerDirs() as $prefix => $dir) {
 			$dirs[self::COMPOSER . '/' . $prefix] = $dir;
+		}
+
+		foreach ($this->pluginDirs() as $id => $dir) {
+			$dirs[self::PLUGINS . '/' . $id] = $dir;
 		}
 
 		foreach ($dirs as $prefix => $dir) {
@@ -430,12 +463,18 @@ final class Client
 	 */
 	private function contents(): string
 	{
-		$files = [];
-		$recent = time() - 2;
-		$dirs = [
+		return $this->hash([
 			...array_map(fn(string $dir): string => $this->dir . '/' . $dir, self::DIRS),
 			...array_values($this->composerDirs()),
-		];
+			...array_values($this->pluginDirs()),
+		]);
+	}
+
+	/** @param list<string> $dirs */
+	private function hash(array $dirs): string
+	{
+		$files = [];
+		$recent = time() - 2;
 
 		foreach ($dirs as $dir) {
 			if (!is_dir($dir)) {
@@ -464,7 +503,11 @@ final class Client
 		return substr(sha1(implode("\n", $files)), 0, 12);
 	}
 
-	/** Cosray's installed revision, combined with those of the module packages. */
+	/**
+	 * Cosray's installed revision, combined with those of the module packages
+	 * and of each plugin with assets: the revision Composer installed for
+	 * its package, or the state of its files for a plugin without one.
+	 */
 	private function revision(): string
 	{
 		$revision = self::installed('cosray/cms');
@@ -474,7 +517,9 @@ final class Client
 			$packages[] = implode('/', array_slice(explode('/', $prefix), 0, 2));
 		}
 
-		if ($revision === 'dev' || $packages === []) {
+		$plugins = $this->pluginDirs();
+
+		if ($revision === 'dev' || $packages === [] && $plugins === []) {
 			return $revision;
 		}
 
@@ -484,7 +529,78 @@ final class Client
 			$parts[] = $package . '@' . self::installed($package);
 		}
 
+		foreach ($plugins as $id => $dir) {
+			$package = self::package($dir);
+			$parts[] = 'plugin:' . $id . '@' . ($package === null ? $this->hash([$dir]) : self::installed($package));
+		}
+
 		return substr(sha1(implode("\n", $parts)), 0, 12);
+	}
+
+	/** @return array<string, string> plugin id => real asset directory */
+	private function pluginDirs(): array
+	{
+		$dirs = [];
+
+		foreach ($this->plugins?->all() ?? [] as $id => $dir) {
+			$real = realpath($dir);
+
+			if ($real !== false && is_dir($real)) {
+				$dirs[$id] = $real;
+			}
+		}
+
+		return $dirs;
+	}
+
+	private function pluginFile(string $id, string $path): ?string
+	{
+		$dir = $this->pluginDirs()[$id] ?? null;
+
+		if (
+			$dir === null
+			|| !in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), self::PLUGIN_EXTENSIONS, true)
+		) {
+			return null;
+		}
+
+		try {
+			return Path::inside($dir, $path, checkIsFile: true);
+		} catch (RuntimeException) {
+			return null;
+		}
+	}
+
+	/**
+	 * The installed Composer package a directory belongs to, null for the
+	 * root package, whose files a project plugin's assets are part of.
+	 */
+	private static function package(string $dir): ?string
+	{
+		$root = InstalledVersions::getRootPackage()['name'];
+		$found = null;
+		$length = 0;
+
+		foreach (InstalledVersions::getInstalledPackages() as $package) {
+			try {
+				$path = InstalledVersions::getInstallPath($package);
+			} catch (OutOfBoundsException) {
+				continue;
+			}
+
+			$path = $path === null ? false : realpath($path);
+
+			if (
+				$path !== false
+				&& str_starts_with($dir . DIRECTORY_SEPARATOR, $path . DIRECTORY_SEPARATOR)
+				&& strlen($path) > $length
+			) {
+				$found = $package;
+				$length = strlen($path);
+			}
+		}
+
+		return $found === $root ? null : $found;
 	}
 
 	private static function installed(string $package): string

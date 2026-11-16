@@ -32,6 +32,7 @@ use Cosray\Node\Types;
 use Cosray\Panel\Client;
 use Cosray\Panel\Cookie;
 use Cosray\Panel\Extras;
+use Cosray\Plugin\Assets as PluginAssets;
 use Cosray\Renderer;
 use Cosray\Security\Policy;
 use Cosray\Session;
@@ -363,7 +364,7 @@ abstract class Panel
 		return [
 			...$this->config->panel->theme,
 			$this->client()->url('styles/panel.css'),
-			...$this->extras()->css(),
+			...$this->extras()->css($this->client()),
 		];
 	}
 
@@ -374,18 +375,21 @@ abstract class Panel
 	 */
 	private function scripts(): array
 	{
-		return [...$this->client()->scripts(), ...$this->extras()->scripts()];
+		return [...$this->client()->scripts(), ...$this->extras()->scripts($this->client())];
 	}
 
 	/** @return list<string> */
 	private function moduleScripts(): array
 	{
-		return [$this->client()->url('src/panel.js'), ...$this->extras()->moduleScripts()];
+		return [$this->client()->url('src/panel.js'), ...$this->extras()->moduleScripts($this->client())];
 	}
 
 	protected function client(): Client
 	{
-		return $this->client ??= new Client($this->config);
+		return $this->client ??= new Client(
+			$this->config,
+			plugins: $this->container->instance(PluginAssets::class),
+		);
 	}
 
 	private function extras(): Extras
