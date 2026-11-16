@@ -34,6 +34,7 @@ use Cosray\Node\Types;
 use Cosray\Panel\Dashboard as PanelDashboard;
 use Cosray\Panel\Extras as PanelExtras;
 use Cosray\Plugin\Assets as PluginAssets;
+use Cosray\Plugin\PanelRoutes;
 use Cosray\Plugin\Plugin;
 use Cosray\Plugin\Registrar;
 use Cosray\Queue\Runner;
@@ -109,8 +110,8 @@ class Bootstrap implements CorePlugin
 		'view' => [],
 	];
 
-	/** @var list<array{pattern: string, endpoint: mixed, template: non-empty-string, name: string}> */
-	protected array $panelPages = [];
+	/** @var list<array{id: string, routes: Closure(PanelRoutes): void}> */
+	protected array $pluginPanels = [];
 
 	public function __construct(
 		protected readonly Config $config,
@@ -201,7 +202,7 @@ class Bootstrap implements CorePlugin
 			$this->policy,
 			$users,
 			$this->pluginRoutes,
-			$this->panelPages,
+			$this->pluginPanels,
 			new ContainerLogger($this->container),
 		);
 		$this->routes->add($app);
@@ -310,22 +311,10 @@ class Bootstrap implements CorePlugin
 		$this->pluginTemplates[$renderer][$namespace] = $dir;
 	}
 
-	public function addPanelPage(
-		string $pattern,
-		mixed $endpoint,
-		string $template,
-		string $name,
-	): void {
-		if ($template === '') {
-			throw new RuntimeException("Panel page '{$name}' has no template");
-		}
-
-		$this->panelPages[] = [
-			'pattern' => $pattern,
-			'endpoint' => $endpoint,
-			'template' => $template,
-			'name' => $name,
-		];
+	/** @param Closure(PanelRoutes): void $routes */
+	public function addPanelRoutes(string $id, Closure $routes): void
+	{
+		$this->pluginPanels[] = ['id' => $id, 'routes' => $routes];
 	}
 
 	public function panelExtras(): PanelExtras

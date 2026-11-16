@@ -8,6 +8,7 @@ use Cosray\Contract\Entries;
 use Cosray\Exception\RuntimeException;
 use Cosray\Finder\Nodes;
 use Cosray\Navigation;
+use Cosray\NavLink;
 use Cosray\Schema\Handle;
 use Cosray\Schema\Label;
 use Cosray\Schema\Permission;
@@ -142,6 +143,17 @@ final class NavigationTest extends TestCase
 		$this->assertSame(['First', 'Stats', 'Logs'], array_map(static fn($link) => $link->meta->label, $links));
 		$this->assertSame('view-stats', $links[1]->meta->permission);
 		$this->assertTrue($links[2]->active('/panel/logs/today'));
+	}
+
+	public function testANavLinkIsCurrentOnItsUrlAndBelowIt(): void
+	{
+		$link = new NavLink('Reports', '/panel/review-reports');
+
+		$this->assertSame(21, $link->match('/panel/review-reports'));
+		$this->assertSame(21, $link->match('/panel/review-reports/a1b2'));
+		$this->assertNull($link->match('/panel/review-reports-old'));
+		$this->assertNull($link->match('/panel'));
+		$this->assertTrue(new NavLink('Logs', '/panel/logs?tab=all')->active('/panel/logs/today'));
 	}
 
 	public function testNavLinkPermissionsMustNotBeEmpty(): void

@@ -232,19 +232,28 @@ Plugin migrations share the `default` namespace. Timestamped filenames avoid col
 
 ### Panel pages and navigation
 
+A plugin's panel pages are routes below `{panel.path}/{id}`, registered with `panel()`:
+
 ```php
-$panel = $cms->config->panel->path;
+use Cosray\Plugin\PanelRoutes;
+
 $cms->templates(__DIR__ . '/../views');
-$cms->panelPage('/shop/orders', [\App\Panel\Orders::class, 'list'], 'acme-shop:orders', 'orders');
-$cms->section('Shop')->link('Orders', "{$panel}/shop/orders")->permission('edit-orders');
-$cms->assets(__DIR__ . '/../dist');
-$cms->css("{$panel}/vendor/acme-shop/shop.css");
-$cms->js("{$panel}/vendor/acme-shop/shop.js");
+$cms->panel(static function (PanelRoutes $panel): void {
+    $panel->get('', [\Acme\Shop\Panel\Orders::class, 'index'], 'orders')->render('acme-shop:orders');
+    $panel->get('/{order}', [\Acme\Shop\Panel\Orders::class, 'show'], 'order')->render('acme-shop:order');
+    $panel->post('/{order}/ship', [\Acme\Shop\Panel\Orders::class, 'ship'], 'ship');
+});
+$cms->section('Shop')->link('Orders', $cms->panelUrl())->permission('acme-shop.edit-orders');
+$cms->allow('role:admin', 'acme-shop.edit-orders');
 ```
+
+`get()`, `post()`, `put()`, `patch()` and `delete()` take a pattern below the plugin's base, the endpoint and a name; routes are named `cms.panel.{id}.{name}`. They run behind the panel's session, language, [CSRF check](#csrf-protection) and sign-in, as built-in pages do. `render()` renders the context the controller returns with a panel template; without it, the controller returns a response, such as a redirect or a download. `$cms->panelUrl('/orders')` builds `{panel.path}/{id}/orders`.
+
+Plugin ids need a dash, and every built-in panel route starts with a one-word segment, so a plugin's pages never meet one of core's. The id also names the plugin's template namespace, translation domain and migration namespace, and its permissions are written `{id}.{name}`, such as `acme-shop.edit-orders`. A permission exists once `allow()` grants it; `#[Permission]` and `permission()` name it in full.
 
 Plugin panel templates can also draw a block type on the editor canvas, see [editor views](blocks.md#editor-views).
 
-Panel controllers extend [Panel](../src/Controller/Panel/Panel.php) and return `$this->context([...])`. Their templates call `$this->layout('layer/main')` and render only their fragment, without another `id="main"`. The [layer templates](../panel/views/layer/) wrap it for the requested swap:
+Panel controllers extend [Panel](../src/Controller/Panel/Panel.php) and return `$this->context([...])`; `#[Permission]` on a method refuses users without that permission. `$this->url('/42', ['tab' => 'items'])` builds a URL below the plugin's pages, `{panel.path}/{id}/42?tab=items`. Their templates call `$this->layout('layer/main')` and render only their fragment, without another `id="main"`. The [layer templates](../panel/views/layer/) wrap it for the requested swap:
 
 - `main`: content inside an area.
 - `frame`: rail and content on an area switch.
@@ -254,14 +263,16 @@ Panel controllers extend [Panel](../src/Controller/Panel/Panel.php) and return `
 A page can also join the system area that the masthead's gear opens. `system()`, on the app or a plugin's registrar, adds its link to that rail, and the controller names the area:
 
 ```php
-$cms->panelPage('/shop/imports', [\App\Panel\Imports::class, 'index'], 'acme-shop:imports', 'imports');
-$cms->system()->link('Imports', "{$panel}/shop/imports")->icon('bi:upload')->permission('import-orders');
+$cms->panel(static function (PanelRoutes $panel): void {
+    $panel->get('/imports', [\Acme\Shop\Panel\Imports::class, 'index'], 'imports')->render('acme-shop:imports');
+});
+$cms->system()->link('Imports', $cms->panelUrl('/imports'))->icon('bi:upload')->permission('acme-shop.import');
 
 final class Imports extends \Cosray\Controller\Panel\Panel
 {
     protected const string AREA = 'system';
 
-    #[\Cosray\Middleware\Permission('import-orders')]
+    #[\Cosray\Middleware\Permission('acme-shop.import')]
     public function index(): array
     {
         return $this->context(['title' => 'Imports']);
@@ -269,7 +280,7 @@ final class Imports extends \Cosray\Controller\Panel\Panel
 }
 ```
 
-System links appear between Users and the profile, in registration order unless their `meta->order` differs. In either rail, `permission()` only hides a link from users without that permission, and a section left empty disappears; the route enforces the permission through `#[Permission]`. A page without `AREA` belongs to the content area.
+System links appear between Users and the profile, in registration order unless their `meta->order` differs. In either rail, `permission()` only hides a link from users without that permission, and a section left empty disappears; the route enforces the permission through `#[Permission]`. A page without `AREA` belongs to the content area. A link is current on its URL and on every page below it; when several links of a rail match, the longest wins. Pass `activePrefix` only for a link that should be current outside its own subtree.
 
 Existing nodes open at `{panel.path}/node/{uid}`; creation uses `{panel.path}/node/create/{type}`. Build URLs through [NodeUrls](../src/Panel/NodeUrls.php):
 

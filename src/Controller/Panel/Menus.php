@@ -472,10 +472,10 @@ final class Menus extends Panel
 			'noticeKind' => $this->request->param('notice', '') === 'move-rejected' ? 'warning' : 'success',
 			'undo' => $this->undoMove($menu),
 			'urls' => [
-				'tree' => $this->url($menu),
-				'edit' => $this->url($menu, '/edit'),
-				'delete' => $this->url($menu, '/delete'),
-				'add' => $this->url($menu) . '?add=',
+				'tree' => $this->menuUrl($menu),
+				'edit' => $this->menuUrl($menu, '/edit'),
+				'delete' => $this->menuUrl($menu, '/delete'),
+				'add' => $this->menuUrl($menu) . '?add=',
 			],
 		]);
 	}
@@ -574,14 +574,14 @@ final class Menus extends Panel
 			'mode' => $mode,
 			'item' => $item,
 			'action' => $mode === 'create'
-				? $this->url($menu, '/item/create')
-				: $this->url($menu, '/item/' . rawurlencode((string) $item)),
+				? $this->menuUrl($menu, '/item/create')
+				: $this->menuUrl($menu, '/item/' . rawurlencode((string) $item)),
 			'parent' => $parent,
 			'anchor' => $anchor,
 			'parentTitle' => $parent === null ? null : $this->itemTitle($menu, $parent),
 			'values' => $values,
 			'errors' => $errors,
-			'cancelUrl' => $this->url($menu),
+			'cancelUrl' => $this->menuUrl($menu),
 			'locales' => $this->localeList($context),
 			'defaultLocale' => $context->locales()->getDefault()->id,
 			'searchUrls' => [
@@ -1033,7 +1033,7 @@ final class Menus extends Panel
 		}
 
 		return [
-			'action' => $this->url($menu, '/item/' . rawurlencode($item) . '/move'),
+			'action' => $this->menuUrl($menu, '/item/' . rawurlencode($item) . '/move'),
 			'parent' => (string) $this->request->param('undoParent', ''),
 			'index' => (int) $index,
 		];
@@ -1053,7 +1053,7 @@ final class Menus extends Panel
 		$query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
 
 		return Response::create($factory)->redirect(
-			$this->url($menu) . ($query === '' ? '' : '?' . $query),
+			$this->menuUrl($menu) . ($query === '' ? '' : '?' . $query),
 			303,
 		);
 	}
@@ -1084,7 +1084,7 @@ final class Menus extends Panel
 				'label' => $this->label($description),
 				'maxDepth' => $row['maxDepth'] === null ? null : (int) $row['maxDepth'],
 				'items' => (int) $row['items'],
-				'url' => $this->url($menu),
+				'url' => $this->menuUrl($menu),
 			];
 		}
 
@@ -1182,7 +1182,7 @@ final class Menus extends Panel
 		return $this->panelPath() . '/menus';
 	}
 
-	private function url(string $menu, string $suffix = ''): string
+	private function menuUrl(string $menu, string $suffix = ''): string
 	{
 		return $this->base() . '/' . rawurlencode($menu) . $suffix;
 	}

@@ -18,7 +18,7 @@ use function Cosray\escape;
 			class="cms-sidebar-link"
 			style="--depth: <?= $level ?>"
 			href="<?= $link->url ?>"
-			<?= $link->active((string) u($currentPath)) ? 'aria-current="page"' : '' ?>>
+			<?= $link === u($currentLink ?? null) ? 'aria-current="page"' : '' ?>>
 			<span class="cms-sidebar-label">
 				<?php $this->include('component/collection-icon', [
 					'iconMeta' => $iconMeta,

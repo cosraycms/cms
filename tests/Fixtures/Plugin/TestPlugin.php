@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests\Fixtures\Plugin;
 
 use Celema\Core\App;
+use Cosray\Plugin\PanelRoutes;
 use Cosray\Plugin\Plugin;
 use Cosray\Plugin\Registrar;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
@@ -33,17 +34,23 @@ final class TestPlugin implements Plugin
 		$cms->control('test-money-picker', 'test-money-picker', 'controls.js');
 		$cms->dashboardCard(TestDashboardCard::class);
 		$cms->templates(__DIR__ . '/views');
-		$cms->panelPage('/test-plugin', [PageController::class, 'index'], 'test-plugin:page', 'index');
+		$cms->panel(static function (PanelRoutes $panel): void {
+			$panel->get('', [PageController::class, 'index'], 'index')->render('test-plugin:page');
+			$panel->post('', [PageController::class, 'save'], 'save');
+			$panel->get('/stats', [SystemPageController::class, 'index'], 'stats')->render('test-plugin:page');
+			$panel->get('/stats/today', [SystemPageController::class, 'index'], 'stats.today')->render(
+				'test-plugin:page',
+			);
+			$panel->get('/sub', [PageController::class, 'index'], 'sub')->render('test-plugin:page');
+		});
 		$cms->css("{$cms->config->panel->path}/vendor/test-plugin/theme.css");
-		$cms
-			->section('Test Plugin')
-			->link('Test Page', "{$cms->config->panel->path}/test-plugin");
-		$cms->panelPage('/test-plugin/stats', [SystemPageController::class, 'index'], 'test-plugin:page', 'stats');
-		$cms->allow('role:admin', 'view-test-stats');
+		$cms->section('Test Plugin')->link('Test Page', $cms->panelUrl());
+		$cms->section('Test Plugin')->link('Other Page', $cms->panelUrl('/sub'));
+		$cms->allow('role:admin', 'test-plugin.view-stats');
 		$cms
 			->system()
-			->link('Test Stats', "{$cms->config->panel->path}/test-plugin/stats")
-			->permission('view-test-stats');
+			->link('Test Stats', $cms->panelUrl('/stats'))
+			->permission('test-plugin.view-stats');
 		$cms->register('test-plugin.service', stdClass::class);
 		$cms->routes(static function (App $app): void {
 			$app->get('/test-plugin', [stdClass::class, 'index'], 'test-plugin.route');

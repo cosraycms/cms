@@ -17,8 +17,10 @@ use Cosray\Middleware\InitRequest;
 use Cosray\Middleware\PanelAuth;
 use Cosray\Middleware\PanelFraming;
 use Cosray\Middleware\PanelLocale;
+use Cosray\Middleware\PanelPlugin;
 use Cosray\Middleware\Session;
 use Cosray\Middleware\VerifyCsrf;
+use Cosray\Plugin\PanelRoutes;
 use Cosray\Security\Policy;
 use Psr\Log\LoggerInterface as Logger;
 use Psr\Log\NullLogger;
@@ -32,7 +34,7 @@ class Routes
 
 	/**
 	 * @param list<Closure(App): void> $pluginRoutes
-	 * @param list<array{pattern: string, endpoint: mixed, template: non-empty-string, name: string}> $panelPages
+	 * @param list<array{id: string, routes: Closure(PanelRoutes): void}> $pluginPanels
 	 */
 	public function __construct(
 		protected Config $config,
@@ -41,7 +43,7 @@ class Routes
 		protected Policy $policy,
 		protected Users $users,
 		protected array $pluginRoutes = [],
-		protected array $panelPages = [],
+		protected array $pluginPanels = [],
 		protected Logger $logger = new NullLogger(),
 	) {
 		$this->panelPath = $config->panel->path;
@@ -556,11 +558,15 @@ class Routes
 					->middleware($panelAuth)
 					->after($renderers->get('editor-save'));
 
-				foreach ($this->panelPages as $page) {
-					$panel
-						->get($page['pattern'], $page['endpoint'], $page['name'])
-						->middleware($panelAuth)
-						->after($renderers->get($page['template']));
+				foreach ($this->pluginPanels as $plugin) {
+					$panel->group(
+						'/' . $plugin['id'],
+						static function (Group $group) use ($plugin, $panelAuth, $renderers): void {
+							$group->middleware(new PanelPlugin($plugin['id']), $panelAuth);
+							$plugin['routes'](new PanelRoutes($group, $renderers));
+						},
+						$plugin['id'] . '.',
+					);
 				}
 			},
 			'cms.panel.',

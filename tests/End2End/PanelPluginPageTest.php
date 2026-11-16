@@ -57,6 +57,22 @@ final class PanelPluginPageTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//*[@id="system-nav"]//li[3]/a[@href="/panel/profile"]', $html);
 	}
 
+	public function testTheLongestMatchingLinkOfARailIsCurrentBelowIt(): void
+	{
+		$this->authenticateAs('admin');
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/test-plugin/stats/today'));
+
+		$this->assertHtmlNodeExists(
+			'//*[@id="system-nav"]//a[@href="/panel/test-plugin/stats" and @aria-current="page"]',
+			$html,
+		);
+		$this->assertHtmlNodeMissing('//*[@id="system-nav"]//a[@href="/panel/users" and @aria-current]', $html);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/test-plugin/sub'));
+		$this->assertHtmlNodeExists('//a[@href="/panel/test-plugin/sub" and @aria-current="page"]', $html);
+		$this->assertHtmlNodeMissing('//a[@href="/panel/test-plugin" and @aria-current]', $html);
+	}
+
 	public function testAPluginEntryIsHiddenAndItsPageRefusedWithoutItsPermission(): void
 	{
 		$this->authenticateAs('editor');
@@ -66,6 +82,32 @@ final class PanelPluginPageTest extends End2EndTestCase
 			$this->getHtmlResponse($this->makeRequest('GET', '/panel/profile')),
 		);
 		$this->assertResponseStatus(403, $this->makeRequest('GET', '/panel/test-plugin/stats'));
+	}
+
+	public function testAPluginPostRouteRunsInsideThePanelGroup(): void
+	{
+		$this->authenticateAs('editor');
+		$response = $this->makeRequest('POST', '/panel/test-plugin', ['form' => ['name' => 'Ada Lovelace']]);
+
+		$this->assertSame(303, $response->getStatusCode());
+		$this->assertSame('/panel/test-plugin?saved=Ada%20Lovelace', $response->getHeaderLine('Location'));
+		$this->assertSame('/panel/test-plugin', $this->app->router()->url('cms.panel.test-plugin.save'));
+	}
+
+	public function testAPluginPostRouteNeedsTheCsrfTokenOfASession(): void
+	{
+		$response = $this->makeRequest('POST', '/panel/test-plugin', ['form' => ['name' => 'x'], 'csrf' => false]);
+
+		$this->assertSame(303, $response->getStatusCode());
+		$this->assertStringStartsWith('/panel/expired', $response->getHeaderLine('Location'));
+	}
+
+	public function testThePluginUrlHelperBuildsUrlsBelowThePluginPages(): void
+	{
+		$this->authenticateAs('editor');
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/test-plugin'));
+
+		$this->assertHtmlNodeExists('//a[@class="stats" and @href="/panel/test-plugin/stats?tab=all"]', $html);
 	}
 
 	public function testPluginPanelPageRequiresAuthentication(): void

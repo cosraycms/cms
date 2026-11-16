@@ -163,16 +163,21 @@ final class Registrar
 	}
 
 	/**
-	 * Register a page inside the panel chrome: session, auth and the
-	 * panel renderer are applied like for built-in pages. The endpoint
-	 * controller should extend Cosray\Controller\Panel\Panel and
-	 * return $this->context([...]) so the shell gets its data.
+	 * Routes of this plugin inside the panel, under `{panel.path}/{id}`: the
+	 * panel's session, locale, CSRF check and sign-in apply as for built-in
+	 * pages. Controllers extend Cosray\Controller\Panel\Panel.
 	 *
-	 * @param mixed $endpoint route endpoint, e.g. [Controller::class, 'method']
+	 * @param Closure(PanelRoutes): void $routes
 	 */
-	public function panelPage(string $pattern, mixed $endpoint, string $template, string $name): void
+	public function panel(Closure $routes): void
 	{
-		$this->bootstrap->addPanelPage($pattern, $endpoint, $template, "{$this->id}.{$name}");
+		$this->bootstrap->addPanelRoutes($this->id, $routes);
+	}
+
+	/** The URL of a page below this plugin's panel routes: panelUrl('/orders'). */
+	public function panelUrl(string $path = ''): string
+	{
+		return rtrim($this->config->panel->path, '/') . '/' . $this->id . $path;
 	}
 
 	/**

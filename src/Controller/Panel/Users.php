@@ -68,7 +68,7 @@ final class Users extends Panel
 				&& $value !== ''
 			),
 		);
-		$page = fn(int $to): string => $this->url('', [...$filter, 'offset' => $to]);
+		$page = fn(int $to): string => $this->usersUrl('', [...$filter, 'offset' => $to]);
 
 		return $this->context([
 			'rows' => array_map($this->listRow(...), $users),
@@ -80,7 +80,7 @@ final class Users extends Panel
 			'rangeEnd' => $offset + count($users),
 			'previousUrl' => $offset > 0 ? $page(max(0, $offset - self::PAGE_SIZE)) : null,
 			'nextUrl' => ($offset + self::PAGE_SIZE) < $total ? $page($offset + self::PAGE_SIZE) : null,
-			'listUrl' => $this->url(),
+			'listUrl' => $this->usersUrl(),
 			'notice' => $this->notice(),
 		]);
 	}
@@ -109,7 +109,7 @@ final class Users extends Panel
 			'actor' => $this->currentUser()->loginName(),
 		]);
 
-		return Response::create($factory)->redirect($this->url('/' . $user->uid, ['notice' => 'created']), 303);
+		return Response::create($factory)->redirect($this->usersUrl('/' . $user->uid, ['notice' => 'created']), 303);
 	}
 
 	/** @return array<string, mixed> */
@@ -191,7 +191,7 @@ final class Users extends Panel
 			'actor' => $this->currentUser()->loginName(),
 		]);
 
-		return Response::create($factory)->redirect($this->url('', ['notice' => 'deleted']), 303);
+		return Response::create($factory)->redirect($this->usersUrl('', ['notice' => 'deleted']), 303);
 	}
 
 	/** @return array<string, mixed> */
@@ -208,11 +208,11 @@ final class Users extends Panel
 			'exists' => $exists,
 			'action' => match (true) {
 				$profile => $this->panelPath() . '/profile',
-				$exists => $this->url('/' . $user->uid),
-				default => $this->url('/create/' . $user->type),
+				$exists => $this->usersUrl('/' . $user->uid),
+				default => $this->usersUrl('/create/' . $user->type),
 			},
-			'deleteUrl' => $exists && !$self ? $this->url('/' . $user->uid . '/delete') : null,
-			'listUrl' => $this->url(),
+			'deleteUrl' => $exists && !$self ? $this->usersUrl('/' . $user->uid . '/delete') : null,
+			'listUrl' => $this->usersUrl(),
 			'title' => $exists
 				? $user->name ?? ($user->username !== '' ? $user->username : $user->email)
 				: __('user:new', ['type' => __($this->types->label($user->type))]),
@@ -453,7 +453,7 @@ final class Users extends Panel
 			), $user->roles),
 			'active' => $user->active,
 			'url' => $this->policy->covers($this->currentUser(), ...$user->roles)
-				? $this->url('/' . $user->uid)
+				? $this->usersUrl('/' . $user->uid)
 				: null,
 		];
 	}
@@ -463,8 +463,8 @@ final class Users extends Panel
 	{
 		return array_map(fn(string $handle): array => [
 			'label' => __($this->types->label($handle)),
-			'filterUrl' => $this->url('', array_filter(['type' => $handle, 'q' => $search])),
-			'createUrl' => $this->url('/create/' . $handle),
+			'filterUrl' => $this->usersUrl('', array_filter(['type' => $handle, 'q' => $search])),
+			'createUrl' => $this->usersUrl('/create/' . $handle),
 			'active' => $handle === $current,
 		], $this->types->handles());
 	}
@@ -490,7 +490,7 @@ final class Users extends Panel
 	}
 
 	/** @param array<string, mixed> $query */
-	private function url(string $path = '', array $query = []): string
+	private function usersUrl(string $path = '', array $query = []): string
 	{
 		$url = $this->panelPath() . '/users' . $path;
 

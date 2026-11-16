@@ -44,13 +44,30 @@ final class NavLink implements NavigationItem
 		return [];
 	}
 
+	/**
+	 * Whether the link is current on a path: on its URL and below it, or
+	 * below `activePrefix` when it has one. When several links of a rail
+	 * match, the rail marks the longest match, see match().
+	 */
 	public function active(string $currentPath): bool
 	{
+		return $this->match($currentPath) !== null;
+	}
+
+	/** The length of the matching URL or prefix, null when the link is not current on the path. */
+	public function match(string $currentPath): ?int
+	{
 		if ($this->activePrefix !== null) {
-			return str_starts_with($currentPath, $this->activePrefix);
+			return str_starts_with($currentPath, $this->activePrefix) ? strlen($this->activePrefix) : null;
 		}
 
-		return $currentPath === $this->url;
+		$url = rtrim((string) parse_url($this->url, PHP_URL_PATH), '/');
+
+		if ($currentPath === $url || $currentPath === $url . '/' || str_starts_with($currentPath, $url . '/')) {
+			return strlen($url);
+		}
+
+		return null;
 	}
 
 	/** @param array<array-key, mixed> $args */

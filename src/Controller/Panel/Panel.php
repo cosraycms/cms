@@ -133,6 +133,7 @@ abstract class Panel
 				// Only a full document loads the entry; a swap reuses the modules.
 				'modulePreloads' => $layer === 'document' ? $this->client()->preloads() : [],
 				'collections' => $collections,
+				'currentLink' => $this->currentLink($collections),
 				'permits' => $this->permits(...),
 				'rail' => match (static::AREA) {
 					'content' => $collections !== [],
@@ -233,6 +234,21 @@ abstract class Panel
 	protected function panelPath(): string
 	{
 		return $this->config->panel->path;
+	}
+
+	/**
+	 * A URL below the pages of the plugin whose panel route handles the
+	 * request, `{panel.path}/{id}{path}`, or below the panel elsewhere.
+	 *
+	 * @param array<string, mixed> $query
+	 */
+	protected function url(string $path = '', array $query = []): string
+	{
+		$plugin = $this->request->get('plugin', null);
+		$url = rtrim($this->panelPath(), '/') . (is_string($plugin) ? '/' . $plugin : '') . $path;
+		$url = $url === '' ? '/' : $url;
+
+		return $query === [] ? $url : $url . '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
 	}
 
 	/**
@@ -499,8 +515,47 @@ abstract class Panel
 		}
 
 		$entries[] = $this->systemEntry(__('nav:profile'), $panelPath . '/profile', 'person');
+		$lengths = array_map(static fn(array $entry): int => $entry['active'] ? strlen($entry['url']) : -1, $entries);
+		$longest = max($lengths);
+
+		foreach ($entries as $index => $entry) {
+			$entries[$index]['active'] = $longest >= 0 && $lengths[$index] === $longest;
+		}
 
 		return $entries;
+	}
+
+	/**
+	 * The content rail's link that is current on the request path: the one
+	 * with the longest match when several are.
+	 *
+	 * @param list<NavigationItem> $items
+	 */
+	private function currentLink(array $items): ?NavLink
+	{
+		$path = $this->request->uri()->getPath();
+		$current = null;
+		$longest = -1;
+		$queue = $items;
+
+		while ($queue !== []) {
+			$item = array_shift($queue);
+
+			if ($item instanceof NavLink) {
+				$length = $item->match($path);
+
+				if ($length !== null && $length > $longest) {
+					$current = $item;
+					$longest = $length;
+				}
+
+				continue;
+			}
+
+			array_push($queue, ...$item->children($this->permits(...)));
+		}
+
+		return $current;
 	}
 
 	/** @return SystemEntry */
