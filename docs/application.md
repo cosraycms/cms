@@ -40,7 +40,7 @@ $app = App::create($root, [
 
 An empty prefix is possible but strongly discouraged. Cosray's tables have short, plain names such as `users`, `types`, `nodes`, `tags`, `jobs` and `drafts`, which a site's own tables or another package may want as well. A namespace keeps them apart and shows at a glance which tables Cosray owns and migrates, so site code and site migrations do not change them by accident. It also lets backups, permissions and maintenance address Cosray's tables as a whole, for example with `pg_dump --schema=cms`, and site SQL names them unambiguously, as in `cms.nodes`. Choose the namespace before installing: changing it later means moving every table, for example with `ALTER TABLE … SET SCHEMA`.
 
-The unqualified names, `public` on PostgreSQL, are the site's own. Each [plugin](#plugins) with tables gets a namespace of its own, in the same form as Cosray's: a schema where Cosray has one, a name prefix where Cosray has that.
+The unqualified names, `public` on PostgreSQL, are the site's own. Name the database role unlike any of these schemas: PostgreSQL's default search path looks in a schema named like the role first, so a role `cms` would put the site's unqualified tables into Cosray's schema. Each [plugin](#plugins) with tables gets a namespace of its own, in the same form as Cosray's: a schema where Cosray has one, a name prefix where Cosray has that.
 
 ### Filesystem directories and URL paths
 
