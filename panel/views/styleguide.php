@@ -428,6 +428,68 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 			</section>
 
+			<section class="cms-styleguide-section" data-section="kit">
+				<h2>Panel kit</h2>
+				<p class="cms-styleguide-note">
+					The documented components plugin pages build on, from <code>kit/</code> and <code>kit.css</code>.
+					See docs/panel-kit.md.
+				</p>
+				<div class="cms-styleguide-sample" data-sample="kit:head">
+					<div class="cms-page" style="flex: 1">
+						<?php $this->include('kit/head', [
+							'title' => 'Spring check',
+							'crumbs' => [['Reports', '#']],
+							'count' => '42 findings',
+							'actions' => [
+								['label' => 'Export', 'url' => '#', 'icon' => 'cloud-download', 'download' => true],
+								['label' => 'Delete', 'icon' => 'trash3', 'variant' => 'danger', 'iconOnly' => true],
+							],
+						]) ?>
+					</div>
+				</div>
+				<div class="cms-styleguide-sample" data-sample="kit:filter">
+					<?php $this->include('kit/filter', ['label' => 'Status', 'links' => [
+						['label' => 'Open', 'url' => '#', 'active' => true, 'count' => 12],
+						['label' => 'Applied', 'url' => '#', 'count' => 3],
+						['label' => 'All', 'url' => '#', 'count' => 15],
+					]]) ?>
+				</div>
+				<div class="cms-styleguide-sample" data-sample="kit:pills">
+					<?php foreach (['neutral', 'info', 'success', 'warning', 'danger'] as $tone): ?>
+						<?php $this->include('kit/pill', ['label' => ucfirst($tone), 'tone' => $tone]) ?>
+					<?php endforeach ?>
+				</div>
+				<div class="cms-styleguide-sample" data-sample="kit:list" style="display: block">
+					<div class="cms-kit-body" style="height: 14rem; margin: 0">
+						<div class="cms-kit-scroll">
+							<div class="cms-kit-cards">
+								<?php foreach (['warning' => 'Generic claim', 'success' => 'Applied', 'danger' => 'Outdated'] as $tone => $heading): ?>
+									<article class="cms-kit-card" data-tone="<?= $tone ?>">
+										<header class="cms-kit-card-head">
+											<h3><?= $heading ?></h3>
+											<span class="cms-kit-card-meta">Beers / Lager · DE</span>
+										</header>
+										<p>Brewed with care for the climate.</p>
+									</article>
+								<?php endforeach ?>
+							</div>
+						</div>
+						<?php $this->include('kit/pagination', ['start' => 1, 'end' => 3, 'total' => 3, 'previous' => null, 'next' => null]) ?>
+					</div>
+				</div>
+				<div class="cms-styleguide-sample" data-sample="kit:empty" style="display: block">
+					<?php $this->include('kit/empty', ['title' => 'No reports yet', 'text' => 'Import a report file to start.']) ?>
+				</div>
+				<form class="cms-styleguide-sample" data-sample="kit:fields" onsubmit="event.preventDefault()" style="display: block">
+					<div class="cms-kit-fields">
+						<?php $this->include('kit/field', ['name' => 'kit-replacement', 'label' => 'Replacement', 'type' => 'textarea', 'placeholder' => 'Replaces the marked text']) ?>
+						<?php $this->include('kit/field', ['name' => 'kit-note', 'label' => 'Note', 'type' => 'textarea', 'description' => 'Kept with the decision.']) ?>
+						<?php $this->include('kit/field', ['name' => 'kit-file', 'label' => 'File', 'type' => 'file', 'error' => 'Choose a JSON file.']) ?>
+						<?php $this->include('kit/field', ['name' => 'kit-status', 'label' => 'Status', 'type' => 'select', 'value' => 'open', 'options' => ['open' => 'Open', 'applied' => 'Applied']]) ?>
+					</div>
+				</form>
+			</section>
+
 			<section class="cms-styleguide-section" data-section="alignment">
 				<h2>Field alignment</h2>
 				<p class="cms-styleguide-note">

@@ -9,6 +9,7 @@
 @import './media.css' layer(panel);
 @import './dashboard.css' layer(panel);
 @import './collection.css' layer(panel);
+@import './kit.css' layer(panel);
 @import './menus.css' layer(panel);
 @import './status.css' layer(panel);
 @import './avatar.css' layer(panel);

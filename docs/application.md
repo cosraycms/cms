@@ -261,7 +261,7 @@ Plugin ids need a dash, and every built-in panel route starts with a one-word se
 
 Plugin panel templates can also draw a block type on the editor canvas, see [editor views](blocks.md#editor-views).
 
-Panel controllers extend [Panel](../src/Controller/Panel/Panel.php) and return `$this->context([...])`; `#[Permission]` on a method refuses users without that permission. `$this->url('/42', ['tab' => 'items'])` builds a URL below the plugin's pages, `{panel.path}/{id}/42?tab=items`. Their templates call `$this->layout('layer/main')` and render only their fragment, without another `id="main"`. The [layer templates](../panel/views/layer/) wrap it for the requested swap:
+Panel controllers extend [Panel](../src/Controller/Panel/Panel.php) and return `$this->context([...])`; the [panel kit](panel-kit.md) lists the components and controller methods a plugin page builds on; `#[Permission]` on a method refuses users without that permission. `$this->url('/42', ['tab' => 'items'])` builds a URL below the plugin's pages, `{panel.path}/{id}/42?tab=items`. Their templates call `$this->layout('layer/main')` and render only their fragment, without another `id="main"`. The [layer templates](../panel/views/layer/) wrap it for the requested swap:
 
 - `main`: content inside an area.
 - `frame`: rail and content on an area switch.
@@ -304,7 +304,7 @@ These endpoints require panel access. Creation accepts registered types, with an
 
 ### Client lifecycle
 
-Registered scripts load once per full document and do not run again after htmx navigation. Delegated, idempotent listeners or custom elements work across replaced fragments; load-time DOM decoration alone does not. Panel markup is internal unless an extension boundary is documented. See [editor controls](controls.md) for the custom-element and bridge interfaces.
+Registered scripts load once per full document and do not run again after htmx navigation. Delegated, idempotent listeners or custom elements work across replaced fragments; load-time DOM decoration alone does not. Panel markup is internal unless an extension boundary is documented, as the [panel kit](panel-kit.md) is. See [editor controls](controls.md) for the custom-element and bridge interfaces.
 
 ### Dashboard cards
 

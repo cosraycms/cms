@@ -19,6 +19,24 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		$this->authenticateAs('editor');
 	}
 
+	public function testTheKitsFieldsTieTheirDescriptionAndErrorToTheControl(): void
+	{
+		$this->app = $this->createApp(['app.debug' => true]);
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/styleguide'));
+
+		$this->assertHtmlNodeExists(
+			'//*[@data-section="kit"]//label[@for="field-kit-file"]/following-sibling::input'
+				. '[@id="field-kit-file"][@aria-invalid="true"][@aria-describedby="field-kit-file-error"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists('//p[@id="field-kit-file-error"][.="Choose a JSON file."]', $html);
+		$this->assertHtmlNodeExists(
+			'//textarea[@id="field-kit-note"][@aria-describedby="field-kit-note-description"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists('//*[@data-section="kit"]//a[@download][@hx-boost="false"]', $html);
+	}
+
 	public function testStyleguideRendersComponentsAndTokens(): void
 	{
 		$this->app = $this->createApp(['app.debug' => true]);
