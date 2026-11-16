@@ -111,6 +111,17 @@ final class Registrar
 		$this->bootstrap->policy()->allow($principal, ...$permissions);
 	}
 
+	/**
+	 * The plugin's translation domain `{id}`, with catalogs named
+	 * `{id}.{locale}.php` in $dir. It is searched after the app's domains
+	 * and before Cosray's. With `$scripts`, the panel also sends it to its
+	 * scripts, embedded in every full page load.
+	 */
+	public function translations(string $dir, bool $scripts = false): void
+	{
+		$this->bootstrap->addTranslations($this->id, $dir, $scripts);
+	}
+
 	public function migrations(string $dir): void
 	{
 		$this->bootstrap->addMigrations($dir);

@@ -104,6 +104,9 @@ class Bootstrap implements CorePlugin
 	/** @var list<array<mixed>|object|string> */
 	protected array $pluginCommands = [];
 
+	/** @var array<string, array{dir: string, scripts: bool}> */
+	protected array $pluginTranslations = [];
+
 	protected readonly PluginAssets $pluginAssets;
 	protected readonly PanelExtras $panelExtras;
 
@@ -150,6 +153,7 @@ class Bootstrap implements CorePlugin
 		$this->container = $app->container();
 
 		$this->loadPlugins();
+		$this->addTranslationsTo($this->container);
 
 		$this->addPanelRenderer();
 		$this->addViewRenderer();
@@ -271,6 +275,24 @@ class Bootstrap implements CorePlugin
 		}
 	}
 
+	/** Plugin catalogs reach the translators through the app's Locales, loaded before boot. */
+	protected function addTranslationsTo(Container $container): void
+	{
+		if ($this->pluginTranslations === [] || !$container->has(Locales::class)) {
+			return;
+		}
+
+		$locales = $container->get(Locales::class);
+
+		if (!$locales instanceof Locales) {
+			return;
+		}
+
+		foreach ($this->pluginTranslations as $domain => $catalog) {
+			$locales->pluginCatalog($domain, $catalog['dir'], $catalog['scripts']);
+		}
+	}
+
 	public function addMigrations(string $dir): void
 	{
 		if ($dir === '') {
@@ -343,6 +365,15 @@ class Bootstrap implements CorePlugin
 	public function addService(string $key, object|string $value): Entry
 	{
 		return $this->container->add($key, $value);
+	}
+
+	public function addTranslations(string $domain, string $dir, bool $scripts): void
+	{
+		if (!is_dir($dir)) {
+			throw new RuntimeException("Translation directory of {$domain} not found: {$dir}");
+		}
+
+		$this->pluginTranslations[$domain] = ['dir' => rtrim($dir, '/'), 'scripts' => $scripts];
 	}
 
 	/** @param array<mixed>|object|string $commands */

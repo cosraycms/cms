@@ -110,6 +110,26 @@ final class PanelPluginPageTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//a[@class="stats" and @href="/panel/test-plugin/stats?tab=all"]', $html);
 	}
 
+	public function testAPluginCatalogTranslatesItsPagesAndReachesTheScripts(): void
+	{
+		$this->authenticateAs('editor');
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/test-plugin', [
+			'headers' => ['Accept-Language' => 'de'],
+		]));
+
+		$this->assertHtmlNodeExists('//p[@class="greeting" and .="Hallo vom Plugin"]', $html);
+		// A language the plugin has no entry for falls back like Cosray's own catalogs.
+		$this->assertHtmlNodeExists('//p[@class="english" and .="Only in English"]', $html);
+		$this->assertStringContainsString('"domain":"test-plugin"', $html);
+		$this->assertStringContainsString('Hallo vom Plugin', $html);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/test-plugin', [
+			'headers' => ['Accept-Language' => 'fr'],
+		]));
+		$this->assertHtmlNodeExists('//html[@lang="fr"]', $html);
+		$this->assertHtmlNodeExists('//p[@class="greeting" and .="Hello from the plugin"]', $html);
+	}
+
 	public function testPluginPanelPageRequiresAuthentication(): void
 	{
 		$response = $this->makeRequest('GET', '/panel/test-plugin');

@@ -24,6 +24,7 @@ use Cosray\Contract\Entries;
 use Cosray\Exception\RuntimeException;
 use Cosray\Icons\Provider as IconProvider;
 use Cosray\Locale;
+use Cosray\Locales;
 use Cosray\Navigation;
 use Cosray\NavigationItem;
 use Cosray\NavLink;
@@ -211,10 +212,11 @@ abstract class Panel
 
 	/**
 	 * The `panel` catalog for the active locale as the payload the panel's
-	 * verba runtime boots from. This domain holds exactly the strings the
-	 * panel scripts use (extracted by the JavascriptScanner), so the browser
-	 * never receives backend-only messages. Empty when no translator is
-	 * active (e.g. outside the request pipeline).
+	 * verba runtime boots from, with the plugin domains registered for
+	 * scripts. `panel` holds exactly the strings the panel scripts use
+	 * (extracted by the JavascriptScanner), so the browser never receives
+	 * backend-only messages. Empty when no translator is active (e.g.
+	 * outside the request pipeline).
 	 *
 	 * @return array{
 	 *     locale: string,
@@ -228,7 +230,10 @@ abstract class Panel
 	 */
 	protected function messages(): array
 	{
-		return Verba::translator()?->exportMany(['panel']) ?? ['locale' => $this->localeId(), 'domains' => []];
+		$locales = $this->container->has(Locales::class) ? $this->container->get(Locales::class) : null;
+		$domains = $locales instanceof Locales ? $locales->scriptDomains() : ['panel'];
+
+		return Verba::translator()?->exportMany($domains) ?? ['locale' => $this->localeId(), 'domains' => []];
 	}
 
 	protected function panelPath(): string

@@ -230,6 +230,8 @@ Settings use flat namespaced keys, such as `'acme-shop.currency' => 'USD'`. With
 
 `$cms->commands(ImportOrders::class)` adds console commands, as `Commands::add()` takes them: class names are autowired in the console scope, and keyed factories build a command themselves. Command names are free; a name another command already uses fails when the console starts.
 
+`$cms->translations(__DIR__ . '/../lang')` registers the translation domain `{id}`, with catalogs named `{id}.{locale}.php`. It is searched after the app's domains and before Cosray's, so an app can still shadow a plugin's entry. Keys start with the plugin id by convention, such as `acme-shop:order-shipped`. A panel language the plugin ships no catalog for shows the entries of the next language in the panel's fallback chain, usually English. The panel sends only the `panel` domain to its scripts; pass `scripts: true` to send the plugin's catalog too, embedded in every full page load. A plugin repo registers Verba's `i18n:sync` and `i18n:status` for its own domain in its `run` script.
+
 Plugin migrations share the `default` namespace. Timestamped filenames avoid collisions; use Quma's `/*:cms.prefix:*/` placeholder for configured table prefixes and bound parameters for runtime data.
 
 ### Panel pages and navigation

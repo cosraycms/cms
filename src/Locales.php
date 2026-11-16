@@ -23,6 +23,12 @@ class Locales implements Iterator, Countable, CorePlugin
 	/** @var array<string, string> App translation domains, mapped to their catalog dir. */
 	protected array $catalogs = [];
 
+	/** @var array<string, string> Plugin translation domains, mapped to their catalog dir. */
+	protected array $pluginCatalogs = [];
+
+	/** @var list<string> */
+	protected array $scriptDomains = ['panel'];
+
 	protected ?string $default = null;
 	protected ?Closure $negotiator = null;
 
@@ -44,8 +50,22 @@ class Locales implements Iterator, Countable, CorePlugin
 	}
 
 	/**
+	 * Register a plugin's translation domain, searched after the app's
+	 * domains and before Cosray's own. With `$scripts`, the panel also
+	 * sends the domain's catalog to its scripts.
+	 */
+	public function pluginCatalog(string $domain, string $dir, bool $scripts = false): void
+	{
+		$this->pluginCatalogs[$domain] = $dir;
+
+		if ($scripts && !in_array($domain, $this->scriptDomains, true)) {
+			$this->scriptDomains[] = $domain;
+		}
+	}
+
+	/**
 	 * The domain cascade for the runtime translator: registered app domains
-	 * first, Cosray's bundled catalogs last.
+	 * first, then the plugins' domains, Cosray's bundled catalogs last.
 	 *
 	 * @return array<string, string>
 	 */
@@ -53,7 +73,19 @@ class Locales implements Iterator, Countable, CorePlugin
 	{
 		$dir = dirname(__DIR__) . '/lang';
 
-		return $this->catalogs + ['cosray' => $dir, 'panel' => $dir];
+		return $this->catalogs + $this->pluginCatalogs + ['cosray' => $dir, 'panel' => $dir];
+	}
+
+	/**
+	 * The domains whose catalogs the panel sends to its scripts: `panel`,
+	 * which holds just the strings core's scripts use, and the plugin
+	 * domains registered for scripts.
+	 *
+	 * @return list<string>
+	 */
+	public function scriptDomains(): array
+	{
+		return $this->scriptDomains;
 	}
 
 	/**

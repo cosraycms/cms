@@ -34,6 +34,7 @@ final class TestPlugin implements Plugin
 		$cms->control('test-money-picker', 'test-money-picker', 'controls.js');
 		$cms->dashboardCard(TestDashboardCard::class);
 		$cms->templates(__DIR__ . '/views');
+		$cms->translations(__DIR__ . '/lang', scripts: true);
 		$cms->panel(static function (PanelRoutes $panel): void {
 			$panel->get('', [PageController::class, 'index'], 'index')->render('test-plugin:page');
 			$panel->post('', [PageController::class, 'save'], 'save');

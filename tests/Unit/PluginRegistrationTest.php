@@ -12,6 +12,7 @@ use Cosray\Bootstrap;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Index as FieldIndex;
 use Cosray\Field\Schema\Registry as FieldSchemas;
+use Cosray\Locales;
 use Cosray\Navigation;
 use Cosray\Panel\Dashboard;
 use Cosray\Plugin\Plugin;
@@ -111,6 +112,18 @@ final class PluginRegistrationTest extends TestCase
 		$this->assertTrue(
 			array_any($sqlDirs, static fn($dir) => str_contains((string) $dir, 'Fixtures/Plugin/db/sql')),
 		);
+	}
+
+	public function testPluginCatalogsComeAfterTheAppsAndBeforeCosrays(): void
+	{
+		$locales = new Locales();
+		$locales->catalog('site', self::root() . '/tests/Fixtures/lang');
+		$this->loadBootstrap(static function (Bootstrap $bootstrap): void {
+			$bootstrap->plugin(TestPlugin::class);
+		}, locales: $locales);
+
+		$this->assertSame(['site', 'test-plugin', 'cosray', 'panel'], array_keys($locales->catalogs()));
+		$this->assertSame(['panel', 'test-plugin'], $locales->scriptDomains());
 	}
 
 	public function testConfigPluginRegistration(): void
@@ -223,7 +236,7 @@ final class PluginRegistrationTest extends TestCase
 		$this->assertSame('CHF', $service->currency);
 	}
 
-	private function loadBootstrap(?callable $configure = null, array $settings = []): App
+	private function loadBootstrap(?callable $configure = null, array $settings = [], ?Locales $locales = null): App
 	{
 		$config = $this->config(array_merge([
 			'db.dsn' => 'pgsql:dbname=cosray',
@@ -237,6 +250,11 @@ final class PluginRegistrationTest extends TestCase
 		}
 
 		$app = new App($this->factory(), new Router(), $this->container());
+
+		if ($locales !== null) {
+			$app->load($locales);
+		}
+
 		$app->load($bootstrap);
 
 		return $app;
