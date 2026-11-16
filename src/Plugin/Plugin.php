@@ -21,9 +21,11 @@ interface Plugin
 	 * Stable identifier, e.g. 'acme-shop'.
 	 *
 	 * Lowercase letters, digits and dashes, with at least one dash —
-	 * like custom element names; dashless names stay reserved for
-	 * cosray's own config keys. Used as the config namespace and for
-	 * asset URLs, template namespaces and error messages.
+	 * like custom element names. The dash keeps every name the plugin
+	 * creates apart from Cosray's own: its config keys '{id}.{option}',
+	 * panel routes under '{panel}/{id}', template namespace, translation
+	 * domain, migration namespace and asset URLs. Its permissions are
+	 * named '{id}.{name}' by convention.
 	 */
 	public function id(): string;
 

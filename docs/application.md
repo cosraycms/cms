@@ -224,7 +224,7 @@ final class ShopPlugin implements Plugin
 $app->plugin(ShopPlugin::class);
 ```
 
-The `plugins` config key also accepts plugin registrations. Classes registered by name are constructed without arguments; register a pre-built instance when construction needs arguments. IDs currently allow lowercase letters, digits, and dashes and require a dash, keeping plugin config namespaces separate from built-in settings.
+A plugin is PHP code that runs in the site's process with the site's full access. There is no sandbox, so installing a plugin means trusting its code. The `plugins` config key also accepts plugin registrations. Classes registered by name are constructed without arguments; register a pre-built instance when construction needs arguments. IDs currently allow lowercase letters, digits, and dashes and require a dash, keeping plugin config namespaces separate from built-in settings.
 
 Settings use flat namespaced keys, such as `'acme-shop.currency' => 'USD'`. Within registration, `$cms->option('currency', 'EUR')` reads that key with a default; elsewhere, use `Config`. Custom field classes extend `Cosray\Field\Field`, as [writing a field type](content.md#writing-a-field-type) describes; `Registrar::field()` string aliases are for legacy imports, not required when node properties use the field class directly.
 
