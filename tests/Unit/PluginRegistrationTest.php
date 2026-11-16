@@ -93,17 +93,8 @@ final class PluginRegistrationTest extends TestCase
 		});
 
 		$config = $app->container()->get(Connection::class)->config;
-		$migrations = $config->migrations;
-		$dirs = [];
-		array_walk_recursive($migrations, static function ($dir) use (&$dirs): void {
-			$dirs[] = $dir;
-		});
-		$this->assertTrue(
-			array_any($dirs, static fn($dir) => str_contains(
-				(string) $dir,
-				'Fixtures/Plugin/db/migrations',
-			)),
-		);
+		$this->assertSame([self::root() . '/tests/Fixtures/Plugin/db/migrations'], $config->migrations['test-plugin']);
+		$this->assertSame(['default', 'test-plugin'], $config->migrationOrder);
 
 		$sql = $config->sql;
 		$sqlDirs = [];

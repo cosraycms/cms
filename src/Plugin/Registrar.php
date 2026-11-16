@@ -133,9 +133,14 @@ final class Registrar
 		$this->bootstrap->addIcons($this->id, $dir);
 	}
 
+	/**
+	 * Migrations in the namespace named after this plugin, recorded as
+	 * `{id}:{file}`. `db:migrations --apply` runs them after the site's and
+	 * Cosray's, in plugin registration order, in the same transaction.
+	 */
 	public function migrations(string $dir): void
 	{
-		$this->bootstrap->addMigrations($dir);
+		$this->bootstrap->addMigrations($this->id, $dir);
 	}
 
 	public function sql(string $dir): void

@@ -93,7 +93,7 @@ class Bootstrap implements CorePlugin
 	/** @var array<string, true> */
 	protected array $pluginIds = [];
 
-	/** @var list<non-empty-string> */
+	/** @var array<non-empty-string, list<non-empty-string>> plugin id => migration directories */
 	protected array $pluginMigrations = [];
 
 	/** @var list<non-empty-string> */
@@ -297,13 +297,14 @@ class Bootstrap implements CorePlugin
 		}
 	}
 
-	public function addMigrations(string $dir): void
+	/** Adds a migration directory to the namespace named after the plugin. */
+	public function addMigrations(string $id, string $dir): void
 	{
-		if ($dir === '') {
+		if ($dir === '' || $id === '') {
 			throw new RuntimeException('Plugin migration directory is empty');
 		}
 
-		$this->pluginMigrations[] = $dir;
+		$this->pluginMigrations[$id][] = $dir;
 	}
 
 	public function addSql(string $dir): void
@@ -585,17 +586,20 @@ class Bootstrap implements CorePlugin
 
 		$namespacedMigrations = [];
 		$namespacedMigrations['install'] = [$root . '/db/migrations/install'];
-		$namespacedMigrations['default'] = array_merge(
-			$migrationPaths,
-			$this->pluginMigrations,
-			[$root . '/db/migrations/update'],
-		);
+		$namespacedMigrations['default'] = array_merge($migrationPaths, [$root . '/db/migrations/update']);
+
+		// Each plugin's migrations run after all of default, in registration
+		// order; `install` only ever runs on its own, on an empty database.
+		foreach ($this->pluginMigrations as $id => $dirs) {
+			$namespacedMigrations[$id] = $dirs;
+		}
 
 		$connection = new Connection(
 			$config->dsn ?? throw new RuntimeException('No database configured: set DATABASE_URL or db.dsn'),
 			$sql,
 		)
 			->migrations($namespacedMigrations)
+			->migrationOrder(['default', ...array_keys($this->pluginMigrations)])
 			->fetch(PDO::FETCH_ASSOC)
 			->options($config->options)
 			->placeholders(Delimiters::comments(), $config->placeholders);
