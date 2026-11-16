@@ -29,6 +29,7 @@ final class TestPlugin implements Plugin
 		$cms->migrations(__DIR__ . '/db/migrations');
 		$cms->sql(__DIR__ . '/db/sql');
 		$cms->assets(__DIR__ . '/assets');
+		$cms->icons(__DIR__ . '/icons');
 		$cms->blockType(TestNotice::class);
 		$cms->blockType(TestCallout::class);
 		$cms->control('test-money-picker', 'test-money-picker', 'controls.js');

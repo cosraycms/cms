@@ -122,6 +122,16 @@ final class Registrar
 		$this->bootstrap->addTranslations($this->id, $dir, $scripts);
 	}
 
+	/**
+	 * The SVG files in $dir as icons `{id}:{name}`, such as
+	 * `acme-shop:truck` for `truck.svg`. A site's own icon files of the
+	 * same id come first, Iconify's last.
+	 */
+	public function icons(string $dir): void
+	{
+		$this->bootstrap->addIcons($this->id, $dir);
+	}
+
 	public function migrations(string $dir): void
 	{
 		$this->bootstrap->addMigrations($dir);

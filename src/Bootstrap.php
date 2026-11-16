@@ -28,6 +28,7 @@ use Cosray\Field\Schema\Registry as FieldSchemas;
 use Cosray\Field\Services as FieldServices;
 use Cosray\Icons\Iconify;
 use Cosray\Icons\Local;
+use Cosray\Icons\Plugins as PluginIcons;
 use Cosray\Icons\Provider as IconProvider;
 use Cosray\Node\Schema\Registry as NodeSchemas;
 use Cosray\Node\Types;
@@ -106,6 +107,9 @@ class Bootstrap implements CorePlugin
 
 	/** @var array<string, array{dir: string, scripts: bool}> */
 	protected array $pluginTranslations = [];
+
+	/** @var array<string, string> plugin id => icon directory */
+	protected array $pluginIcons = [];
 
 	protected readonly PluginAssets $pluginAssets;
 	protected readonly PanelExtras $panelExtras;
@@ -376,6 +380,15 @@ class Bootstrap implements CorePlugin
 		$this->pluginTranslations[$domain] = ['dir' => rtrim($dir, '/'), 'scripts' => $scripts];
 	}
 
+	public function addIcons(string $id, string $dir): void
+	{
+		if (!is_dir($dir)) {
+			throw new RuntimeException("Icon directory of {$id} not found: {$dir}");
+		}
+
+		$this->pluginIcons[$id] = $dir;
+	}
+
 	/** @param array<mixed>|object|string $commands */
 	public function addCommands(array|object|string $commands): void
 	{
@@ -419,6 +432,14 @@ class Bootstrap implements CorePlugin
 
 		if (!$this->replaceDefaultIconProviders) {
 			$providers[] = new Local($this->localIconPaths());
+		}
+
+		// Before Iconify, whose dashed set names a plugin id may share.
+		if ($this->pluginIcons !== []) {
+			$providers[] = new PluginIcons($this->pluginIcons);
+		}
+
+		if (!$this->replaceDefaultIconProviders) {
 			$providers[] = Iconify::class;
 		}
 

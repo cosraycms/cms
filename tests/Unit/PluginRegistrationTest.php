@@ -12,6 +12,7 @@ use Cosray\Bootstrap;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Index as FieldIndex;
 use Cosray\Field\Schema\Registry as FieldSchemas;
+use Cosray\Icons\Provider as IconProvider;
 use Cosray\Locales;
 use Cosray\Navigation;
 use Cosray\Panel\Dashboard;
@@ -124,6 +125,17 @@ final class PluginRegistrationTest extends TestCase
 
 		$this->assertSame(['site', 'test-plugin', 'cosray', 'panel'], array_keys($locales->catalogs()));
 		$this->assertSame(['panel', 'test-plugin'], $locales->scriptDomains());
+	}
+
+	public function testPluginIconsResolveUnderThePluginId(): void
+	{
+		$app = $this->loadBootstrap(static function (Bootstrap $bootstrap): void {
+			$bootstrap->plugin(TestPlugin::class);
+		});
+		$icons = $app->container()->get(IconProvider::class);
+
+		$this->assertStringContainsString('M1 1h14v14H1z', $icons->icon('test-plugin:crate', ['class' => 'x']));
+		$this->assertStringContainsString('class="x"', $icons->icon('test-plugin:crate', ['class' => 'x']));
 	}
 
 	public function testConfigPluginRegistration(): void
