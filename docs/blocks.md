@@ -331,7 +331,7 @@ Migration `000000-000031` converts blocks in nodes, working copies, and history.
 
 Apply the normal application migrations before saving legacy content. Review `blocks-migration-report.json`, especially unknown types, unresolved field types, legacy richtext, and dropped media items. Unknown rows are retained by the migration but may be dropped on the next editor save. Richtext without its format marker still needs migration `000000-000020`.
 
-Fields relying on the old implicit twelve columns need `#[Columns(12)]`; otherwise they are one-column stacks. The migration and renderer details live in [db/migrations/update/](../db/migrations/update/) and the implementation links above.
+Fields relying on the old implicit twelve columns need `#[Columns(12)]`; otherwise they are one-column stacks. The renderer details live in the implementation links above.
 
 ### Positions
 

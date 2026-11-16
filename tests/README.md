@@ -46,10 +46,9 @@ export COSRAY_DB_USER=cosray
 
 createdb --host "$COSRAY_DB_HOST" --username "$COSRAY_DB_USER" "$COSRAY_DB_NAME"
 php run db:migrations --namespace=install --apply
-php run db:migrations --apply
 ```
 
-The install namespace creates the current schema and records included updates. An already initialized test database normally needs only the update command. Schema checks report when setup is missing or outdated.
+The install namespace creates the current schema. Schema checks report when setup is missing or outdated.
 
 `php run recreate-db` is destructive: it terminates connections and drops/recreates the selected database. Use it only for an explicitly approved isolated reset, never as an automatic response to a failing test.
 
