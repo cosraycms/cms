@@ -70,7 +70,8 @@ final class ContactTest extends TestCase
 ```
 
 - `createApp()` returns what the project's `boot/app.php` returns. Override it for another layout, like `return require dirname(__DIR__) . '/app/app.php';`. It must create the app, not return one created earlier.
-- `get()` and `post()` handle a request as the site would and return the response without sending it. A path goes to `http://localhost`; give an absolute URL for another host, like a locale's domain. Requests come from `127.0.0.1`. `post()` sends a form as a browser does. For anything else, build a request with `serverRequest()`, add to it, and pass it to `request()`.
+- `get()` and `post()` handle a request as the site would and return the response without sending it. A path goes to `http://localhost`; give an absolute URL for another host, like a locale's domain. Requests come from `127.0.0.1`. `post()` sends a form as a browser does, and with `files:` a multipart upload: each file is the path of a local file or an `UploadedFileInterface`. For anything else, build a request with `serverRequest()`, add to it, and pass it to `request()`.
+- `actingAs($user)` signs a user in for the following requests, with a session as the panel's sign-in starts it, and every request that changes data then carries the session's CSRF token. `user(roles: ['admin'])` creates an active user for the test.
 - `service()` returns a service of the app as a job or a command gets it: without a request, in the default locale. Create content with [`Node\Writer`](content.md#programmatic-creation) and menus with `Cosray\Menus`, read what was stored with `Cms`, and what was queued with [`Mailer::queued()`](mail.md#testing) and [`Queue::pending()`](queue.md#testing).
 - `$this->app` is the app of the running test.
 
@@ -83,3 +84,39 @@ The code under test works inside that transaction. A transaction it begins is a 
 The active Verba translator is global. Whatever translator a test activates, `service()` included, is replaced again by the one active before the test.
 
 Sessions end with the test. Settings the app reads from `.env` still apply unless `phpunit.xml.dist` sets them, such as a provider's API token or the [breach check](application.md#passwords).
+
+## Panel pages
+
+A test signs in and uses the panel as an editor would:
+
+```php
+public function testAnAdminImportsAReport(): void
+{
+    $response = $this
+        ->actingAs($this->user(roles: ['admin']))
+        ->post('/panel/review-reports', files: ['file' => __DIR__ . '/fixtures/report.json']);
+
+    $this->assertSame(303, $response->getStatusCode());
+}
+```
+
+`csrfToken()` returns the token a page of the session carries, for a request built by hand.
+
+## Testing a plugin
+
+In a plugin's own repository, the plugin is the root package and there is no site to boot. Its tests override `createApp()` with a small app that registers the plugin, as a site's boot file would:
+
+```php
+protected function createApp(): App
+{
+    $app = App::create(dirname(__DIR__), ['db.dsn' => getenv('DATABASE_URL') ?: throw new RuntimeException('Set DATABASE_URL')]);
+    $locales = new Locales();
+    $locales->add('en', title: 'English', pgDict: 'english');
+    $app->load($locales);
+    $app->plugin(\Acme\Shop\Plugin::class);
+
+    return $app->boot();
+}
+```
+
+The test database needs Cosray's schema and the plugin's migrations: `php run db:migrations --namespace=install --apply`, then `php run db:migrations --apply`, from a `run` script that boots the same app.

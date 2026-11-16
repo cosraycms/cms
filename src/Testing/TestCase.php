@@ -8,13 +8,18 @@ use Celema\Quma\Database as QumaDatabase;
 use Celema\Verba\Translator;
 use Celema\Verba\Verba;
 use Composer\InstalledVersions;
+use Cosray\Actor;
 use Cosray\App;
 use Cosray\Console\Runtime;
 use Cosray\Exception\RuntimeException;
+use Cosray\Session;
+use Cosray\User;
+use Cosray\Users;
 use Override;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\UploadedFileInterface;
 
 /**
  * Base class for a site's tests. Each test gets a new instance of the site's
@@ -28,6 +33,7 @@ abstract class TestCase extends PHPUnitTestCase
 {
 	protected App $app;
 	private ?Database $db = null;
+	private bool $signedIn = false;
 	private ?Runtime $runtime = null;
 	private ?Translator $previousTranslator = null;
 
@@ -62,6 +68,7 @@ abstract class TestCase extends PHPUnitTestCase
 
 			$this->previousTranslator = null;
 			$this->runtime = null;
+			$this->signedIn = false;
 			$this->db?->discard();
 			$this->db = null;
 			self::endSession();
@@ -92,9 +99,21 @@ abstract class TestCase extends PHPUnitTestCase
 		return $app;
 	}
 
-	/** Handles the request as the site would, without sending the response. */
+	/**
+	 * Handles the request as the site would, without sending the response.
+	 * After actingAs(), a request that changes data carries the session's
+	 * CSRF token, as the panel's pages send it.
+	 */
 	protected function request(Request $request): Response
 	{
+		if (
+			$this->signedIn
+			&& !in_array($request->getMethod(), ['GET', 'HEAD', 'OPTIONS'], true)
+			&& !$request->hasHeader('X-CSRF-Token')
+		) {
+			$request = $request->withHeader('X-CSRF-Token', $this->csrfToken());
+		}
+
 		// PHPUnit lowers error_reporting while a test runs, and the app's error
 		// handler ignores what it does not report, unlike on the server.
 		$reporting = error_reporting(E_ALL);
@@ -113,19 +132,125 @@ abstract class TestCase extends PHPUnitTestCase
 	}
 
 	/**
-	 * Posts the form as a browser does.
+	 * Posts the form as a browser does. With files, by field name, it is a
+	 * multipart upload: each is the path of a local file or an uploaded
+	 * file built with the app's factory.
 	 *
 	 * @param array<array-key, mixed> $form
 	 * @param array<string, string|list<string>> $headers
+	 * @param array<string, string|UploadedFileInterface> $files
 	 */
-	protected function post(string $uri, array $form = [], array $headers = []): Response
+	protected function post(string $uri, array $form = [], array $headers = [], array $files = []): Response
 	{
+		$factory = $this->app->factory();
+
+		if ($files === []) {
+			$request = $this
+				->serverRequest('POST', $uri, ['Content-Type' => 'application/x-www-form-urlencoded', ...$headers])
+				->withParsedBody($form)
+				->withBody($factory->streamFactory()->createStream(http_build_query($form)));
+
+			return $this->request($request);
+		}
+
+		$uploads = [];
+
+		foreach ($files as $name => $file) {
+			$uploads[$name] = $file instanceof UploadedFileInterface ? $file : $this->upload($file);
+		}
+
 		$request = $this
-			->serverRequest('POST', $uri, ['Content-Type' => 'application/x-www-form-urlencoded', ...$headers])
+			->serverRequest('POST', $uri, ['Content-Type' => 'multipart/form-data; boundary=cosray', ...$headers])
 			->withParsedBody($form)
-			->withBody($this->app->factory()->streamFactory()->createStream(http_build_query($form)));
+			->withUploadedFiles($uploads);
 
 		return $this->request($request);
+	}
+
+	/**
+	 * Signs the user in for the following requests, with a session as the
+	 * panel's sign-in starts it.
+	 */
+	protected function actingAs(User $user): static
+	{
+		$session = $this->session();
+		$session->start();
+		$session->regenerate();
+		$session->setUser($user);
+		$session->close();
+		$this->signedIn = true;
+
+		return $this;
+	}
+
+	/**
+	 * Creates an active user of the site for the test, with a random
+	 * password.
+	 *
+	 * @param list<string> $roles
+	 */
+	protected function user(array $roles = [], string $type = 'user', ?string $email = null): User
+	{
+		$email ??= bin2hex(random_bytes(6)) . '@example.com';
+
+		return $this->service(Users::class)->create(
+			$type,
+			[
+				'username' => null,
+				'email' => $email,
+				'name' => null,
+				'roles' => $roles,
+				'active' => true,
+				'panelLocale' => null,
+				'panelRegion' => null,
+				'panelTimezone' => null,
+				'content' => [],
+			],
+			bin2hex(random_bytes(16)),
+			new Actor(1),
+		);
+	}
+
+	/** The CSRF token of the session the next request continues. */
+	protected function csrfToken(): string
+	{
+		$session = $this->session();
+		$session->start();
+
+		try {
+			return $session->csrf->token();
+		} finally {
+			$session->close();
+		}
+	}
+
+	private function session(): Session
+	{
+		$config = $this->app->config();
+
+		return new Session($config->session->options, $config->app->name, $config->session->handler);
+	}
+
+	private function upload(string $path): UploadedFileInterface
+	{
+		$size = filesize($path);
+
+		if (!is_file($path) || $size === false) {
+			throw new RuntimeException("No file to upload at {$path}");
+		}
+
+		$type = mime_content_type($path);
+
+		return $this->app
+			->factory()
+			->uploadedFileFactory()
+			->createUploadedFile(
+				$this->app->factory()->streamFactory()->createStreamFromFile($path),
+				$size,
+				UPLOAD_ERR_OK,
+				basename($path),
+				$type === false ? null : $type,
+			);
 	}
 
 	/**

@@ -134,6 +134,49 @@ final class TestingTestCaseTest extends TestCase
 		$this->assertStringContainsString('<h1>Hello</h1>', (string) $response->getBody());
 	}
 
+	public function testASignedInUserPostsAFormWithAnUploadToAPluginPage(): void
+	{
+		$file = (string) tempnam(sys_get_temp_dir(), 'upload');
+		file_put_contents($file, '{"findings": []}');
+
+		try {
+			$response = $this
+				->actingAs($this->user(roles: ['admin'], email: 'ada@example.com'))
+				->post('/panel/test-uploads', ['note' => 'First'], files: ['file' => $file]);
+		} finally {
+			unlink($file);
+		}
+
+		$this->assertSame(200, $response->getStatusCode());
+		$this->assertSame(
+			[
+				'user' => 'ada@example.com',
+				'note' => 'First',
+				'name' => basename($file),
+				'content' => '{"findings": []}',
+			],
+			json_decode((string) $response->getBody(), true),
+		);
+	}
+
+	public function testThePanelRefusesAUserWithoutThePermissionAndAGuest(): void
+	{
+		$this->assertSame(303, $this->post('/panel/test-uploads')->getStatusCode());
+
+		$this->actingAs($this->user(roles: ['editor']));
+
+		$this->assertSame(403, $this->post('/panel/test-uploads')->getStatusCode());
+	}
+
+	public function testASignedInRequestWithoutTheTokenIsRefused(): void
+	{
+		$this->actingAs($this->user(roles: ['admin']));
+
+		$response = $this->post('/panel/test-uploads', headers: ['X-CSRF-Token' => 'forged']);
+
+		$this->assertSame(403, $response->getStatusCode());
+	}
+
 	public function testASessionEndsWithTheTest(): void
 	{
 		$this->get('/panel/login');

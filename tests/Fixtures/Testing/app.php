@@ -6,6 +6,7 @@ use Cosray\App;
 use Cosray\Locales;
 use Cosray\Tests\Fixtures\Node\TestPage;
 use Cosray\Tests\Fixtures\Testing\Signups;
+use Cosray\Tests\Fixtures\Testing\UploadsPlugin;
 use Psr\Log\NullLogger;
 
 /** A site's app, as its boot file would create it. */
@@ -25,6 +26,7 @@ return function (string $dsn): App {
 	$app->load($locales);
 	$app->logger(new NullLogger());
 	$app->node(TestPage::class);
+	$app->plugin(UploadsPlugin::class);
 	$app->post('/signups', [Signups::class, 'store']);
 	$app->post('/signups/abandon', [Signups::class, 'abandon']);
 	$app->post('/signups/break', [Signups::class, 'break']);
