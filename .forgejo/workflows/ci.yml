@@ -89,6 +89,9 @@ jobs:
       - name: Initialize database schema
         run: php ./run db:migrations --namespace=install --apply
 
+      - name: Apply system update migrations
+        run: php ./run db:migrations --apply
+
       # Not required yet: the runner's browser setup has not been tried.
       - name: Run browser tests
         continue-on-error: true

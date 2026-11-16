@@ -525,7 +525,11 @@ class Bootstrap implements CorePlugin
 
 		$namespacedMigrations = [];
 		$namespacedMigrations['install'] = [$root . '/db/migrations/install'];
-		$namespacedMigrations['default'] = array_merge($migrationPaths, $this->pluginMigrations);
+		$namespacedMigrations['default'] = array_merge(
+			$migrationPaths,
+			$this->pluginMigrations,
+			[$root . '/db/migrations/update'],
+		);
 
 		$connection = new Connection(
 			$config->dsn ?? throw new RuntimeException('No database configured: set DATABASE_URL or db.dsn'),
