@@ -137,6 +137,10 @@ final class Registrar
 	 * Migrations in the namespace named after this plugin, recorded as
 	 * `{id}:{file}`. `db:migrations --apply` runs them after the site's and
 	 * Cosray's, in plugin registration order, in the same transaction.
+	 *
+	 * The plugin's tables never go into Cosray's database namespace: its
+	 * SQL names them through the placeholder `{id}.prefix`, and indexes
+	 * and triggers through `{id}.obj`. Cosray creates the schema.
 	 */
 	public function migrations(string $dir): void
 	{
@@ -145,7 +149,7 @@ final class Registrar
 
 	public function sql(string $dir): void
 	{
-		$this->bootstrap->addSql($dir);
+		$this->bootstrap->addSql($this->id, $dir);
 	}
 
 	/**

@@ -20,12 +20,13 @@ interface Plugin
 	/**
 	 * Stable identifier, e.g. 'acme-shop'.
 	 *
-	 * Lowercase letters, digits and dashes, with at least one dash —
-	 * like custom element names. The dash keeps every name the plugin
-	 * creates apart from Cosray's own: its config keys '{id}.{option}',
-	 * panel routes under '{panel}/{id}', template namespace, translation
-	 * domain, migration namespace and asset URLs. Its permissions are
-	 * named '{id}.{name}' by convention.
+	 * Lowercase letters, digits and dashes, starting with a letter and
+	 * with at least one dash — like custom element names. The dash keeps
+	 * every name the plugin creates apart from Cosray's own: its config
+	 * keys '{id}.{option}', panel routes under '{panel}/{id}', template
+	 * namespace, translation domain, migration namespace, database
+	 * namespace and asset URLs. Its permissions are named '{id}.{name}'
+	 * by convention.
 	 */
 	public function id(): string;
 

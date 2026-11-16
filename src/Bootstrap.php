@@ -35,6 +35,7 @@ use Cosray\Node\Types;
 use Cosray\Panel\Dashboard as PanelDashboard;
 use Cosray\Panel\Extras as PanelExtras;
 use Cosray\Plugin\Assets as PluginAssets;
+use Cosray\Plugin\Namespaces as PluginNamespaces;
 use Cosray\Plugin\PanelRoutes;
 use Cosray\Plugin\Plugin;
 use Cosray\Plugin\Registrar;
@@ -98,6 +99,11 @@ class Bootstrap implements CorePlugin
 
 	/** @var list<non-empty-string> */
 	protected array $pluginSql = [];
+
+	/** @var array<string, true> the ids of the plugins with migrations or SQL */
+	protected array $pluginDatabases = [];
+
+	protected PluginNamespaces $pluginNamespaces;
 
 	/** @var list<Closure> */
 	protected array $pluginRoutes = [];
@@ -184,6 +190,7 @@ class Bootstrap implements CorePlugin
 		$this->container->add(CollectionSchemaRegistry::class, $this->collectionSchemas->registry());
 		$this->container->add(PanelDashboard::class, $this->dashboardCards)->value();
 		$this->container->add(PluginAssets::class, $this->pluginAssets);
+		$this->container->add(PluginNamespaces::class, $this->pluginNamespaces);
 		$this->container->add(PanelExtras::class, $this->panelExtras);
 		$this->container->add(Policy::class, $this->policy);
 		$this->container->add(UserTypes::class, $this->userTypes);
@@ -260,13 +267,13 @@ class Bootstrap implements CorePlugin
 			// Like custom element names, plugin ids need a dash: dashless
 			// names stay reserved for cosray's own config keys, so the
 			// plugin's '{id}.{option}' config namespace can never collide.
-			if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)+$/', $id)) {
+			if (!preg_match('/^[a-z][a-z0-9]*(?:-[a-z0-9]+)+$/', $id)) {
 				throw new RuntimeException(
 					"Invalid plugin id '{$id}' ("
 						. $plugin::class
 						. '): ids consist of'
-						. ' lowercase letters, digits and dashes, and must contain at least'
-						. " one dash, e.g. 'acme-shop'.",
+						. ' lowercase letters, digits and dashes, start with a letter and'
+						. " contain at least one dash, e.g. 'acme-shop'.",
 				);
 			}
 
@@ -305,15 +312,17 @@ class Bootstrap implements CorePlugin
 		}
 
 		$this->pluginMigrations[$id][] = $dir;
+		$this->pluginDatabases[$id] = true;
 	}
 
-	public function addSql(string $dir): void
+	public function addSql(string $id, string $dir): void
 	{
-		if ($dir === '') {
+		if ($dir === '' || $id === '') {
 			throw new RuntimeException('Plugin SQL directory is empty');
 		}
 
 		$this->pluginSql[] = $dir;
+		$this->pluginDatabases[$id] = true;
 	}
 
 	public function addAssets(string $id, string $dir): void
@@ -569,6 +578,7 @@ class Bootstrap implements CorePlugin
 
 	protected function database(): void
 	{
+		$this->pluginNamespaces = new PluginNamespaces($this->config->db, array_keys($this->pluginDatabases));
 		$this->connection = $this->createConnection();
 		$this->db = $this->createDatabase($this->connection);
 	}
@@ -590,8 +600,10 @@ class Bootstrap implements CorePlugin
 
 		// Each plugin's migrations run after all of default, in registration
 		// order; `install` only ever runs on its own, on an empty database.
+		// Cosray's own directory comes with each: its migration sorts first
+		// and creates the plugin's schema.
 		foreach ($this->pluginMigrations as $id => $dirs) {
-			$namespacedMigrations[$id] = $dirs;
+			$namespacedMigrations[$id] = [$root . '/db/migrations/plugin', ...$dirs];
 		}
 
 		$connection = new Connection(
@@ -602,7 +614,7 @@ class Bootstrap implements CorePlugin
 			->migrationOrder(['default', ...array_keys($this->pluginMigrations)])
 			->fetch(PDO::FETCH_ASSOC)
 			->options($config->options)
-			->placeholders(Delimiters::comments(), $config->placeholders);
+			->placeholders(Delimiters::comments(), $this->pluginNamespaces->placeholders());
 
 		if ($config->slow !== null) {
 			$connection->onExecute(self::slowStatements($config->slow, new ContainerLogger($this->container)));

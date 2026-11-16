@@ -93,7 +93,10 @@ final class PluginRegistrationTest extends TestCase
 		});
 
 		$config = $app->container()->get(Connection::class)->config;
-		$this->assertSame([self::root() . '/tests/Fixtures/Plugin/db/migrations'], $config->migrations['test-plugin']);
+		$this->assertSame(
+			[self::root() . '/db/migrations/plugin', self::root() . '/tests/Fixtures/Plugin/db/migrations'],
+			$config->migrations['test-plugin'],
+		);
 		$this->assertSame(['default', 'test-plugin'], $config->migrationOrder);
 
 		$sql = $config->sql;
@@ -186,6 +189,22 @@ final class PluginRegistrationTest extends TestCase
 		$this->assertSame('USD', $seen['configured']);
 		$this->assertSame('de', $seen['defaulted']);
 		$this->assertNull($seen['absent']);
+	}
+
+	public function testAPluginIdStartsWithALetter(): void
+	{
+		$this->throws(RuntimeException::class, "Invalid plugin id '3d-viewer'");
+
+		$this->loadBootstrap(static function (Bootstrap $bootstrap): void {
+			$bootstrap->plugin(new class implements Plugin {
+				public function id(): string
+				{
+					return '3d-viewer';
+				}
+
+				public function register(Registrar $cms): void {}
+			});
+		});
 	}
 
 	public function testDashlessPluginIdThrows(): void

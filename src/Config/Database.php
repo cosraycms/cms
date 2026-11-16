@@ -126,7 +126,8 @@ final class Database
 		return $placeholders;
 	}
 
-	private function prefix(?string $driver = null): string
+	/** The prefix of Cosray's tables: a schema when it ends with a dot, else a part of each table's name. */
+	public function prefix(?string $driver = null): string
 	{
 		$placeholders = $this->placeholders;
 		$driver ??= $this->driver();
@@ -150,7 +151,7 @@ final class Database
 		throw new RuntimeException('Invalid table prefix.');
 	}
 
-	private function validPrefix(string $prefix, string $driver): bool
+	public function validPrefix(string $prefix, string $driver): bool
 	{
 		if ($driver === 'pgsql') {
 			return preg_match('/^(?:[a-z_][a-z0-9_]*[.]?)?$/', $prefix) === 1;
@@ -159,7 +160,7 @@ final class Database
 		return preg_match('/^(?:[a-z_][a-z0-9_]*)?$/', $prefix) === 1;
 	}
 
-	private function driver(): string
+	public function driver(): string
 	{
 		$driver = strstr($this->dsn ?? '', ':', before_needle: true);
 
