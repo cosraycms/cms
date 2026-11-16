@@ -38,9 +38,36 @@ return $app->serve();
 ## Requirements
 
 - PHP `^8.5` and Composer 2. Required extensions are declared in [composer.json](composer.json); run `composer check-platform-reqs` after installation.
-- PostgreSQL 17 or newer with `btree_gist`, `btree_gin`, and `unaccent`. Structured field sorting uses PostgreSQL 17's SQL/JSON scalar extraction. CI uses PostgreSQL 17. The migration role needs permission to create the required extensions, or an administrator must provision them.
+- PostgreSQL 17 or newer with the contrib extensions `btree_gist`, `btree_gin`, `unaccent`, and `pg_trgm`. Structured field sorting uses PostgreSQL 17's SQL/JSON scalar extraction. CI uses PostgreSQL 17.
 - A web server routing requests to the public PHP entrypoint while serving existing public files directly.
 - Node.js and pnpm for building the panel, with versions declared in [panel/package.json](panel/package.json). The transitional legacy richtext migration also needs Node.js, but ordinary CMS requests do not.
+
+## Database setup
+
+Create a login role and an empty database it owns, as a role with `CREATEROLE` and `CREATEDB`:
+
+```sql
+CREATE ROLE example LOGIN PASSWORD 'example';
+CREATE DATABASE example OWNER example;
+```
+
+Or with the PostgreSQL command-line tools:
+
+```bash
+createuser --login --pwprompt example
+createdb --owner=example example
+```
+
+Point `DATABASE_URL` at it, such as `pgsql:host=localhost;dbname=example;user=example;password=example`, then install Cosray's schema and apply all updates, including the site's own migrations:
+
+```bash
+php run db:migrations --namespace=install --apply
+php run db:migrations --apply
+```
+
+The install namespace creates the extensions, the `cms` schema, the tables, and the migrations table, and records the updates it already includes. Afterwards, deployments run only the second command.
+
+The role needs no superuser rights: PostgreSQL marks the required extensions as trusted, so the owner of a database may create them in it, provided the server has the contrib extensions installed. Where the role does not own the database, or a hosting provider restricts extensions, an administrator creates them beforehand, and the install uses them as they are.
 
 ## Documentation
 
