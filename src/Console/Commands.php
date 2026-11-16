@@ -120,6 +120,10 @@ final class Commands
 			PruneJobs::class,
 			SendTestMail::class,
 		]);
+
+		foreach ($app->bootstrap()->commands() as $commands) {
+			$this->runner->add($commands);
+		}
 	}
 
 	/**

@@ -228,6 +228,8 @@ The `plugins` config key also accepts plugin registrations. Classes registered b
 
 Settings use flat namespaced keys, such as `'acme-shop.currency' => 'USD'`. Within registration, `$cms->option('currency', 'EUR')` reads that key with a default; elsewhere, use `Config`. Custom field classes extend `Cosray\Field\Field`, as [writing a field type](content.md#writing-a-field-type) describes; `Registrar::field()` string aliases are for legacy imports, not required when node properties use the field class directly.
 
+`$cms->commands(ImportOrders::class)` adds console commands, as `Commands::add()` takes them: class names are autowired in the console scope, and keyed factories build a command themselves. Command names are free; a name another command already uses fails when the console starts.
+
 Plugin migrations share the `default` namespace. Timestamped filenames avoid collisions; use Quma's `/*:cms.prefix:*/` placeholder for configured table prefixes and bound parameters for runtime data.
 
 ### Panel pages and navigation

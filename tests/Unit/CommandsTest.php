@@ -16,6 +16,8 @@ use Cosray\Console\Commands;
 use Cosray\Console\Runtime;
 use Cosray\Context;
 use Cosray\Locales;
+use Cosray\Plugin\Plugin;
+use Cosray\Plugin\Registrar;
 use Cosray\Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -59,6 +61,37 @@ final class CommandsTest extends TestCase
 		$this->assertSame($app, $command->app);
 		$this->assertNull($command->context->request);
 		$this->assertSame('en', $command->context->localeId());
+	}
+
+	public function testPluginCommandsJoinTheRunner(): void
+	{
+		$config = $this->config([
+			'db.dsn' => 'sqlite::memory:',
+			'error.enabled' => false,
+		]);
+		$app = new App($config, $this->factory(), new Router(), $this->container());
+		$locales = new Locales();
+		$locales->add('en', title: 'English');
+		$app->load($locales);
+		$app->plugin(new class implements Plugin {
+			public function id(): string
+			{
+				return 'test-commands';
+			}
+
+			public function register(Registrar $cms): void
+			{
+				$cms->commands(ScopedCommand::class, [
+					FactoryCommand::class => static fn(): FactoryCommand => new FactoryCommand('plugin'),
+				]);
+			}
+		});
+		$buffer = new Buffer();
+		$commands = new Commands($app, new Io($buffer));
+
+		$this->assertSame(0, $commands->runner()->run(['run', 'test:scoped']), $buffer->errorOutput());
+		$this->assertSame(0, $commands->runner()->run(['run', 'test:factory']), $buffer->errorOutput());
+		$this->assertInstanceOf(FactoryCommand::class, FactoryCommand::$invoked);
 	}
 
 	public function testKeyedFactoriesStaySupported(): void

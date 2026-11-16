@@ -209,6 +209,19 @@ final class Registrar
 		return $this->bootstrap->addService($key, $value);
 	}
 
+	/**
+	 * Console commands, as Cosray\Console\Commands::add() takes them: class
+	 * names, autowired in the console scope, or keyed factories.
+	 *
+	 * @param array<mixed>|object|string ...$commands
+	 */
+	public function commands(array|object|string ...$commands): void
+	{
+		foreach ($commands as $command) {
+			$this->bootstrap->addCommands($command);
+		}
+	}
+
 	/** @param Closure(\Celema\Core\App): void $routes */
 	public function routes(Closure $routes): void
 	{

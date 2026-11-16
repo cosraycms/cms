@@ -101,6 +101,9 @@ class Bootstrap implements CorePlugin
 	/** @var list<Closure> */
 	protected array $pluginRoutes = [];
 
+	/** @var list<array<mixed>|object|string> */
+	protected array $pluginCommands = [];
+
 	protected readonly PluginAssets $pluginAssets;
 	protected readonly PanelExtras $panelExtras;
 
@@ -340,6 +343,22 @@ class Bootstrap implements CorePlugin
 	public function addService(string $key, object|string $value): Entry
 	{
 		return $this->container->add($key, $value);
+	}
+
+	/** @param array<mixed>|object|string $commands */
+	public function addCommands(array|object|string $commands): void
+	{
+		$this->pluginCommands[] = $commands;
+	}
+
+	/**
+	 * The console commands plugins registered, in registration order.
+	 *
+	 * @return list<array<mixed>|object|string>
+	 */
+	public function commands(): array
+	{
+		return $this->pluginCommands;
 	}
 
 	/** @param Closure(App): void $routes */
