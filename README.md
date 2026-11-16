@@ -69,6 +69,8 @@ The install namespace creates the extensions, the `cms` schema, the tables, and 
 
 The role needs no superuser rights: PostgreSQL marks the required extensions as trusted, so the owner of a database may create them in it, provided the server has the contrib extensions installed. Where the role does not own the database, or a hosting provider restricts extensions, an administrator creates them beforehand, and the install uses them as they are.
 
+A site that needs an extension that is not trusted, such as PostGIS, has a superuser create it before running the migrations. As the role then does not own the extension, leave it out of dumps the role restores, as in `pg_dump --exclude-extension=postgis` (PostgreSQL 17 or newer).
+
 ## Documentation
 
 Read the topic relevant to the task rather than loading every reference. When documentation and implementation disagree, inspect the source and tests before relying on the documented behavior. A current limitation is not a prohibition on exploring a different design.
