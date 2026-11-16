@@ -17,10 +17,10 @@ final class Migration implements Contract\Migration
 	public function run(Environment $env): void
 	{
 		$env->db->execute(<<<'SQL'
-			CREATE EXTENSION btree_gist;
-			CREATE EXTENSION btree_gin;
-			CREATE EXTENSION unaccent;
-			CREATE EXTENSION pg_trgm;
+			CREATE EXTENSION IF NOT EXISTS btree_gist;
+			CREATE EXTENSION IF NOT EXISTS btree_gin;
+			CREATE EXTENSION IF NOT EXISTS unaccent;
+			CREATE EXTENSION IF NOT EXISTS pg_trgm;
 			SQL)->run();
 
 		$schema = $this->schema($env);
