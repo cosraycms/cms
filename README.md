@@ -73,7 +73,7 @@ The role needs no superuser rights: PostgreSQL marks the required extensions as 
 
 Read the topic relevant to the task rather than loading every reference. When documentation and implementation disagree, inspect the source and tests before relying on the documented behavior. A current limitation is not a prohibition on exploring a different design.
 
-These links describe a source checkout. Distribution archives omit development documentation and tests; for an installed package, consult the [repository](https://codeberg.org/cosray/cms) at the source reference recorded in its Composer lock file, not necessarily the latest branch.
+These links describe a source checkout. Distribution archives omit development documentation and tests; for an installed package, consult the [repository](https://codefloe.com/cosray/cms) at the source reference recorded in its Composer lock file, not necessarily the latest branch.
 
 | Topic | Reference |
 | --- | --- |
