@@ -31,6 +31,8 @@ Values are keyed by content locale, or `zxx` when neutral. [Normalizer](../src/R
 
 A missing format marker denotes legacy HTML, which current readers do not render. Migration `000000-000020` converts that content; a bare HTML string is not valid input to the structured writer.
 
+A `RichLine` field stores the same envelope. Its writer accepts a line only: one paragraph of text, without line breaks, images or paragraph attributes beyond their defaults.
+
 ## Node tree
 
 A document is a tree of `{type, attrs?, text?, marks?, content?}` objects. Canonical key order is `type`, `attrs`, `text`, `marks`, `content`; attribute keys and marks are sorted. Default-valued attributes and empty attribute/mark collections are omitted, and adjacent text runs with equal marks are merged. This keeps history diffs small and normalization idempotent.
@@ -93,7 +95,7 @@ Without declared text styles, the editor offers none and the writer rejects styl
 
 ## Captions
 
-A [caption](media.md#per-use-texts) is a document restricted to one paragraph of text, with only the `bold`, `italic`, and `strike` marks and no attributes. It sits in a media item's `meta` per language, without an envelope. A plain string stays valid and reads as plain text until it is next saved. [Richtext\Inline](../src/Richtext/Inline.php) holds the rules; its HTML has no surrounding `<p>`.
+A [caption](media.md#per-use-texts) is a line, as a `RichLine` stores one: a document of one paragraph of text with no attributes beyond their defaults, here with only the `bold`, `italic`, and `strike` marks. It sits in a media item's `meta` per language, without an envelope. A plain string stays valid and reads as plain text until it is next saved. [Richtext\Inline](../src/Richtext/Inline.php) holds the rules; its HTML has no surrounding `<p>`. The panel edits it with RichLine's editor, marking text through the bubble.
 
 ## Validation and rendering
 

@@ -25,6 +25,8 @@ import { docToPm, pmToDoc } from './format.js';
  * @typedef {object} CmsEditor
  * @property {EditorView} view
  * @property {(command: Command) => void} run
+ * @property {(doc: RichtextDoc | null) => void} load Replaces the document, with a fresh history.
+ * @property {(text: string) => void} placeholder
  * @property {() => RichtextDoc} getDoc
  * @property {() => string} getHTML
  * @property {(html: string) => void} setContent
@@ -39,6 +41,8 @@ import { docToPm, pmToDoc } from './format.js';
  * @property {(state: EditorState) => void} onStateChange
  * @property {boolean} structure Whether typing may change the structure: headings, lists, quotes.
  * @property {boolean} [line] One paragraph of text: Enter does nothing and a paste lands on the line.
+ * @property {string[]} [marks] The marks a line may carry; any of the schema's without.
+ * @property {string} [label] The accessible name, where no label element names the editor.
  * @property {HTMLElement} [bubbleElement] The menu over a selection, for a field without a toolbar.
  * @property {(uid: string) => string | null} [assetUrl] Resolve an asset uid to a display URL for inline images.
  * @property {() => boolean} [editable] Whether the document takes input; the view stays selectable
@@ -80,19 +84,26 @@ function blank(doc) {
  * The placeholder sits on the empty line itself, so it takes that line's
  * font and place; the stylesheet shows it through the attribute.
  *
- * @param {string} text
+ * @param {{ text: string }} hint Read on every update, so it can change.
  * @returns {Plugin}
  */
-function placeholderPlugin(text) {
+function placeholderPlugin(hint) {
 	return new Plugin({
 		props: {
-			attributes: { 'aria-placeholder': text },
+			attributes: () => {
+				/** @type {Record<string, string>} */
+				const attributes = {};
+
+				if (hint.text) attributes['aria-placeholder'] = hint.text;
+
+				return attributes;
+			},
 			decorations(state) {
-				return blank(state.doc)
+				return hint.text && blank(state.doc)
 					? DecorationSet.create(state.doc, [
 							Decoration.node(0, /** @type {Node} */ (state.doc.firstChild).nodeSize, {
 								class: 'is-placeholder',
-								'data-placeholder': text,
+								'data-placeholder': hint.text,
 							}),
 						])
 					: null;
@@ -113,14 +124,20 @@ export default function createEditor(options) {
 		onStateChange,
 		structure,
 		line = false,
+		marks,
+		label,
 		bubbleElement,
 		assetUrl,
 		editable,
 		placeholder,
 	} = options;
 
+	const allowed = marks ? new Set(marks) : null;
+	const hint = { text: placeholder ?? '' };
+	/** @param {RichtextDoc | null} doc */
+	const read = (doc) => (line ? toLine(docToPm(doc), allowed) : docToPm(doc));
 	const plugins = [
-		...(line ? linePlugins() : []),
+		...(line ? linePlugins(allowed) : []),
 		...(structure ? [buildInputRules()] : []),
 		buildKeymap(structure),
 		keymap(baseKeymap),
@@ -133,12 +150,14 @@ export default function createEditor(options) {
 		plugins.push(bubbleMenu(bubbleElement));
 	}
 
-	if (placeholder) {
-		plugins.push(placeholderPlugin(placeholder));
+	plugins.push(placeholderPlugin(hint));
+
+	if (label) {
+		plugins.push(new Plugin({ props: { attributes: { 'aria-label': label } } }));
 	}
 
 	const state = EditorState.create({
-		doc: line ? toLine(docToPm(content)) : docToPm(content),
+		doc: read(content),
 		schema,
 		plugins,
 	});
@@ -146,7 +165,9 @@ export default function createEditor(options) {
 	const view = new EditorView(element, {
 		state,
 		editable,
-		...(line ? { transformPasted: flatten, clipboardTextParser: lineText } : {}),
+		...(line
+			? { transformPasted: (slice) => flatten(slice, allowed), clipboardTextParser: lineText }
+			: {}),
 		nodeViews: {
 			image(node) {
 				const dom = document.createElement('img');
@@ -180,6 +201,17 @@ export default function createEditor(options) {
 		run(command) {
 			view.focus();
 			command(view.state, view.dispatch, view);
+		},
+
+		load(doc) {
+			const state = EditorState.create({ doc: read(doc), plugins: view.state.plugins });
+			view.updateState(state);
+			onStateChange(state);
+		},
+
+		placeholder(text) {
+			hint.text = text;
+			view.dispatch(view.state.tr);
 		},
 
 		getDoc() {

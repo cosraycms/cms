@@ -49,8 +49,30 @@ final class RichtextInlineTest extends TestCase
 			'marks' => [['type' => 'strike']],
 		]])));
 
+		// The default paragraph attributes the panel's editor writes are no structure.
+		$this->assertTrue(Inline::valid([
+			'type' => 'doc',
+			'content' => [[
+				'type' => 'paragraph',
+				'attrs' => ['class' => 'default'],
+				'content' => [
+					['type' => 'text', 'text' => 'x'],
+				],
+			]],
+		]));
+
 		$this->assertFalse(Inline::valid(42));
 		$this->assertFalse(Inline::valid(['type' => 'paragraph']));
+		$this->assertFalse(Inline::valid([
+			'type' => 'doc',
+			'content' => [[
+				'type' => 'paragraph',
+				'attrs' => ['align' => 'center'],
+				'content' => [
+					['type' => 'text', 'text' => 'x'],
+				],
+			]],
+		]));
 		$this->assertFalse(Inline::valid(self::doc([[
 			'type' => 'text',
 			'text' => 'x',

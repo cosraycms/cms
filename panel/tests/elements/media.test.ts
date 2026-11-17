@@ -125,7 +125,7 @@ const captionDoc = (text: string): RichtextDoc => ({
 
 /** Pastes over a caption: the editor's own way in, as jsdom has no typing. */
 function writeCaption(root: ParentNode, text: string, html = ''): void {
-	const field = root.querySelector<HTMLElement>('.cms-inline-editor .ProseMirror')!;
+	const field = root.querySelector<HTMLElement>('.cms-richtext.is-line .ProseMirror')!;
 	field.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', ctrlKey: true, bubbles: true }));
 	const paste = new Event('paste', { bubbles: true, cancelable: true });
 	Object.assign(paste, {
@@ -138,10 +138,10 @@ function writeCaption(root: ParentNode, text: string, html = ''): void {
 }
 
 const captionHint = (root: ParentNode) =>
-	root.querySelector('.cms-inline-editor-placeholder')?.textContent;
+	root.querySelector('.cms-richtext.is-line .ProseMirror')?.getAttribute('aria-placeholder');
 
 const captionShown = (root: ParentNode) =>
-	root.querySelector('.cms-inline-editor .ProseMirror')?.textContent;
+	root.querySelector('.cms-richtext.is-line .ProseMirror')?.textContent;
 
 async function action(label: string): Promise<void> {
 	const button = Array.from(document.querySelectorAll<HTMLButtonElement>('.cms-modal button')).find(
@@ -831,7 +831,7 @@ describe('image details', () => {
 				.querySelector('.cms-modal .ProseMirror')!
 				.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', ctrlKey: true, bubbles: true }));
 			document
-				.querySelector<HTMLButtonElement>('.cms-inline-editor-tools button:nth-child(2)')!
+				.querySelector<HTMLButtonElement>('.cms-richtext-bubble button:nth-child(2)')!
 				.click();
 			await action('common:apply');
 
@@ -896,7 +896,7 @@ describe('image details', () => {
 			expect(
 				document.querySelector('.cms-modal .ProseMirror')?.getAttribute('contenteditable'),
 			).toBe('false');
-			expect(document.querySelector('.cms-inline-editor-tools')).toBeNull();
+			expect(document.querySelector('.cms-richtext-bubble')).toBeNull();
 		});
 	});
 

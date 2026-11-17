@@ -45,21 +45,11 @@ final class Inline
 			return true;
 		}
 
-		if (!is_array($value) || new Validator()->validate($value) !== []) {
+		if (!is_array($value) || new Validator(line: true)->validate($value) !== []) {
 			return false;
 		}
 
-		$blocks = $value['content'] ?? [];
-
-		if (count($blocks) !== 1 || ($blocks[0]['type'] ?? null) !== 'paragraph' || isset($blocks[0]['attrs'])) {
-			return false;
-		}
-
-		foreach ($blocks[0]['content'] ?? [] as $node) {
-			if (($node['type'] ?? null) !== 'text') {
-				return false;
-			}
-
+		foreach ($value['content'][0]['content'] ?? [] as $node) {
 			foreach ($node['marks'] ?? [] as $mark) {
 				if (!in_array($mark['type'] ?? null, self::MARKS, true)) {
 					return false;
