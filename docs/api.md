@@ -187,7 +187,7 @@ An editor may hold a working copy of a node in the panel. A `PATCH` applies to t
 
 ## Search
 
-`GET /api/search?q=…` runs a [full-text search](fulltext.md) in the request locale over the nodes with an active URL, ordered by relevance unless `order` names another order. It takes the listing parameters and adds `search` to each item: its `score` and a `snippet` of escaped HTML with the matches marked.
+`GET /api/search?q=…` runs a [full-text search](fulltext.md) in the request locale over what the client reads: nodes with an active URL, and nodes of the types it may change with or without one, records included. Like a listing, it returns published nodes unless `published` asks otherwise; a record has no publication, so `published=any` finds it. Results are ordered by relevance unless `order` names another order. It takes the listing parameters and adds `search` to each item: its `score` and a `snippet` of escaped HTML with the matches marked.
 
 ## Routing
 

@@ -45,7 +45,7 @@ Supported field classes are exactly `Text`, `Textarea`, `RichText`, `Blocks` and
 - Embedded fields use their ordinary flat stored names. The embedding property itself is not a full-text container.
 - `#[When]` deactivation excludes dormant values. Conditions read neutral-locale siblings in the owning node or row, not similarly named fields elsewhere.
 - Rich text is read from its structured document, without rendering templates or loading assets. Adjacent marked text runs stay adjacent; paragraphs, list items and hard breaks retain word boundaries. Link destinations, image metadata, row identities, layout and arbitrary JSON keys never contribute. Node types the format does not know are skipped with their subtree, as the renderer does.
-- Both the vector and the snippet source contain only selected text. Do not opt private fields into this shared index; panel-only fields are not supported in v1.
+- Both the vector and the snippet source contain only selected text. A [record](content.md#publication)'s document is as private as the record, so records may opt in: public queries never return them, while the panel and API clients that may change their type find them. Do not opt private fields of public types into this shared index; panel-only fields are not supported yet.
 
 An annotated `title()` contributes only when it is the resolved `Title` provider: an outer implementation wins over an embedded one, and an explicitly selected embedded provider wins over automatic candidates. Inherited concrete implementations retain their annotations. Arbitrary method annotations are unsupported; the `Title` interface itself does not opt classes in.
 
@@ -141,6 +141,8 @@ $internal = $cms->nodes()
     ->hidden(null)
     ->activeUrl(false);
 ```
+
+`readable($live, $any)` narrows a finder to what a reader sees, as the API does for its client: the `$live` types published, the `$any` types, which the reader may change, in every state. The implicit active-URL gate then holds for the `$live` types only, so a search finds the reader's unpublished nodes, records and other nodes without a URL; an explicit `activeUrl()` still holds for all.
 
 This is not an authorization API. Never let unrestricted request parameters choose those gates. The index also contains selected text from unpublished, hidden and non-routable live nodes; the table is not a public database view. Soft-deleted nodes lose their index rows.
 

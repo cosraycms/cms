@@ -107,6 +107,30 @@ final class FulltextFinderTest extends FulltextTestCase
 		self::assertCount(5, $this->uids($all));
 	}
 
+	public function testAReaderSeesTypesItMayChangeWithoutAnActiveUrl(): void
+	{
+		$this->writer->create(
+			$this->writer->prepare(FulltextDocument::class, ['body' => 'Needle'])->uid('fts-reader-document'),
+		);
+		$this->page('fts-reader-page', 'Needle');
+		$this->sql('deletePaths', ['uid' => 'fts-reader-page'])->run();
+		$found = fn(array $live, array $any): array => $this->uids(
+			$this->cms->nodes()->published(null)->readable($live, $any)->fulltext('needle'),
+		);
+
+		self::assertSame([], $found(['fulltext-page', 'fulltext-document'], []));
+		self::assertSame(['fts-reader-document'], $found(['fulltext-page'], ['fulltext-document']));
+		// An explicit gate holds for every type.
+		self::assertSame([], $this->uids(
+			$this->cms
+				->nodes()
+				->published(null)
+				->readable([], ['fulltext-document'])
+				->fulltext('needle')
+				->activeUrl(),
+		));
+	}
+
 	public function testActiveLocaleOrFallbackUrlsAreRequiredWithoutDuplicatingNodes(): void
 	{
 		foreach (['exact', 'fallback', 'missing', 'inactive', 'unrelated'] as $kind) {

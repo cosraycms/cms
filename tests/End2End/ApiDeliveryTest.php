@@ -10,6 +10,7 @@ use Cosray\Field\Text;
 use Cosray\Menus;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Node\FulltextPage;
+use Cosray\Tests\Fixtures\Node\FulltextRecord;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UploadedFileInterface;
 
@@ -232,6 +233,32 @@ final class ApiDeliveryTest extends End2EndTestCase
 		$this->problem($this->makeRequest('GET', '/api/search'), 400);
 	}
 
+	public function testSearchFindsRecordsForClientsThatMayChangeThem(): void
+	{
+		$this->authenticateAs('editor');
+		$this->json($this->send('PUT', '/api/nodes/note', [
+			'type' => 'fulltext-record',
+			'content' => ['message' => ['value' => ['zxx' => 'A confidential complaint']]],
+		]), 201);
+		$this->json($this->send('PUT', '/api/nodes/draft', [
+			'type' => 'fulltext-page',
+			'published' => false,
+			'content' => ['name' => ['value' => ['en' => 'Complaint form']]],
+		]), 201);
+		$search = fn(array $query): array => array_column(
+			$this->json($this->makeRequest('GET', '/api/search', ['query' => $query]))['items'],
+			'uid',
+		);
+
+		// Unpublished nodes need their state asked for; a record has no publication.
+		$this->assertSame([], $search(['q' => 'complaint']));
+		$this->assertEqualsCanonicalizing(['note', 'draft'], $search(['q' => 'complaint', 'published' => 'any']));
+
+		$this->defaultAuthToken = null;
+
+		$this->assertSame([], $search(['q' => 'complaint', 'published' => 'any']));
+	}
+
 	public function testCorsAllowsTheConfiguredOrigins(): void
 	{
 		$this->app = $this->createApp(['api.path' => '/api', 'api.origins' => ['https://front.example']]);
@@ -356,6 +383,7 @@ final class ApiDeliveryTest extends End2EndTestCase
 	{
 		$bootstrap = parent::createBootstrap($config);
 		$bootstrap->node(FulltextPage::class);
+		$bootstrap->node(FulltextRecord::class);
 		$bootstrap->node(\Cosray\Tests\Fixtures\Node\TestPrivatePage::class);
 		$bootstrap->node(\Cosray\Tests\Fixtures\Node\TestInternalDocument::class);
 

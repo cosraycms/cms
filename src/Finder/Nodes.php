@@ -34,6 +34,8 @@ final class Nodes implements Iterator
 	private ?string $fulltext = null;
 	private ?SearchCompiler $search = null;
 	private ?bool $activeUrl = null;
+	/** @var list<string> handles of the types a reader sees in every state */
+	private array $anyState = [];
 	private readonly Configurations $configurations;
 	private ?bool $deleted = false; // defaults to false, if all nodes are needed set $deleted to null
 	private ?bool $published = true; // ditto
@@ -106,17 +108,14 @@ final class Nodes implements Iterator
 	 * nodes of the `$live` types when published and not deleted. With
 	 * `$removals`, the `$live` types' nodes come in every state as long as
 	 * they have publication, so a sync can report those that went away.
+	 * The active URL fulltext() requires holds for the `$live` types only.
 	 *
 	 * @param list<string> $live type handles
 	 * @param list<string> $any type handles
 	 */
 	public function readable(array $live, array $any, bool $removals = false): self
 	{
-		$in = fn(array $handles): string => (
-			't.handle IN ('
-			. implode(', ', array_map(fn(string $handle): string => $this->context->db->quote($handle), $handles))
-			. ')'
-		);
+		$in = $this->typesIn(...);
 		$conditions = [];
 
 		if ($any !== []) {
@@ -129,6 +128,7 @@ final class Nodes implements Iterator
 		}
 
 		$this->addWhere($conditions === [] ? 'FALSE' : '(' . implode(' OR ', $conditions) . ')');
+		$this->anyState = $any;
 
 		return $this;
 	}
@@ -553,11 +553,16 @@ final class Nodes implements Iterator
 			];
 		}
 
-		// An explicit activeUrl() wins; otherwise the gate is on while fulltext() is active.
+		// An explicit activeUrl() wins; otherwise the gate is on while fulltext() is active,
+		// except for the types readable() lets the reader see in every state.
 		if ($this->activeUrl ?? $this->search !== null) {
 			$params['active_url'] = true;
 			$params['url_locales'] = $this->localeIds();
 			$params['routable'] = $this->builtins['routable'];
+			$params['url_exempt'] =
+				$this->activeUrl === null && $this->anyState !== []
+					? $this->typesIn($this->anyState)
+					: 'FALSE';
 		}
 
 		return $params;
@@ -607,6 +612,16 @@ final class Nodes implements Iterator
 		}
 
 		return $ids;
+	}
+
+	/** @param list<string> $handles */
+	private function typesIn(array $handles): string
+	{
+		return (
+			't.handle IN ('
+				. implode(', ', array_map(fn(string $handle): string => $this->context->db->quote($handle), $handles))
+				. ')'
+		);
 	}
 
 	/** Each registered type's label as the panel shows it, translated. */
