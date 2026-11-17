@@ -39,7 +39,6 @@ $contentLocales = ContentLocales::used($fields, count($locales));
 $edit = $mode === 'edit';
 $showSettings = $routable || $renderable || $contentLocales || $edit;
 $panelCookie = u($panelCookie);
-$wideBlocks = $panelCookie->is('blocks', 'wide');
 $showSettings = $showSettings && $embed === null;
 $action = $edit
 	? $links->edit($uid)
@@ -52,7 +51,6 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 
 <div
 	class="cms-page cms-node"
-	<?= $wideBlocks ? 'data-wide-blocks' : '' ?>
 	<?php if ($embed !== null): ?>
 		data-embed
 		data-embed-uid="<?= escape($uid) ?>"

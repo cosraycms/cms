@@ -21,8 +21,6 @@ A collection's search offers the type a word names as the type filter with `funn
 
 The masthead's theme toggle shows the current theme: `sun` for light, `moon` for dark.
 
-A full-row grid blocks field toggles its width with `arrows-expand-vertical` and `arrows-collapse-vertical`.
-
 The node inspector uses `layout-sidebar-inset-reverse` to collapse and expand, and its strip uses `toggles`, `link-45deg`, and `sliders` for the status, paths, and advanced tabs. Its status tab, the editor head and lists mark the stages from `Cosray\Panel\NodeStatus::icon()`: the main version and a record's saved state by their state, `check-lg` while online or saved and `slash-circle` while offline, and what waits by what it is, the draft with `file-earmark-text` and the user's own edits with `pencil`; its steps use `arrow-up` on the line and `arrow-bar-up` for applying, which the head's Apply shares, and `lightning` says the visibility switches act at once.
 
 The layout preview's width presets use `display`, `tablet-landscape`, `tablet`, and `phone`; its reload uses `arrow-clockwise`.

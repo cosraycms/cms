@@ -15,7 +15,6 @@ final class Cookie
 	public const string NAME = 'cosray_panel';
 
 	private const array CHOICES = [
-		'blocks' => ['wide'],
 		'inspector' => ['collapsed'],
 		'theme' => ['light', 'dark'],
 	];

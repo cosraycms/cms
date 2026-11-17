@@ -32,7 +32,6 @@ $gridStyle = "grid-column: span {$width} / span {$width}; --rows: {$rowspan}";
 	'node' => $uid,
 	'assets' => $assets,
 	'gridStyle' => $gridStyle,
-	'fullRow' => $width === 100,
 	'pathSource' => $isPathSource,
 	'changed' => $changed,
 ]) ?>

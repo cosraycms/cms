@@ -22,8 +22,8 @@ final class PanelIconTest extends TestCase
 	{
 		$this->assertHtmlNodeExists('//svg[@class="cms-icon"]', Icon::render('plus'));
 		$this->assertHtmlNodeExists(
-			'//svg[@class="cms-icon cms-field-width-expand"]',
-			Icon::render('plus', 'cms-field-width-expand'),
+			'//svg[@class="cms-icon cms-menu-tree-collapsed-icon"]',
+			Icon::render('plus', 'cms-menu-tree-collapsed-icon'),
 		);
 	}
 

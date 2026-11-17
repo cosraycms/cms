@@ -282,7 +282,6 @@ return [
 		'field:duplicate-block' => 'Duplicate block',
 		'field:fallback-from' => 'Fallback from :language',
 		'field:fallback-shared' => 'Fallback from shared content',
-		'field:full-width' => 'Full width',
 		'field:gap' => 'Gap',
 		'field:gap-split' => 'Set row and column gap separately',
 		'field:item' => 'Item',

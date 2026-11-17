@@ -194,30 +194,6 @@
 		margin-inline: auto;
 	}
 
-	/* A grid of blocks spreads past the capped column towards the pane's
-	   width, its label staying in the column; the margin holds because every
-	   box between the two is centred, and keeps the field's own side padding. */
-	&[data-wide-blocks] .cms-field-widenable > .cms-field-body {
-		margin-inline: calc(
-			50% - min(50cqi - var(--cms-space-2), var(--cms-editor-wide-max-width) / 2)
-		);
-	}
-
-	& .cms-field-width-toggle {
-		display: inline-flex;
-		align-items: center;
-		padding-block: var(--cms-space-0-5);
-
-		& .cms-icon {
-			--cms-icon-size: 0.875rem;
-		}
-	}
-
-	&:not([data-wide-blocks]) .cms-field-width-collapse,
-	&[data-wide-blocks] .cms-field-width-expand {
-		display: none;
-	}
-
 	& .cms-node-sheet {
 		display: flex;
 		flex-direction: column;
@@ -336,14 +312,6 @@
 	.cms-node > .cms-page-head::before,
 	.cms-node > .cms-page-head::after {
 		transition: none;
-	}
-}
-
-/* The literal is --cms-editor-max-width: at or below it there is nothing to
-   widen, and container queries cannot read custom properties. */
-@container content (width <= 53rem) {
-	.cms-node .cms-field-width-toggle {
-		display: none;
 	}
 }
 

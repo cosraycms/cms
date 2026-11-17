@@ -13,21 +13,21 @@ afterEach(() => {
 describe('panel cookie', () => {
 	it('keeps every choice in one cookie and forgets them one by one', () => {
 		remember('inspector', 'collapsed');
-		remember('blocks', 'wide');
+		remember('theme', 'dark');
 
-		expect(document.cookie).toBe('cosray_panel=inspector=collapsed&blocks=wide');
+		expect(document.cookie).toBe('cosray_panel=inspector=collapsed&theme=dark');
 
 		remember('inspector', null);
 
-		expect(document.cookie).toBe('cosray_panel=blocks=wide');
+		expect(document.cookie).toBe('cosray_panel=theme=dark');
 
-		remember('blocks', null);
+		remember('theme', null);
 
 		expect(document.cookie).toBe('');
 	});
 
 	it('is sent to the panel only', () => {
-		remember('blocks', 'wide');
+		remember('theme', 'dark');
 		history.replaceState(null, '', '/about');
 
 		expect(document.cookie).toBe('');

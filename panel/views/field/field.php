@@ -14,7 +14,6 @@ $node = (string) ($node ?? '');
 $assets = (array) (u($assets ?? null) ?? []);
 $gridStyle = (string) ($gridStyle ?? '');
 $pathSource = (bool) (u($pathSource ?? null) ?? false);
-$fullRow = (bool) (u($fullRow ?? null) ?? false);
 $changed = (bool) (u($changed ?? null) ?? false);
 
 $control = $field['control'] ?? ['name' => '', 'props' => []];
@@ -47,7 +46,6 @@ $neutral = 'zxx';
 $columns = $controlName === 'blocks'
 	? \Cosray\Field\Blocks::storedColumns($data['columns'] ?? null, (int) ($control['props']['columns'] ?? 1))
 	: 0;
-$widens = $fullRow && $columns > 1;
 
 $labelFor = $idRoot . '-' . ($variants ? $defaultLocale : $neutral);
 $description = $field['description'] ?? null;
@@ -59,7 +57,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 ?>
 
 <div
-	class="cms-field<?= $pathSource ? ' cms-path-source' : '' ?><?= $widens ? ' cms-field-widenable' : '' ?>"
+	class="cms-field<?= $pathSource ? ' cms-path-source' : '' ?>"
 	<?= $gridStyle !== '' ? 'style="' . escape($gridStyle) . '"' : '' ?>
 	data-field="<?= escape($fieldName) ?>"
 	<?= $fallbackPreview && is_scalar($value[$neutral] ?? null)
@@ -96,19 +94,6 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			<?php // The layout-preview behavior posts the form and opens the shared dialog. ?>
 			<button type="button" class="cms-field-button cms-field-layout-preview" data-layout-preview="<?= escape($fieldName) ?>">
 				<?= escape(__('editor:layout-preview')) ?>
-			</button>
-		<?php endif ?>
-		<?php if ($widens): ?>
-			<?php // The editor syncs aria-pressed; the icons follow its data-wide-blocks. ?>
-			<button
-				type="button"
-				class="cms-field-button cms-field-width-toggle"
-				data-blocks-width
-				aria-pressed="false"
-				aria-label="<?= escape(__('field:full-width')) ?>"
-				title="<?= escape(__('field:full-width')) ?>">
-				<?= \Cosray\Panel\Icon::render('arrows-expand-vertical', 'cms-field-width-expand') ?>
-				<?= \Cosray\Panel\Icon::render('arrows-collapse-vertical', 'cms-field-width-collapse') ?>
 			</button>
 		<?php endif ?>
 	</label>
