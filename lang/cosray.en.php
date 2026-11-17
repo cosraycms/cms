@@ -125,6 +125,7 @@ return [
 		'collection:status' => 'Status',
 		'collection:tree' => 'Tree',
 		'collection:types-all' => 'All types',
+		'collection:type-suggestion' => 'Only :type',
 		'collection:view' => 'Collection view',
 		'color:palette' => 'Color palette',
 		'color:pick' => 'Pick a color',

@@ -6,6 +6,8 @@ namespace Cosray\Panel;
 
 use Cosray\CollectionListMeta;
 use Cosray\Column;
+use Cosray\Fulltext\Marker;
+use Cosray\Fulltext\Query;
 use DateTimeZone;
 
 final class CollectionPage
@@ -18,6 +20,7 @@ final class CollectionPage
 	 * @param array{publishUrl: string, deleteUrl: string, duplicateUrl: string, publication: bool, drafts: bool} $bulk
 	 * @param list<array{key: string, label: string, count: int, url: string, active: bool}> $stages
 	 * @param list<array{label: string, count: ?int, url: string, active: bool}> $types the type filter's choices, `all` first; empty without one
+	 * @param ?array{label: string, url: string} $suggestedType the type a word of the search names, offered as the filter
 	 */
 	private function __construct(
 		public readonly string $name,
@@ -31,6 +34,7 @@ final class CollectionPage
 		public readonly array $bulk,
 		public readonly array $stages = [],
 		public readonly array $types = [],
+		public readonly ?array $suggestedType = null,
 	) {}
 
 	/**
@@ -44,6 +48,7 @@ final class CollectionPage
 	 * @param array<string, array{label: string, count: int}> $types the types the listing holds, by handle
 	 * @param bool $publication whether the collection holds entries with publication, which records have not
 	 * @param bool $drafts whether the collection holds entries of types that keep working copies
+	 * @param bool $typeSearch whether the search matches the types, which a word naming one then offers as the filter
 	 */
 	public static function from(
 		string $name,
@@ -66,6 +71,7 @@ final class CollectionPage
 		bool $publication = true,
 		bool $drafts = true,
 		array $types = [],
+		bool $typeSearch = false,
 	): self {
 		$query = $urls->query;
 		$nodes = self::items($nodes);
@@ -109,7 +115,58 @@ final class CollectionPage
 			],
 			stages: self::stages($stages, $query, $urls),
 			types: self::types($types, $query, $urls),
+			suggestedType: $typeSearch ? self::suggestedType($types, $query, $urls) : null,
 		);
+	}
+
+	/**
+	 * The type with hits that a word of the search names: choosing it moves
+	 * the word from the search into the type filter. A word in an OR group
+	 * or an excluded one names none.
+	 *
+	 * @param array<string, array{label: string, count: int}> $types
+	 * @return ?array{label: string, url: string}
+	 */
+	private static function suggestedType(array $types, CollectionQuery $query, CollectionUrls $urls): ?array
+	{
+		if ($query->q === '' || $query->type !== '') {
+			return null;
+		}
+
+		foreach (Query::parse($query->q)->groups as $group) {
+			if (count($group) !== 1 || $group[0]->negated) {
+				continue;
+			}
+
+			foreach ($types as $handle => $type) {
+				if (Marker::same($group[0]->text, $type['label']) || Marker::same($group[0]->text, $handle)) {
+					return [
+						'label' => __('collection:type-suggestion', ['type' => $type['label']]),
+						'url' => $urls->collection([
+							'type' => $handle,
+							'q' => self::without($query->q, $group[0]->text, $group[0]->phrase),
+							'offset' => '',
+						]),
+					];
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/** The query without the first word or phrase that reads as `$text`. */
+	private static function without(string $query, string $text, bool $phrase): string
+	{
+		$words = implode('\s+', array_map(
+			static fn(string $word): string => preg_quote($word, '/'),
+			preg_split('/\s+/u', $text) ?: [],
+		));
+		$pattern = $phrase
+			? '/(?<!\S)"\s*' . $words . '\s*"?/iu'
+			: '/(?<!\S)[^\p{L}\p{N}\s"]*' . $words . '[^\p{L}\p{N}\s"]*(?!\S)/iu';
+
+		return trim(preg_replace('/\s+/u', ' ', preg_replace($pattern, '', $query, 1) ?? $query) ?? $query);
 	}
 
 	/**

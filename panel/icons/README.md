@@ -17,6 +17,8 @@ Notable mappings from the former artwork:
 
 Masthead areas use `grid-1x2` for the dashboard, `files` for content, `image` for media, `list-nested` for menus, and `people` for users.
 
+A collection's search offers the type a word names as the type filter with `funnel`.
+
 The masthead's theme toggle shows the current theme: `sun` for light, `moon` for dark.
 
 A full-row grid blocks field toggles its width with `arrows-expand-vertical` and `arrows-collapse-vertical`.

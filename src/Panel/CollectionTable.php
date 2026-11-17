@@ -6,6 +6,8 @@ namespace Cosray\Panel;
 
 use Cosray\CollectionListMeta;
 use Cosray\Column;
+use Cosray\Fulltext\Marker;
+use Cosray\Fulltext\Query;
 use Cosray\Stage;
 use Cosray\StatusColumn;
 use Cosray\User\Avatar;
@@ -23,7 +25,7 @@ final class CollectionTable
 	use NormalizesInput;
 
 	/**
-	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}> $headers
+	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool, searched: bool}> $headers
 	 * @param list<array{
 	 *     uid: string,
 	 *     depth: int,
@@ -33,7 +35,7 @@ final class CollectionTable
 	 *     hasChildren: bool,
 	 *     path: list<string>,
 	 *     snippet: list<array{text: string, match: bool}>,
-	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, avatarOnly: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
+	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, avatarOnly: bool, marks: ?list<array{text: string, match: bool}>, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
@@ -78,7 +80,16 @@ final class CollectionTable
 				&& $urls->query->stage === ''
 				&& $urls->query->type === '',
 			headers: $headers,
-			rows: self::rows($nodes, $headers, $urls, $meta, $locale, $timezone, $moved),
+			rows: self::rows(
+				$nodes,
+				$headers,
+				$urls,
+				$meta,
+				$locale,
+				$timezone,
+				$moved,
+				$urls->query->q === '' ? null : new Marker(Query::parse($urls->query->q)),
+			),
 			positionUrl: $urls->position(),
 		);
 	}
@@ -91,7 +102,7 @@ final class CollectionTable
 	 * collection of types without them.
 	 *
 	 * @param iterable<Column> $columns
-	 * @return list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}>
+	 * @return list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool, searched: bool}>
 	 */
 	private static function headers(
 		iterable $columns,
@@ -123,6 +134,7 @@ final class CollectionTable
 					'look' => $column->look,
 					'fixed' => $column->fixed,
 					'badges' => false,
+					'searched' => false,
 				];
 
 				continue;
@@ -157,6 +169,7 @@ final class CollectionTable
 				'look' => $column instanceof UserColumn ? $column->look : '',
 				'fixed' => false,
 				'badges' => false,
+				'searched' => $column->searched() !== [],
 			];
 			$lead = true;
 		}
@@ -176,7 +189,7 @@ final class CollectionTable
 	}
 
 	/**
-	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}> $headers
+	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool, searched: bool}> $headers
 	 * @param list<mixed> $nodes
 	 * @return list<array{
 	 *     uid: string,
@@ -187,7 +200,7 @@ final class CollectionTable
 	 *     hasChildren: bool,
 	 *     path: list<string>,
 	 *     snippet: list<array{text: string, match: bool}>,
-	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, avatarOnly: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
+	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, avatarOnly: bool, marks: ?list<array{text: string, match: bool}>, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>,
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
@@ -205,6 +218,7 @@ final class CollectionTable
 		string $locale,
 		DateTimeZone $timezone,
 		string $moved,
+		?Marker $marker,
 	): array {
 		$rows = [];
 
@@ -232,7 +246,7 @@ final class CollectionTable
 				'hasChildren' => $hasChildren,
 				'path' => array_values(array_filter((array) ($node['path'] ?? []), 'is_string')),
 				'snippet' => self::snippet($node['snippet'] ?? []),
-				'cells' => self::cells($node, $headers, $urls, $meta, $locale, $timezone),
+				'cells' => self::cells($node, $headers, $urls, $meta, $locale, $timezone, $marker),
 				'childrenUrl' => $childrenUrl,
 				'focusedChildrenUrl' =>
 					$meta->showChildren && $uid !== '' && ($hasChildren || $childBlueprints !== [])
@@ -249,6 +263,18 @@ final class CollectionTable
 		}
 
 		return $rows;
+	}
+
+	/**
+	 * Where a search matched in a cell, null where it did not.
+	 *
+	 * @return ?list<array{text: string, match: bool}>
+	 */
+	private static function marks(Marker $marker, string $value): ?array
+	{
+		$segments = $marker->segments($value);
+
+		return array_any($segments, static fn(array $segment): bool => $segment['match']) ? $segments : null;
 	}
 
 	/** @return list<array{text: string, match: bool}> */
@@ -302,8 +328,8 @@ final class CollectionTable
 
 	/**
 	 * @param array<string, mixed> $node
-	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool}> $headers
-	 * @return list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, avatarOnly: bool, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>
+	 * @param list<array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool, searched: bool}> $headers
+	 * @return list<array{label: string, value: string, class: string, editUrl: ?string, lead: bool, avatar: ?array{label: string, initials: string, hue: int}, avatarOnly: bool, marks: ?list<array{text: string, match: bool}>, status: ?array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}}>
 	 */
 	private static function cells(
 		array $node,
@@ -312,6 +338,7 @@ final class CollectionTable
 		CollectionListMeta $meta,
 		string $locale,
 		DateTimeZone $timezone,
+		?Marker $marker = null,
 	): array {
 		$cells = [];
 		$uid = (string) ($node['uid'] ?? '');
@@ -334,6 +361,7 @@ final class CollectionTable
 					'lead' => false,
 					'avatar' => null,
 					'avatarOnly' => false,
+					'marks' => null,
 					'status' => self::stagesOf($header, $stages, $header['badges'] ? self::status($node, $meta) : []),
 				];
 
@@ -362,14 +390,16 @@ final class CollectionTable
 			// The first column links the entry by its name alone.
 			$avatar = !$lead && $look !== 'name' && $value instanceof Avatar ? $value->array() : null;
 
+			$display = self::displayValue($value, $kind, $locale, $timezone);
 			$cells[] = [
 				'label' => $label,
-				'value' => self::displayValue($value, $kind, $locale, $timezone),
+				'value' => $display,
 				'class' => implode(' ', $classes),
 				'editUrl' => $lead && $uid !== '' ? $urls->edit($uid) : null,
 				'lead' => $lead,
 				'avatar' => $avatar,
 				'avatarOnly' => $avatar !== null && $look === 'avatar',
+				'marks' => $marker !== null && ($header['searched'] ?? false) ? self::marks($marker, $display) : null,
 				'status' => null,
 			];
 		}
@@ -383,7 +413,7 @@ final class CollectionTable
 	 * state fills the main version's slot; the draft slot, which a type
 	 * without drafts lacks, stays empty and out of the sentence.
 	 *
-	 * @param array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool} $header
+	 * @param array{label: string, name: string, url: ?string, class: string, kind: string, ariaSort: ?string, lead: bool, stages: list<string>, look: string, fixed: bool, badges: bool, searched: bool} $header
 	 * @param list<array{key: string, state: string, name: string, text: string, help: string, badge: string}> $stages
 	 * @param list<array{kind: string, label: string}> $badges
 	 * @return array{stages: list<array{key: string, state: string, name: string, text: string, help: string, badge: string}>, sentence: string, look: string, fixed: bool, badges: list<array{kind: string, label: string}>}

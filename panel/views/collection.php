@@ -207,6 +207,14 @@ $columns = ltrim($columns . ' ' . implode(' ', $tracks));
 				</div>
 			<?php endif ?>
 
+			<?php if ($page->suggestedType !== null): ?>
+				<?php // A word of the search names a type: its filter replaces the word. ?>
+				<a class="cms-collection-type-suggestion" href="<?= escape($page->suggestedType['url']) ?>">
+					<?= Icon::render('funnel') ?>
+					<span><?= escape($page->suggestedType['label']) ?></span>
+				</a>
+			<?php endif ?>
+
 			<?php if ($page->parent !== null): ?>
 				<div class="cms-collection-parent-context">
 					<?php if ($page->parent->type !== null): ?>

@@ -33,6 +33,35 @@
 		}
 	}
 
+	/* Offers the type a word of the search names, in place of the word. */
+	& .cms-collection-type-suggestion {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-height: 2rem;
+		padding: 0 var(--cms-space-3);
+		border: 1px dashed var(--cms-color-border);
+		border-radius: var(--cms-radius-full);
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+		text-decoration: none;
+
+		&:hover {
+			background: var(--cms-color-hover);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		& .cms-icon {
+			width: 0.75rem;
+			height: 0.75rem;
+		}
+	}
+
 	& .cms-collection-type-filter {
 		display: inline-flex;
 		align-items: center;
@@ -534,6 +563,13 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+
+		/* The words a search found in a column it matches. */
+		& mark {
+			border-radius: 2px;
+			background: var(--cms-color-warning-surface);
+			color: inherit;
+		}
 	}
 
 	/* A search hit found in its content shows where, on a line below its title. */

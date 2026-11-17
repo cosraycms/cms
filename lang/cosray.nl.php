@@ -128,6 +128,7 @@ return [
 		'collection:status' => 'Status',
 		'collection:tree' => 'Boomstructuur',
 		'collection:types-all' => 'Alle typen',
+		'collection:type-suggestion' => 'Alleen :type',
 		'collection:view' => 'Collectieweergave',
 		'color:palette' => 'Kleurenpalet',
 		'color:pick' => 'Kleur kiezen',

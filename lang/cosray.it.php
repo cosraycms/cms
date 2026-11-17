@@ -125,6 +125,7 @@ return [
 		'collection:status' => 'Stato',
 		'collection:tree' => 'Albero',
 		'collection:types-all' => 'Tutti i tipi',
+		'collection:type-suggestion' => 'Solo :type',
 		'collection:view' => 'Vista della raccolta',
 		'color:palette' => 'Tavolozza dei colori',
 		'color:pick' => 'Scegli un colore',

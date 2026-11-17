@@ -135,6 +135,7 @@ return [
 		'collection:status' => 'Status',
 		'collection:tree' => 'Drzewo',
 		'collection:types-all' => 'Wszystkie typy',
+		'collection:type-suggestion' => 'Tylko :type',
 		'collection:view' => 'Widok kolekcji',
 		'color:palette' => 'Paleta kolorów',
 		'color:pick' => 'Wybierz kolor',

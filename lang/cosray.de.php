@@ -128,6 +128,7 @@ return [
 		'collection:status' => 'Status',
 		'collection:tree' => 'Baum',
 		'collection:types-all' => 'Alle Typen',
+		'collection:type-suggestion' => 'Nur :type',
 		'collection:view' => 'Sammlungsansicht',
 		'color:palette' => 'Farbpalette',
 		'color:pick' => 'Farbe auswählen',

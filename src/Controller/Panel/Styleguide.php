@@ -1529,6 +1529,7 @@ final class Styleguide extends Panel
 				'lead' => false,
 				'avatar' => $editor->array(),
 				'avatarOnly' => false,
+				'marks' => null,
 				'status' => null,
 			],
 		];

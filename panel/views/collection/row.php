@@ -25,6 +25,15 @@ $creates = (array) $row['childCreateLinks'];
 $path = (array) ($row['path'] ?? []);
 $snippet = (array) ($row['snippet'] ?? []);
 $menuId = 'row-' . (string) $row['uid'];
+// A cell the search matched marks the words it found.
+$value = static fn(array $cell): string => is_array($cell['marks'] ?? null)
+	? implode('', array_map(
+		static fn(array $segment): string => $segment['match']
+			? '<mark>' . escape((string) $segment['text']) . '</mark>'
+			: escape((string) $segment['text']),
+		$cell['marks'],
+	))
+	: escape((string) $cell['value']);
 ?>
 <tr
 	class="cms-list-row<?= $treeMode ? ' is-tree' : '' ?>"
@@ -108,10 +117,10 @@ $menuId = 'row-' . (string) $row['uid'];
 					<?php endif ?>
 					<?php if ($cell['editUrl'] !== null): ?>
 						<a class="cms-list-value" href="<?= escape((string) $cell['editUrl']) ?>">
-							<?= escape((string) $cell['value']) ?>
+							<?= $value($cell) ?>
 						</a>
 					<?php else: ?>
-						<span class="cms-list-value"><?= escape((string) $cell['value']) ?></span>
+						<span class="cms-list-value"><?= $value($cell) ?></span>
 					<?php endif ?>
 					<?php if ($snippet !== []): ?>
 						<span class="cms-list-snippet"><?php foreach ($snippet as $segment): ?><?= $segment['match']
@@ -122,17 +131,17 @@ $menuId = 'row-' . (string) $row['uid'];
 			<?php elseif ($cell['editUrl'] !== null): ?>
 				<?= $isLead ? $titleGrip : '' ?>
 				<a class="cms-list-value" href="<?= escape((string) $cell['editUrl']) ?>">
-					<?= escape((string) $cell['value']) ?>
+					<?= $value($cell) ?>
 				</a>
 			<?php elseif (is_array($cell['avatar'] ?? null) && ($cell['avatarOnly'] ?? false)): ?>
 				<?php $this->include('component/avatar', ['avatar' => $cell['avatar'], 'size' => 'sm', 'named' => true]) ?>
 			<?php elseif (is_array($cell['avatar'] ?? null)): ?>
 				<span class="cms-list-user">
 					<?php $this->include('component/avatar', ['avatar' => $cell['avatar'], 'size' => 'sm']) ?>
-					<span class="cms-list-value"><?= escape((string) $cell['value']) ?></span>
+					<span class="cms-list-value"><?= $value($cell) ?></span>
 				</span>
 			<?php else: ?>
-				<span class="cms-list-value"><?= escape((string) $cell['value']) ?></span>
+				<span class="cms-list-value"><?= $value($cell) ?></span>
 			<?php endif ?>
 		</td>
 	<?php endforeach ?>

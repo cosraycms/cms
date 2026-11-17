@@ -13,11 +13,15 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Finder\Nodes;
 use Cosray\Finder\Order;
 use Cosray\Finder\SortField;
+use Cosray\Fulltext\Marker;
+use Cosray\Fulltext\Query;
+use Cosray\Fulltext\Term;
 use Cosray\Node\Positions;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 use Cosray\StatusColumn;
 use Cosray\TypeColumn;
+use Stringable;
 
 /**
  * A registered collection as the panel lists it: its entries, columns,
@@ -410,13 +414,17 @@ final class Listing
 		$hasChildren = $this->meta->showChildren
 			? $this->hasChildrenMap($nodes)
 			: [];
+		$query = $q === '' ? null : Query::parse($q);
 
 		foreach (array_values($nodes) as $index => $node) {
 			$position = $offset + $index;
+			$row = $this->row($node, $hasChildren[$node->meta->uid] ?? false);
 			$result[] = [
-				...$this->row($node, $hasChildren[$node->meta->uid] ?? false),
+				...$row,
 				'path' => $paths[$node->meta->uid] ?? [],
-				'snippet' => $this->snippet($node, $q),
+				'snippet' => $query === null
+					? []
+					: $this->snippet($node, $query, $this->searchedTexts($row['columns'])),
 				'group' => $group,
 				'moveUp' => $group !== null && $position > 0,
 				'moveDown' => $group !== null && $position < ($total - 1),
@@ -480,24 +488,29 @@ final class Listing
 	}
 
 	/**
-	 * Where a search hit matched in its content, when its title does not
-	 * already show every word of the query.
+	 * Where a search hit matched in its content, when the columns the search
+	 * matches do not already show every required word.
 	 *
+	 * @param list<string> $shown
 	 * @return list<array{text: string, match: bool}>
 	 */
-	private function snippet(Wrapper $node, string $q): array
+	private function snippet(Wrapper $node, Query $query, array $shown): array
 	{
-		if ($q === '' || !isset($node->meta->search)) {
+		if (!isset($node->meta->search)) {
 			return [];
 		}
 
-		$title = (string) $node->title();
-		$words = array_filter(
-			preg_split('/\s+/u', str_replace('"', ' ', $q), -1, PREG_SPLIT_NO_EMPTY) ?: [],
-			static fn(string $word): bool => !str_starts_with($word, '-') && strcasecmp($word, 'OR') !== 0,
-		);
+		$marker = new Marker($query);
+		$required = $query->required();
 		$explained =
-			$words !== [] && array_all($words, static fn(string $word): bool => mb_stripos($title, $word) !== false);
+			$required !== []
+			&& array_all($required, static fn(array $group): bool => array_any(
+				$group,
+				static fn(Term $term): bool => (
+					!$term->negated
+					&& array_any($shown, static fn(string $text): bool => $marker->contains($text, $term))
+				),
+			));
 		$segments = $node->meta->search->snippet->segments;
 
 		if ($explained || !array_any($segments, static fn(array $segment): bool => $segment['match'])) {
@@ -522,7 +535,28 @@ final class Listing
 		return $snippet;
 	}
 
-	/** @return array<string, mixed> */
+	/**
+	 * The texts a row shows in the columns the search matches.
+	 *
+	 * @param list<array<string, mixed>> $cells
+	 * @return list<string>
+	 */
+	private function searchedTexts(array $cells): array
+	{
+		$texts = [];
+
+		foreach ($this->columns as $index => $column) {
+			$value = $cells[$index]['value'] ?? null;
+
+			if ($column->searched() !== [] && (is_string($value) || $value instanceof Stringable)) {
+				$texts[] = (string) $value;
+			}
+		}
+
+		return $texts;
+	}
+
+	/** @return array{columns: list<array<string, mixed>>, ...} */
 	private function row(Wrapper $node, bool $hasChildren): array
 	{
 		$columns = [];

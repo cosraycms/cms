@@ -126,7 +126,7 @@ Results order by relevance, then title, unless `order()` is set. A node whose ui
 
 Without `fulltext`, `search()` matches the fields alone, by the same rules, and orders nothing. `searchTitle()` searches the title as a reference picker does while an editor types: words match inside longer ones from their first letter. [Finder\SearchCompiler](../src/Finder/SearchCompiler.php) builds the SQL of all of them.
 
-The panel's collection search works this way in the request locale, the default content locale unless the panel request selects another. A hit found only in its document shows a snippet below its title. Text that exists only in an unpublished working copy is not found, because the index holds live content.
+The panel's collection search works this way in the request locale, the default content locale unless the panel request selects another. A hit shows a snippet of its document below its title unless the columns the search matches already show every word. Text that exists only in an unpublished working copy is not found, because the index holds live content.
 
 ### Public eligibility
 

@@ -125,6 +125,7 @@ return [
 		'collection:status' => 'Estado',
 		'collection:tree' => 'Árvore',
 		'collection:types-all' => 'Todos os tipos',
+		'collection:type-suggestion' => 'Apenas :type',
 		'collection:view' => 'Vista da coleção',
 		'color:palette' => 'Paleta de cores',
 		'color:pick' => 'Escolher uma cor',

@@ -169,6 +169,7 @@ final class Collection extends Panel
 				types: $types,
 				publication: $lister->publication(),
 				drafts: $lister->drafts(),
+				typeSearch: in_array('type', $lister->search, true),
 			),
 		]);
 	}

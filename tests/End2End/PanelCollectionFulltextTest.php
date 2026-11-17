@@ -99,17 +99,65 @@ final class PanelCollectionFulltextTest extends End2EndTestCase
 
 	public function testAWordMayNameTheTypeWhereTheListingShowsIt(): void
 	{
-		$rows = fn(string $collection, string $q): array => $this->rows($this->getHtmlResponse($this->makeRequest(
-			'GET',
-			"/panel/collection/{$collection}",
-			['query' => ['q' => $q]],
-		)));
+		$rows = fn(string $collection, string $q): array => $this->rows($this->listing($collection, $q));
 
 		$this->assertSame(['fts-panel-document'], $rows('test-fulltext-mixed', 'zebra document'));
 		$this->assertSame(['fts-panel-document'], $rows('test-fulltext-mixed', 'FulltextDocument'));
 		$this->assertSame(['fts-panel-title', 'fts-panel-body'], $rows('test-fulltext-mixed', 'zebra -document'));
 		// A listing of one type has no type column, so its search leaves the type alone.
 		$this->assertSame([], $rows('test-fulltext', 'FulltextPage'));
+	}
+
+	public function testASearchMarksTheWordsItsColumnsShow(): void
+	{
+		$html = $this->listing('test-fulltext-mixed', 'zebra document');
+		$document = '//tr[@data-uid="fts-panel-document"]';
+
+		$this->assertHtmlNodeExists(
+			$document . '//*[contains(@class, "cms-list-value")]/mark[normalize-space()="FulltextDocument"]',
+			$html,
+		);
+		// Only the document explains the other word.
+		$this->assertHtmlNodeExists(
+			$document . '//*[contains(@class, "cms-list-snippet")]/mark[normalize-space()="zebra"]',
+			$html,
+		);
+
+		$html = $this->listing('test-fulltext-mixed', 'ZEBRA crossing');
+		$title = '//tr[@data-uid="fts-panel-title"]';
+
+		$this->assertHtmlNodeExists(
+			$title . '//a[contains(@class, "cms-list-value")]/mark[normalize-space()="Zebra"]',
+			$html,
+		);
+		$this->assertHtmlNodeMissing($title . '//*[contains(@class, "cms-list-snippet")]', $html);
+		$this->assertHtmlNodeMissing(
+			'//tr[@data-uid="fts-panel-body"]//*[contains(@class, "cms-list-value")]/mark',
+			$html,
+		);
+	}
+
+	public function testAWordNamingATypeOffersItsFilterInsteadOfTheWord(): void
+	{
+		$chip = '//a[contains(@class, "cms-collection-type-suggestion")]';
+
+		$this->assertHtmlNodeExists(
+			$chip
+				. '[contains(@href, "type=fulltext-document")][contains(@href, "q=zebra")]'
+				. '[not(contains(@href, "FulltextDocument"))]',
+			$this->listing('test-fulltext-mixed', 'zebra FulltextDocument'),
+		);
+		$this->assertHtmlNodeMissing($chip, $this->listing('test-fulltext-mixed', 'zebra OR FulltextDocument'));
+		$this->assertHtmlNodeMissing($chip, $this->listing('test-fulltext-mixed', 'zebra'));
+		$this->assertHtmlNodeMissing($chip, $this->listing('test-fulltext', 'FulltextPage'));
+	}
+
+	private function listing(string $collection, string $q): string
+	{
+		$response = $this->makeRequest('GET', "/panel/collection/{$collection}", ['query' => ['q' => $q]]);
+		$this->assertResponseOk($response);
+
+		return $this->getHtmlResponse($response);
 	}
 
 	/** @return list<string> */
