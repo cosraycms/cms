@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cosray\Controller\Panel;
 
 use Cosray\Block as Builtin;
-use Cosray\Field\Blocks;
 use Cosray\Field\Control;
 use Cosray\Field\Control\Registry as Controls;
 use Cosray\Field\File;
@@ -647,13 +646,6 @@ final class Styleguide extends Panel
 		$meta = Control::group([
 			['key' => 'class', 'label' => 'CSS class', 'control' => Control::text()],
 			['key' => 'id', 'label' => 'Element ID', 'control' => Control::text()],
-			['key' => 'padding', 'label' => 'Padding', 'control' => Blocks::spacingControl()],
-		])->array();
-		// Mirrors Blocks::metaControl(): the gap, split by axis behind a toggle.
-		$spacing = Control::group([
-			['key' => 'gap', 'label' => 'Gap', 'control' => Blocks::spacingControl()],
-			['key' => 'rowGap', 'label' => 'Row gap', 'control' => Blocks::spacingControl()],
-			['key' => 'columnGap', 'label' => 'Column gap', 'control' => Blocks::spacingControl()],
 		])->array();
 		$aspect = Control::group([
 			[
@@ -809,7 +801,6 @@ final class Styleguide extends Panel
 			[
 				'name' => 'story',
 				'label' => 'Story — one column, translated in the row',
-				'metaControl' => $spacing,
 				'control' => [
 					'name' => 'blocks',
 					'props' => [
@@ -828,7 +819,6 @@ final class Styleguide extends Panel
 			[
 				'name' => 'grid',
 				'label' => 'Grid — twelve columns, one list per locale',
-				'metaControl' => $spacing,
 				'control' => [
 					'name' => 'blocks',
 					'props' => [

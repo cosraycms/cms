@@ -32,8 +32,6 @@ $blocks = array_values(array_filter(
 ));
 $first = Layout::normalize($blocks[0]['layout'] ?? null, $layout->colspan, $min, $layout->rowspan);
 $direction = $blocks !== [] && $first->colspan === $layout->colspan ? 'rows' : 'columns';
-$padding = $rowData['meta']['padding']['zxx'] ?? null;
-$padding = in_array($padding, \Cosray\Field\Blocks::SPACING, true) ? (string) $padding : '';
 $style = "--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}";
 $style .= $layout->placed() ? "; --col: {$layout->col}; --row: {$layout->row}" : '';
 $label = __('field:split-block');
@@ -44,7 +42,6 @@ $label = __('field:split-block');
 	data-meta-owner
 	data-split="<?= $direction ?>"
 	<?= $layout->placed() ? 'data-placed' : '' ?>
-	<?= $padding !== '' ? 'data-padding="' . $this->escape($padding) . '"' : '' ?>
 	style="<?= $this->escape($style) ?>">
 	<input
 		type="hidden"

@@ -27,12 +27,6 @@ $columns = \Cosray\Field\Blocks::storedColumns(
 $min = min($columns, max(1, (int) ($props['min'] ?? 1)));
 $rows = \Cosray\Block\Placement::rows(is_array($value) ? $value : [], $columns, $min);
 $metaControl = is_array($props['meta'] ?? null) ? $props['meta'] : null;
-// The field's own settings: the gap tokens the canvas renders like the site.
-$meta = is_array($data) && is_array($data['meta'] ?? null) ? $data['meta'] : [];
-$spacing = static fn(string $key): string => is_array($meta[$key] ?? null)
-	&& in_array($meta[$key]['zxx'] ?? null, \Cosray\Field\Blocks::SPACING, true)
-		? (string) $meta[$key]['zxx']
-		: '';
 
 $field = (array) u($field);
 $choices = new \Cosray\Panel\BlockChoices(
@@ -58,9 +52,6 @@ $readonly = (bool) ($field['immutable'] ?? false);
 	data-columns="<?= $columns ?>"
 	data-min="<?= $min ?>"
 	<?= $columns > 1 ? 'data-ghost-label="' . $this->escape(__('field:add-block-here')) . '"' : '' ?>
-	<?= $spacing('gap') !== '' ? 'data-gap="' . $this->escape($spacing('gap')) . '"' : '' ?>
-	<?= $spacing('rowGap') !== '' ? 'data-row-gap="' . $this->escape($spacing('rowGap')) . '"' : '' ?>
-	<?= $spacing('columnGap') !== '' ? 'data-column-gap="' . $this->escape($spacing('columnGap')) . '"' : '' ?>
 	style="--columns: <?= $columns ?>">
 	<div class="cms-blocks-editor-grid" data-repeater-list>
 		<?php foreach ($rows as $index => $rowData) {

@@ -1078,133 +1078,6 @@ function onInput(event) {
 	}
 }
 
-const SPACING = ['none', 's', 'm', 'l', 'xl'];
-/** @type {Record<string, string>} */
-const CONTAINER_SPACING = {
-	gap: 'gap',
-	rowGap: 'rowGap',
-	columnGap: 'columnGap',
-};
-
-/**
- * @param {HTMLSelectElement} control
- * @returns {string | null}
- */
-function spacingKey(control) {
-	return /\[meta\]\[(gap|rowGap|columnGap|padding)\]\[zxx\]$/.exec(control.name)?.[1] ?? null;
-}
-
-/**
- * @param {HTMLElement} target
- * @param {string} key
- * @param {string} value
- */
-function applySpacing(target, key, value) {
-	if (SPACING.includes(value)) {
-		target.dataset[key] = value;
-	} else {
-		delete target.dataset[key];
-	}
-}
-
-/**
- * The canvas follows the spacing dialogs live: a block's padding select
- * writes the row's attribute, the field's gap selects write every
- * container of the field, so the grid and the resize math read the gap
- * the site will render with.
- *
- * @param {HTMLSelectElement} control
- */
-export function mirrorSpacing(control) {
-	const key = spacingKey(control);
-
-	if (key === 'padding') {
-		const row = /** @type {HTMLElement | null} */ (control.closest('[data-repeater-row]'));
-
-		if (row) {
-			applySpacing(row, key, control.value);
-		}
-
-		return;
-	}
-
-	const owner = control.closest('[data-meta-owner]');
-
-	if (!key || !owner) {
-		return;
-	}
-
-	/** @type {NodeListOf<HTMLElement>} */ (owner.querySelectorAll('.cms-blocks-editor')).forEach(
-		(container) => applySpacing(container, CONTAINER_SPACING[key], control.value),
-	);
-}
-
-/**
- * @param {Event} event
- */
-function onSpacing(event) {
-	if (event.target instanceof HTMLSelectElement) {
-		mirrorSpacing(event.target);
-	}
-}
-
-/**
- * The field's gap dialog: splitting copies the gap into both axes and
- * clears it, joining copies the row gap back. The selects then report a
- * change of their own, so the form turns dirty as for a typed choice.
- *
- * @param {Event} event
- */
-function onSplit(event) {
-	const toggle = event.target;
-
-	if (!(toggle instanceof HTMLInputElement) || !toggle.matches('[data-gap-split]')) {
-		return;
-	}
-
-	const scope = /** @type {HTMLElement | null} */ (toggle.closest('[data-gap-scope]'));
-	/**
-	 * @param {string} key
-	 * @returns {HTMLSelectElement | null}
-	 */
-	const select = (key) =>
-		/** @type {HTMLSelectElement | null} */ (
-			scope?.querySelector(`select[name$="[meta][${key}][zxx]"]`)
-		) ?? null;
-	const gap = select('gap');
-	const row = select('rowGap');
-	const column = select('columnGap');
-
-	if (!scope || !gap || !row || !column) {
-		return;
-	}
-
-	if (toggle.checked) {
-		row.value = gap.value;
-		column.value = gap.value;
-		gap.value = '';
-	} else {
-		gap.value = row.value || column.value;
-		row.value = '';
-		column.value = '';
-	}
-
-	/** @type {NodeListOf<HTMLElement>} */ (scope.querySelectorAll('[data-gap-single]')).forEach(
-		(part) => {
-			part.hidden = toggle.checked;
-		},
-	);
-	/** @type {NodeListOf<HTMLElement>} */ (scope.querySelectorAll('[data-gap-separate]')).forEach(
-		(part) => {
-			part.hidden = !toggle.checked;
-		},
-	);
-
-	for (const changed of [gap, row, column]) {
-		changed.dispatchEvent(new Event('change', { bubbles: true }));
-	}
-}
-
 /**
  * A stamped row shows the layout its inputs carry: a duplicate copies
  * the inputs of its source, while its style and dialog still say what
@@ -1339,15 +1212,6 @@ function onStamp(event) {
 	if (input(row, 'colspan')) {
 		write(row, read(row), gridOf(container));
 	}
-
-	// A duplicate copies its source's padding select; the row shows it.
-	const padding = /** @type {HTMLSelectElement | null} */ (
-		row.querySelector('select[name$="[meta][padding][zxx]"]')
-	);
-
-	if (padding) {
-		mirrorSpacing(padding);
-	}
 }
 
 /** @returns {() => void} */
@@ -1357,8 +1221,6 @@ export function install() {
 	document.addEventListener('mousedown', onMouseDown);
 	document.addEventListener('input', onInput);
 	document.addEventListener('change', onInput);
-	document.addEventListener('change', onSplit);
-	document.addEventListener('change', onSpacing);
 	document.addEventListener('keydown', onKeyDown);
 	document.addEventListener('pointerdown', onPointerDown);
 	document.addEventListener('pointermove', onPointerMove);
@@ -1372,8 +1234,6 @@ export function install() {
 		document.removeEventListener('mousedown', onMouseDown);
 		document.removeEventListener('input', onInput);
 		document.removeEventListener('change', onInput);
-		document.removeEventListener('change', onSplit);
-		document.removeEventListener('change', onSpacing);
 		document.removeEventListener('keydown', onKeyDown);
 		document.removeEventListener('pointerdown', onPointerDown);
 		document.removeEventListener('pointermove', onPointerMove);

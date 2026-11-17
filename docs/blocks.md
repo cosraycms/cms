@@ -59,7 +59,7 @@ final class Button implements Block
 }
 ```
 
-The dialog lists these fields above the layout and spacing settings, with their labels, required markers, and `#[Width]`. Only fields left on the canvas count towards a single-field block, so this button's label shows as bare text. A block whose fields all sit in the dialog shows its name on the canvas, which opens the dialog. A read-only block still opens it to show the values. The attribute changes neither storage nor validation, and has no effect outside a block type.
+The dialog lists these fields above the layout, class and ID settings, with their labels, required markers, and `#[Width]`. Only fields left on the canvas count towards a single-field block, so this button's label shows as bare text. A block whose fields all sit in the dialog shows its name on the canvas, which opens the dialog. A read-only block still opens it to show the values. The attribute changes neither storage nor validation, and has no effect outside a block type.
 
 ### Editor views
 
@@ -179,7 +179,7 @@ Symmetric translation shares structure; asymmetric translation permits different
 }
 ```
 
-`columns` is the grid the value was placed on, `#[Columns]` for a new value. Row UIDs identify rows across edits and reordering. `type` is an FQCN; rows no longer allowed by the field are dropped on save. Fields retain their ordinary envelopes. Row meta includes `class`, `id`, and `padding`, each a neutral map; empty row meta can be omitted. Field meta holds gap settings.
+`columns` is the grid the value was placed on, `#[Columns]` for a new value. Row UIDs identify rows across edits and reordering. `type` is an FQCN; rows no longer allowed by the field are dropped on save. Fields retain their ordinary envelopes. Row meta includes `class` and `id`, each a neutral map; empty row meta can be omitted.
 
 `colspan` counts columns and `rowspan` grid rows; `col` and `row` are the 1-based lines the block starts at. A block sits exactly there, cells left free stay empty, and blocks never overlap. Rows are stored in reading order, row by row and left to right, which is also the order they stack in on narrow screens. A position is optional on write: a row without one is placed below the placed rows, the rows flowing in order the way the browser's grid flow places spans, so imports may leave it out.
 
@@ -279,12 +279,6 @@ A split renders as a `{prefix}-block` with `data-split="columns"` or `data-split
 
 The container is emitted even for an empty field; `data-columns` and `--columns` carry the stored grid. Blocks are emitted in reading order. A block whose type renders nothing leaves its cells empty. Data attributes support styles that cannot use inline custom properties. All generated attribute values are escaped, including class/id settings; the type's own output is not sanitized by the wrapper.
 
-### Spacing
-
-Editor choices are tokens (`none`, `s`, `m`, `l`, `xl`), not lengths. A default choice stores nothing. Field meta can set `gap` or separate `rowGap`/`columnGap`; row meta can set `padding`. They become `data-gap`, `data-row-gap`, `data-column-gap`, and `data-padding`. Per-axis gaps beat shared gaps.
-
-The editor keeps usable control spacing; Layout preview shows configured spacing using the reference stylesheet, not site-specific styles. Templates read `gap()`, `rowGap()`, `columnGap()`, and each block's `padding()`, returning null for defaults.
-
 ### Render arguments
 
 | Argument | Purpose |
@@ -317,10 +311,7 @@ It uses the `cosray.blocks` cascade layer, so ordinary unlayered site CSS wins. 
 
 Override points:
 
-- `--blocks-gap-s` through `--blocks-gap-xl` and matching `--blocks-padding-*` values define the site's spacing scale.
-- `--blocks-gap` supplies the gap when the editor chose nothing; an explicit token wins, including `none`.
-- Gap values should be context-independent lengths such as `rem` or `px`; font-relative values follow whatever font size the container has.
-- `--blocks-column-gap` and `--blocks-row-gap` are resolved internal values used by the sheet, rather than primary theme inputs.
+- `--blocks-gap` sets the gap between blocks, `2rem` by default. Use a context-independent length such as `rem` or `px`; font-relative values follow whatever font size the container has. A field that needs a different gap gets a class of its own through the `class` render argument.
 - Container queries and gallery rules can be replaced by site styles. `Stack` collapses the grid below the sheet's threshold; `Preserve` and `Custom` leave it to the site.
 
 The stylesheet itself is the reference for selectors and defaults; its implementation is not duplicated here.

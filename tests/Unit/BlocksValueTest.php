@@ -213,38 +213,6 @@ final class BlocksValueTest extends TestCase
 		$this->assertSame($blocks->render()->html, (string) $blocks);
 	}
 
-	public function testRendersTheSpacingAttributesOnlyWhenSet(): void
-	{
-		$full = ['colspan' => 12, 'rowspan' => 1];
-		$blocks = $this->createBlocksValue(
-			[$this->text('Hi', $full, ['padding' => ['zxx' => 'xl']])],
-			meta: ['gap' => ['zxx' => 's'], 'columnGap' => ['zxx' => 'l'], 'rowGap' => ['zxx' => 'huge']],
-		);
-		$html = $blocks->render()->html;
-
-		$this->assertStringContainsString(
-			'data-responsive="stack" data-gap="s" data-column-gap="l" style="--columns: 12"',
-			$html,
-		);
-		$this->assertStringNotContainsString('data-row-gap', $html);
-		$this->assertStringContainsString('data-row="1" data-padding="xl" style="', $html);
-		$this->assertSame('s', $blocks->gap());
-		$this->assertNull($blocks->rowGap());
-		$this->assertSame('l', $blocks->columnGap());
-		$this->assertSame('xl', $blocks->first()?->padding());
-
-		$plain = $this->createBlocksValue(
-			[$this->text('Hi', $full, ['padding' => ['zxx' => '']])],
-			meta: ['gap' => ['zxx' => '']],
-		);
-		$html = $plain->render()->html;
-
-		$this->assertStringNotContainsString('data-gap', $html);
-		$this->assertStringNotContainsString('data-padding', $html);
-		$this->assertNull($plain->gap());
-		$this->assertNull($plain->first()?->padding());
-	}
-
 	public function testRenderArgs(): void
 	{
 		$html = $this->createBlocksValue([$this->text('Hi', ['colspan' => 12, 'rowspan' => 1])])
@@ -983,7 +951,7 @@ final class BlocksValueTest extends TestCase
 					$this->text('Bottom', ['colspan' => 6, 'rowspan' => 1], uid: 'b2'),
 				],
 				['colspan' => 6, 'rowspan' => 2],
-				meta: ['padding' => ['zxx' => 's']],
+				meta: ['class' => ['zxx' => 'band']],
 			),
 		]);
 
@@ -996,7 +964,7 @@ final class BlocksValueTest extends TestCase
 		$this->assertNull($split['type']);
 		$this->assertNull($split['handle']);
 		$this->assertSame(['colspan' => 6, 'rowspan' => 2, 'col' => 1, 'row' => 1], $split['layout']);
-		$this->assertSame(['padding' => ['zxx' => 's']], $split['meta']);
+		$this->assertSame(['class' => ['zxx' => 'band']], $split['meta']);
 		$this->assertSame(['Top', 'Bottom'], array_column(array_column($split['blocks'], 'fields'), 'text'));
 		$this->assertSame('text', $split['blocks'][0]['handle']);
 		$this->assertSame('Bottom', $blocks->json()['blocks'][0]['blocks'][1]['fields']['text']);

@@ -112,22 +112,6 @@ class Blocks extends Value implements IteratorAggregate
 		return $this->field->getResponsive();
 	}
 
-	/** The gap between blocks as a spacing token, `null` for the site's default. */
-	public function gap(): ?string
-	{
-		return $this->spacing('gap');
-	}
-
-	public function rowGap(): ?string
-	{
-		return $this->spacing('rowGap');
-	}
-
-	public function columnGap(): ?string
-	{
-		return $this->spacing('columnGap');
-	}
-
 	/** The n-th image block's image. */
 	public function image(int $index = 1): ?Image
 	{
@@ -225,20 +209,6 @@ class Blocks extends Value implements IteratorAggregate
 			. escape($this->responsive()->value)
 			. '"';
 
-		// The spacing chosen in the editor, as tokens the site's sheet maps
-		// to lengths; nothing is emitted for the site's default.
-		foreach ([
-			'gap' => 'data-gap',
-			'rowGap' => 'data-row-gap',
-			'columnGap' => 'data-column-gap',
-		] as $key => $attribute) {
-			$size = $this->spacing($key);
-
-			if ($size !== null) {
-				$attributes .= " {$attribute}=\"" . escape($size) . '"';
-			}
-		}
-
 		$out = '<' . $ctx->tag() . $attributes . " style=\"--columns: {$columns}\">";
 		$types = $this->field->services()->blocks->cached($this->owner);
 
@@ -247,13 +217,6 @@ class Blocks extends Value implements IteratorAggregate
 		}
 
 		return new Markup($out . '</' . $ctx->tag() . '>');
-	}
-
-	private function spacing(string $key): ?string
-	{
-		$value = $this->meta($key);
-
-		return is_string($value) && in_array($value, Field\Blocks::SPACING, true) ? $value : null;
 	}
 
 	private function perLocale(): bool

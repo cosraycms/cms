@@ -10,18 +10,9 @@
  * prefix follows the `prefix` render argument, so a site that renders
  * with a different prefix copies the file and renames.
  *
- * The editor chooses spacing in tokens — `none`, `s`, `m`, `l`, `xl` —
- * and the markup carries them as `data-gap`, `data-row-gap` and
- * `data-column-gap` on the container and `data-padding` on a block.
- * Each token reads a variable the site sets to its own scale, on the
- * container or anywhere above it: `--blocks-gap-s` … `--blocks-gap-xl`
- * and `--blocks-padding-s` … `--blocks-padding-xl`; `none` is zero.
- * Without a token the container falls back to `--blocks-gap`, the
- * site's default gap; a chosen token always wins over it, `none`
- * included, so what the editor sees is what the site renders.
- *
- * Gap lengths should be context-independent — `rem` or `px`: an `em`
- * follows whatever font size the container has.
+ * The gap between blocks is the site's: `--blocks-gap`, set on the
+ * container or anywhere above it. It should be context-independent —
+ * `rem` or `px`: an `em` follows whatever font size the container has.
  *
  * A block on the field's grid carries the lines it starts at —
  * `data-col`/`data-row` and `--col`/`--row` — next to its spans, and
@@ -43,86 +34,11 @@
  */
 
 @layer cosray.blocks {
-	/*
-	 * `--blocks-column-gap` is the resolved column gap, `--blocks-row-gap`
-	 * the row gap. Both start from the site's default `--blocks-gap`; a
-	 * shared `data-gap` sets both, a per-axis attribute only its own.
-	 */
 	.cosray-blocks {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
-		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
-
 		display: grid;
 		grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr));
-		column-gap: var(--blocks-column-gap);
-		row-gap: var(--blocks-row-gap);
+		gap: var(--blocks-gap, 2rem);
 		container-type: inline-size;
-	}
-
-	.cosray-blocks[data-gap="none"] {
-		--blocks-column-gap: 0px;
-		--blocks-row-gap: 0px;
-	}
-
-	.cosray-blocks[data-gap="s"] {
-		--blocks-column-gap: var(--blocks-gap-s, 1rem);
-		--blocks-row-gap: var(--blocks-gap-s, 1rem);
-	}
-
-	.cosray-blocks[data-gap="m"] {
-		--blocks-column-gap: var(--blocks-gap-m, 2rem);
-		--blocks-row-gap: var(--blocks-gap-m, 2rem);
-	}
-
-	.cosray-blocks[data-gap="l"] {
-		--blocks-column-gap: var(--blocks-gap-l, 3rem);
-		--blocks-row-gap: var(--blocks-gap-l, 3rem);
-	}
-
-	.cosray-blocks[data-gap="xl"] {
-		--blocks-column-gap: var(--blocks-gap-xl, 4.5rem);
-		--blocks-row-gap: var(--blocks-gap-xl, 4.5rem);
-	}
-
-	/* A gap set per axis beats the shared one. */
-	.cosray-blocks[data-column-gap="none"] {
-		--blocks-column-gap: 0px;
-	}
-
-	.cosray-blocks[data-column-gap="s"] {
-		--blocks-column-gap: var(--blocks-gap-s, 1rem);
-	}
-
-	.cosray-blocks[data-column-gap="m"] {
-		--blocks-column-gap: var(--blocks-gap-m, 2rem);
-	}
-
-	.cosray-blocks[data-column-gap="l"] {
-		--blocks-column-gap: var(--blocks-gap-l, 3rem);
-	}
-
-	.cosray-blocks[data-column-gap="xl"] {
-		--blocks-column-gap: var(--blocks-gap-xl, 4.5rem);
-	}
-
-	.cosray-blocks[data-row-gap="none"] {
-		--blocks-row-gap: 0px;
-	}
-
-	.cosray-blocks[data-row-gap="s"] {
-		--blocks-row-gap: var(--blocks-gap-s, 1rem);
-	}
-
-	.cosray-blocks[data-row-gap="m"] {
-		--blocks-row-gap: var(--blocks-gap-m, 2rem);
-	}
-
-	.cosray-blocks[data-row-gap="l"] {
-		--blocks-row-gap: var(--blocks-gap-l, 3rem);
-	}
-
-	.cosray-blocks[data-row-gap="xl"] {
-		--blocks-row-gap: var(--blocks-gap-xl, 4.5rem);
 	}
 
 	/* The blocks of a split follow each other; a placed block sits on its lines. */
@@ -143,26 +59,6 @@
 		grid-template-rows: subgrid;
 	}
 
-	.cosray-block[data-padding="none"] {
-		padding: 0;
-	}
-
-	.cosray-block[data-padding="s"] {
-		padding: var(--blocks-padding-s, 1rem);
-	}
-
-	.cosray-block[data-padding="m"] {
-		padding: var(--blocks-padding-m, 2rem);
-	}
-
-	.cosray-block[data-padding="l"] {
-		padding: var(--blocks-padding-l, 3rem);
-	}
-
-	.cosray-block[data-padding="xl"] {
-		padding: var(--blocks-padding-xl, 4.5rem);
-	}
-
 	@container (max-width: 42rem) {
 		.cosray-blocks[data-responsive="stack"] .cosray-block {
 			grid-column: 1 / -1;
@@ -172,7 +68,7 @@
 		.cosray-blocks[data-responsive="stack"] .cosray-block[data-split] {
 			grid-template-columns: minmax(0, 1fr);
 			grid-template-rows: none;
-			row-gap: var(--blocks-row-gap);
+			row-gap: inherit;
 		}
 	}
 

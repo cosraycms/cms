@@ -23,7 +23,7 @@ final class TextBlocksTest extends TestCase
 {
 	public function testTurnsATextBlockIntoARichTextBlockWithItsPlaceAndSettings(): void
 	{
-		$meta = ['class' => ['zxx' => 'wide'], 'padding' => ['zxx' => 'l']];
+		$meta = ['class' => ['zxx' => 'wide'], 'id' => ['zxx' => 'intro']];
 		$layout = ['col' => 3, 'row' => 2, 'colspan' => 6, 'rowspan' => 1];
 		$block = TextBlocks::content(self::text('t1', ['zxx' => 'Hello'], $layout, $meta));
 

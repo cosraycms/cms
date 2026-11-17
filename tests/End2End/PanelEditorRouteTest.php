@@ -129,7 +129,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 								'fields' => [
 									'text' => ['type' => Textarea::class, 'value' => ['zxx' => 'First block']],
 								],
-								'meta' => ['class' => ['zxx' => 'wide'], 'padding' => ['zxx' => 'm']],
+								'meta' => ['class' => ['zxx' => 'wide']],
 							],
 							[
 								'uid' => 'block-gone',
@@ -140,7 +140,6 @@ final class PanelEditorRouteTest extends End2EndTestCase
 						],
 						'de' => [],
 					],
-					'meta' => ['gap' => ['zxx' => 's']],
 				],
 			]),
 		]);
@@ -164,7 +163,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'class="cms-blocks-editor is-grid" data-repeater data-name="'
 				. $en
 				. '" data-id="field-contentBlocks-en" data-columns="12" data-min="2" data-ghost-label="Add block here"'
-				. ' data-gap="s" style="--columns: 12"',
+				. ' style="--columns: 12"',
 			preg_replace('/\s+/', ' ', $html) ?? '',
 		);
 		// The row: uid, type and layout as hidden inputs, the layout on the
@@ -185,32 +184,6 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('name="' . $en . '[0][meta][class][zxx]"', $html);
 		$this->assertStringContainsString('value="wide"', $html);
 		$this->assertStringContainsString('name="' . $en . '[0][meta][id][zxx]"', $html);
-		// The canvas carries the stored spacing the way the site will render it.
-		$this->assertHtmlNodeExists('//div[@data-repeater-row][@data-padding="m"]', $html);
-		// The block meta holds the padding, the field's own dialog the gap with
-		// its split into row and column gap behind a toggle.
-		$this->assertHtmlNodeExists(
-			'//select[@name="' . $en . '[0][meta][padding][zxx]"]/option[@value="m"][@selected]',
-			$html,
-		);
-		$this->assertHtmlNodeExists(
-			'//div[@data-field="contentBlocks"]/label//button[@data-dialog-open="meta"]',
-			$html,
-		);
-		$this->assertHtmlNodeExists(
-			'//div[@data-field="contentBlocks"]/dialog[@data-dialog="meta"]'
-				. '//select[@name="content[contentBlocks][meta][gap][zxx]"]/option[@value="s"][@selected]',
-			$html,
-		);
-		$this->assertHtmlNodeExists(
-			'//div[@data-field="contentBlocks"]/dialog[@data-dialog="meta"]//input[@type="checkbox"][@data-gap-split][not(@checked)]',
-			$html,
-		);
-		$this->assertHtmlNodeExists(
-			'//div[@data-field="contentBlocks"]/dialog[@data-dialog="meta"]//div[@data-gap-separate][@hidden]'
-				. '/select[@name="content[contentBlocks][meta][rowGap][zxx]"]',
-			$html,
-		);
 		// A block with one field hides that field's label. A field's own meta
 		// group moves into the block's settings dialog, so no meta button
 		// sits in the content and the label row goes with it.

@@ -91,11 +91,22 @@ An attribute decides what editors can fill in, not the markup. A template prints
 `gallery()` prints this, with the ratio and crop an editor chose for the gallery:
 
 ```html
-<div class="cosray-image-gallery" data-ratio="4/3" style="--ratio: 4/3" data-crop>
-    <figure class="cosray-image-gallery-item">
-        <img src="/cache/…/pic-block-thumb.jpg" data-url-large="/cache/…/pic-large.jpg" width="480" height="320" alt="…">
-        <figcaption>Words <small>© Jane Doe</small></figcaption>
-    </figure>
+<div
+	class="cosray-image-gallery"
+	data-ratio="4/3"
+	style="--ratio: 4/3"
+	data-crop
+>
+	<figure class="cosray-image-gallery-item">
+		<img
+			src="/cache/…/pic-block-thumb.jpg"
+			data-url-large="/cache/…/pic-large.jpg"
+			width="480"
+			height="320"
+			alt="…"
+		/>
+		<figcaption>Words <small>© Jane Doe</small></figcaption>
+	</figure>
 </div>
 ```
 
@@ -181,7 +192,7 @@ GD renders images by default. `'media.backend' => 'imagick'` renders them with I
 
 With GD, resizing decodes the whole original, at about 5 bytes per pixel, so `memory_limit` bounds what can be resized: 128M takes about 25 megapixels, a 45 megapixel photo needs about 256M. A larger original gets no renditions: their URLs redirect to the original, which is heavier but still shows, uncropped, and the failure is logged. A crop costs no extra memory beyond its rendition, which is copied directly out of the decoded original.
 
-Block image ladders, responsive `sizes`, gallery ratios, and spacing are documented in [Blocks](blocks.md#rendering).
+Block image ladders, responsive `sizes`, and gallery ratios are documented in [Blocks](blocks.md#rendering).
 
 ## Commands
 

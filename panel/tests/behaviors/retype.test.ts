@@ -58,18 +58,7 @@ const META = {
 	props: {
 		fields: [
 			{ key: 'class', control: { name: 'text' } },
-			{
-				key: 'padding',
-				control: {
-					name: 'option',
-					props: {
-						options: [
-							{ value: '', label: 'Default' },
-							{ value: 'l', label: 'Large' },
-						],
-					},
-				},
-			},
+			{ key: 'id', control: { name: 'text' } },
 		],
 	},
 };
@@ -209,7 +198,7 @@ async function answer(yes: boolean): Promise<void> {
 describe('changing a block’s type', () => {
 	it('puts a fresh block of the picked type in an empty block’s cells, with its settings', () => {
 		const { rows } = editor([
-			text('a', at(1, 1, 6), '', { class: { zxx: 'wide' }, padding: { zxx: 'l' } }),
+			text('a', at(1, 1, 6), '', { class: { zxx: 'wide' }, id: { zxx: 'intro' } }),
 			text('b', at(7, 1, 6)),
 		]);
 
@@ -223,8 +212,7 @@ describe('changing a block’s type', () => {
 		expect(uid(fresh)).toMatch(/^[a-z0-9]{13}$/);
 		expect(layout(fresh)).toEqual(at(1, 1, 6));
 		expect(own(fresh, '[meta][class][zxx]').value).toBe('wide');
-		expect(own(fresh, '[meta][padding][zxx]').value).toBe('l');
-		expect(fresh.dataset.padding).toBe('l');
+		expect(own(fresh, '[meta][id][zxx]').value).toBe('intro');
 		expect(content(fresh)).toBe('');
 		expect(fresh.contains(document.activeElement)).toBe(true);
 		expect(uid(other)).toBe('b');

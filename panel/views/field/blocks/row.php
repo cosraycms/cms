@@ -37,8 +37,6 @@ $layout = $area === null
 	? Layout::normalize($rowData['layout'] ?? null, $columns, $min)
 	: Layout::normalize($rowData['layout'] ?? null, $area->colspan, $min, $area->rowspan);
 $readonly = (bool) (u($readonly ?? null) ?? false);
-$padding = $rowData['meta']['padding']['zxx'] ?? null;
-$padding = in_array($padding, \Cosray\Field\Blocks::SPACING, true) ? (string) $padding : '';
 $style = "--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}";
 $style .= $layout->placed() ? "; --col: {$layout->col}; --row: {$layout->row}" : '';
 $labels = (bool) ($blockType['labels'] ?? true);
@@ -126,7 +124,6 @@ $retype = count($blockTypes) > 1;
 	data-repeater-row
 	data-meta-owner
 	<?= $layout->placed() ? 'data-placed' : '' ?>
-	<?= $padding !== '' ? 'data-padding="' . $this->escape($padding) . '"' : '' ?>
 	style="<?= $this->escape($style) ?>">
 	<input
 		type="hidden"

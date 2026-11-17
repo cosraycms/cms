@@ -50,7 +50,6 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 						'rowspan' => 1,
 					])],
 				],
-				'meta' => ['gap' => ['zxx' => 'l']],
 			],
 		]);
 
@@ -96,7 +95,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 		// The reference stylesheet is inlined, so the frame needs no request.
 		$this->assertStringContainsString('@layer cosray.blocks', $html);
 		$this->assertHtmlNodeExists(
-			'//div[contains(@class, "cosray-blocks")][@data-columns="12"][@data-gap="l"]',
+			'//div[contains(@class, "cosray-blocks")][@data-columns="12"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists('//div[@data-type="heading"]/h3[text()="Fresh heading"]', $html);
