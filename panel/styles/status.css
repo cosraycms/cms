@@ -576,10 +576,10 @@ button.cms-status-dots .cms-status-dots-tooltip {
 		gap: var(--cms-space-2);
 		margin-top: var(--cms-space-2);
 		padding: var(--cms-space-2-5) var(--cms-space-3);
-		border: 1px solid color-mix(in oklch, var(--cms-color-warning), transparent 65%);
+		border: 1px solid var(--cms-color-danger-border-soft);
 		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-warning-surface);
-		color: var(--cms-color-warning-text);
+		background: var(--cms-color-danger-surface);
+		color: var(--cms-color-danger-text);
 		font-size: var(--cms-font-size-xs);
 		line-height: 1.4;
 
