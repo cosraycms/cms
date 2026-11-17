@@ -30,6 +30,34 @@
 		position: relative;
 	}
 
+	/* In a block the toolbar shows while the text has focus, above it and
+	   over whatever is there; it sticks to the pane's top while the text
+	   scrolls past. place() in richtext.js measures the offsets. */
+	&.is-docked {
+		& > .cms-richtext-dock {
+			position: sticky;
+			z-index: 16;
+			top: var(--dock-top, 2.75rem);
+			height: 0;
+		}
+
+		&:not(:focus-within) > .cms-richtext-dock {
+			display: none;
+		}
+
+		& > .cms-richtext-dock > .cms-richtext-toolbar {
+			position: absolute;
+			inset-block-end: calc(var(--cms-space-1) + var(--dock-lift, 0px));
+			inset-inline-start: calc(var(--dock-shift, 0px) - var(--cms-space-2));
+			width: max-content;
+			max-width: var(--dock-max, none);
+			padding: 0 var(--cms-space-1);
+			border: 1px solid var(--cms-color-border-control);
+			border-radius: var(--cms-radius-md);
+			box-shadow: var(--cms-shadow-md);
+		}
+	}
+
 	svg {
 		display: inline-block;
 	}
@@ -254,27 +282,30 @@
 
 	/* The breakpoint is sized to the trimmed default toolbar inside the 55rem
 	   editing column, not to the viewport: below it the strip gives way to
-	   the overflow menu; a maximal tool set above it scrolls horizontally. */
+	   the overflow menu; a maximal tool set above it scrolls horizontally.
+	   A docked toolbar is bound by the field's width, not its block's. */
 	@container (max-width: 36rem) {
-		.cms-richtext-dropdown-button {
-			padding-left: var(--cms-space-3);
-			padding-right: var(--cms-space-3);
-		}
+		&:not(.is-docked) {
+			.cms-richtext-dropdown-button {
+				padding-left: var(--cms-space-3);
+				padding-right: var(--cms-space-3);
+			}
 
-		.cms-richtext-toolbar-btns {
-			display: none;
-		}
+			.cms-richtext-toolbar-btns {
+				display: none;
+			}
 
-		.cms-richtext-overflow {
-			display: inline-block;
-		}
+			.cms-richtext-overflow {
+				display: inline-block;
+			}
 
-		.cms-richtext-source-btn-offset {
-			margin-left: var(--cms-space-1);
-		}
+			.cms-richtext-source-btn-offset {
+				margin-left: var(--cms-space-1);
+			}
 
-		.cms-richtext-toolbar-source-label {
-			display: none;
+			.cms-richtext-toolbar-source-label {
+				display: none;
+			}
 		}
 	}
 

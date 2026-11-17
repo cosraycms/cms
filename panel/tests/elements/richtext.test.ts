@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RichtextEnvelope } from '../../src/elements/richtext/format.js';
 import type { HostPayload } from '../../src/lib/host';
 import type { LocaleMap, RichtextDoc } from '../../src/types/data';
-import '../../src/elements/richtext.js';
+import { place } from '../../src/elements/richtext.js';
 
 vi.mock('../../src/lib/locale.js', () => ({ __: (id: string) => id }));
 
@@ -269,6 +269,58 @@ describe('the menu follows the tools', () => {
 		await tick();
 
 		expect(changes).not.toHaveBeenCalled();
+	});
+});
+
+describe('the docked toolbar of a block', () => {
+	function rect(left: number, top: number, width: number, height: number): DOMRect {
+		return { left, top, width, height, right: left + width, bottom: top + height } as DOMRect;
+	}
+
+	function at(element: Element, box: DOMRect): void {
+		element.getBoundingClientRect = () => box;
+	}
+
+	function block(): { root: HTMLElement; toolbar: HTMLElement; scroller: HTMLElement } {
+		document.body.innerHTML = `<div class="scroller" style="overflow-y: auto; padding-top: 32px">
+			<div class="cms-blocks-editor-grid">
+				<div class="cms-block">
+					<div class="cms-block-chrome"></div>
+					<div class="cms-richtext is-docked"><div class="cms-richtext-toolbar"></div></div>
+				</div>
+			</div>
+		</div>`;
+		at(document.querySelector('.cms-blocks-editor-grid')!, rect(100, 0, 800, 600));
+
+		return {
+			root: document.querySelector<HTMLElement>('.cms-richtext')!,
+			toolbar: document.querySelector<HTMLElement>('.cms-richtext-toolbar')!,
+			scroller: document.querySelector<HTMLElement>('.scroller')!,
+		};
+	}
+
+	it('stays inside the field and clear of the block’s chrome', () => {
+		const { root, toolbar } = block();
+		at(root, rect(700, 200, 300, 100));
+		at(toolbar, rect(690, 160, 300, 36));
+		at(document.querySelector('.cms-block-chrome')!, rect(860, 180, 100, 28));
+
+		place(root, toolbar);
+
+		expect(root.style.getPropertyValue('--dock-shift')).toBe('-90px');
+		// Shifted to 600–900, the toolbar still meets the chrome at 860.
+		expect(root.style.getPropertyValue('--dock-lift')).toBe('20px');
+	});
+
+	it('sticks at the scroller’s top edge, not below its padding', () => {
+		const { root, toolbar } = block();
+		at(root, rect(100, 200, 300, 100));
+		at(toolbar, rect(100, 160, 200, 36));
+
+		place(root, toolbar);
+
+		// 40px from the toolbar's top to the text, 4px off the edge, less the padding.
+		expect(root.style.getPropertyValue('--dock-top')).toBe('12px');
 	});
 });
 

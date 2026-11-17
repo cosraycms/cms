@@ -258,6 +258,65 @@ function dropdown(id, face, attributes) {
 	return { wrap, trigger, menu };
 }
 
+/**
+ * Docks a block's toolbar above its text, inside the field and clear of
+ * the block's own chrome, and keeps it at the pane's top while the text
+ * scrolls past. Measured whenever the text takes focus, as the toolbar
+ * shows only then.
+ *
+ * @param {HTMLElement} root
+ * @param {HTMLElement} toolbar
+ */
+export function place(root, toolbar) {
+	for (const name of ['--dock-shift', '--dock-lift', '--dock-max', '--dock-top']) {
+		root.style.removeProperty(name);
+	}
+
+	const bar = toolbar.getBoundingClientRect();
+
+	if (bar.width === 0) return;
+
+	const grid = root.closest('.cms-blocks-editor-grid')?.getBoundingClientRect();
+	const chrome = root
+		.closest('.cms-block')
+		?.querySelector(':scope > .cms-block-chrome')
+		?.getBoundingClientRect();
+	let shift = 0;
+	let lift = 0;
+
+	if (grid) {
+		const over = bar.right - grid.right;
+		shift = over > 0 ? -Math.min(over, Math.max(0, bar.left - grid.left)) : 0;
+		root.style.setProperty('--dock-max', `${grid.width}px`);
+	}
+
+	const left = bar.left + shift;
+	const right = bar.right + shift;
+
+	if (
+		chrome &&
+		chrome.width > 0 &&
+		right > chrome.left &&
+		left < chrome.right &&
+		bar.bottom > chrome.top
+	) {
+		lift = bar.bottom - chrome.top + 4;
+	}
+
+	// A sticky box keeps clear of its scroller's padding, so it is taken back.
+	let scroller = root.parentElement;
+
+	while (scroller && !/auto|scroll/.test(getComputedStyle(scroller).overflowY)) {
+		scroller = scroller.parentElement;
+	}
+
+	const inset = scroller ? parseFloat(getComputedStyle(scroller).paddingTop) || 0 : 0;
+	const top = root.getBoundingClientRect().top - bar.top + lift + 4 - inset;
+	root.style.setProperty('--dock-shift', `${shift}px`);
+	root.style.setProperty('--dock-lift', `${lift}px`);
+	root.style.setProperty('--dock-top', `${top}px`);
+}
+
 export class CosrayRichtext extends HTMLElement {
 	/** @type {LocaleMap<RichtextDoc | string | null> | null | undefined} */
 	value = {};
@@ -750,22 +809,30 @@ export class CosrayRichtext extends HTMLElement {
 		}
 
 		if (!readonly && structure) {
-			root.prepend(
-				this.#toolbar({
-					menuId,
-					specs,
-					tools,
-					updates,
-					run,
-					source,
-					content,
-					sourceBox,
-					onSource: (next) => {
-						showSource = next;
-						showFallback();
-					},
-				}),
-			);
+			const toolbar = this.#toolbar({
+				menuId,
+				specs,
+				tools,
+				updates,
+				run,
+				source,
+				content,
+				sourceBox,
+				onSource: (next) => {
+					showSource = next;
+					showFallback();
+				},
+			});
+
+			if (field.presentation === 'block') {
+				const dock = create('div', 'cms-richtext-dock');
+				dock.append(toolbar);
+				root.classList.add('is-docked');
+				root.prepend(dock);
+				root.addEventListener('focusin', () => requestAnimationFrame(() => place(root, toolbar)));
+			} else {
+				root.prepend(toolbar);
+			}
 		}
 
 		this.#editor = createEditor({
