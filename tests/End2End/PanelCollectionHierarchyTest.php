@@ -350,6 +350,32 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 		);
 	}
 
+	public function testHierarchyTreeOffersNoExpandControlForChildrenOutsideTheCollection(): void
+	{
+		$parent = $this->createHierarchyNode(
+			uid: 'panel-tree-outsider-parent',
+			type: $this->parentTypeId,
+			title: 'Panel Tree Outsider Parent',
+		);
+		$article = $this->db()->execute("SELECT type FROM cms.types WHERE handle = 'test-article'")->first();
+		$this->createHierarchyNode(
+			uid: 'panel-tree-outsider-child',
+			type: $article ? (int) $article['type'] : $this->createTestType('test-article'),
+			title: 'Panel Tree Outsider Child',
+			parent: $parent,
+		);
+
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('Panel Tree Outsider Parent', $html);
+		$this->assertStringNotContainsString(
+			'aria-label="Expand children of Panel Tree Outsider Parent"',
+			$html,
+		);
+	}
+
 	public function testHierarchyTreeRendersOpenedGrandchildren(): void
 	{
 		$rootId = $this->createHierarchyNode(

@@ -643,10 +643,8 @@ final class Listing
 			return [];
 		}
 
-		$children = $this->cms
-			->nodes("parent @ [{$list}]")
-			->published(null)
-			->hidden(null);
+		// Only the children an expanded row lists count, not those of other types.
+		$children = $this->entries()->filter("parent @ [{$list}]");
 		$result = [];
 
 		foreach ($children as $child) {
