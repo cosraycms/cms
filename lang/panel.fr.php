@@ -136,7 +136,6 @@ return [
 		'richtext:align-center' => 'Centrer le texte',
 		'richtext:align-left' => 'Aligner le texte à gauche',
 		'richtext:align-right' => 'Aligner le texte à droite',
-		'richtext:block-style' => 'Style de bloc',
 		'richtext:blockquote' => 'Citation',
 		'richtext:bold' => 'Gras',
 		'richtext:bullet-list' => 'Liste à puces',

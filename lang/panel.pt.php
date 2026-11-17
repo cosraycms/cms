@@ -133,7 +133,6 @@ return [
 		'richtext:align-center' => 'Centrar texto',
 		'richtext:align-left' => 'Alinhar texto à esquerda',
 		'richtext:align-right' => 'Alinhar texto à direita',
-		'richtext:block-style' => 'Estilo de parágrafo',
 		'richtext:blockquote' => 'Citação',
 		'richtext:bold' => 'Negrito',
 		'richtext:bullet-list' => 'Lista com marcas',

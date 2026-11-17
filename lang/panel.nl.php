@@ -133,7 +133,6 @@ return [
 		'richtext:align-center' => 'Centreren',
 		'richtext:align-left' => 'Links uitlijnen',
 		'richtext:align-right' => 'Rechts uitlijnen',
-		'richtext:block-style' => 'Alinea-opmaak',
 		'richtext:blockquote' => 'Citaat',
 		'richtext:bold' => 'Vet',
 		'richtext:bullet-list' => 'Opsommingslijst',

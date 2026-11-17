@@ -344,8 +344,8 @@ final class Styleguide extends Panel
 	}
 
 	/**
-	 * Two richtext descriptors: the built-in default toolbar and a field
-	 * trimmed the way `#[Tools]` would.
+	 * Richtext descriptors: the built-in default toolbar, a field trimmed
+	 * the way `#[Tools]` would, and one of marks only, which gets a bubble.
 	 *
 	 * @return list<array<string, mixed>>
 	 */
@@ -367,6 +367,14 @@ final class Styleguide extends Panel
 				'label' => 'Richtext — #[Tools(Bold, Italic, Link, Source)]',
 				'control' => $control,
 				'tools' => ['bold', 'italic', 'link', 'source'],
+				'richtextClasses' => (object) [],
+				'richtextStyles' => (object) [],
+			],
+			[
+				'name' => 'rtMarks',
+				'label' => 'Richtext — #[Tools(Tool::MINIMAL)], a bubble on the selection',
+				'control' => $control,
+				'tools' => array_map(static fn(Tool $tool): string => $tool->value, Tool::MINIMAL),
 				'richtextClasses' => (object) [],
 				'richtextStyles' => (object) [],
 			],
@@ -675,7 +683,7 @@ final class Styleguide extends Panel
 						'type' => RichText::class,
 						'control' => $richtext,
 						'translate' => $translate,
-						'tools' => array_map(static fn(Tool $tool): string => $tool->value, Tool::INLINE),
+						'tools' => array_map(static fn(Tool $tool): string => $tool->value, Tool::DEFAULT),
 						'richtextClasses' => (object) [],
 						'richtextStyles' => (object) [],
 					],
@@ -1246,6 +1254,19 @@ final class Styleguide extends Panel
 			],
 			'rtTrimmed' => [
 				'value' => ['zxx' => $doc('Presse', 'Nur Fett, Kursiv, Link und die Quelltextansicht.')],
+				'format' => Envelope::FORMAT,
+				'version' => Envelope::VERSION,
+			],
+			'rtMarks' => [
+				'value' => [
+					'zxx' => [
+						'type' => 'doc',
+						'content' => [[
+							'type' => 'paragraph',
+							'content' => [['type' => 'text', 'text' => 'Text markieren, um ihn auszuzeichnen.']],
+						]],
+					],
+				],
 				'format' => Envelope::FORMAT,
 				'version' => Envelope::VERSION,
 			],

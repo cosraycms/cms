@@ -26,7 +26,7 @@
 	}
 
 	/* The bubble's offset origin. */
-	&.cms-richtext-inline {
+	&.has-bubble {
 		position: relative;
 	}
 
@@ -79,7 +79,7 @@
 			}
 		}
 
-		& .cms-richtext-block-style {
+		& .cms-richtext-style {
 			width: auto;
 			gap: var(--cms-space-0-5);
 			grid-auto-flow: column;

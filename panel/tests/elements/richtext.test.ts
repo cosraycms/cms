@@ -162,13 +162,13 @@ describe('richtext fallback previews', () => {
 	});
 });
 
-describe('richtext inside a block', () => {
-	async function block(tools: string[]) {
+describe('the menu follows the tools', () => {
+	async function field(tools: string[], extra: Record<string, unknown> = {}) {
 		const element = document.createElement('cosray-richtext') as RichtextElement;
 		Object.assign(element, {
-			value: { zxx: doc('Block text') },
+			value: { zxx: doc('Some text') },
 			format: 'cosray-richtext',
-			field: { name: 'text', presentation: 'block', tools },
+			field: { name: 'text', tools, ...extra },
 			locale: 'zxx',
 		});
 		const changes = vi.fn<(detail: RichtextEnvelope) => void>();
@@ -181,8 +181,8 @@ describe('richtext inside a block', () => {
 		return { element, changes };
 	}
 
-	// The bubble's own buttons, without the entries of its block-style menu.
-	function labels(element: HTMLElement): (string | null)[] {
+	// The bubble's own buttons and menu triggers, without the menus' entries.
+	function bubbled(element: HTMLElement): (string | null)[] {
 		const bubble = element.querySelector('.cms-richtext-bubble')!;
 
 		return Array.from(
@@ -190,45 +190,48 @@ describe('richtext inside a block', () => {
 		).map((button) => button.getAttribute('aria-label'));
 	}
 
-	it('shows a bubble with the configured tools instead of the toolbar', async () => {
-		const { element } = await block([
-			'undo',
-			'bold',
-			'italic',
-			'strike',
-			'link',
-			'bullet-list',
-			'ordered-list',
-			'clear',
-			'source',
-		]);
+	function press(element: HTMLElement, key: string): void {
+		element
+			.querySelector<HTMLElement>('[contenteditable="true"]')!
+			.dispatchEvent(
+				new KeyboardEvent('keydown', { key, shiftKey: true, ctrlKey: true, bubbles: true }),
+			);
+	}
+
+	it('gives a field of marks only a bubble instead of the toolbar', async () => {
+		const { element } = await field(['undo', 'bold', 'italic', 'strike', 'link', 'clear']);
 
 		expect(element.querySelector('.cms-richtext-toolbar')).toBeNull();
-		expect(labels(element)).toEqual([
+		expect(bubbled(element)).toEqual([
 			'richtext:bold',
 			'richtext:italic',
 			'richtext:strikethrough',
-			'richtext:bullet-list',
-			'richtext:numbered-list',
 			'richtext:add-page-link',
 			'richtext:remove-formats',
 		]);
 	});
 
-	it('folds enabled block styles into one menu', async () => {
-		const { element, changes } = await block(['bold', 'h2', 'blockquote']);
+	it('offers the text styles in the bubble', async () => {
+		const { element } = await field(['bold'], { richtextStyles: { lead: 'Lead' } });
 
-		expect(labels(element)).toEqual(['richtext:block-style', 'richtext:bold']);
-		const entries = Array.from(
-			element.querySelectorAll<HTMLButtonElement>('.cms-richtext-bubble [data-action-menu] button'),
-		);
-		expect(entries.map((entry) => entry.textContent?.trim())).toEqual([
-			'richtext:paragraph',
-			'richtext:heading-2',
-			'richtext:blockquote',
-		]);
+		expect(bubbled(element)).toEqual(['richtext:text-style', 'richtext:bold']);
+	});
 
-		entries[1].click();
+	it('gives a field that changes the structure a toolbar, inside a block too', async () => {
+		const { element } = await field(['bold', 'bullet-list'], { presentation: 'block' });
+
+		expect(element.querySelector('.cms-richtext-toolbar')).not.toBeNull();
+		expect(element.querySelector('.cms-richtext-bubble')).toBeNull();
+	});
+
+	it('turns a paragraph into a heading without a selection', async () => {
+		const { element, changes } = await field(['h2', 'bullet-list']);
+
+		element
+			.querySelector<HTMLButtonElement>(
+				'.cms-richtext-toolbar-btns [aria-label="richtext:heading-2"]',
+			)!
+			.click();
 		await tick();
 
 		expect(changes).toHaveBeenLastCalledWith(
@@ -243,13 +246,9 @@ describe('richtext inside a block', () => {
 	});
 
 	it('toggles a list from the keyboard', async () => {
-		const { element, changes } = await block(['bullet-list']);
-		const content = element.querySelector<HTMLElement>('[contenteditable="true"]')!;
+		const { element, changes } = await field(['bullet-list']);
 
-		content.focus();
-		content.dispatchEvent(
-			new KeyboardEvent('keydown', { key: '8', shiftKey: true, ctrlKey: true, bubbles: true }),
-		);
+		press(element, '8');
 		await tick();
 
 		expect(changes).toHaveBeenLastCalledWith(
@@ -261,6 +260,15 @@ describe('richtext inside a block', () => {
 				},
 			}),
 		);
+	});
+
+	it('keeps a field of marks only free of lists from the keyboard', async () => {
+		const { element, changes } = await field(['bold']);
+
+		press(element, '8');
+		await tick();
+
+		expect(changes).not.toHaveBeenCalled();
 	});
 });
 

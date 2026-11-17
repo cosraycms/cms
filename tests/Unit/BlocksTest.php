@@ -581,9 +581,13 @@ final class BlocksTest extends TestCase
 		$richtext = $blocks->blockFields(Builtin\RichText::class)['text'];
 
 		$this->assertInstanceOf(RichText::class, $richtext);
-		$this->assertSame(['h1', 'bold'], $richtext->getTools());
 		$this->assertSame(['h1', 'bold'], $note['body']->getTools());
 		$this->assertSame(['bold', 'italic', 'link'], $note['aside']->getTools());
+		// The built-in text block declares the full default of its own.
+		$this->assertSame(
+			array_map(static fn(Tool $tool): string => $tool->value, Tool::DEFAULT),
+			$richtext->getTools(),
+		);
 
 		// Without a list from the field, a block's richtext gets the inline
 		// preset rather than the full toolbar's default.

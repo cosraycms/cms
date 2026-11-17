@@ -139,7 +139,6 @@ return [
 		'richtext:align-center' => 'Allinea al centro',
 		'richtext:align-left' => 'Allinea a sinistra',
 		'richtext:align-right' => 'Allinea a destra',
-		'richtext:block-style' => 'Formato paragrafo',
 		'richtext:blockquote' => 'Citazione',
 		'richtext:bold' => 'Grassetto',
 		'richtext:bullet-list' => 'Elenco puntato',

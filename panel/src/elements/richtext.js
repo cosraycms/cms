@@ -1,7 +1,8 @@
 // Defines <cosray-richtext>: the ProseMirror editor for rich text fields.
-// A field shown as a block gets a bubble over the selection, every other a
-// toolbar. The host assigns the element contract (docs/controls.md); edits
-// report the whole value map in the cosray richtext envelope.
+// The tools decide the menu: a field that may change the document's
+// structure gets a toolbar, one that only marks text a bubble over the
+// selection. The host assigns the element contract (docs/controls.md);
+// edits report the whole value map in the cosray richtext envelope.
 
 /** @import { EditorState } from 'prosemirror-state' */
 /** @import { AssetInfo, AssetMap, LocaleMap } from '../types/data' */
@@ -76,7 +77,7 @@ import {
  * @property {() => boolean} [visible]
  */
 
-// Mirrors Cosray\Schema\Tool::defaults(): the set an editor gets when
+// Mirrors Cosray\Schema\Tool::DEFAULT: the set an editor gets when
 // neither the field nor the project configures one.
 const DEFAULT_TOOLS = [
 	'undo',
@@ -91,10 +92,23 @@ const DEFAULT_TOOLS = [
 	'link',
 ];
 
-// The bubble shows on a selection: tools that act on the document as a
-// whole have no place in it, block styles fold into one menu.
-const BUBBLELESS = new Set(['undo', 'redo', 'source', 'hr', 'br', 'image', 'align']);
-const BLOCK_STYLES = new Set(['h1', 'h2', 'h3', 'blockquote']);
+// Tools that change the document's structure act without a selection, so a
+// field with any of them needs a toolbar.
+const STRUCTURE = new Set([
+	'h1',
+	'h2',
+	'h3',
+	'align',
+	'bullet-list',
+	'ordered-list',
+	'blockquote',
+	'hr',
+	'image',
+	'br',
+	'source',
+]);
+// The bubble shows on a selection; these act on the document as a whole.
+const HISTORY = new Set(['undo', 'redo']);
 
 let ids = 0;
 
@@ -391,14 +405,11 @@ export class CosrayRichtext extends HTMLElement {
 	#build(active, fallback, fallbackText) {
 		const field = this.field;
 		const readonly = field.immutable ?? false;
-		const mode = field.presentation === 'block' ? 'inline' : 'default';
 		const tools = new Set(field.tools ?? DEFAULT_TOOLS);
+		const structure = [...tools].some((tool) => STRUCTURE.has(tool));
 		const menuId = `cms-richtext-${++ids}`;
 		const map = this.#values();
-		const root = create(
-			'div',
-			mode === 'inline' ? 'cms-richtext cms-richtext-inline' : 'cms-richtext',
-		);
+		const root = create('div', structure ? 'cms-richtext' : 'cms-richtext has-bubble');
 		const stack = create('div', 'cms-richtext-stack');
 		const content = create('div', 'cms-richtext-content cms-richtext-layer-base');
 		content.dataset.name = field.name;
@@ -482,7 +493,7 @@ export class CosrayRichtext extends HTMLElement {
 		/** @type {HTMLElement | undefined} */
 		let bubble;
 
-		if (mode === 'inline' && !readonly) {
+		if (!structure && !readonly) {
 			bubble = create('div', 'cms-richtext-bubble');
 			root.append(bubble);
 		}
@@ -729,58 +740,16 @@ export class CosrayRichtext extends HTMLElement {
 		const updates = [];
 
 		if (bubble) {
-			const blockSpecs = specs.filter((spec) => BLOCK_STYLES.has(spec.tool));
-			const blockIcon = () => blockSpecs.find((spec) => spec.active?.())?.icon ?? 'paragraph';
+			const styles = this.#styles(menuId, updates, run, true);
 
-			if (blockSpecs.length > 0) {
-				const { wrap, trigger, menu } = dropdown(
-					`${menuId}-block-style`,
-					[svg('paragraph'), svg('chevron-down')],
-					{
-						class: 'cms-richtext-toolbar-btn cms-richtext-block-style',
-						title: __('richtext:block-style'),
-						'aria-label': __('richtext:block-style'),
-					},
-				);
-				trigger.addEventListener('mousedown', keepFocus);
-				entry(updates, menu, {
-					icon: 'paragraph',
-					label: __('richtext:paragraph'),
-					run: run(setParagraph()),
-					checked: () => blockIcon() === 'paragraph',
-					bubbled: true,
-				});
+			if (styles) bubble.append(styles);
 
-				for (const spec of blockSpecs) {
-					entry(updates, menu, {
-						icon: spec.icon,
-						label: spec.label,
-						run: spec.run,
-						checked: () => spec.active?.() ?? false,
-						bubbled: true,
-					});
-				}
-
-				let shown = 'paragraph';
-				updates.push(() => {
-					const name = blockIcon();
-
-					if (name !== shown) {
-						trigger.firstElementChild?.replaceWith(svg(name));
-						shown = name;
-					}
-				});
-				bubble.append(wrap);
-			}
-
-			for (const spec of specs.filter(
-				(spec) => !BUBBLELESS.has(spec.tool) && !BLOCK_STYLES.has(spec.tool),
-			)) {
+			for (const spec of specs.filter((spec) => !HISTORY.has(spec.tool))) {
 				tool(updates, bubble, spec, 'bubble');
 			}
 		}
 
-		if (!readonly && mode !== 'inline') {
+		if (!readonly && structure) {
 			root.prepend(
 				this.#toolbar({
 					menuId,
@@ -802,7 +771,7 @@ export class CosrayRichtext extends HTMLElement {
 		this.#editor = createEditor({
 			element: content,
 			content: map[active],
-			mode,
+			structure,
 			bubbleElement: bubble,
 			assetUrl: (uid) => this.#assetUrl(uid),
 			editable: () => !readonly,
@@ -842,7 +811,6 @@ export class CosrayRichtext extends HTMLElement {
 	#toolbar({ menuId, specs, tools, updates, run, source, content, sourceBox, onSource }) {
 		const toolbar = create('div', 'cms-richtext-toolbar is-open');
 		const classes = Object.entries(this.field.richtextClasses ?? {});
-		const styles = Object.entries(this.field.richtextStyles ?? {});
 		/** @type {HTMLElement[]} */
 		const editing = [];
 		const back = create('div', 'cms-richtext-extras cms-richtext-extras-source');
@@ -905,29 +873,9 @@ export class CosrayRichtext extends HTMLElement {
 			editing.push(wrap);
 		}
 
-		if (styles.length > 0) {
-			const { wrap, menu } = dropdown(`${menuId}-style`, [svg('fonts'), svg('chevron-down')], {
-				class: 'cms-richtext-dropdown-button',
-				'aria-label': __('richtext:text-style'),
-			});
-			const current = () => this.#currentStyle;
+		const styleMenu = this.#styles(menuId, updates, run, false);
 
-			for (const [name, label] of styles) {
-				entry(updates, menu, {
-					icon: null,
-					label,
-					run: run(setStyle(name)),
-					checked: () => current() === name,
-				});
-			}
-
-			entry(updates, menu, {
-				icon: 'eraser',
-				label: __('richtext:remove-style'),
-				run: run(unsetStyle()),
-			});
-			editing.push(wrap);
-		}
+		if (styleMenu) editing.push(styleMenu);
 
 		const overflow = dropdown(menuId, [svg('three-dots-vertical')], {
 			id: `${menuId}-trigger`,
@@ -962,6 +910,55 @@ export class CosrayRichtext extends HTMLElement {
 		toolbar.append(...editing);
 
 		return toolbar;
+	}
+
+	/**
+	 * The configured text styles as a menu, or null without any.
+	 *
+	 * @param {string} menuId
+	 * @param {(() => void)[]} updates
+	 * @param {(command: (state: EditorState, dispatch?: any, view?: any) => boolean) => () => void} run
+	 * @param {boolean} bubbled Keeps the editor focused, as in the bubble.
+	 * @returns {HTMLElement | null}
+	 */
+	#styles(menuId, updates, run, bubbled) {
+		const styles = Object.entries(this.field.richtextStyles ?? {});
+
+		if (styles.length === 0) return null;
+
+		const { wrap, trigger, menu } = dropdown(
+			`${menuId}-style`,
+			[svg('fonts'), svg('chevron-down')],
+			{
+				class: bubbled
+					? 'cms-richtext-toolbar-btn cms-richtext-style'
+					: 'cms-richtext-dropdown-button',
+				title: __('richtext:text-style'),
+				'aria-label': __('richtext:text-style'),
+			},
+		);
+		const current = () => this.#currentStyle;
+
+		if (bubbled) trigger.addEventListener('mousedown', keepFocus);
+
+		for (const [name, label] of styles) {
+			entry(updates, menu, {
+				icon: null,
+				label,
+				run: run(setStyle(name)),
+				checked: () => current() === name,
+				bubbled,
+			});
+		}
+
+		entry(updates, menu, {
+			icon: 'eraser',
+			label: __('richtext:remove-style'),
+			run: run(unsetStyle()),
+			bubbled,
+		});
+
+		return wrap;
 	}
 
 	/** @type {string | null} */

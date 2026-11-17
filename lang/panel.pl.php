@@ -150,7 +150,6 @@ return [
 		'richtext:align-center' => 'Wyśrodkuj tekst',
 		'richtext:align-left' => 'Wyrównaj tekst do lewej',
 		'richtext:align-right' => 'Wyrównaj tekst do prawej',
-		'richtext:block-style' => 'Styl bloku',
 		'richtext:blockquote' => 'Cytat',
 		'richtext:bold' => 'Pogrubienie',
 		'richtext:bullet-list' => 'Lista punktowana',

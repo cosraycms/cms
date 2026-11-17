@@ -40,8 +40,11 @@ function horizontalRuleInputRule() {
 	});
 }
 
-/** @returns {Plugin} */
-export function buildKeymap() {
+/**
+ * @param {boolean} [structure] Whether the shortcuts may turn text into lists.
+ * @returns {Plugin}
+ */
+export function buildKeymap(structure = true) {
 	const { bold, italic, strike, code } = schema.marks;
 	const { listItem, hardBreak } = schema.nodes;
 
@@ -60,8 +63,7 @@ export function buildKeymap() {
 		'Mod-Shift-X': toggleMark(strike),
 		'Mod-e': toggleMark(code),
 		'Mod-E': toggleMark(code),
-		'Mod-Shift-7': toggleOrderedList(),
-		'Mod-Shift-8': toggleBulletList(),
+		...(structure ? { 'Mod-Shift-7': toggleOrderedList(), 'Mod-Shift-8': toggleBulletList() } : {}),
 		'Mod-z': undo,
 		'Mod-y': redo,
 		'Mod-Shift-z': redo,

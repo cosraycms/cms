@@ -139,7 +139,6 @@ return [
 		'richtext:align-center' => 'Centrar el texto',
 		'richtext:align-left' => 'Alinear el texto a la izquierda',
 		'richtext:align-right' => 'Alinear el texto a la derecha',
-		'richtext:block-style' => 'Estilo de bloque',
 		'richtext:blockquote' => 'Cita',
 		'richtext:bold' => 'Negrita',
 		'richtext:bullet-list' => 'Lista con viñetas',

@@ -127,7 +127,9 @@ use Cosray\Schema\Tools;
 public RichText $body;
 ```
 
-Inside a block, resolution is the block type property's own `#[Tools]`, then the blocks field's `#[Tools]`, then `Tool::INLINE`. Project toolbar settings do not override that block default. The current block editor uses a selection bubble rather than the standalone toolbar, so document-level commands may have no button there.
+Inside a block, resolution is the block type property's own `#[Tools]`, then the blocks field's `#[Tools]`, then `Tool::INLINE`. Project toolbar settings do not override that block default. The built-in text block declares `Tool::DEFAULT` of its own, so it offers headings.
+
+The tools decide the menu. A set with a tool that changes the document's structure (headings, alignment, lists, quotes, rules, images, line breaks, the source view) gets a toolbar, because those commands act without a selection. A set of marks only (bold, italic, strike, sub- and superscript, link, clear) gets a bubble over the selection instead, and typing in it never starts a list or heading. Undo and redo do not decide: a toolbar shows them, the bubble leaves them to the keyboard. Configured text styles show in either menu, paragraph classes only in a toolbar.
 
 [Tool](../src/Schema/Tool.php) defines the vocabulary and presets. Paragraph-class and text-style choices come from `richtext.classes` and `richtext.styles`, independently of the tool set. Hiding a tool does not remove its stored content semantics.
 

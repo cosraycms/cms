@@ -36,8 +36,8 @@ import { docToPm, pmToDoc } from './format.js';
  * @property {RichtextDoc | null} content
  * @property {(doc: RichtextDoc) => void} onUpdate
  * @property {(state: EditorState) => void} onStateChange
- * @property {'default' | 'inline'} mode
- * @property {HTMLElement} [bubbleElement]
+ * @property {boolean} structure Whether typing may change the structure: headings, lists, quotes.
+ * @property {HTMLElement} [bubbleElement] The menu over a selection, for a field without a toolbar.
  * @property {(uid: string) => string | null} [assetUrl] Resolve an asset uid to a display URL for inline images.
  * @property {() => boolean} [editable] Whether the document takes input; the view stays selectable
  *     either way, so a read-only document can still be read and copied. Absent means editable.
@@ -109,7 +109,7 @@ export default function createEditor(options) {
 		content,
 		onUpdate,
 		onStateChange,
-		mode,
+		structure,
 		bubbleElement,
 		assetUrl,
 		editable,
@@ -117,15 +117,15 @@ export default function createEditor(options) {
 	} = options;
 
 	const plugins = [
-		buildInputRules(),
-		buildKeymap(),
+		...(structure ? [buildInputRules()] : []),
+		buildKeymap(structure),
 		keymap(baseKeymap),
 		history(),
 		dropCursor(),
 		gapCursor(),
 	];
 
-	if (mode === 'inline' && bubbleElement) {
+	if (bubbleElement) {
 		plugins.push(bubbleMenu(bubbleElement));
 	}
 
