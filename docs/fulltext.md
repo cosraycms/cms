@@ -1,6 +1,6 @@
 # Full-text search
 
-Cosray provides PostgreSQL full-text search for public websites through `Nodes::fulltext()`. Applications supply their own search page or endpoint. The panel's collection search also matches the index; reference pickers and `searchTitle()` remain substring searches.
+Cosray provides PostgreSQL full-text search for public websites through `Nodes::fulltext()`. Applications supply their own search page or endpoint. The panel's collection search also matches the index; reference pickers search titles alone.
 
 This is the current implementation, not a frozen search API. [Fulltext/](../src/Fulltext/), [Finder\Nodes](../src/Finder/Nodes.php), and their tests are the starting points for changes; the data-safety and deployment considerations below still apply when revisiting the design.
 
@@ -110,9 +110,9 @@ A word normally matches whole words and their inflections only: `ball` does not 
 $results = $cms->nodes()->fulltext($query, partial: true);
 ```
 
-A document then also matches when every word of the query occurs in its selected text, either as a full-text match or as part of a longer word, case- and accent-insensitively. Words prefixed with `-` exclude documents containing them in either way. Words shorter than three characters keep whole-word matching. Stopwords take no part in it, and a query of stopwords only still returns no results. The additional matches are a conjunction of the query's words: `OR` does not widen them. Queries with quoted phrases, without a required word, or with more than eight words get no partial matching.
+A document then also matches term by term: each word occurs in its selected text as a full-text match or as part of a longer word, case- and accent-insensitively, and each quoted phrase as a full-text match. `OR` joins alternatives as in the plain query, and words prefixed with `-` exclude documents containing them in either way. Words shorter than three characters match whole words only, as do all words of a query with more than eight words and phrases. Stopwords take no part in it, and a query of stopwords only still returns no results. A query without a required word gets no partial matching. [Fulltext\Query](../src/Fulltext/Query.php) reads the query.
 
-With partial matching, a match scores at least `0.05`, plus up to `0.45` by the share of its words found in the node's title, even inside longer title words. Such a title ranks above a single whole-word match in body text, but below a whole-word title match. Snippets highlight the whole words that contain a query word, such as `Football` for `ball`. A trigram index on the folded snippet source serves the lookups inside words.
+With partial matching, a match scores at least `0.05`, plus up to `0.45` by the share of the query's required words and phrases found in the node's title, words inside longer title words included. Such a title ranks above a single whole-word match in body text, but below a whole-word title match. Snippets highlight the whole words that contain a query word, such as `Football` for `ball`. A trigram index on the folded snippet source serves the lookups inside words.
 
 Ranking uses `ts_rank_cd`, PostgreSQL's default A–D weights (`1.0`, `0.4`, `0.2`, `0.1`), and normalization `0`. Results default to descending relevance, then ascending node UID for ties. An explicit `order()` overrides relevance ordering. The score is relative to this query, not a percentage or comparable across unrelated searches.
 
@@ -120,7 +120,11 @@ Contributions keep document order and are joined with PostgreSQL's vector concat
 
 ### Combined with a field search
 
-`search($query, $fields, fulltext: true)` matches a node when every word occurs in one of the fields, as `search()` does, **or** its document matches as with `fulltext($query, partial: true)`. A node without a document can still match through its fields. Results order by relevance, then title, unless `order()` is set, so field-only matches follow document matches in title order. Unlike `fulltext()`, it does not require an active URL; call `activeUrl()` to add that gate.
+`search($query, $fields, fulltext: true)` matches a node when each word or phrase of the query occurs in one of the fields **or** in its document, so the terms of one query may match in different places: `zebra works` finds a node with Zebra in its title and works in its body. Every source follows the rules of partial matching: fields compare case- and accent-insensitively, words of three characters and more also inside longer words, shorter words and phrases as whole words, and `OR` and `-` apply across all of them. `uid` matches a whole uid or its start, never its inside. A node without a document can still match through its fields.
+
+Results order by relevance, then title, unless `order()` is set. A node whose uid a word names comes first; otherwise a hit scores as in partial matching, ranked by any of the required terms, so field-only matches follow document matches in title order. Unlike `fulltext()`, it does not require an active URL; call `activeUrl()` to add that gate.
+
+Without `fulltext`, `search()` matches the fields alone, by the same rules, and orders nothing. `searchTitle()` searches the title as a reference picker does while an editor types: words match inside longer ones from their first letter. [Finder\SearchCompiler](../src/Finder/SearchCompiler.php) builds the SQL of all of them.
 
 The panel's collection search works this way in the request locale, the default content locale unless the panel request selects another. A hit found only in its document shows a snippet below its title. Text that exists only in an unpublished working copy is not found, because the index holds live content.
 

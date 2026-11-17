@@ -9,7 +9,7 @@ use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Fulltext\Configurations;
-use Cosray\Fulltext\Partial;
+use Cosray\Fulltext\Query;
 use Cosray\Fulltext\Search;
 use Cosray\Fulltext\Snippet;
 use Cosray\Node\Factory;
@@ -32,8 +32,7 @@ final class Nodes implements Iterator
 	private ?int $limit = null;
 	private ?int $offset = null;
 	private ?string $fulltext = null;
-	private ?string $fulltextOr = null;
-	private bool $partial = false;
+	private ?SearchCompiler $search = null;
 	private ?bool $activeUrl = null;
 	private readonly Configurations $configurations;
 	private ?bool $deleted = false; // defaults to false, if all nodes are needed set $deleted to null
@@ -138,8 +137,7 @@ final class Nodes implements Iterator
 	public function fulltext(string $query, bool $partial = false): self
 	{
 		$this->fulltext = $query;
-		$this->partial = $partial;
-		$this->fulltextOr = null;
+		$this->search = SearchCompiler::fulltext($query, $partial);
 
 		return $this;
 	}
@@ -152,66 +150,64 @@ final class Nodes implements Iterator
 	}
 
 	/**
-	 * A substring search on `$fields`, every word somewhere in one of them.
-	 * With `$fulltext`, a node also matches through its full-text document
-	 * in the current locale, words inside longer ones included, and results
-	 * order by relevance unless order() is set; unlike fulltext(), it does
-	 * not require an active URL unless activeUrl() asks for one.
+	 * A search on `$fields`: each word or phrase of the query occurs in one
+	 * of them, words of three characters and more also inside longer words.
+	 * `uid` matches a whole uid or its start. With `$fulltext`, a word may
+	 * also match through the node's full-text document in the current
+	 * locale, and results order by relevance unless order() is set; unlike
+	 * fulltext(), it does not require an active URL unless activeUrl() asks
+	 * for one.
 	 *
 	 * @param array<string> $fields
 	 */
 	public function search(string $query, array $fields, bool $fulltext = false): self
 	{
+		return $this->sources(Query::parse($query), $query, $fields, $fulltext);
+	}
+
+	/** A title search as a picker runs it while the editor types: words match inside longer ones from their first letter. */
+	public function searchTitle(string $query): self
+	{
+		return $this->sources(Query::parse($query, inside: 1), $query, ['title'], false);
+	}
+
+	/** @param array<string> $fields */
+	private function sources(Query $parsed, string $query, array $fields, bool $fulltext): self
+	{
 		$query = trim($query);
+		$fields = array_values(array_filter(
+			array_map('trim', $fields),
+			static fn(string $field): bool => $field !== '',
+		));
 
-		if ($query === '') {
+		if ($query === '' || $fields === [] && !$fulltext) {
 			return $this;
 		}
 
-		$fields = array_values(array_filter(array_map('trim', $fields)));
+		$texts = [];
+		$uid = false;
 
-		if ($fields === []) {
-			return $fulltext ? $this->fulltext($query, partial: true)->activeUrl($this->activeUrl ?? false) : $this;
-		}
-
-		$terms = preg_split('/\s+/u', $query, -1, PREG_SPLIT_NO_EMPTY);
-
-		if (!is_array($terms) || $terms === []) {
-			return $this;
-		}
-
-		$expressions = array_map(
-			$this->fieldExpression(...),
-			$fields,
-		);
-		$termClauses = [];
-
-		foreach ($terms as $term) {
-			$needle = $this->context->db->quote('%' . $term . '%');
-			$fieldClauses = array_map(
-				static fn(string $expression): string => "COALESCE(({$expression})::text, '') ILIKE {$needle}",
-				$expressions,
-			);
-
-			$termClauses[] = '(' . implode(' OR ', $fieldClauses) . ')';
+		foreach ($fields as $field) {
+			if ($field === 'uid' || $field === 'id') {
+				$uid = true;
+			} else {
+				$texts[] = $field === 'title' ? SearchCompiler::TITLE : $this->fieldExpression($field);
+			}
 		}
 
 		if (!$fulltext) {
-			$this->addWhere(implode(' AND ', $termClauses));
+			$search = SearchCompiler::sources($parsed, $texts, $uid, false, 'search_' . count($this->whereParams));
+			$this->addWhere($search->condition());
+			$this->whereParams = [...$this->whereParams, ...$search->params()];
 
 			return $this;
 		}
 
-		$this->fulltext($query, partial: true);
-		$this->fulltextOr = implode(' AND ', $termClauses);
+		$this->fulltext = $query;
+		$this->search = SearchCompiler::sources($parsed, $texts, $uid, true);
 		$this->activeUrl ??= false;
 
 		return $this;
-	}
-
-	public function searchTitle(string $query): self
-	{
-		return $this->search($query, ['title']);
 	}
 
 	public function types(string ...$types): self
@@ -484,11 +480,11 @@ final class Nodes implements Iterator
 		if ($this->order) {
 			$params['order'] = $this->order;
 			$params = [...$params, ...$this->orderParams];
-		} elseif ($this->fulltextOr !== null) {
+		} elseif ($this->search?->outer()) {
 			// Nodes found only through the searched fields score alike, so the title orders them.
 			$title = $this->context->titleSort()->order($this->context->locale(), 'n.title');
 			$params['order'] = "search_score DESC, {$title} ASC, n.uid ASC";
-		} elseif ($this->fulltext !== null) {
+		} elseif ($this->search !== null) {
 			$params['order'] = 'search_score DESC, n.uid ASC';
 		}
 
@@ -542,50 +538,25 @@ final class Nodes implements Iterator
 			$params['mine'] = $this->mine;
 		}
 
-		if ($this->fulltext !== null) {
-			$params['fulltext'] = $this->fulltext;
-
-			// The substring alternative: a node without a matching document still qualifies.
-			if ($this->fulltextOr !== null) {
-				$params['fulltext_or'] = $this->fulltextOr;
-			}
-
-			$params['search_locale'] = $this->context->localeId();
-			$params['search_config'] = $this->configurations->for($this->context->locale());
-			$params = [...$params, ...$this->partialParams($this->fulltext)];
+		if ($this->search !== null) {
+			$params = [
+				...$params,
+				...$this->search->params(),
+				'fulltext' => $this->fulltext,
+				'search_outer' => $this->search->outer(),
+				'search_match' => $this->search->match(),
+				'search_score' => $this->search->score(),
+				'search_headline' => $this->search->headline(),
+				'search_locale' => $this->context->localeId(),
+				'search_config' => $this->configurations->for($this->context->locale()),
+			];
 		}
 
 		// An explicit activeUrl() wins; otherwise the gate is on while fulltext() is active.
-		if ($this->activeUrl ?? $this->fulltext !== null) {
+		if ($this->activeUrl ?? $this->search !== null) {
 			$params['active_url'] = true;
 			$params['url_locales'] = $this->localeIds();
 			$params['routable'] = $this->builtins['routable'];
-		}
-
-		return $params;
-	}
-
-	/** @return array<string, mixed> */
-	private function partialParams(string $query): array
-	{
-		$words = $this->partial ? Partial::words($query) : null;
-
-		if ($words === null) {
-			return [];
-		}
-
-		$params = [
-			'fulltext_words' => $words,
-			'fulltext_partial_score' => Partial::SCORE,
-			'fulltext_title_score' => Partial::TITLE_SCORE,
-			'fulltext_inside_words' => array_keys(array_filter(
-				$words,
-				static fn(array $word): bool => $word['inside'] && !$word['negated'],
-			)),
-		];
-
-		foreach ($words as $i => $word) {
-			$params["fulltext_word_{$i}"] = $word['word'];
 		}
 
 		return $params;
@@ -610,12 +581,6 @@ final class Nodes implements Iterator
 
 	private function fieldExpression(string $field): string
 	{
-		// The materialized title also covers computed titles that have no
-		// content field. Only its values are matched, never the locale keys.
-		if ($field === 'title') {
-			return "(SELECT string_agg(value, ' ') FROM jsonb_each_text(n.title))";
-		}
-
 		$builtin = $this->builtins[$field] ?? null;
 
 		if (is_string($builtin) && $builtin !== '') {

@@ -364,7 +364,7 @@ references.related @ ['first-uid', 'second-uid']
 
 `references` matches indexed node references, including richtext links; `references.fieldName` matches one Reference field. Comparing a reference field directly with a UID string does not match its stored list shape. `path` and `references` are reserved DSL names. See [QueryParser](../src/Finder/QueryParser.php), [QueryCompiler](../src/Finder/QueryCompiler.php), and their tests rather than constructing DSL expressions from untrusted input without understanding its quoting rules.
 
-[Full-text search](fulltext.md) is explicit opt-in through `fulltext()`. Existing `search()` and `searchTitle()` use substring matching.
+[Full-text search](fulltext.md) is explicit opt-in through `fulltext()`. `search()` and `searchTitle()` match words in fields; see [combined search](fulltext.md#combined-with-a-field-search) for their rules.
 
 ### Materialized titles
 

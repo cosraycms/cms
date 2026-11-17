@@ -22,33 +22,8 @@ SELECT
 <?php endif ?>
 	n.title,
 <?php if (isset($fulltext)) : ?>
-<?php if (isset($fulltext_words)) : ?>
-<?php // LIKE patterns are escaped after the fold, which maps fullwidth ％ and ＿ to % and _. ?>
-<?php // A node without a title map, such as a type without Title, scores no title words. ?>
-	coalesce(GREATEST(
-		ts_rank_cd(ft.document, websearch_to_tsquery(:search_config::regconfig, :fulltext)),
-		<?= $fulltext_partial_score ?> + <?= $fulltext_title_score ?> * (0
-<?php foreach ($fulltext_inside_words as $i) : ?>
-			+ (/*:cms.prefix:*/fulltext_fold((SELECT string_agg(value, ' ') FROM jsonb_each_text(CASE WHEN jsonb_typeof(n.title) = 'object' THEN n.title ELSE '{}' END)))
-				LIKE '%' || regexp_replace(/*:cms.prefix:*/fulltext_fold(:fulltext_word_<?= $i ?>), '([\\%_])', '\\\1', 'g') || '%')::int
-<?php endforeach ?>
-		)::float / <?= max(1, count($fulltext_inside_words)) ?>
-	), 0) AS search_score,
-<?php else: ?>
-	coalesce(ts_rank_cd(ft.document, websearch_to_tsquery(:search_config::regconfig, :fulltext)), 0) AS search_score,
-<?php endif ?>
-<?php if (!empty($fulltext_inside_words)) : ?>
-	ts_headline(:search_config::regconfig, ft.source, websearch_to_tsquery(:search_config::regconfig, :fulltext) || coalesce((
-		SELECT websearch_to_tsquery(:search_config::regconfig, string_agg(DISTINCT word, ' OR '))
-		FROM regexp_split_to_table(ft.source, '[[:space:][:punct:]]+') AS word
-		WHERE false
-<?php foreach ($fulltext_inside_words as $i) : ?>
-			OR /*:cms.prefix:*/fulltext_fold(word) LIKE '%' || regexp_replace(/*:cms.prefix:*/fulltext_fold(:fulltext_word_<?= $i ?>), '([\\%_])', '\\\1', 'g') || '%'
-<?php endforeach ?>
-	), ''::tsquery),
-<?php else: ?>
-	ts_headline(:search_config::regconfig, ft.source, websearch_to_tsquery(:search_config::regconfig, :fulltext),
-<?php endif ?>
+	<?= $search_score ?> AS search_score,
+	ts_headline(:search_config::regconfig, ft.source, <?= $search_headline ?>,
 		'StartSel=' || chr(1) || ', StopSel=' || chr(2) || ', MaxWords=35, MinWords=15, MaxFragments=2, FragmentDelimiter=" … "') AS search_headline,
 <?php endif ?>
 <?php if (isset($mine)) : ?>
@@ -82,7 +57,7 @@ FROM
 	/*:cms.prefix:*/nodes n
 	INNER JOIN /*:cms.prefix:*/types t USING(type)
 <?php if (isset($fulltext)) : ?>
-	<?= isset($fulltext_or) ? 'LEFT' : 'INNER' ?> JOIN /*:cms.prefix:*/full_text ft ON ft.node = n.node AND ft.locale = :search_locale
+	<?= $search_outer ? 'LEFT' : 'INNER' ?> JOIN /*:cms.prefix:*/full_text ft ON ft.node = n.node AND ft.locale = :search_locale
 <?php endif ?>
 	LEFT JOIN /*:cms.prefix:*/publications p ON
 		p.node = n.node
@@ -137,26 +112,8 @@ WHERE
 	1 = 1
 <?php if (isset($fulltext)) : ?>
 	AND (
-		ft.document @@ websearch_to_tsquery(:search_config::regconfig, :fulltext)
-<?php if (isset($fulltext_words)) : ?>
-<?php // Column-free guards fold to constants because PDO inlines the values and the functions are immutable; otherwise they would block both indexes. ?>
-		OR (numnode(websearch_to_tsquery(:search_config::regconfig, :fulltext)) > 0
-<?php foreach ($fulltext_words as $i => $word) : ?>
-			AND <?= $word['negated'] ? 'NOT ' : '' ?>(
-<?php if (!$word['negated']) : ?>
-				numnode(plainto_tsquery(:search_config::regconfig, :fulltext_word_<?= $i ?>)) = 0 OR
-<?php endif ?>
-				ft.document @@ plainto_tsquery(:search_config::regconfig, :fulltext_word_<?= $i ?>)
-<?php if ($word['inside']) : ?>
-				OR /*:cms.prefix:*/fulltext_fold(ft.source) LIKE '%' || regexp_replace(/*:cms.prefix:*/fulltext_fold(:fulltext_word_<?= $i ?>), '([\\%_])', '\\\1', 'g') || '%'
-<?php endif ?>
-			)
-<?php endforeach ?>
-		)
-<?php endif ?>
-<?php if (isset($fulltext_or)) : ?>
-		OR (<?= $fulltext_or ?>)
-<?php endif ?>
+		<?= $search_match ?>
+
 	)
 <?php endif ?>
 <?php if (isset($active_url) && $active_url) : ?>

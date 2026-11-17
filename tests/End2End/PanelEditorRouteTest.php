@@ -1020,6 +1020,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'type' => $this->articleTypeId(),
 			'changed' => $changed,
 			'published' => true,
+			'title' => ['en' => $title],
 			'content' => [
 				'title' => [
 					'type' => 'text',

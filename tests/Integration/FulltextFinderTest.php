@@ -294,7 +294,8 @@ final class FulltextFinderTest extends FulltextTestCase
 		return [
 			'every word is required' => ['ball week', ['a', 'b']],
 			'negation excludes partial matches' => ['ball -end', ['b', 'c']],
-			'or narrows rather than widens' => ['foot OR room', []],
+			'or widens to either word' => ['foot OR room', ['a', 'c']],
+			'phrases beside words keep partial words' => ['"weekday" ball', ['b']],
 			'short words only match whole' => ['ba', []],
 			'phrases match exactly' => ['"ball"', []],
 			'like wildcards are literal' => ['%', []],
@@ -313,14 +314,14 @@ final class FulltextFinderTest extends FulltextTestCase
 	{
 		$this->page('fts-combo-title', 'Zebra');
 		$this->page('fts-combo-body', 'Other', 'A zebra crossing');
-		$this->page('fts-combo-zebra-uid', 'Something else');
+		$this->page('zebra-combo-uid', 'Something else');
 		$this->page('fts-combo-none', 'Nothing');
 		$finder = fn(): Nodes => $this->cms->nodes()->search('zebra', ['uid', 'title'], fulltext: true);
 
 		self::assertSame(3, $finder()->count());
 		$uids = $this->uids($finder());
 		self::assertSame('fts-combo-title', $uids[0]);
-		self::assertEqualsCanonicalizing(['fts-combo-title', 'fts-combo-body', 'fts-combo-zebra-uid'], $uids);
+		self::assertEqualsCanonicalizing(['fts-combo-title', 'fts-combo-body', 'zebra-combo-uid'], $uids);
 		// Only the document explains the body hit.
 		self::assertSame(
 			['fts-combo-body'],
@@ -328,8 +329,66 @@ final class FulltextFinderTest extends FulltextTestCase
 		);
 		// Without full text, the fields alone decide.
 		self::assertEqualsCanonicalizing(
-			['fts-combo-title', 'fts-combo-zebra-uid'],
+			['fts-combo-title', 'zebra-combo-uid'],
 			$this->uids($this->cms->nodes()->search('zebra', ['uid', 'title'])),
+		);
+	}
+
+	#[DataProvider('sourceQueries')]
+	public function testEachWordMatchesInOneOfTheSources(string $query, array $expected): void
+	{
+		$this->page('fts-source-a', 'Zebra crossing', 'Cars stop and wait');
+		$this->page('fts-source-b', 'Road works', 'Cars stop at the zebra');
+		$this->page('fts-source-c', 'Café Q3 report');
+		$this->page('fts-source-d', 'Aq3x 100%', 'Crossing zebra');
+		$finder = $this->cms->nodes()->search($query, ['uid', 'title'], fulltext: true)->order('uid');
+
+		self::assertSame(
+			array_map(static fn(string $id): string => 'fts-source-' . $id, $expected),
+			$this->uids($finder),
+		);
+		self::assertSame(count($expected), $finder->count());
+	}
+
+	public static function sourceQueries(): array
+	{
+		return [
+			'a word in the title or the document' => ['zebra', ['a', 'b', 'd']],
+			'words split across title and document' => ['zebra works', ['b']],
+			'an excluded word in any source' => ['zebra -crossing', ['b']],
+			'a phrase in the title' => ['"zebra crossing"', ['a']],
+			'either word of an or group' => ['works OR report', ['b', 'c']],
+			'a short word matches whole words only' => ['q3', ['c']],
+			'accents fold in the title' => ['cafe', ['c']],
+			'like wildcards are literal' => ['ze_ra', []],
+			'punctuation around a word is dropped' => ['100%', ['d']],
+			'a whole uid' => ['fts-source-c', ['c']],
+			'the start of a uid' => ['fts-source', ['a', 'b', 'c', 'd']],
+			'not the inside of a uid' => ['source-a', []],
+			'punctuation only' => ['%', []],
+		];
+	}
+
+	public function testFieldsAloneFoldAccentsAndMatchWordsInsideLongerOnes(): void
+	{
+		$this->page('fts-fields-cafe', 'Café Zebrastreifen');
+
+		self::assertSame(['fts-fields-cafe'], $this->uids($this->cms->nodes()->search('CAFE strei', ['title'])));
+		self::assertSame([], $this->uids($this->cms->nodes()->search('ca', ['title'])));
+		// A picker searches while the editor types.
+		self::assertSame(['fts-fields-cafe'], $this->uids($this->cms->nodes()->searchTitle('ca')));
+	}
+
+	public function testANamedUidRanksFirstThenTitleThenDocumentMatches(): void
+	{
+		$this->page('fts-rank-body', 'Other', 'A zebra walks');
+		$this->page('fts-rank-title', 'Zebra');
+		$this->page('zebra', 'Unrelated');
+		$this->page('fts-rank-inside', 'Zebrafish');
+
+		self::assertSame(
+			['zebra', 'fts-rank-title', 'fts-rank-inside', 'fts-rank-body'],
+			$this->uids($this->cms->nodes()->search('zebra', ['uid', 'title'], fulltext: true)),
 		);
 	}
 

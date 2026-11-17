@@ -399,6 +399,7 @@ final class FinderTest extends IntegrationTestCase
 		$this->createTestNode([
 			'uid' => 'search-node-alpha',
 			'type' => $typeId,
+			'title' => ['en' => 'Alpha story'],
 			'content' => [
 				'title' => ['type' => 'text', 'value' => ['en' => 'Alpha story']],
 			],
@@ -406,6 +407,7 @@ final class FinderTest extends IntegrationTestCase
 		$this->createTestNode([
 			'uid' => 'search-node-beta',
 			'type' => $typeId,
+			'title' => ['en' => 'Beta story'],
 			'content' => [
 				'title' => ['type' => 'text', 'value' => ['en' => 'Beta story']],
 			],

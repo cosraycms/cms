@@ -164,7 +164,7 @@ final class PanelCollectionOrderTest extends End2EndTestCase
 		$this->family();
 		new Positions($this->db())->orderChildren('station', ['zulu', 'mike', 'alpha']);
 
-		$html = $this->listing('test-arranged-children', ['parent' => 'station', 'q' => 'i']);
+		$html = $this->listing('test-arranged-children', ['parent' => 'station', 'q' => 'bravo OR charlie']);
 
 		$this->assertSame(['mike', 'alpha'], array_keys($this->rows($html)));
 		$this->assertHtmlNodeMissing('//tr[@data-group]', $html);
