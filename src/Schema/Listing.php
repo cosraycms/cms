@@ -15,12 +15,10 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS)]
 readonly class Listing
 {
-	/** @param list<string> $search Fields the panel search matches */
 	public function __construct(
 		public bool $locked = false,
 		public bool $hidden = false,
 		public bool $children = false,
-		public array $search = ['uid', 'title'],
 		public bool $sortable = false,
 	) {}
 }

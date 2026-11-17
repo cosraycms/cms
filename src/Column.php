@@ -11,7 +11,7 @@ use Cosray\User\Avatar;
 
 /**
  * A listing column of a collection. The factories pick its kind: text,
- * number, date, date and time, user, or status.
+ * number, date, date and time, user, type, or status.
  */
 abstract class Column
 {
@@ -60,6 +60,12 @@ abstract class Column
 		);
 	}
 
+	/** The entry's type by its label. A listing of a single type leaves it out. */
+	public static function type(?string $title = null): TypeColumn
+	{
+		return new TypeColumn($title ?? __('collection:column-type'));
+	}
+
 	/** The user who last changed the entry. */
 	public static function editor(?string $title = null): UserColumn
 	{
@@ -97,10 +103,21 @@ abstract class Column
 	{
 		return [
 			self::text(__('collection:column-title'), 'title')->bold()->sort('title'),
-			self::text(__('collection:column-type'), 'meta.name'),
+			self::type(),
 			self::editor(),
 			self::changed(),
 		];
+	}
+
+	/**
+	 * The finder fields the panel search matches for the column, none by
+	 * default.
+	 *
+	 * @return list<string>
+	 */
+	public function searched(): array
+	{
+		return [];
 	}
 
 	/** What the column holds, for the listing to size its track and format its cells by. */

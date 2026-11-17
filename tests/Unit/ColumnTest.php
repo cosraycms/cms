@@ -8,6 +8,7 @@ use Celema\Verba\Translator;
 use Celema\Verba\Verba;
 use Cosray\Column;
 use Cosray\DateColumn;
+use Cosray\Exception\RuntimeException;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 use Cosray\Tests\Fixtures\Node\TestHierarchyChild;
@@ -42,7 +43,7 @@ final class ColumnTest extends TestCase
 		try {
 			$this->assertSame(
 				'Hierarchie-Kind',
-				Column::text('Type', 'meta.name')->get(new Wrapper(new TestHierarchyChild(), [], new Types()))['value'],
+				Column::type()->get(new Wrapper(new TestHierarchyChild(), [], new Types()))['value'],
 			);
 		} finally {
 			Verba::deactivate();
@@ -100,5 +101,43 @@ final class ColumnTest extends TestCase
 		$column = Column::text('Title', 'title')->sort('title')->sort(null);
 
 		$this->assertNull($column->sort);
+	}
+
+	public function testTheSearchMatchesTitleAndTypeColumnsByDefault(): void
+	{
+		$this->assertSame(['title'], Column::text('Name', 'title')->searched());
+		$this->assertSame(['type'], Column::type()->searched());
+		$this->assertSame([], Column::text('Code', 'code')->searched());
+		$this->assertSame([], Column::editor()->searched());
+		$this->assertSame([], Column::type()->search(false)->searched());
+	}
+
+	public function testAColumnJoinsTheSearchWithWhatItShowsOrTheFieldsNamed(): void
+	{
+		$this->assertSame(['code'], Column::text('Code', 'code')->search()->searched());
+		$this->assertSame(['type'], Column::text('Kind', 'meta.name')->search()->searched());
+		$this->assertSame(['uid'], Column::text('Id', 'meta.uid')->search()->searched());
+		$this->assertSame(['amount'], Column::number('Amount', 'amount')->search()->searched());
+		$this->assertSame(
+			['venue.city', 'venue.name'],
+			Column::text('Venue', static fn(Wrapper $node): string => '')
+				->search('venue.city', 'venue.name')
+				->searched(),
+		);
+	}
+
+	public function testAComputedColumnNamesTheFieldsItSearches(): void
+	{
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage("Column 'Venue' shows no field the search can match");
+
+		Column::text('Venue', static fn(Wrapper $node): string => '')->search();
+	}
+
+	public function testFalseLeavesAColumnOutAlone(): void
+	{
+		$this->expectException(RuntimeException::class);
+
+		Column::text('Code', 'code')->search(false, 'code');
 	}
 }

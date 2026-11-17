@@ -17,7 +17,7 @@ use Cosray\Node\Positions;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 use Cosray\StatusColumn;
-use Cosray\TextColumn;
+use Cosray\TypeColumn;
 
 /**
  * A registered collection as the panel lists it: its entries, columns,
@@ -34,6 +34,8 @@ final class Listing
 
 	/** @var list<Column> */
 	public readonly array $columns;
+	/** @var list<string> the finder fields the search matches: the uid and what the columns show */
+	public readonly array $search;
 	/** @var array<string, Sort> */
 	public readonly array $sorts;
 	public readonly CollectionListMeta $meta;
@@ -66,6 +68,10 @@ final class Listing
 		}
 		$this->sorts = $sorts;
 		$this->defaultSort = self::defaultSort($sorts);
+		$this->search = array_values(array_unique([
+			'uid',
+			...array_merge(...array_map(static fn(Column $column): array => $column->searched(), $this->columns)),
+		]));
 	}
 
 	/**
@@ -84,7 +90,7 @@ final class Listing
 
 		return array_values(array_filter(
 			$columns,
-			static fn(mixed $column): bool => !$column instanceof TextColumn || $column->field !== 'meta.name',
+			static fn(mixed $column): bool => !$column instanceof TypeColumn,
 		));
 	}
 
@@ -310,7 +316,7 @@ final class Listing
 		}
 
 		if ($q !== '') {
-			$nodes->search($q, $this->schema->search, fulltext: true);
+			$nodes->search($q, $this->search, fulltext: true);
 		}
 
 		return $nodes;

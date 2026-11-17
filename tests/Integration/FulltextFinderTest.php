@@ -379,6 +379,23 @@ final class FulltextFinderTest extends FulltextTestCase
 		self::assertSame(['fts-fields-cafe'], $this->uids($this->cms->nodes()->searchTitle('ca')));
 	}
 
+	public function testATypeMatchesByItsHandleOrLabel(): void
+	{
+		$this->page('fts-type-page', 'Notes');
+		$this->writer->create(
+			$this->writer->prepare(FulltextDocument::class, ['body' => 'Notes'])->uid('fts-type-document'),
+		);
+		$search = fn(string $query): array => $this->uids(
+			$this->cms->nodes()->published(null)->search($query, ['title', 'type'])->order('uid'),
+		);
+
+		self::assertSame(['fts-type-document'], $search('document'));
+		self::assertSame(['fts-type-page'], $search('fulltext-page'));
+		self::assertSame(['fts-type-page'], $search('notes FulltextPage'));
+		self::assertSame([], $search('notes FulltextDocument'));
+		self::assertSame(['fts-type-page'], $search('-document'));
+	}
+
 	public function testANamedUidRanksFirstThenTitleThenDocumentMatches(): void
 	{
 		$this->page('fts-rank-body', 'Other', 'A zebra walks');

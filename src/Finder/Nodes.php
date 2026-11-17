@@ -152,11 +152,11 @@ final class Nodes implements Iterator
 	/**
 	 * A search on `$fields`: each word or phrase of the query occurs in one
 	 * of them, words of three characters and more also inside longer words.
-	 * `uid` matches a whole uid or its start. With `$fulltext`, a word may
-	 * also match through the node's full-text document in the current
-	 * locale, and results order by relevance unless order() is set; unlike
-	 * fulltext(), it does not require an active URL unless activeUrl() asks
-	 * for one.
+	 * `uid` matches a whole uid or its start, `type` a type's handle or its
+	 * label as the panel shows it. With `$fulltext`, a word may also match
+	 * through the node's full-text document in the current locale, and
+	 * results order by relevance unless order() is set; unlike fulltext(),
+	 * it does not require an active URL unless activeUrl() asks for one.
 	 *
 	 * @param array<string> $fields
 	 */
@@ -188,11 +188,12 @@ final class Nodes implements Iterator
 		$uid = false;
 
 		foreach ($fields as $field) {
-			if ($field === 'uid' || $field === 'id') {
-				$uid = true;
-			} else {
-				$texts[] = $field === 'title' ? SearchCompiler::TITLE : $this->fieldExpression($field);
-			}
+			match ($field) {
+				'uid', 'id' => $uid = true,
+				'title' => $texts[] = SearchCompiler::TITLE,
+				'type' => array_push($texts, 't.handle', $this->typeLabels()),
+				default => $texts[] = $this->fieldExpression($field),
+			};
 		}
 
 		if (!$fulltext) {
@@ -606,6 +607,29 @@ final class Nodes implements Iterator
 		}
 
 		return $ids;
+	}
+
+	/** Each registered type's label as the panel shows it, translated. */
+	private function typeLabels(): string
+	{
+		$labels = [];
+		$types = $this->context->container->tag(Bootstrap::NODE_TAG);
+
+		foreach ($types->entries() as $handle) {
+			$class = $types->entry($handle)->definition();
+
+			if (is_string($class) && class_exists($class)) {
+				$labels[] =
+					'WHEN '
+					. $this->context->db->quote($handle)
+					. ' THEN '
+					. $this->context->db->quote(
+						__((string) $this->types->get($class, 'label')),
+					);
+			}
+		}
+
+		return $labels === [] ? "''" : 'CASE t.handle ' . implode(' ', $labels) . ' END';
 	}
 
 	/** @param list<string> $types */

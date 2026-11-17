@@ -8,6 +8,8 @@ use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestFulltextCollection;
+use Cosray\Tests\Fixtures\Collection\TestFulltextMixedCollection;
+use Cosray\Tests\Fixtures\Node\FulltextDocument;
 use Cosray\Tests\Fixtures\Node\FulltextPage;
 
 final class PanelCollectionFulltextTest extends End2EndTestCase
@@ -38,13 +40,25 @@ final class PanelCollectionFulltextTest extends End2EndTestCase
 			]);
 			$this->assertSame(201, $response->getStatusCode(), (string) $response->getBody());
 		}
+
+		$response = $this->makeRequest('PUT', '/api/nodes/fts-panel-document', [
+			'body' => json_encode([
+				'type' => 'fulltext-document',
+				'published' => false,
+				'content' => ['body' => ['value' => ['zxx' => 'A zebra in the notes']]],
+			]),
+			'headers' => ['Content-Type' => 'application/json'],
+		]);
+		$this->assertSame(201, $response->getStatusCode(), (string) $response->getBody());
 	}
 
 	protected function createBootstrap(Config $config): Bootstrap
 	{
 		$bootstrap = parent::createBootstrap($config);
 		$bootstrap->node(FulltextPage::class);
+		$bootstrap->node(FulltextDocument::class);
 		$bootstrap->collection(TestFulltextCollection::class);
+		$bootstrap->collection(TestFulltextMixedCollection::class);
 
 		return $bootstrap;
 	}
@@ -81,5 +95,28 @@ final class PanelCollectionFulltextTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//tbody/tr[1][@data-uid="fts-panel-body"]', $html);
 		$this->assertHtmlNodeExists('//tbody/tr[2][@data-uid="fts-panel-title"]', $html);
 		$this->assertHtmlNodeExists('//th[@aria-sort="ascending"]', $html);
+	}
+
+	public function testAWordMayNameTheTypeWhereTheListingShowsIt(): void
+	{
+		$rows = fn(string $collection, string $q): array => $this->rows($this->getHtmlResponse($this->makeRequest(
+			'GET',
+			"/panel/collection/{$collection}",
+			['query' => ['q' => $q]],
+		)));
+
+		$this->assertSame(['fts-panel-document'], $rows('test-fulltext-mixed', 'zebra document'));
+		$this->assertSame(['fts-panel-document'], $rows('test-fulltext-mixed', 'FulltextDocument'));
+		$this->assertSame(['fts-panel-title', 'fts-panel-body'], $rows('test-fulltext-mixed', 'zebra -document'));
+		// A listing of one type has no type column, so its search leaves the type alone.
+		$this->assertSame([], $rows('test-fulltext', 'FulltextPage'));
+	}
+
+	/** @return list<string> */
+	private function rows(string $html): array
+	{
+		preg_match_all('/<tr[^>]*\sdata-uid="([^"]+)"/', $html, $matches);
+
+		return $matches[1];
 	}
 }

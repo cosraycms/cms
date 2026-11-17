@@ -176,7 +176,7 @@ use Cosray\Schema\Types;
 final class Articles {}
 ```
 
-`#[Types]` names the node types a collection lists, as classes or handles. The panel lists them in any state, unpublished and hidden entries included. `#[Blueprints]` names the types editors can create at the top of the listing. Hierarchy listings show roots and expand direct children, and `#[Children]` on a node supplies its child creation choices, so blueprints are often a subset of the listed types. The panel search matches the fields named by `#[Listing(search: [...])]`, UID and title by default, and each entry's [full-text document](fulltext.md#combined-with-a-field-search) where its type opts fields in; while searching, hits rank by relevance until a column is chosen. In a hierarchy listing, a search or filter lists its matches from every level as a flat list, each after its ancestors' titles; in a parent's children view it stays on that parent's children. A [status column](#status-columns), after the title unless placed elsewhere, shows each entry's [stages](controls.md#editor-status) as icons, with badges for hidden and locked entries where `#[Listing(hidden: true, locked: true)]` asks for them. Filters above the list narrow it to entries with a draft, the user's own changes, or unpublished entries, each with its count; the draft filter needs entries of a type with drafts and the unpublished filter entries with publication, so a collection of records offers only the user's own changes. A listing whose entries span more than one type also offers a type filter, listing each type with its count. A search keeps the chosen filters. Bulk actions publish and unpublish entries, and publishing can also apply the drafts of the types that keep them; a collection without entries with publication leaves these actions out, and they skip records. Further [collection schema attributes](../src/Schema/) set the label, handle, icon, badge, permission, visibility, and navigation order. `#[Permission('…')]` leaves a collection out of the rail for users without that permission, as `permission()` does for a [rail link](application.md#panel-pages-and-navigation); the listing itself does not check it.
+`#[Types]` names the node types a collection lists, as classes or handles. The panel lists them in any state, unpublished and hidden entries included. `#[Blueprints]` names the types editors can create at the top of the listing. Hierarchy listings show roots and expand direct children, and `#[Children]` on a node supplies its child creation choices, so blueprints are often a subset of the listed types. The panel search matches each entry's UID, the [columns that search](#searching-columns), title and type by default, and its [full-text document](fulltext.md#combined-with-a-field-search) where its type opts fields in; each word of a query may match in a different one. While searching, hits rank by relevance until a column is chosen. In a hierarchy listing, a search or filter lists its matches from every level as a flat list, each after its ancestors' titles; in a parent's children view it stays on that parent's children. A [status column](#status-columns), after the title unless placed elsewhere, shows each entry's [stages](controls.md#editor-status) as icons, with badges for hidden and locked entries where `#[Listing(hidden: true, locked: true)]` asks for them. Filters above the list narrow it to entries with a draft, the user's own changes, or unpublished entries, each with its count; the draft filter needs entries of a type with drafts and the unpublished filter entries with publication, so a collection of records offers only the user's own changes. A listing whose entries span more than one type also offers a type filter, listing each type with its count. A search keeps the chosen filters. Bulk actions publish and unpublish entries, and publishing can also apply the drafts of the types that keep them; a collection without entries with publication leaves these actions out, and they skip records. Further [collection schema attributes](../src/Schema/) set the label, handle, icon, badge, permission, visibility, and navigation order. `#[Permission('…')]` leaves a collection out of the rail for users without that permission, as `permission()` does for a [rail link](application.md#panel-pages-and-navigation); the listing itself does not check it.
 
 Behavior is opt-in through [contracts](../src/Contract/). `Entries` narrows the finder the panel prepares, which covers nodes in any state and is already limited to the collection's `#[Types]`. A collection implementing `Entries` may omit `#[Types]` to narrow all nodes; registering a collection that declares neither fails at boot. `Columns` replaces the default listing columns. Only collections implementing a contract are instantiated, through the container, so their constructors can take autowired services such as `Cms` or `Config`:
 
@@ -197,7 +197,7 @@ final class Alerts implements Entries
 
 ### Columns and panel ordering
 
-The default listing shows title, the [status column](#status-columns), type, the [editor](#user-columns), and last changed. Its initial order is title ascending. Where `#[Types]` names a single type, the listing leaves out any type column, a text column on `meta.name`, since every row would show the same. Created is an opt-in column; type and editor have no built-in display-name sort. Finder's `type` and `editor` fields mean type handle and editor UID, not the labels displayed in those columns.
+The default listing shows title, the [status column](#status-columns), type, the [editor](#user-columns), and last changed. Its initial order is title ascending. Where `#[Types]` names a single type, the listing leaves out the type column, `Column::type()`, since every row would show the same. Created is an opt-in column; type and editor have no built-in display-name sort. In Finder filters and orders, `type` and `editor` mean type handle and editor UID, not the labels displayed in those columns.
 
 `#[Types]` and `entries()` define collection membership. The panel replaces any Finder `order()` set in `entries()` with the selected column order, before applying pagination. Declare the panel's initial order on a column, not in `entries()`.
 
@@ -208,6 +208,7 @@ The factory decides what a column shows:
 | Factory | Shows |
 | --- | --- |
 | `Column::text($title, $field)` | a field, a meta value like `meta.name` (the type's translated label), or a closure's result, as text |
+| `Column::type()` | the entry's type by its translated label |
 | `Column::number($title, $field)` | the same as a number, right-aligned |
 | `Column::date($title, $field)` | the same as a date |
 | `Column::dateTime($title, $field)` | the same as a date and time |
@@ -215,7 +216,7 @@ The factory decides what a column shows:
 | `Column::editor()`, `Column::creator()`, `Column::user()` | a [user](#user-columns) |
 | `Column::status()` | the entry's [stages](#status-columns) |
 
-`changed()`, `created()`, `editor()` and `creator()` take an optional title and default to a translated heading. Text, number, date and user columns take `bold()` and `italic()`. Numbers, dates and times follow the panel language and the user's region, see [users, roles and permissions](application.md#users-roles-and-permissions); a number keeps every decimal it was stored with.
+`type()`, `changed()`, `created()`, `editor()` and `creator()` take an optional title and default to a translated heading. Text, number, date and user columns take `bold()` and `italic()`. Numbers, dates and times follow the panel language and the user's region, see [users, roles and permissions](application.md#users-roles-and-permissions); a number keeps every decimal it was stored with.
 
 A column declares its own allowed sort key, order fields, and initial direction. Without `fields`, the key is also the order field, ordered as the column's kind: numerically in a number column, by date or instant in a date or date-time column, and as text otherwise. Meta values like `meta.created` keep their native order. Without `direction`, the initial direction is ascending. `default: true` makes a column's sort the listing's initial order; without a flagged sort, the listing starts in the first sortable column's order:
 
@@ -246,6 +247,18 @@ Column::date(__('Publication date'), 'date')->sort('date', direction: 'desc');
 Column::dateTime(__('Start'), 'start')->sort('start', direction: 'desc');
 Column::text(__('Code'), 'code')->sort('code', fields: [SortField::number('code')]);
 ```
+
+#### Searching columns
+
+The panel search matches what a listing shows: a text column on `title` and the type column search by default, and `search()` adds another text or number column. Without arguments it searches the column's field; a closure's column names the [Finder fields](fulltext.md#combined-with-a-field-search) it shows, as `uid`, `title`, `type` or content field paths. `search(false)` leaves out a column that searches by default. The UID is always searched, and the full-text document wherever a type opts fields in:
+
+```php
+Column::text(__('Code'), 'code')->search();
+Column::text(__('Venue'), static fn(Wrapper $node): string => $node->venue->city)->search('venue.city');
+Column::type()->search(false);
+```
+
+A column searched this way matches words by the rules of the [combined search](fulltext.md#combined-with-a-field-search), substring matches included, so it suits identifiers, codes and names that full-text analysis does not; prose belongs in the full-text document. A closure's column without fields, or `search()` on a meta value other than `meta.name`, `meta.uid` or `meta.handle`, is a configuration error.
 
 #### User columns
 
@@ -289,7 +302,7 @@ A column without `sort(...)` is not sortable; `sort(null)` explicitly disables i
 
 When updating existing collections, move `sorts()` mappings into their columns and move `defaultDir()` into each sort's `direction`; those collection methods are no longer used. Add explicit sorts to columns that previously relied on field-name inference, and remove redundant ordering from `entries()`. A title-sorting trait is no longer needed. Replace a collection's `defaultSort()` with `default: true` on the matching column's sort. Remove dead type/editor sort markers unless handle/UID ordering is explicitly intended. Old URLs requesting removed keys, including the former default `uid` option, are invalid. Code inspecting columns reads the nullable `Column::$sort` definition instead of `sortKey()`.
 
-Collections no longer extend a `Cosray\Collection` base class. When updating existing collections, remove `extends Collection`. Move the node types of a plain `entries()` query into `#[Types]` and remove the method, including its `published(null)` and `hidden(null)` calls. Implement `Entries` for any further narrowing; it receives the prepared finder instead of reading `$this->cms`. Move `blueprints()` into `#[Blueprints]` and `searchFields()` into `#[Listing(search: [...])]`. Implement `Columns` for custom columns and replace `...parent::columns()` with `...Column::defaults()`. A collection that needs services, including the CMS, takes them in its own constructor.
+Collections no longer extend a `Cosray\Collection` base class. When updating existing collections, remove `extends Collection`. Move the node types of a plain `entries()` query into `#[Types]` and remove the method, including its `published(null)` and `hidden(null)` calls. Implement `Entries` for any further narrowing; it receives the prepared finder instead of reading `$this->cms`. Move `blueprints()` into `#[Blueprints]`, and replace `searchFields()` with `search()` on the columns that show those fields. Implement `Columns` for custom columns and replace `...parent::columns()` with `...Column::defaults()`. A collection that needs services, including the CMS, takes them in its own constructor.
 
 ### Manual order
 

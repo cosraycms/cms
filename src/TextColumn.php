@@ -6,6 +6,7 @@ namespace Cosray;
 
 use Closure;
 use Cosray\Collection\Sort;
+use Cosray\Exception\RuntimeException;
 use Cosray\Finder\SortField;
 use Cosray\Node\Factory;
 use Cosray\Node\Wrapper;
@@ -20,6 +21,9 @@ class TextColumn extends Column
 {
 	public private(set) bool $bold = false;
 	public private(set) bool $italic = false;
+
+	/** @var ?list<string> */
+	private ?array $search = null;
 
 	/** @param string|Closure(Wrapper): mixed $field */
 	public function __construct(
@@ -60,6 +64,69 @@ class TextColumn extends Column
 			: new Sort(trim($key), $fields ?? [$this->sortField(trim($key))], $direction, $default);
 
 		return $this;
+	}
+
+	/**
+	 * Makes the panel search match the column: what it shows, or the
+	 * finder fields named, such as `uid`, `title`, `type` or a content
+	 * field. `false` leaves out a column the search matches by default.
+	 */
+	public function search(string|false ...$fields): static
+	{
+		if ($fields === [false]) {
+			$this->search = [];
+
+			return $this;
+		}
+
+		$named = [];
+
+		foreach ($fields as $field) {
+			if (!is_string($field) || trim($field) === '') {
+				throw new RuntimeException("Column '{$this->title}': search() takes field names, or false alone");
+			}
+
+			$named[] = trim($field);
+		}
+
+		$this->search = $named === []
+			? [
+				$this->shown() ?? throw new RuntimeException(
+					"Column '{$this->title}' shows no field the search can match: name the fields to search",
+				),
+			]
+			: $named;
+
+		return $this;
+	}
+
+	#[Override]
+	public function searched(): array
+	{
+		return $this->search ?? $this->searchedByDefault();
+	}
+
+	/**
+	 * What the search matches without search(): a title column's title.
+	 *
+	 * @return list<string>
+	 */
+	protected function searchedByDefault(): array
+	{
+		return $this->field === 'title' ? ['title'] : [];
+	}
+
+	/** The finder field the column shows, null for a closure or a meta value without one. */
+	private function shown(): ?string
+	{
+		return match (true) {
+			!is_string($this->field) => null,
+			$this->field === 'meta.name' => 'type',
+			$this->field === 'meta.uid' => 'uid',
+			$this->field === 'meta.handle' => 'handle',
+			str_starts_with($this->field, 'meta.') => null,
+			default => $this->field,
+		};
 	}
 
 	/** How the column orders by a key it was given without fields. */

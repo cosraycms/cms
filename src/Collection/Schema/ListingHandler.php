@@ -22,7 +22,6 @@ class ListingHandler extends Handler
 				showChildren: $meta->children,
 				sortable: $meta->sortable,
 			),
-			'search' => $meta->search,
 		];
 	}
 }
