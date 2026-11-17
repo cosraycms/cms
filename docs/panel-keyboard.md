@@ -71,13 +71,17 @@ Native dialogs contain focus in the active modal. Initial focus goes to a design
 
 Field and block settings edit live and retain values on closure; media metadata has separate Apply/Cancel semantics. Browser confirmation and unsaved-navigation prompts remain browser-owned exceptions. See [modal lifecycle](controls.md#modal-controls).
 
+## Rich text
+
+A rich text's toolbar is one tab stop, just before the text, so Shift+Tab from the text reaches it. Left and Right move between its tools and wrap at the ends, Home and End go to the first and last, and Enter or Space uses one; a formatting tool returns to the text. Escape returns to the text where it was. Alt+F10 jumps from the text to the toolbar, to the tool used last; some desktops keep Alt+F10 for themselves, and Shift+Tab gets there as well. A menu in the toolbar has the keys of [action menus](#action-menus). In a block the toolbar shows only while its text has focus.
+
+A field that offers only marks, and a caption, have a bubble over the selection instead. While text is selected, Alt+F10 or Shift+Tab reaches it, with the same keys. Their marks also have their usual shortcuts, such as Ctrl+B.
+
 ## Block controls
 
 A multi-column block's focused grip supports resizing: Alt+Left/Right moves the end edge; Alt+Shift+Left/Right the start edge; Alt+Up/Down changes row span. The settings dialog provides number inputs for the same layout values and for the block's column and row, which move it the way a drop does. Move up/down actions move a block one row, pushing what it meets, as a keyboard alternative to dragging. Escape cancels a drag in progress.
 
 A block's split entries open the field's picker at the action menu's trigger, focused on its first type, or split at once when the field has one type; its "Change block type" entry opens the same picker. A split's tools come before its parts, and each part's tools before its content, as a block's do. On a part's grip Alt+Left/Right trades width with its neighbour in a split into columns and Alt+Up/Down changes a part's rows in a split into rows; the start edge has no keys inside a split, and a split into rows takes no Alt+Up/Down, since its height is its parts'. The seam between two parts is a pointer handle only; the grip and the settings dialog reach the same widths.
-
-A rich text in a block shows its toolbar only while it has focus. The toolbar comes before the text, so Shift+Tab from the text reaches it and Tab from its last tool returns. A text whose field offers only marks has no toolbar; its bubble appears over a selection and its formatting keys work without it.
 
 Ghost blocks, the buttons a multi-column canvas shows in its empty cells, are tab stops after the field's rows and before its add bar. Enter or Space inserts a block into that gap; with several block types it opens the picker inside the ghost, which then behaves as the add bar's picker does.
 

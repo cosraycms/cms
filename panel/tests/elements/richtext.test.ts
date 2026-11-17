@@ -272,6 +272,82 @@ describe('the menu follows the tools', () => {
 	});
 });
 
+describe('the toolbar from the keyboard', () => {
+	async function field(tools: string[]) {
+		const element = document.createElement('cosray-richtext') as RichtextElement;
+		Object.assign(element, {
+			value: { zxx: doc('Some text') },
+			format: 'cosray-richtext',
+			field: { name: 'text', tools },
+			locale: 'zxx',
+		});
+		document.body.append(element);
+		await tick();
+
+		return element;
+	}
+
+	const text = (element: HTMLElement) =>
+		element.querySelector<HTMLElement>('[contenteditable="true"]')!;
+
+	function key(target: Element, init: KeyboardEventInit): void {
+		target.dispatchEvent(
+			new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init }),
+		);
+	}
+
+	// The toolbar's own controls, without the entries of its menus.
+	function controls(bar: Element): HTMLButtonElement[] {
+		return Array.from(bar.querySelectorAll<HTMLButtonElement>('button')).filter(
+			(button) => !button.closest('[popover]'),
+		);
+	}
+
+	it('is one tab stop that Alt+F10 reaches from the text', async () => {
+		const element = await field(['bold', 'italic', 'h2']);
+		const bar = element.querySelector('.cms-richtext-toolbar')!;
+		const stops = controls(bar).filter((button) => button.tabIndex === 0);
+
+		expect(bar.getAttribute('role')).toBe('toolbar');
+		expect(stops).toHaveLength(1);
+
+		text(element).focus();
+		key(text(element), { key: 'F10', altKey: true });
+
+		expect(document.activeElement).toBe(stops[0]);
+	});
+
+	it('moves with the arrow keys, Home and End, and returns to the text on Escape', async () => {
+		const element = await field(['bold', 'italic', 'h2']);
+		const shown = controls(element.querySelector('.cms-richtext-toolbar')!);
+
+		shown[0].focus();
+		key(shown[0], { key: 'ArrowRight' });
+		expect(document.activeElement).toBe(shown[1]);
+		expect(shown[1].tabIndex).toBe(0);
+		expect(shown[0].tabIndex).toBe(-1);
+
+		key(shown[1], { key: 'End' });
+		expect(document.activeElement).toBe(shown[shown.length - 1]);
+
+		key(shown[shown.length - 1], { key: 'ArrowRight' });
+		expect(document.activeElement).toBe(shown[0]);
+
+		key(shown[0], { key: 'Escape' });
+		expect(document.activeElement).toBe(text(element));
+	});
+
+	it('leaves the bubble alone while nothing is selected', async () => {
+		const element = await field(['bold', 'italic']);
+
+		text(element).focus();
+		key(text(element), { key: 'F10', altKey: true });
+
+		expect(element.querySelector('.cms-richtext-bubble')!.getAttribute('role')).toBe('toolbar');
+		expect(document.activeElement).toBe(text(element));
+	});
+});
+
 describe('a RichLine', () => {
 	async function line(value: RichtextDoc | null) {
 		const element = document.createElement('cosray-richtext') as RichtextElement;

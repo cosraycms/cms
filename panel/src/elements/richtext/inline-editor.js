@@ -12,6 +12,7 @@ import { toggleBold, toggleItalic, toggleStrike } from './commands.js';
 import createEditor from './editor.js';
 import { schema } from './schema.js';
 import { isMarkActive } from './state-helpers.js';
+import { enterToolbar, toolbarKeys } from './toolbar-keys.js';
 import { vocabulary } from './vocabulary.js';
 
 const TOOLS = [
@@ -127,6 +128,12 @@ export function inlineEditor({ value, label, readonly = false, change, focus, bl
 	}
 
 	for (const update of updates) update();
+
+	if (bubble) {
+		const shown = bubble;
+		const keys = toolbarKeys(bubble, () => editor.view.focus());
+		enterToolbar(content, [() => shown.style.display !== 'none' && keys.enter()]);
+	}
 
 	element.addEventListener('focusin', () => focus?.());
 	element.addEventListener('focusout', (event) => {

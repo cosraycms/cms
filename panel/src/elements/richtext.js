@@ -45,6 +45,7 @@ import { openImageDialog, openLinkDialog } from './richtext/dialogs.js';
 import createEditor from './richtext/editor.js';
 import { FORMAT, VERSION, docToPm, htmlToDoc, isFilledDoc } from './richtext/format.js';
 import { schema } from './richtext/schema.js';
+import { enterToolbar, toolbarKeys } from './richtext/toolbar-keys.js';
 import { vocabulary } from './richtext/vocabulary.js';
 import {
 	getActiveTextAlign,
@@ -802,6 +803,10 @@ export class CosrayRichtext extends HTMLElement {
 		/** @type {(() => void)[]} */
 		const updates = [];
 
+		const back = () => this.#editor?.view.focus();
+		/** @type {(() => boolean)[]} */
+		const bars = [];
+
 		if (bubble) {
 			const styles = this.#styles(menuId, updates, run, true);
 
@@ -810,6 +815,10 @@ export class CosrayRichtext extends HTMLElement {
 			for (const spec of specs.filter((spec) => !HISTORY.has(spec.tool))) {
 				tool(updates, bubble, spec, 'bubble');
 			}
+
+			const shown = bubble;
+			const keys = toolbarKeys(bubble, back);
+			bars.push(() => shown.style.display !== 'none' && keys.enter());
 		}
 
 		if (!readonly && structure) {
@@ -828,6 +837,8 @@ export class CosrayRichtext extends HTMLElement {
 				},
 			});
 
+			bars.push(toolbarKeys(toolbar, back).enter);
+
 			if (field.presentation === 'block') {
 				const dock = create('div', 'cms-richtext-dock');
 				dock.append(toolbar);
@@ -838,6 +849,8 @@ export class CosrayRichtext extends HTMLElement {
 				root.prepend(toolbar);
 			}
 		}
+
+		enterToolbar(content, bars);
 
 		this.#editor = createEditor({
 			element: content,
