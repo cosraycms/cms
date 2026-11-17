@@ -21,7 +21,7 @@ final class PluginNamespacesTest extends TestCase
 		$namespaces = $this->namespaces(['acme-shop', 'review-reports']);
 
 		$this->assertSame('acme_shop.', $namespaces->prefix('acme-shop'));
-		$this->assertSame(['acme_shop', 'review_reports'], $namespaces->schemas());
+		$this->assertSame('review_reports.', $namespaces->prefix('review-reports'));
 		$this->assertNull($namespaces->prefix('other-plugin'));
 
 		$placeholders = $namespaces->placeholders()['pgsql'];
@@ -36,7 +36,6 @@ final class PluginNamespacesTest extends TestCase
 
 		$this->assertSame('acme_shop_', $namespaces->prefix('acme-shop'));
 		$this->assertSame('acme_shop_', $namespaces->placeholders()['pgsql']['acme-shop.obj']);
-		$this->assertSame([], $namespaces->schemas());
 	}
 
 	public function testOtherDriversHaveNamePrefixesOnly(): void
@@ -45,7 +44,6 @@ final class PluginNamespacesTest extends TestCase
 
 		$this->assertSame('acme_shop_', $namespaces->prefix('acme-shop'));
 		$this->assertSame('acme_shop_', $namespaces->placeholders()['sqlite']['acme-shop.obj']);
-		$this->assertSame([], $namespaces->schemas());
 	}
 
 	public function testASiteWithoutACosrayNamespaceStillGivesPluginsOne(): void
@@ -70,7 +68,6 @@ final class PluginNamespacesTest extends TestCase
 			$placeholders['review-reports.prefix'],
 			$placeholders['review-reports.obj'],
 		]);
-		$this->assertSame(['reviews'], $namespaces->schemas());
 	}
 
 	/**
@@ -115,7 +112,10 @@ final class PluginNamespacesTest extends TestCase
 	{
 		$namespaces = $this->namespaces(['acme-shop', 'acme-shop-export']);
 
-		$this->assertSame(['acme_shop', 'acme_shop_export'], $namespaces->schemas());
+		$this->assertSame(
+			['acme_shop.', 'acme_shop_export.'],
+			[$namespaces->prefix('acme-shop'), $namespaces->prefix('acme-shop-export')],
+		);
 	}
 
 	/**

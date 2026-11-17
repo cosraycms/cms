@@ -19,7 +19,9 @@ use Cosray\Commands\RecreateDb;
 use Cosray\Commands\References;
 use Cosray\Config;
 use Cosray\I18n\SchemaScanner;
+use Cosray\Migration\Schemas;
 use Cosray\MigrationFactory;
+use Cosray\Plugin\Namespaces;
 
 $env = static function (string $key, string $default): string {
 	$value = getenv($key);
@@ -46,7 +48,8 @@ $conn = new Connection($dsn, __DIR__ . '/db/sql')
 	->migrations([
 		'install' => [__DIR__ . '/db/migrations/install'],
 		'default' => [__DIR__ . '/db/migrations/update'],
-	]);
+	])
+	->beforeMigrations(new Schemas($config->db, new Namespaces($config->db, []))->create(...));
 
 $runner = new Runner(QumaCommands::get($conn, migrationFactory: new MigrationFactory($container)));
 $runner->add(new RecreateDb($database, $username, $password, $host));

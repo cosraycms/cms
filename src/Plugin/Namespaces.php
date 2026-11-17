@@ -65,25 +65,6 @@ final class Namespaces
 		return $this->namespaces[$id]['prefix'] ?? null;
 	}
 
-	/**
-	 * The schemas the plugins' tables live in; none where prefixes are part
-	 * of the table names.
-	 *
-	 * @return list<string>
-	 */
-	public function schemas(): array
-	{
-		$schemas = [];
-
-		foreach ($this->namespaces as $namespace) {
-			if (str_ends_with($namespace['prefix'], '.')) {
-				$schemas[] = substr($namespace['prefix'], 0, -1);
-			}
-		}
-
-		return $schemas;
-	}
-
 	/** @return array{prefix: string, obj: string} */
 	private function namespace(string $id): array
 	{

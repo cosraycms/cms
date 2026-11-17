@@ -40,7 +40,7 @@ final class PluginMigrationsTest extends TestCase
 		[$exit, $output] = $this->migrate($connection, ['run', 'db:migrations']);
 		$this->assertSame(0, $exit, $output);
 		$this->assertStringContainsString(
-			"  - test-plugin:+namespace[pgsql].php\n  - test-plugin:000000-000000-test-plugin.sql\n",
+			"Would apply 1 migration:\n  - test-plugin:000000-000000-test-plugin.sql\n",
 			$output,
 		);
 	}
@@ -51,7 +51,7 @@ final class PluginMigrationsTest extends TestCase
 		[$exit, $output] = $this->migrate($this->connection(), ['run', 'db:migrations', '--test-run', '--yes']);
 
 		$this->assertSame(0, $exit, $output);
-		$this->assertStringContainsString('Rolled back 2 migrations', $output);
+		$this->assertStringContainsString('Rolled back 1 migration', $output);
 		$this->assertSame([], $this->leftovers());
 	}
 

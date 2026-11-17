@@ -30,6 +30,7 @@ use Cosray\Icons\Iconify;
 use Cosray\Icons\Local;
 use Cosray\Icons\Plugins as PluginIcons;
 use Cosray\Icons\Provider as IconProvider;
+use Cosray\Migration\Schemas;
 use Cosray\Node\Schema\Registry as NodeSchemas;
 use Cosray\Node\Types;
 use Cosray\Panel\Dashboard as PanelDashboard;
@@ -190,7 +191,6 @@ class Bootstrap implements CorePlugin
 		$this->container->add(CollectionSchemaRegistry::class, $this->collectionSchemas->registry());
 		$this->container->add(PanelDashboard::class, $this->dashboardCards)->value();
 		$this->container->add(PluginAssets::class, $this->pluginAssets);
-		$this->container->add(PluginNamespaces::class, $this->pluginNamespaces);
 		$this->container->add(PanelExtras::class, $this->panelExtras);
 		$this->container->add(Policy::class, $this->policy);
 		$this->container->add(UserTypes::class, $this->userTypes);
@@ -600,10 +600,8 @@ class Bootstrap implements CorePlugin
 
 		// Each plugin's migrations run after all of default, in registration
 		// order; `install` only ever runs on its own, on an empty database.
-		// Cosray's own directory comes with each: its migration sorts first
-		// and creates the plugin's schema.
 		foreach ($this->pluginMigrations as $id => $dirs) {
-			$namespacedMigrations[$id] = [$root . '/db/migrations/plugin', ...$dirs];
+			$namespacedMigrations[$id] = $dirs;
 		}
 
 		$connection = new Connection(
@@ -612,6 +610,7 @@ class Bootstrap implements CorePlugin
 		)
 			->migrations($namespacedMigrations)
 			->migrationOrder(['default', ...array_keys($this->pluginMigrations)])
+			->beforeMigrations(new Schemas($config, $this->pluginNamespaces)->create(...))
 			->fetch(PDO::FETCH_ASSOC)
 			->options($config->options)
 			->placeholders(Delimiters::comments(), $this->pluginNamespaces->placeholders());

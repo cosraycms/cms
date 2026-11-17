@@ -28,7 +28,7 @@ The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); 
 
 ### Database namespace
 
-Cosray keeps its tables in a namespace of their own: the PostgreSQL schema `cms` by default, which the install migration creates, and the table-name prefix `cms_` on other drivers. The `cms.prefix` placeholder sets it. On PostgreSQL, a value ending in a dot names a schema; any other value is prepended to each table name.
+Cosray keeps its tables in a namespace of their own: the PostgreSQL schema `cms` by default, which Cosray creates before its install migrations unless it exists, and the table-name prefix `cms_` on other drivers. The `cms.prefix` placeholder sets it. On PostgreSQL, a value ending in a dot names a schema; any other value is prepended to each table name.
 
 ```php
 $app = App::create($root, [
@@ -251,7 +251,7 @@ CREATE TABLE /*:acme-shop.prefix:*/orders (
 CREATE INDEX /*:acme-shop.obj:*/ix_orders_customer ON /*:acme-shop.prefix:*/orders (customer);
 ```
 
-The namespace takes the form Cosray's own has (see [database namespace](#database-namespace)). On PostgreSQL that is a schema, `acme_shop.orders`, which Cosray creates before the plugin's first migration, or leaves alone where an administrator created it for a role that may not. Where the site gave Cosray a name prefix such as `cms_`, and on other drivers, the plugin's is a name prefix too: `acme_shop_orders`, with `acme_shop_` in front of each index name as well. So table names need no plugin id of their own. A site sets another namespace with `'acme-shop.prefix'` in `db.placeholders`. A namespace that is empty, equals Cosray's or another plugin's, or lies inside one, as `cms_shop_` does inside `cms_`, stops the app at boot. Plugin migration files start with a digit or a letter, so Cosray's schema migration sorts before them.
+The namespace takes the form Cosray's own has (see [database namespace](#database-namespace)). On PostgreSQL that is a schema, `acme_shop.orders`, which Cosray creates before the plugin's pending migrations run, or leaves alone where an administrator created it for a role that may not. Where the site gave Cosray a name prefix such as `cms_`, and on other drivers, the plugin's is a name prefix too: `acme_shop_orders`, with `acme_shop_` in front of each index name as well. So table names need no plugin id of their own. A site sets another namespace with `'acme-shop.prefix'` in `db.placeholders`. A namespace that is empty, equals Cosray's or another plugin's, or lies inside one, as `cms_shop_` does inside `cms_`, stops the app at boot.
 
 A plugin may reference `users (usr)` in Cosray's namespace and read `users.uid`, `username`, `email`, `data->>'name'` and `deleted`; users are only marked deleted, so such a foreign key never blocks deleting one. Name the plugin's SQL folder after the plugin, `acme_shop`, so queries read `$db->acme_shop->orders()`: Quma takes the first folder of a name it finds and searches Cosray's first, so a folder named like one of Cosray's or another plugin's loses without an error. Cosray offers no uninstall; a plugin's docs say how to drop its schema or tables.
 

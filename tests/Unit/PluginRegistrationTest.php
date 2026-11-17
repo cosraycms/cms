@@ -94,7 +94,7 @@ final class PluginRegistrationTest extends TestCase
 
 		$config = $app->container()->get(Connection::class)->config;
 		$this->assertSame(
-			[self::root() . '/db/migrations/plugin', self::root() . '/tests/Fixtures/Plugin/db/migrations'],
+			[self::root() . '/tests/Fixtures/Plugin/db/migrations'],
 			$config->migrations['test-plugin'],
 		);
 		$this->assertSame(['default', 'test-plugin'], $config->migrationOrder);
