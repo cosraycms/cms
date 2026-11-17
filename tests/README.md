@@ -55,7 +55,7 @@ The install namespace creates the current schema and records included updates. A
 
 ## Test isolation
 
-[IntegrationTestCase](IntegrationTestCase.php) checks the schema and wraps ordinary database tests in rollback transactions. [End2EndTestCase](End2EndTestCase.php) shares the in-process application's database instance with the harness so HTTP writes join the same transaction. These HTTP tests do not exercise a real browser.
+[IntegrationTestCase](IntegrationTestCase.php) checks the schema and wraps ordinary database tests in a transaction that is rolled back at the end. It opens it with Quma's `isolate()`, so the code under test does not see it: its own transactions are savepoints, and work it defers with `afterCommit()` runs once they commit, as in production. [End2EndTestCase](End2EndTestCase.php) shares the in-process application's database instance with the harness so HTTP writes join the same transaction. These HTTP tests do not exercise a real browser.
 
 [FulltextConcurrencyTest](Integration/FulltextConcurrencyTest.php) is an exception: a second PHP process needs committed, uniquely named fixtures, removed in `finally`. It uses `proc_open` and observes PostgreSQL lock waits. The full-text suite also requires `unaccent` and the schema from migration `000000-000036` or a current install. See [search maintenance](../docs/fulltext.md#synchronization-and-maintenance).
 

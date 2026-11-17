@@ -105,7 +105,7 @@ class IntegrationTestCase extends TestCase
 		$this->testDb = new SharedDatabase($this->conn());
 
 		if ($this->useTransactions) {
-			$this->testDb->begin();
+			$this->testDb->isolate();
 		}
 	}
 
@@ -114,9 +114,7 @@ class IntegrationTestCase extends TestCase
 		try {
 			// The next test gets the same connection, so never leave it inside
 			// a transaction, not even one a failed test without rollback began.
-			if ($this->testDb?->connected() && $this->testDb->getConn()->inTransaction()) {
-				$this->testDb->rollback();
-			}
+			$this->testDb?->discard();
 		} finally {
 			$this->testDb = null;
 			parent::tearDown();

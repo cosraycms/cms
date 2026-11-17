@@ -32,7 +32,7 @@ final class WorkerLifecycleTest extends End2EndTestCase
 
 		// These requests run the app's own database teardown instead of
 		// joining a transaction the test owns.
-		$this->testDb?->rollback();
+		$this->testDb?->discard();
 	}
 
 	protected function createBootstrap(Config $config): Bootstrap

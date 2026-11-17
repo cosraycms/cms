@@ -46,7 +46,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$this->app = $this->createApp();
 		$this->testConnection = $this->app->container()->get(Connection::class);
 		$this->testDb = $this->app->container()->get(Database::class);
-		$this->testDb->begin();
+		$this->testDb->isolate();
 	}
 
 	protected function tearDown(): void
