@@ -13,23 +13,19 @@ use PDOException;
  * The database of an app under test. All instances with the same DSN share
  * one connection per process, as opening one costs more than most tests
  * take. While a test isolates it, the code under test works inside the
- * test's transaction: its own transaction is a savepoint, and the end of a
- * request rolls back only what the request left open.
+ * test's transaction as Quma's isolate() describes, and each request runs
+ * in a savepoint of its own.
  *
  * @internal
  */
 final class Database extends QumaDatabase
 {
-	private const string SAVEPOINT = 'cosray_testing';
 	private const string REQUEST = 'cosray_testing_request';
 
 	/** @var array<string, PDO> */
 	private static array $connections = [];
 
 	private bool $isolated = false;
-
-	/** Whether the code under test opened its transaction. */
-	private bool $nested = false;
 
 	#[Override]
 	public function connect(): static
@@ -56,22 +52,19 @@ final class Database extends QumaDatabase
 	}
 
 	/** Opens the test's transaction, which holds everything until discard(). */
+	#[Override]
 	public function isolate(): void
 	{
-		parent::begin();
+		parent::isolate();
 		$this->isolated = true;
-		$this->nested = false;
 	}
 
 	/** Rolls back the test's transaction and all the work in it. */
+	#[Override]
 	public function discard(): void
 	{
 		$this->isolated = false;
-		$this->nested = false;
-
-		if ($this->pdo?->inTransaction()) {
-			$this->pdo->rollBack();
-		}
+		parent::discard();
 	}
 
 	/**
@@ -102,87 +95,6 @@ final class Database extends QumaDatabase
 				$pdo->exec('ROLLBACK TO SAVEPOINT ' . self::REQUEST);
 				$pdo->exec('RELEASE SAVEPOINT ' . self::REQUEST);
 			}
-		}
-	}
-
-	#[Override]
-	public function begin(): bool
-	{
-		if (!$this->isolated) {
-			return parent::begin();
-		}
-
-		if ($this->nested) {
-			throw new PDOException('There is already an active transaction');
-		}
-
-		$this->getConn()->exec('SAVEPOINT ' . self::SAVEPOINT);
-		$this->nested = true;
-
-		return true;
-	}
-
-	#[Override]
-	public function commit(): bool
-	{
-		if (!$this->isolated) {
-			return parent::commit();
-		}
-
-		$this->end('RELEASE SAVEPOINT ' . self::SAVEPOINT);
-
-		return true;
-	}
-
-	#[Override]
-	public function rollback(): bool
-	{
-		if (!$this->isolated) {
-			return parent::rollback();
-		}
-
-		$this->end('ROLLBACK TO SAVEPOINT ' . self::SAVEPOINT, 'RELEASE SAVEPOINT ' . self::SAVEPOINT);
-
-		return true;
-	}
-
-	#[Override]
-	public function reset(): bool
-	{
-		if (!$this->isolated) {
-			return parent::reset();
-		}
-
-		if ($this->nested) {
-			$this->rollback();
-		}
-
-		return true;
-	}
-
-	#[Override]
-	public function disconnect(): void
-	{
-		if ($this->isolated) {
-			$this->reset();
-
-			return;
-		}
-
-		parent::disconnect();
-	}
-
-	private function end(string ...$statements): void
-	{
-		if (!$this->nested) {
-			throw new PDOException('There is no active transaction');
-		}
-
-		$this->nested = false;
-		$pdo = $this->getConn();
-
-		foreach ($statements as $statement) {
-			$pdo->exec($statement);
 		}
 	}
 }

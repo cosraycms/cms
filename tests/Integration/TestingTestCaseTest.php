@@ -118,6 +118,28 @@ final class TestingTestCaseTest extends TestCase
 		$db->rollback();
 	}
 
+	public function testWorkAfterTheCommitRunsAsItWouldOutsideATest(): void
+	{
+		$db = $this->service(Database::class);
+		$calls = [];
+		$record = static function (string $call) use (&$calls): \Closure {
+			return static function () use (&$calls, $call): void {
+				$calls[] = $call;
+			};
+		};
+
+		$db->transaction(function () use ($db, $record, &$calls): void {
+			$db->afterCommit($record('committed'));
+			$this->assertSame([], $calls);
+		});
+		$db->begin();
+		$db->afterCommit($record('rolled back'));
+		$db->rollback();
+		$db->afterCommit($record('outside'));
+
+		$this->assertSame(['committed', 'outside'], $calls);
+	}
+
 	public function testContentWrittenAsAServiceIsServed(): void
 	{
 		$writer = $this->service(Writer::class);

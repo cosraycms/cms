@@ -79,7 +79,7 @@ final class ContactTest extends TestCase
 
 Each test begins a transaction on the app's database connection and rolls it back when it ends, so the next test finds the database as it was. Sequences advance all the same, and what the site writes elsewhere, like uploaded files, stays.
 
-The code under test works inside that transaction. A transaction it begins is a savepoint: its rollback undoes only its own work, and one it leaves open ends with the request, as it would on the server. A statement that fails outside the code's own transaction undoes the work of its request only, so the test can go on. Beginning a second transaction inside the first fails as it would without a test.
+The code under test works inside that transaction. A transaction it begins is a savepoint: its rollback undoes only its own work, and one it leaves open ends with the request, as it would on the server. Work it defers with `afterCommit()` runs once its transaction commits, or at once outside one, as on the server. A statement that fails outside the code's own transaction undoes the work of its request only, so the test can go on. Beginning a second transaction inside the first fails as it would without a test.
 
 The active Verba translator is global. Whatever translator a test activates, `service()` included, is replaced again by the one active before the test.
 
