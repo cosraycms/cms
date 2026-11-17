@@ -45,6 +45,7 @@ import { openImageDialog, openLinkDialog } from './richtext/dialogs.js';
 import createEditor from './richtext/editor.js';
 import { FORMAT, VERSION, docToPm, htmlToDoc, isFilledDoc } from './richtext/format.js';
 import { schema } from './richtext/schema.js';
+import { vocabulary } from './richtext/vocabulary.js';
 import {
 	getActiveTextAlign,
 	getBlockAttributes,
@@ -841,7 +842,11 @@ export class CosrayRichtext extends HTMLElement {
 		this.#editor = createEditor({
 			element: content,
 			content: map[active],
-			structure,
+			vocabulary: vocabulary(
+				tools,
+				Object.keys(field.richtextClasses ?? {}),
+				Object.keys(field.richtextStyles ?? {}),
+			),
 			line: field.line === true,
 			bubbleElement: bubble,
 			assetUrl: (uid) => this.#assetUrl(uid),

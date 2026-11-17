@@ -1,5 +1,6 @@
 /** @import { NodeType } from 'prosemirror-model' */
 /** @import { Plugin } from 'prosemirror-state' */
+/** @import { Vocabulary } from './vocabulary.js' */
 
 import { keymap } from 'prosemirror-keymap';
 import {
@@ -41,12 +42,14 @@ function horizontalRuleInputRule() {
 }
 
 /**
- * @param {boolean} [structure] Whether the shortcuts may turn text into lists.
+ * The shortcuts of what the field offers, and the ones every field has.
+ *
+ * @param {Vocabulary} v
  * @returns {Plugin}
  */
-export function buildKeymap(structure = true) {
-	const { bold, italic, strike, code } = schema.marks;
-	const { listItem, hardBreak } = schema.nodes;
+export function buildKeymap(v) {
+	const { bold, italic, strike } = schema.marks;
+	const { listItem } = schema.nodes;
 
 	const hardBreakCmd = chainCommands(exitCode, (state, dispatch) => {
 		if (!dispatch) return false;
@@ -55,15 +58,13 @@ export function buildKeymap(structure = true) {
 	});
 
 	return keymap({
-		'Mod-b': toggleMark(bold),
-		'Mod-B': toggleMark(bold),
-		'Mod-i': toggleMark(italic),
-		'Mod-I': toggleMark(italic),
-		'Mod-Shift-x': toggleMark(strike),
-		'Mod-Shift-X': toggleMark(strike),
-		'Mod-e': toggleMark(code),
-		'Mod-E': toggleMark(code),
-		...(structure ? { 'Mod-Shift-7': toggleOrderedList(), 'Mod-Shift-8': toggleBulletList() } : {}),
+		...(v.marks.has('bold') ? { 'Mod-b': toggleMark(bold), 'Mod-B': toggleMark(bold) } : {}),
+		...(v.marks.has('italic') ? { 'Mod-i': toggleMark(italic), 'Mod-I': toggleMark(italic) } : {}),
+		...(v.marks.has('strike')
+			? { 'Mod-Shift-x': toggleMark(strike), 'Mod-Shift-X': toggleMark(strike) }
+			: {}),
+		...(v.nodes.has('orderedList') ? { 'Mod-Shift-7': toggleOrderedList() } : {}),
+		...(v.nodes.has('bulletList') ? { 'Mod-Shift-8': toggleBulletList() } : {}),
 		'Mod-z': undo,
 		'Mod-y': redo,
 		'Mod-Shift-z': redo,
@@ -80,26 +81,31 @@ export function buildKeymap(structure = true) {
 	});
 }
 
-/** @returns {Plugin} */
-export function buildInputRules() {
-	return inputRules({
-		rules: [
-			headingRule(1),
-			headingRule(2),
-			headingRule(3),
+/**
+ * Markdown-like typing for what the field offers; none without any.
+ *
+ * @param {Vocabulary} v
+ * @returns {Plugin | null}
+ */
+export function buildInputRules(v) {
+	const rules = [
+		...v.headings.map(headingRule),
+		...(v.nodes.has('bulletList')
+			? [wrappingInputRule(/^\s*([-*])\s$/, schema.nodes.bulletList)]
+			: []),
+		...(v.nodes.has('orderedList')
+			? [
+					wrappingInputRule(
+						/^\s*(\d+)\.\s$/,
+						schema.nodes.orderedList,
+						(match) => ({ start: +match[1] }),
+						(match, node) => node.childCount + node.attrs.start === +match[1],
+					),
+				]
+			: []),
+		...(v.nodes.has('blockquote') ? [wrappingInputRule(/^\s*>\s$/, schema.nodes.blockquote)] : []),
+		...(v.nodes.has('horizontalRule') ? [horizontalRuleInputRule()] : []),
+	];
 
-			wrappingInputRule(/^\s*([-*])\s$/, schema.nodes.bulletList),
-
-			wrappingInputRule(
-				/^\s*(\d+)\.\s$/,
-				schema.nodes.orderedList,
-				(match) => ({ start: +match[1] }),
-				(match, node) => node.childCount + node.attrs.start === +match[1],
-			),
-
-			wrappingInputRule(/^\s*>\s$/, schema.nodes.blockquote),
-			textblockTypeInputRule(/^```$/, schema.nodes.codeBlock),
-			horizontalRuleInputRule(),
-		],
-	});
+	return rules.length > 0 ? inputRules({ rules }) : null;
 }

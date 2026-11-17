@@ -131,6 +131,8 @@ Inside a block, resolution is the block type property's own `#[Tools]`, then the
 
 The tools decide the menu. A set with a tool that changes the document's structure (headings, alignment, lists, quotes, rules, images, line breaks, the source view) gets a toolbar, because those commands act without a selection. A set of marks only (bold, italic, strike, sub- and superscript, link, clear) gets a bubble over the selection instead, and typing in it never starts a list or heading. Undo and redo do not decide: a toolbar shows them, the bubble leaves them to the keyboard. Configured text styles show in either menu, paragraph classes only in a toolbar. In a block the toolbar shows while the text has focus, docked above it and over whatever is there, clear of the block's own tools and inside the field, and it stays at the pane's top while a long text scrolls past.
 
+The tools also decide what pasting, dropping and typing bring in. A heading takes the nearest level on offer or becomes a paragraph; lists and quotes without their tool leave their paragraphs, a code block becomes paragraphs, and rules and images without their tool are dropped. Marks without a tool go, underline and inline code always, as do paragraph classes and text styles the project does not declare and alignment without its tool; line breaks stay. Shortcuts such as typing `##` and a space, or Ctrl+B, work only for what the field offers, and HTML typed into the source view is read the same way. Stored content keeps what it has, so removing a tool loses nothing.
+
 A `RichLine` is one line of formatted text, for a subtitle or a teaser line:
 
 ```php

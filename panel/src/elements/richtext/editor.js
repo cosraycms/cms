@@ -1,7 +1,9 @@
 /** @import { Command } from 'prosemirror-state' */
 /** @import { Node } from 'prosemirror-model' */
 /** @import { RichtextDoc } from './format.js' */
+/** @import { Vocabulary } from './vocabulary.js' */
 
+import { Slice } from 'prosemirror-model';
 import { EditorState, Plugin } from 'prosemirror-state';
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { history } from 'prosemirror-history';
@@ -13,6 +15,7 @@ import { schema, parser, serializer } from './schema.js';
 import { buildKeymap, buildInputRules } from './keymap.js';
 import { bubbleMenu } from './bubble-menu.js';
 import { flatten, lineText, linePlugins, toLine } from './line.js';
+import { clean } from './vocabulary.js';
 import { docToPm, pmToDoc } from './format.js';
 
 /**
@@ -39,9 +42,8 @@ import { docToPm, pmToDoc } from './format.js';
  * @property {RichtextDoc | null} content
  * @property {(doc: RichtextDoc) => void} onUpdate
  * @property {(state: EditorState) => void} onStateChange
- * @property {boolean} structure Whether typing may change the structure: headings, lists, quotes.
+ * @property {Vocabulary} vocabulary What typing, pastes and drops may bring in.
  * @property {boolean} [line] One paragraph of text: Enter does nothing and a paste lands on the line.
- * @property {string[]} [marks] The marks a line may carry; any of the schema's without.
  * @property {string} [label] The accessible name, where no label element names the editor.
  * @property {HTMLElement} [bubbleElement] The menu over a selection, for a field without a toolbar.
  * @property {(uid: string) => string | null} [assetUrl] Resolve an asset uid to a display URL for inline images.
@@ -122,9 +124,8 @@ export default function createEditor(options) {
 		content,
 		onUpdate,
 		onStateChange,
-		structure,
+		vocabulary,
 		line = false,
-		marks,
 		label,
 		bubbleElement,
 		assetUrl,
@@ -132,14 +133,14 @@ export default function createEditor(options) {
 		placeholder,
 	} = options;
 
-	const allowed = marks ? new Set(marks) : null;
 	const hint = { text: placeholder ?? '' };
 	/** @param {RichtextDoc | null} doc */
-	const read = (doc) => (line ? toLine(docToPm(doc), allowed) : docToPm(doc));
+	const read = (doc) => (line ? toLine(docToPm(doc)) : docToPm(doc));
+	const rules = buildInputRules(vocabulary);
 	const plugins = [
-		...(line ? linePlugins(allowed) : []),
-		...(structure ? [buildInputRules()] : []),
-		buildKeymap(structure),
+		...(line ? linePlugins() : []),
+		...(rules ? [rules] : []),
+		buildKeymap(vocabulary),
 		keymap(baseKeymap),
 		history(),
 		dropCursor(),
@@ -165,9 +166,9 @@ export default function createEditor(options) {
 	const view = new EditorView(element, {
 		state,
 		editable,
-		...(line
-			? { transformPasted: (slice) => flatten(slice, allowed), clipboardTextParser: lineText }
-			: {}),
+		transformPasted: (slice) =>
+			line ? flatten(clean(slice, vocabulary)) : clean(slice, vocabulary),
+		...(line ? { clipboardTextParser: lineText } : {}),
 		nodeViews: {
 			image(node) {
 				const dom = document.createElement('img');
@@ -223,8 +224,12 @@ export default function createEditor(options) {
 		},
 
 		setContent(html) {
-			const newDoc = parseContent(html);
-			const tr = view.state.tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
+			const { content } = clean(new Slice(parseContent(html).content, 0, 0), vocabulary);
+			const tr = view.state.tr.replaceWith(
+				0,
+				view.state.doc.content.size,
+				content.size > 0 ? content : schema.nodes.paragraph.create(),
+			);
 			view.dispatch(tr);
 		},
 

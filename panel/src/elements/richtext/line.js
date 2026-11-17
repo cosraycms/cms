@@ -11,17 +11,16 @@ import { schema } from './schema.js';
 
 /**
  * @param {PmNode} doc
- * @param {Set<string> | null} [marks] The marks the line may carry; any without.
  * @returns {boolean}
  */
-export function isLine(doc, marks = null) {
+export function isLine(doc) {
 	const paragraph = doc.firstChild;
 
 	if (doc.childCount !== 1 || paragraph?.type !== schema.nodes.paragraph) return false;
 
 	let text = true;
 	paragraph.forEach((node) => {
-		text &&= node.isText && node.marks.every((mark) => !marks || marks.has(mark.type.name));
+		text &&= node.isText;
 	});
 
 	return text;
@@ -31,19 +30,15 @@ export function isLine(doc, marks = null) {
  * The text of a paste with its marks, its blocks joined by spaces.
  *
  * @param {Slice} slice
- * @param {Set<string> | null} [marks] The marks to keep; all without.
  * @returns {Slice}
  */
-export function flatten(slice, marks = null) {
+export function flatten(slice) {
 	/** @type {PmNode[]} */
 	const nodes = [];
 	/** @param {PmNode} node */
 	const add = (node) => {
-		if (node.isText) {
-			nodes.push(marks ? node.mark(node.marks.filter((mark) => marks.has(mark.type.name))) : node);
-		} else if (node.type === schema.nodes.hardBreak) {
-			nodes.push(schema.text(' '));
-		}
+		if (node.isText) nodes.push(node);
+		else if (node.type === schema.nodes.hardBreak) nodes.push(schema.text(' '));
 	};
 
 	slice.content.descendants((node) => {
@@ -70,13 +65,12 @@ export function flatten(slice, marks = null) {
  * A stored document as one line, for a field that held more before.
  *
  * @param {PmNode} doc
- * @param {Set<string> | null} [marks] The marks to keep; all without.
  * @returns {PmNode}
  */
-export function toLine(doc, marks = null) {
-	if (isLine(doc, marks)) return doc;
+export function toLine(doc) {
+	if (isLine(doc)) return doc;
 
-	const text = flatten(new Slice(doc.content, 0, 0), marks).content;
+	const text = flatten(new Slice(doc.content, 0, 0)).content;
 
 	return schema.nodes.doc.create(null, schema.nodes.paragraph.create(null, text));
 }
@@ -91,16 +85,13 @@ export function lineText(text) {
 	return line === '' ? Slice.empty : new Slice(Fragment.from(schema.text(line)), 0, 0);
 }
 
-/**
- * @param {Set<string> | null} [marks] The marks the line may carry; any without.
- * @returns {Plugin[]}
- */
-export function linePlugins(marks = null) {
+/** @returns {Plugin[]} */
+export function linePlugins() {
 	return [
 		keymap({ Enter: () => true, 'Shift-Enter': () => true }),
 		new Plugin({
 			props: { attributes: { role: 'textbox', 'aria-multiline': 'false' } },
-			filterTransaction: (tr) => !tr.docChanged || isLine(tr.doc, marks),
+			filterTransaction: (tr) => !tr.docChanged || isLine(tr.doc),
 		}),
 	];
 }

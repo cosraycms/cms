@@ -12,8 +12,7 @@ import { toggleBold, toggleItalic, toggleStrike } from './commands.js';
 import createEditor from './editor.js';
 import { schema } from './schema.js';
 import { isMarkActive } from './state-helpers.js';
-
-const MARKS = ['bold', 'italic', 'strike'];
+import { vocabulary } from './vocabulary.js';
 
 const TOOLS = [
 	{ mark: schema.marks.bold, command: toggleBold, name: 'type-bold', label: 'richtext:bold' },
@@ -102,9 +101,8 @@ export function inlineEditor({ value, label, readonly = false, change, focus, bl
 	const editor = createEditor({
 		element: content,
 		content: read(value),
-		structure: false,
+		vocabulary: vocabulary(['bold', 'italic', 'strike']),
 		line: true,
-		marks: MARKS,
 		label,
 		bubbleElement: bubble,
 		editable: () => !readonly,
