@@ -131,6 +131,17 @@ Inside a block, resolution is the block type property's own `#[Tools]`, then the
 
 The tools decide the menu. A set with a tool that changes the document's structure (headings, alignment, lists, quotes, rules, images, line breaks, the source view) gets a toolbar, because those commands act without a selection. A set of marks only (bold, italic, strike, sub- and superscript, link, clear) gets a bubble over the selection instead, and typing in it never starts a list or heading. Undo and redo do not decide: a toolbar shows them, the bubble leaves them to the keyboard. Configured text styles show in either menu, paragraph classes only in a toolbar. In a block the toolbar shows while the text has focus, docked above it and over whatever is there, clear of the block's own tools and inside the field, and it stays at the pane's top while a long text scrolls past.
 
+A `RichLine` is one line of formatted text, for a subtitle or a teaser line:
+
+```php
+use Cosray\Field\RichLine;
+
+#[Tools(Tool::Bold, Tool::Italic, Tool::Link)]
+protected RichLine $subtitle;
+```
+
+It stores a richtext document of one paragraph of text, in the same envelope, and the writer refuses anything more. It looks like a text input and formats through the bubble: Enter does nothing, a paste lands on the line with its marks, and a stored document of several paragraphs opens as one line. It keeps only the tools that mark text, `Tool::MINIMAL` without a list of its own; the project's `richtext.tools` does not reach it. It renders without a `<p>`, so a template can put it into a heading.
+
 [Tool](../src/Schema/Tool.php) defines the vocabulary and presets. Paragraph-class and text-style choices come from `richtext.classes` and `richtext.styles`, independently of the tool set. Hiding a tool does not remove its stored content semantics.
 
 ### Link fields

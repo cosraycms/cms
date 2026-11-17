@@ -19,10 +19,12 @@ final class Validator
 	/**
 	 * @param array<string, string> $classes Declared paragraph classes (`richtext.classes`)
 	 * @param array<string, string> $styles Declared text styles (`richtext.styles`)
+	 * @param bool $line Whether the document is one line: a single paragraph of text, as `RichLine` stores
 	 */
 	public function __construct(
 		private readonly array $classes = [],
 		private readonly array $styles = [],
+		private readonly bool $line = false,
 	) {}
 
 	/** @return list<string> Errors; empty when the document is valid. */
@@ -41,7 +43,38 @@ final class Validator
 		$this->keys($doc, ['type', 'content'], 'doc');
 		$this->content($doc, 'doc', 'doc');
 
+		if ($this->line) {
+			$this->line($doc);
+		}
+
 		return $this->errors;
+	}
+
+	/** @param array<mixed> $doc */
+	private function line(array $doc): void
+	{
+		$blocks = is_array($doc['content'] ?? null) ? $doc['content'] : [];
+		$paragraph = $blocks[0] ?? null;
+
+		if (count($blocks) !== 1 || !is_array($paragraph) || ($paragraph['type'] ?? null) !== 'paragraph') {
+			$this->errors[] = 'doc: a line is one paragraph';
+
+			return;
+		}
+
+		$defaults = Spec::nodeDefaults('paragraph');
+
+		foreach (is_array($paragraph['attrs'] ?? null) ? $paragraph['attrs'] : [] as $key => $value) {
+			if (($defaults[$key] ?? null) !== $value) {
+				$this->errors[] = "doc.content.0: a line has no paragraph attribute '{$key}'";
+			}
+		}
+
+		foreach (is_array($paragraph['content'] ?? null) ? $paragraph['content'] : [] as $i => $node) {
+			if (!is_array($node) || ($node['type'] ?? null) !== 'text') {
+				$this->errors[] = "doc.content.0.content.{$i}: a line holds text only";
+			}
+		}
 	}
 
 	private function node(mixed $node, string $path): void

@@ -87,8 +87,7 @@ class RichText extends Text implements Capability\ToolsAware
 			'max:' . Envelope::VERSION,
 		);
 
-		$richtext = $this->owner->config()->richtext;
-		$doc = new RichtextDoc($richtext->classes, $richtext->styles);
+		$doc = $this->docValidator();
 
 		if ($this->isTranslatable()) {
 			$locales = $this->owner->locales();
@@ -124,5 +123,13 @@ class RichText extends Text implements Capability\ToolsAware
 		$this->addMeta($shape);
 
 		return $shape;
+	}
+
+	/** The writer-strict validation of one locale's document. */
+	protected function docValidator(): RichtextDoc
+	{
+		$richtext = $this->owner->config()->richtext;
+
+		return new RichtextDoc($richtext->classes, $richtext->styles);
 	}
 }

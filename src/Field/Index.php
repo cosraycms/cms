@@ -73,6 +73,7 @@ final class Index
 		$index->add(Option::class, 'option');
 		$index->add(Radio::class, 'radio');
 		$index->add(Reference::class, 'reference');
+		$index->add(RichLine::class, 'richline');
 		$index->add(RichText::class, 'richtext', 'html');
 		$index->add(Text::class, 'text');
 		$index->add(Textarea::class, 'textarea');

@@ -38,7 +38,7 @@ final class Article implements Title
 }
 ```
 
-Supported field classes are exactly `Text`, `Textarea`, `RichText`, `Blocks` and `Entries`. Custom field classes, including custom `Text` subclasses, need explicit extraction support before they can be opted in. Code, iframe markup, provider ids, references, and media are not prose fields.
+Supported field classes are exactly `Text`, `Textarea`, `RichText`, `RichLine`, `Blocks` and `Entries`. Custom field classes, including custom `Text` subclasses, need explicit extraction support before they can be opted in. Code, iframe markup, provider ids, references, and media are not prose fields.
 
 - An annotated `Blocks` or `Entries` field supplies its weight to supported descendants. A child annotation overrides that weight; `#[Fulltext(false)]` excludes a field or a structural subtree. Unsupported descendants are skipped, never flattened as arbitrary JSON.
 - An unannotated structural field still discovers explicitly annotated children, but supplies no inherited weight. Only allowed row types contribute. The existing restrictions on nested repeaters apply.

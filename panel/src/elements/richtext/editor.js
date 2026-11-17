@@ -12,6 +12,7 @@ import { gapCursor } from 'prosemirror-gapcursor';
 import { schema, parser, serializer } from './schema.js';
 import { buildKeymap, buildInputRules } from './keymap.js';
 import { bubbleMenu } from './bubble-menu.js';
+import { flatten, lineText, linePlugins, toLine } from './line.js';
 import { docToPm, pmToDoc } from './format.js';
 
 /**
@@ -37,6 +38,7 @@ import { docToPm, pmToDoc } from './format.js';
  * @property {(doc: RichtextDoc) => void} onUpdate
  * @property {(state: EditorState) => void} onStateChange
  * @property {boolean} structure Whether typing may change the structure: headings, lists, quotes.
+ * @property {boolean} [line] One paragraph of text: Enter does nothing and a paste lands on the line.
  * @property {HTMLElement} [bubbleElement] The menu over a selection, for a field without a toolbar.
  * @property {(uid: string) => string | null} [assetUrl] Resolve an asset uid to a display URL for inline images.
  * @property {() => boolean} [editable] Whether the document takes input; the view stays selectable
@@ -110,6 +112,7 @@ export default function createEditor(options) {
 		onUpdate,
 		onStateChange,
 		structure,
+		line = false,
 		bubbleElement,
 		assetUrl,
 		editable,
@@ -117,6 +120,7 @@ export default function createEditor(options) {
 	} = options;
 
 	const plugins = [
+		...(line ? linePlugins() : []),
 		...(structure ? [buildInputRules()] : []),
 		buildKeymap(structure),
 		keymap(baseKeymap),
@@ -134,7 +138,7 @@ export default function createEditor(options) {
 	}
 
 	const state = EditorState.create({
-		doc: docToPm(content),
+		doc: line ? toLine(docToPm(content)) : docToPm(content),
 		schema,
 		plugins,
 	});
@@ -142,6 +146,7 @@ export default function createEditor(options) {
 	const view = new EditorView(element, {
 		state,
 		editable,
+		...(line ? { transformPasted: flatten, clipboardTextParser: lineText } : {}),
 		nodeViews: {
 			image(node) {
 				const dom = document.createElement('img');

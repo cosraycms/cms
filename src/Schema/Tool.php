@@ -94,4 +94,28 @@ enum Tool: string
 		self::Clear,
 		self::Source,
 	];
+
+	/**
+	 * Whether the tool changes the document's structure rather than marking
+	 * text. Such tools act without a selection, so the panel gives a field
+	 * with any of them a toolbar and one without them a bubble.
+	 */
+	public function structural(): bool
+	{
+		return match ($this) {
+			self::H1,
+			self::H2,
+			self::H3,
+			self::Align,
+			self::BulletList,
+			self::OrderedList,
+			self::Blockquote,
+			self::Hr,
+			self::Image,
+			self::Br,
+			self::Source,
+				=> true,
+			default => false,
+		};
+	}
 }

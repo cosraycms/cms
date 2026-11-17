@@ -226,7 +226,7 @@ final class Builder
 			if ($value === null) {
 				continue;
 			}
-			if ($field['type'] === Field\RichText::class) {
+			if ($field['type'] === Field\RichText::class || $field['type'] === Field\RichLine::class) {
 				if (!Envelope::isStructured($data)) {
 					continue;
 				}

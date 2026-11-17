@@ -24,9 +24,9 @@ final class RichtextDoc implements Validator
 	 * @param array<string, string> $classes
 	 * @param array<string, string> $styles
 	 */
-	public function __construct(array $classes = [], array $styles = [])
+	public function __construct(array $classes = [], array $styles = [], bool $line = false)
 	{
-		$this->validator = new DocValidator($classes, $styles);
+		$this->validator = new DocValidator($classes, $styles, $line);
 		$this->shape = Shapes::create();
 		$this->shape->review($this->review(...));
 	}

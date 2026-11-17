@@ -39,6 +39,7 @@ class FulltextHandler extends Handler
 				Field\Text::class,
 				Field\Textarea::class,
 				Field\RichText::class,
+				Field\RichLine::class,
 				Field\Blocks::class,
 				Field\Entries::class,
 			],

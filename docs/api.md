@@ -84,7 +84,7 @@ The resolved view, the default, adds `fields`: every value resolved for the loca
 | Field | Value |
 | --- | --- |
 | Text, Textarea, Iframe | A string, empty when unset |
-| RichText | `{html}`, rendered with internal links resolved |
+| RichText, RichLine | `{html}`, rendered with internal links resolved; a line without `<p>` |
 | Code | `{code, syntax}` |
 | Number, Decimal | A number or null |
 | Checkbox | A boolean, or null for a nullable checkbox without a value |

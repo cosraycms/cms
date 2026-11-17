@@ -345,7 +345,8 @@ final class Styleguide extends Panel
 
 	/**
 	 * Richtext descriptors: the built-in default toolbar, a field trimmed
-	 * the way `#[Tools]` would, and one of marks only, which gets a bubble.
+	 * the way `#[Tools]` would, one of marks only, which gets a bubble, and
+	 * a `RichLine`.
 	 *
 	 * @return list<array<string, mixed>>
 	 */
@@ -374,6 +375,15 @@ final class Styleguide extends Panel
 				'name' => 'rtMarks',
 				'label' => 'Richtext — #[Tools(Tool::MINIMAL)], a bubble on the selection',
 				'control' => $control,
+				'tools' => array_map(static fn(Tool $tool): string => $tool->value, Tool::MINIMAL),
+				'richtextClasses' => (object) [],
+				'richtextStyles' => (object) [],
+			],
+			[
+				'name' => 'rtLine',
+				'label' => 'RichLine — one line of formatted text',
+				'control' => $control,
+				'line' => true,
 				'tools' => array_map(static fn(Tool $tool): string => $tool->value, Tool::MINIMAL),
 				'richtextClasses' => (object) [],
 				'richtextStyles' => (object) [],
@@ -1254,6 +1264,22 @@ final class Styleguide extends Panel
 			],
 			'rtTrimmed' => [
 				'value' => ['zxx' => $doc('Presse', 'Nur Fett, Kursiv, Link und die Quelltextansicht.')],
+				'format' => Envelope::FORMAT,
+				'version' => Envelope::VERSION,
+			],
+			'rtLine' => [
+				'value' => [
+					'zxx' => [
+						'type' => 'doc',
+						'content' => [[
+							'type' => 'paragraph',
+							'content' => [
+								['type' => 'text', 'text' => 'Frisch gebraut', 'marks' => [['type' => 'bold']]],
+								['type' => 'text', 'text' => ' im Sudhaus'],
+							],
+						]],
+					],
+				],
 				'format' => Envelope::FORMAT,
 				'version' => Envelope::VERSION,
 			],

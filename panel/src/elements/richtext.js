@@ -62,6 +62,7 @@ import {
  * @property {string} [presentation]
  * @property {string} [placeholder]
  * @property {string[]} [tools]
+ * @property {boolean} [line] A RichLine: one paragraph of text.
  * @property {Record<string, string>} [richtextClasses]
  * @property {Record<string, string>} [richtextStyles]
  */
@@ -92,8 +93,9 @@ const DEFAULT_TOOLS = [
 	'link',
 ];
 
-// Tools that change the document's structure act without a selection, so a
-// field with any of them needs a toolbar.
+// Mirrors Cosray\Schema\Tool::structural(): tools that change the
+// document's structure act without a selection, so a field with any of
+// them needs a toolbar.
 const STRUCTURE = new Set([
 	'h1',
 	'h2',
@@ -469,6 +471,7 @@ export class CosrayRichtext extends HTMLElement {
 		const menuId = `cms-richtext-${++ids}`;
 		const map = this.#values();
 		const root = create('div', structure ? 'cms-richtext' : 'cms-richtext has-bubble');
+		root.classList.toggle('is-line', field.line === true);
 		const stack = create('div', 'cms-richtext-stack');
 		const content = create('div', 'cms-richtext-content cms-richtext-layer-base');
 		content.dataset.name = field.name;
@@ -839,6 +842,7 @@ export class CosrayRichtext extends HTMLElement {
 			element: content,
 			content: map[active],
 			structure,
+			line: field.line === true,
 			bubbleElement: bubble,
 			assetUrl: (uid) => this.#assetUrl(uid),
 			editable: () => !readonly,

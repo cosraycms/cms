@@ -272,6 +272,56 @@ describe('the menu follows the tools', () => {
 	});
 });
 
+describe('a RichLine', () => {
+	async function line(value: RichtextDoc | null) {
+		const element = document.createElement('cosray-richtext') as RichtextElement;
+		Object.assign(element, {
+			value: { zxx: value },
+			format: 'cosray-richtext',
+			field: { name: 'subtitle', line: true, tools: ['bold', 'italic', 'link'] },
+			locale: 'zxx',
+		});
+		const changes = vi.fn<(detail: RichtextEnvelope) => void>();
+		element.addEventListener('cosray-change', (event) => {
+			changes(JSON.parse(JSON.stringify((event as CustomEvent).detail)));
+		});
+		document.body.append(element);
+		await tick();
+
+		return { element, changes };
+	}
+
+	it('formats through a bubble and takes no second paragraph', async () => {
+		const { element, changes } = await line(doc('One line'));
+		const content = element.querySelector<HTMLElement>('[contenteditable="true"]')!;
+
+		content.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+		content.dispatchEvent(
+			new KeyboardEvent('keydown', { key: 'Enter', shiftKey: true, bubbles: true }),
+		);
+		await tick();
+
+		expect(element.querySelector('.cms-richtext-toolbar')).toBeNull();
+		expect(element.querySelector('.cms-richtext-bubble')).not.toBeNull();
+		expect(changes).not.toHaveBeenCalled();
+		expect(content.querySelectorAll('p')).toHaveLength(1);
+	});
+
+	it('edits a stored document of several paragraphs as one line', async () => {
+		const { element } = await line({
+			type: 'doc',
+			content: [
+				{ type: 'paragraph', content: [{ type: 'text', text: 'First' }] },
+				{ type: 'paragraph', content: [{ type: 'text', text: 'second' }] },
+			],
+		});
+		const content = element.querySelector<HTMLElement>('[contenteditable="true"]')!;
+
+		expect(content.querySelectorAll('p')).toHaveLength(1);
+		expect(content.textContent).toBe('First second');
+	});
+});
+
 describe('the docked toolbar of a block', () => {
 	function rect(left: number, top: number, width: number, height: number): DOMRect {
 		return { left, top, width, height, right: left + width, bottom: top + height } as DOMRect;

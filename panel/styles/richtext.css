@@ -30,6 +30,15 @@
 		position: relative;
 	}
 
+	/* A line looks like a text input and grows as its text wraps. */
+	&.is-line .ProseMirror {
+		min-height: calc(var(--cms-control-height) - 2px);
+		max-height: none;
+		padding: calc((var(--cms-control-height) - 1lh - 2px) / 2) var(--cms-space-2-5);
+		line-height: 1.5rem;
+		overflow-wrap: anywhere;
+	}
+
 	/* In a block the toolbar shows while the text has focus, above it and
 	   over whatever is there; it sticks to the pane's top while the text
 	   scrolls past. place() in richtext.js measures the offsets. */
