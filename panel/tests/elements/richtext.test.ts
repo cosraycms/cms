@@ -438,6 +438,18 @@ describe('the docked toolbar of a block', () => {
 		expect(root.style.getPropertyValue('--dock-lift')).toBe('20px');
 	});
 
+	it('lines up with the block’s chrome beside it', () => {
+		const { root, toolbar } = block();
+		at(root, rect(100, 200, 300, 100));
+		at(toolbar, rect(100, 168, 200, 28));
+		at(document.querySelector('.cms-block-chrome')!, rect(700, 165, 100, 28));
+
+		place(root, toolbar);
+
+		// Both bottoms at 193.
+		expect(root.style.getPropertyValue('--dock-lift')).toBe('3px');
+	});
+
 	it('sticks at the scroller’s top edge, not below its padding', () => {
 		const { root, toolbar } = block();
 		at(root, rect(100, 200, 300, 100));

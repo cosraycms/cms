@@ -60,10 +60,45 @@
 			inset-inline-start: calc(var(--dock-shift, 0px) - var(--cms-space-2));
 			width: max-content;
 			max-width: var(--dock-max, none);
+			border: 1px solid var(--cms-color-border);
+			box-shadow: var(--cms-shadow-sm);
+
+			& .cms-richtext-toolbar-btn:not(.is-active) {
+				color: var(--cms-color-text-subtle);
+
+				&:hover {
+					background: var(--cms-color-surface-sunken);
+					color: var(--cms-color-text);
+				}
+			}
+		}
+	}
+
+	/* The bars that float over a block, the docked toolbar and the bubble,
+	   take the shape and size of the block's own tools (blocks.css). */
+	&.is-docked > .cms-richtext-dock > .cms-richtext-toolbar,
+	.cms-richtext-bubble {
+		gap: var(--cms-space-1);
+		height: 1.75rem;
+		padding: 0 var(--cms-space-1-5);
+		border-radius: var(--cms-radius-full);
+
+		& .cms-richtext-toolbar-btn,
+		& .cms-richtext-dropdown-button {
+			width: auto;
+			min-width: 1.625rem;
+			height: 1.625rem;
+			margin: 0;
 			padding: 0 var(--cms-space-1);
-			border: 1px solid var(--cms-color-border-control);
-			border-radius: var(--cms-radius-md);
-			box-shadow: var(--cms-shadow-md);
+			border-radius: var(--cms-radius-sm);
+		}
+
+		& .cms-richtext-toolbar-btns {
+			gap: var(--cms-space-1);
+		}
+
+		& .cms-richtext-source-btn {
+			margin: 0;
 		}
 	}
 
@@ -96,9 +131,7 @@
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-0-5);
-		border-radius: var(--cms-radius);
 		background-color: var(--cms-color-neutral-600);
-		padding: 0 var(--cms-space-1);
 		color: var(--cms-color-white);
 		box-shadow: var(--cms-shadow-md);
 		white-space: nowrap;

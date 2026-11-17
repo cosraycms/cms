@@ -263,9 +263,9 @@ function dropdown(id, face, attributes) {
 }
 
 /**
- * Docks a block's toolbar above its text, inside the field and clear of
- * the block's own chrome, and keeps it at the pane's top while the text
- * scrolls past. Measured whenever the text takes focus, as the toolbar
+ * Docks a block's toolbar above its text, inside the field and level with
+ * or clear of the block's own chrome, and keeps it at the pane's top while
+ * the text scrolls past. Measured whenever the text takes focus, as the toolbar
  * shows only then.
  *
  * @param {HTMLElement} root
@@ -297,14 +297,14 @@ export function place(root, toolbar) {
 	const left = bar.left + shift;
 	const right = bar.right + shift;
 
-	if (
-		chrome &&
-		chrome.width > 0 &&
-		right > chrome.left &&
-		left < chrome.right &&
-		bar.bottom > chrome.top
-	) {
-		lift = bar.bottom - chrome.top + 4;
+	// Beside the chrome it takes the same band on the block's edge; where
+	// the two would meet, it moves up above the chrome.
+	if (chrome && chrome.width > 0) {
+		if (right > chrome.left && left < chrome.right && bar.bottom > chrome.top) {
+			lift = bar.bottom - chrome.top + 4;
+		} else if (Math.abs(bar.bottom - chrome.bottom) < bar.height) {
+			lift = bar.bottom - chrome.bottom;
+		}
 	}
 
 	// A sticky box keeps clear of its scroller's padding, so it is taken back.
