@@ -145,6 +145,7 @@
 	--cms-color-red-600: #c93223;
 	--cms-color-amber-400: #e39200;
 	--cms-color-amber-600: #975f00;
+	--cms-color-yellow-200: #fdf0a0;
 	--cms-color-green-400: #43ba66;
 	--cms-color-green-600: #007d37;
 	--cms-color-blue-400: #51a8fd;
@@ -246,6 +247,11 @@
 	 */
 	--cms-color-hover: light-dark(var(--cms-color-neutral-100), var(--cms-color-neutral-850));
 	--cms-color-selected: light-dark(var(--cms-color-neutral-150), var(--cms-color-neutral-800));
+	/* Behind the words a search found; dimmed on a dark canvas, so the text stays light. */
+	--cms-color-highlight: light-dark(
+		var(--cms-color-yellow-200),
+		color-mix(in oklch, var(--cms-color-yellow-200), var(--cms-color-neutral-900) 72%)
+	);
 
 	/*
 	 * The direction a hover or text variant moves in: toward black on a light

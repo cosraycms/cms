@@ -567,7 +567,7 @@
 		/* The words a search found in a column it matches. */
 		& mark {
 			border-radius: 2px;
-			background: var(--cms-color-warning-surface);
+			background: var(--cms-color-highlight);
 			color: inherit;
 		}
 	}
@@ -589,7 +589,7 @@
 
 		& mark {
 			border-radius: 2px;
-			background: var(--cms-color-warning-surface);
+			background: var(--cms-color-highlight);
 			color: var(--cms-color-text);
 		}
 	}
