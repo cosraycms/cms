@@ -31,12 +31,11 @@ final class Listener
 	{
 		$config = $connection->config;
 
-		return new self(static fn(): Pgsql => new Pgsql(
-			$config->dsn,
-			$config->pdo->username,
-			$config->pdo->password,
-			$config->pdo->effectiveOptions($config->driver),
-		));
+		return new self(static function () use ($config): Pgsql {
+			[$username, $password] = $config->pdo->resolveCredentials();
+
+			return new Pgsql($config->dsn, $username, $password, $config->pdo->effectiveOptions($config->driver));
+		});
 	}
 
 	/**

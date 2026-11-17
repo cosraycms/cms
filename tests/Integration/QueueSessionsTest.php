@@ -6,6 +6,7 @@ namespace Cosray\Tests\Integration;
 
 use Celema\Console\Buffer;
 use Celema\Console\Io;
+use Celema\Quma\Connection;
 use Celema\Quma\Database;
 use Cosray\Commands\ListenQueue;
 use Cosray\Queue;
@@ -101,6 +102,23 @@ final class QueueSessionsTest extends IntegrationTestCase
 		} finally {
 			$other->disconnect();
 		}
+	}
+
+	public function testAListenerTakesCredentialsFromTheConnectionsResolver(): void
+	{
+		$dsn = self::databaseDsn();
+		$this->assertSame(1, preg_match('/;user=([^;]*);password=([^;]*)$/', $dsn, $credentials));
+		$calls = 0;
+		$conn = new Connection(str_replace($credentials[0], '', $dsn), self::root() . '/db/sql')->credentialsFrom(
+			static function () use (&$calls, $credentials): array {
+				$calls++;
+
+				return [$credentials[1], $credentials[2]];
+			},
+		);
+
+		$this->assertFalse(Listener::fromConnection($conn)->wait(0.01));
+		$this->assertSame(1, $calls);
 	}
 
 	public function testTheDaemonRunsJobsUntilALimitStopsIt(): void
