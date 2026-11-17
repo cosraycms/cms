@@ -20,6 +20,9 @@ final class SearchCompiler
 	/** … plus up to this much as its terms appear in the title, below a whole-word title match (`1.0`). */
 	public const TITLE_SCORE = 0.45;
 
+	/** Added as a share of the terms its type matches: a match by type alone stays below a whole-word body match. */
+	public const TYPE_SCORE = 0.04;
+
 	/** A node whose uid a term names ranks above any full-text score. */
 	public const UID_SCORE = 10.0;
 
@@ -48,7 +51,10 @@ final class SearchCompiler
 	/** @var array<int, array<int, string>> parameter names by group and term */
 	private array $names = [];
 
-	/** @param list<string> $texts */
+	/**
+	 * @param list<string> $texts
+	 * @param list<string> $types
+	 */
 	private function __construct(
 		private readonly Query $query,
 		private readonly bool $websearch,
@@ -57,6 +63,7 @@ final class SearchCompiler
 		private readonly bool $uid,
 		private readonly bool $document,
 		string $prefix,
+		private readonly array $types = [],
 	) {
 		foreach ($query->groups as $g => $group) {
 			foreach ($group as $t => $term) {
@@ -79,9 +86,11 @@ final class SearchCompiler
 
 	/**
 	 * Every group matches term by term in one of `$texts`, the uid when
-	 * `$uid`, or the document when `$document`.
+	 * `$uid`, the document when `$document`, or one of `$types`, the
+	 * expressions naming a node's type, which also raise its score a little.
 	 *
 	 * @param list<string> $texts SQL expressions whose text a term may match
+	 * @param list<string> $types
 	 */
 	public static function sources(
 		Query $query,
@@ -89,14 +98,15 @@ final class SearchCompiler
 		bool $uid,
 		bool $document,
 		string $prefix = 'search_term',
+		array $types = [],
 	): self {
-		return new self($query, false, true, $texts, $uid, $document, $prefix);
+		return new self($query, false, true, $texts, $uid, $document, $prefix, $types);
 	}
 
 	/** Whether a node without a document can still match through another source. */
 	public function outer(): bool
 	{
-		return $this->texts !== [] || $this->uid;
+		return $this->texts !== [] || $this->types !== [] || $this->uid;
 	}
 
 	public function match(): string
@@ -122,14 +132,16 @@ final class SearchCompiler
 
 		$scores = [
 			"ts_rank_cd(ft.document, {$rank})",
-			self::SCORE . ' + ' . self::TITLE_SCORE . ' * ' . $this->titleShare(),
+			self::SCORE . ' + ' . self::TITLE_SCORE . ' * ' . $this->share(self::TITLE),
 		];
 
 		if ($this->uid) {
 			$scores[] = 'CASE WHEN ' . $this->uidNamed() . ' THEN ' . self::UID_SCORE . ' ELSE 0 END';
 		}
 
-		return 'coalesce(GREATEST(' . implode(', ', $scores) . '), 0)';
+		$score = 'coalesce(GREATEST(' . implode(', ', $scores) . '), 0)';
+
+		return $this->types === [] ? $score : "{$score} + " . self::TYPE_SCORE . ' * ' . $this->share(...$this->types);
 	}
 
 	/** The query a snippet highlights: whole words that contain a term are marked too. */
@@ -200,33 +212,36 @@ final class SearchCompiler
 		return implode("\n\t\tAND ", $groups);
 	}
 
-	/** The share of required groups found in the title, from 0 to 1. */
-	private function titleShare(): string
+	/** The share of required groups found in one of `$expressions`, from 0 to 1. */
+	private function share(string ...$expressions): string
 	{
 		$found = [];
-		$count = 0;
 
 		foreach ($this->query->groups as $g => $group) {
 			$alternatives = [];
 
 			foreach ($group as $t => $term) {
 				if (!$term->negated) {
-					$alternatives[] = $this->text(self::TITLE, $term, $this->names[$g][$t]);
+					foreach ($expressions as $expression) {
+						$alternatives[] = $this->text($expression, $term, $this->names[$g][$t]);
+					}
 				}
 			}
 
 			if ($alternatives !== []) {
 				$found[] = '(' . implode(' OR ', $alternatives) . ')::int';
-				$count++;
 			}
 		}
 
-		return '((0 + ' . implode(' + ', $found) . ")::float / {$count})";
+		return '((0 + ' . implode(' + ', $found) . ')::float / ' . count($found) . ')';
 	}
 
 	private function sourcesOf(Term $term, string $name): string
 	{
-		$sources = array_map(fn(string $expression): string => $this->text($expression, $term, $name), $this->texts);
+		$sources = array_map(
+			fn(string $expression): string => $this->text($expression, $term, $name),
+			[...$this->texts, ...$this->types],
+		);
 
 		if ($this->uid) {
 			$sources[] = $term->inside

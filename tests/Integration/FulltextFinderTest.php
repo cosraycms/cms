@@ -420,6 +420,20 @@ final class FulltextFinderTest extends FulltextTestCase
 		self::assertSame(['fts-type-page'], $search('-document'));
 	}
 
+	public function testATypeMatchRanksBelowAWholeWordInTheDocumentAboveAPartialOne(): void
+	{
+		$this->page('fts-type-rank-inside', 'Other', 'Superdocuments');
+		$this->page('fts-type-rank-whole', 'Other', 'A document');
+		$this->writer->create(
+			$this->writer->prepare(FulltextDocument::class, ['body' => 'Notes'])->uid('fts-type-rank-type'),
+		);
+
+		self::assertSame(
+			['fts-type-rank-whole', 'fts-type-rank-type', 'fts-type-rank-inside'],
+			$this->uids($this->cms->nodes()->published(null)->search('document', ['title', 'type'], fulltext: true)),
+		);
+	}
+
 	public function testANamedUidRanksFirstThenTitleThenDocumentMatches(): void
 	{
 		$this->page('fts-rank-body', 'Other', 'A zebra walks');

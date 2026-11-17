@@ -185,19 +185,27 @@ final class Nodes implements Iterator
 		}
 
 		$texts = [];
+		$types = [];
 		$uid = false;
 
 		foreach ($fields as $field) {
 			match ($field) {
 				'uid', 'id' => $uid = true,
 				'title' => $texts[] = SearchCompiler::TITLE,
-				'type' => array_push($texts, 't.handle', $this->typeLabels()),
+				'type' => $types = ['t.handle', $this->typeLabels()],
 				default => $texts[] = $this->fieldExpression($field),
 			};
 		}
 
 		if (!$fulltext) {
-			$search = SearchCompiler::sources($parsed, $texts, $uid, false, 'search_' . count($this->whereParams));
+			$search = SearchCompiler::sources(
+				$parsed,
+				$texts,
+				$uid,
+				false,
+				'search_' . count($this->whereParams),
+				$types,
+			);
 			$this->addWhere($search->condition());
 			$this->whereParams = [...$this->whereParams, ...$search->params()];
 
@@ -205,7 +213,7 @@ final class Nodes implements Iterator
 		}
 
 		$this->fulltext = $query;
-		$this->search = SearchCompiler::sources($parsed, $texts, $uid, true);
+		$this->search = SearchCompiler::sources($parsed, $texts, $uid, true, types: $types);
 		$this->activeUrl ??= false;
 
 		return $this;
