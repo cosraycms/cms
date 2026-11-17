@@ -38,7 +38,7 @@ final class Listing
 
 	/** @var list<Column> */
 	public readonly array $columns;
-	/** @var list<string> the finder fields the search matches: the uid and what the columns show */
+	/** @var list<string> the finder fields the search matches: uid, title and what the columns show */
 	public readonly array $search;
 	/** @var array<string, Sort> */
 	public readonly array $sorts;
@@ -74,6 +74,7 @@ final class Listing
 		$this->defaultSort = self::defaultSort($sorts);
 		$this->search = array_values(array_unique([
 			'uid',
+			'title',
 			...array_merge(...array_map(static fn(Column $column): array => $column->searched(), $this->columns)),
 		]));
 	}

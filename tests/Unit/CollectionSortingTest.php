@@ -167,6 +167,19 @@ final class CollectionSortingTest extends TestCase
 		$this->assertNull($table->headers[2]['url']);
 	}
 
+	public function testTheSearchMatchesUidTitleAndTheColumnsThatSearch(): void
+	{
+		$collection = new SortingTestCollection();
+		$collection->configured = [
+			Column::text('Name', static fn(): string => '')->sort('name', fields: ['lastName']),
+			Column::text('Code', 'code')->search(),
+			Column::type(),
+			Column::text('Notes', 'notes'),
+		];
+
+		$this->assertSame(['uid', 'title', 'code', 'type'], $this->listing($collection)->search);
+	}
+
 	private function listing(SortingTestCollection $collection): Listing
 	{
 		$context = new Context($this->db(), $this->request(), $this->config(), $this->container(), $this->factory());
