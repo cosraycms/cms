@@ -199,6 +199,41 @@ $writer->create($prepared, new Actor($editorId));
 
 The lower-level [Node\Store](../src/Node/Store.php) takes `Locales` and an explicit `Cosray\Actor`; HTTP callers derive the actor from their authenticated session. See [working copies](content.md#working-copies) before choosing a store operation.
 
+### Content migrations
+
+A site's PHP migrations ask for the same services in their constructors as commands do. Cosray builds them on the migration's own connection, so their writes join the transaction `php run db:migrations --apply` runs the migrations in: a failing migration leaves the content as it was. Each write becomes a new revision with an event, as any other write through the store does. [Api\Writer](../src/Api/Writer.php)`::patch()` changes fields of an existing node like a `PATCH` through the [API](api.md#nodes), on the main version and an editor's working copy alike, so applying that copy later keeps the change:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Migrations\AboutSubtitle;
+
+use Celema\Quma\Contract\Migration as MigrationContract;
+use Celema\Quma\Environment;
+use Cosray\Actor;
+use Cosray\Api\Writer;
+use Cosray\Cms;
+
+final class Migration implements MigrationContract
+{
+    public function __construct(
+        private readonly Cms $cms,
+        private readonly Writer $writer,
+    ) {}
+
+    public function run(Environment $env): void
+    {
+        $this->writer->patch(
+            $this->cms->node->byUid('about', published: null),
+            ['content' => ['subtitle' => ['value' => ['en' => 'Who we are']]]],
+            Actor::system(),
+        );
+    }
+}
+```
+
 ## Plugins
 
 Runtime plugins implement [Cosray\Plugin\Plugin](../src/Plugin/Plugin.php) and register through [Registrar](../src/Plugin/Registrar.php):
