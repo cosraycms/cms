@@ -60,28 +60,29 @@
 			inset-inline-start: calc(var(--dock-shift, 0px) - var(--cms-space-2));
 			width: max-content;
 			max-width: var(--dock-max, none);
-			border: 1px solid var(--cms-color-border);
-			box-shadow: var(--cms-shadow-sm);
-
-			& .cms-richtext-toolbar-btn:not(.is-active) {
-				color: var(--cms-color-text-subtle);
-
-				&:hover {
-					background: var(--cms-color-surface-sunken);
-					color: var(--cms-color-text);
-				}
-			}
 		}
 	}
 
-	/* The bars that float over a block, the docked toolbar and the bubble,
-	   take the shape and size of the block's own tools (blocks.css). */
+	/* The bars that float over the text, the docked toolbar and the bubble,
+	   look like a block's own tools (blocks.css). */
 	&.is-docked > .cms-richtext-dock > .cms-richtext-toolbar,
 	.cms-richtext-bubble {
 		gap: var(--cms-space-1);
 		height: 1.75rem;
 		padding: 0 var(--cms-space-1-5);
+		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-surface);
+		box-shadow: var(--cms-shadow-sm);
+
+		& .cms-richtext-toolbar-btn:not(.is-active) {
+			color: var(--cms-color-text-subtle);
+
+			&:hover {
+				background: var(--cms-color-surface-sunken);
+				color: var(--cms-color-text);
+			}
+		}
 
 		& .cms-richtext-toolbar-btn,
 		& .cms-richtext-dropdown-button {
@@ -124,30 +125,12 @@
 		}
 	}
 
-	/* Inverted on purpose, like the code editor: chrome over the document. */
 	.cms-richtext-bubble {
 		position: absolute;
 		z-index: 20;
 		display: flex;
 		align-items: center;
-		gap: var(--cms-space-0-5);
-		background-color: var(--cms-color-neutral-600);
-		color: var(--cms-color-white);
-		box-shadow: var(--cms-shadow-md);
 		white-space: nowrap;
-
-		& .cms-richtext-toolbar-btn {
-			color: var(--cms-color-white);
-
-			&:hover {
-				background: var(--cms-color-neutral-500);
-				color: var(--cms-color-white);
-			}
-
-			&.is-active {
-				background-color: var(--cms-color-neutral-900);
-			}
-		}
 
 		& .cms-richtext-style {
 			width: auto;
