@@ -232,7 +232,7 @@ final class SystemInfoTest extends TestCase
 
 		$this->assertNotSame('fail', $report['status']);
 		$this->assertSame(
-			['runtime', 'extensions', 'limits', 'database', 'queue', 'paths'],
+			['runtime', 'limits', 'extensions', 'database', 'queue', 'paths'],
 			array_column($report['groups'], 'key'),
 		);
 	}

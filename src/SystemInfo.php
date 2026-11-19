@@ -63,8 +63,8 @@ final class SystemInfo
 	{
 		$groups = [
 			self::group('runtime', $this->runtime()),
-			self::group('extensions', $this->extensions()),
 			self::group('limits', $this->limits()),
+			self::group('extensions', $this->extensions()),
 			self::group('database', $this->database()),
 			self::group('queue', $this->queue()),
 			self::group('paths', $this->paths()),
