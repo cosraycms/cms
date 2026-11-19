@@ -35,6 +35,10 @@ final class PanelSystemInfoTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//a[@href="/panel/system-info" and @aria-current="page"]', $html);
 		$this->assertHtmlNodeExists('//h2[normalize-space()="Extensions"]', $html);
 		$this->assertHtmlNodeExists('//dt[normalize-space()="Server version"]', $html);
+		$this->assertHtmlNodeExists(
+			'//dt[normalize-space()="Migrations"]/following-sibling::dd[contains(., "all applied")]',
+			$html,
+		);
 		$this->assertStringContainsString(PHP_VERSION, $html);
 		$this->assertHtmlNodeExists('//button[@data-copy="system-info-text"]', $html);
 		$this->assertHtmlNodeExists('//template[@id="system-info-text" and starts-with(., "System info")]', $html);

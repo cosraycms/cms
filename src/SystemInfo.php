@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Cosray;
 
+use Celema\Quma\Connection;
 use Celema\Quma\Database;
+use Celema\Quma\Environment;
+use Celema\Quma\Migrations\DriverPolicy;
+use Celema\Quma\Migrations\Log;
+use Celema\Quma\Migrations\Planner;
 use Composer\InstalledVersions;
 use Cosray\SystemInfo\Php;
 use PDO;
@@ -49,6 +54,7 @@ final class SystemInfo
 	public function __construct(
 		private readonly Config $config,
 		private readonly Database $db,
+		private readonly Connection $connection,
 		private readonly Php $php = new Php(),
 	) {}
 
@@ -190,7 +196,41 @@ final class SystemInfo
 
 		$entries[] = self::entry('db.prefix', $this->config->db->prefix(), 'info');
 
+		if ($version !== null) {
+			$pending = $this->pendingMigrations();
+			$entries[] = self::entry('db.migrations', $pending, $pending === 0 ? 'ok' : 'fail', 0);
+		}
+
 		return $entries;
+	}
+
+	/**
+	 * The migrations `db:migrations --apply` would run: those of the default
+	 * and plugin namespaces not recorded yet. Null when the database has no
+	 * record of migrations, as before the install.
+	 */
+	private function pendingMigrations(): ?int
+	{
+		try {
+			$env = new Environment($this->connection);
+
+			if (!$env->checkIfMigrationsTableExists($this->db)) {
+				return null;
+			}
+
+			$planner = new Planner(new DriverPolicy($env->driver));
+			$applied = new Log($env, $planner)->applied($this->db);
+			$namespaces = $env->getMigrations() ?: [];
+			$pending = 0;
+
+			foreach ($this->connection->config->migrationOrder as $namespace) {
+				$pending += count($planner->pendingMigrations($namespace, $namespaces[$namespace] ?? [], $applied));
+			}
+
+			return $pending;
+		} catch (Throwable) {
+			return null;
+		}
 	}
 
 	/** @return list<Entry> */

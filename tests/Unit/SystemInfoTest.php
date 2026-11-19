@@ -12,7 +12,6 @@ use Celema\Router\Router;
 use Celema\Verba\Translator;
 use Celema\Verba\Verba;
 use Cosray\App;
-use Cosray\Config;
 use Cosray\Console\Commands;
 use Cosray\Locales;
 use Cosray\SystemInfo;
@@ -141,16 +140,48 @@ final class SystemInfoTest extends TestCase
 	public function testAnUnreachableDatabaseIsAProblem(): void
 	{
 		$config = $this->config(['db.dsn' => 'pgsql:host=not-a-database.invalid;dbname=none;connect_timeout=1']);
-		$info = new SystemInfo(
-			$config,
-			new Database(new Connection((string) $config->db->dsn, self::root() . '/db/sql')),
-			self::web([]),
-		);
+		$connection = new Connection((string) $config->db->dsn, self::root() . '/db/sql');
+		$info = new SystemInfo($config, new Database($connection), $connection, self::web([]));
 		$server = self::entry($info->report(), 'db.server');
 
 		$this->assertSame('fail', $server['status']);
 		$this->assertSame('unreachable', new Text()->value($server));
 		$this->assertSame('Cosray cannot connect to the database.', new Text()->hint($server));
+	}
+
+	public function testPendingMigrationsAreAProblem(): void
+	{
+		$dir = sys_get_temp_dir() . '/cosray-system-info-migrations-' . bin2hex(random_bytes(4));
+		mkdir($dir);
+		file_put_contents($dir . '/000001-first.sql', 'SELECT 1;');
+		file_put_contents($dir . '/000002-second.sql', 'SELECT 1;');
+		$config = $this->config(['db.dsn' => 'sqlite::memory:']);
+		$connection = new Connection('sqlite::memory:', self::root() . '/db/sql')->migrations(['default' => [$dir]]);
+		$db = new Database($connection);
+		$info = new SystemInfo($config, $db, $connection, self::web([]));
+
+		try {
+			$missing = self::entry($info->report(), 'db.migrations');
+			$db->execute('CREATE TABLE migrations (migration TEXT, applied TEXT)')->run();
+			$db->execute("INSERT INTO migrations (migration) VALUES ('000001-first.sql')")->run();
+			$pending = self::entry($info->report(), 'db.migrations');
+			$db->execute("INSERT INTO migrations (migration) VALUES ('000002-second.sql')")->run();
+			$applied = self::entry($info->report(), 'db.migrations');
+		} finally {
+			array_map(unlink(...), glob($dir . '/*') ?: []);
+			rmdir($dir);
+		}
+
+		$this->assertSame('fail', $missing['status']);
+		$this->assertSame('unknown', new Text()->value($missing));
+		$this->assertSame('fail', $pending['status']);
+		$this->assertSame('1 pending', new Text()->value($pending));
+		$this->assertSame(
+			'The database is behind the code. Run php run db:migrations --apply.',
+			new Text()->hint($pending),
+		);
+		$this->assertSame('ok', $applied['status']);
+		$this->assertSame('all applied', new Text()->value($applied));
 	}
 
 	public function testDirectoriesPhpCannotWriteToAreAProblem(): void
@@ -243,12 +274,11 @@ final class SystemInfoTest extends TestCase
 			...$settings,
 		]);
 
-		return new SystemInfo($config, self::sqlite($config), $php);
-	}
+		$connection = new Connection((string) $config->db->dsn, self::root() . '/db/sql');
+		$db = new Database($connection);
+		$db->execute('CREATE TABLE migrations (migration TEXT, applied TEXT)')->run();
 
-	private static function sqlite(Config $config): Database
-	{
-		return new Database(new Connection((string) $config->db->dsn, self::root() . '/db/sql'));
+		return new SystemInfo($config, $db, $connection, $php);
 	}
 
 	/**

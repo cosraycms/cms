@@ -52,6 +52,7 @@ final class Text
 			'db.driver' => __('system-info:db-driver'),
 			'db.server' => __('system-info:db-server'),
 			'db.prefix' => __('system-info:db-prefix'),
+			'db.migrations' => __('system-info:db-migrations'),
 			'path.cache' => __('system-info:path-cache'),
 			'path.assets' => __('system-info:path-assets'),
 			default => str_starts_with($key, 'ext.') ? substr($key, 4) : $key,
@@ -69,6 +70,11 @@ final class Text
 				? __('system-info:unlimited')
 				: __('system-info:seconds', ['seconds' => (int) $value]),
 			$entry['key'] === 'db.server' && $value === null => __('system-info:unreachable'),
+			$entry['key'] === 'db.migrations' => match ($value) {
+				null => __('system-info:unknown'),
+				0 => __('system-info:all-applied'),
+				default => __n('system-info:pending', 'system-info:pending-plural', (int) $value),
+			},
 			str_starts_with($entry['key'], 'ext.') => match ($value) {
 				null => __('system-info:missing'),
 				'' => __('system-info:loaded'),
@@ -110,6 +116,9 @@ final class Text
 			'db.server' => $entry['value'] === null
 				? __('system-info:hint-db-unreachable')
 				: __('system-info:hint-db-version', ['version' => (string) $expected]),
+			'db.migrations' => $entry['value'] === null
+				? __('system-info:hint-migrations-unknown')
+				: __('system-info:hint-migrations'),
 			'path.cache', 'path.assets' => __('system-info:hint-path'),
 			'ext.imagick' => __('system-info:hint-imagick'),
 			default => str_starts_with($entry['key'], 'ext.')
