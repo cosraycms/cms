@@ -724,7 +724,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 				"SELECT p.path FROM cms.url_paths p
 				JOIN cms.nodes n ON n.node = p.node
 				WHERE n.type = :type AND n.uid <> 'bulk-dup-route' AND p.locale = 'en'
-				ORDER BY p.created",
+				ORDER BY n.node",
 				['type' => $routableType],
 			)->all(),
 			'path',
