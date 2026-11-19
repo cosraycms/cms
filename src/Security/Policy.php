@@ -35,6 +35,7 @@ final class Policy
 			'manage-menus',
 			'edit-users',
 			'edit-settings',
+			'view-system-info',
 		);
 		$policy->allow('role:admin', 'panel', 'read-nodes', 'edit-nodes', 'edit-menus', 'edit-users');
 		$policy->allow('role:editor', 'panel', 'read-nodes', 'edit-nodes');

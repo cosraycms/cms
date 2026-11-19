@@ -40,6 +40,7 @@ use Cosray\Commands\RetryJobs;
 use Cosray\Commands\RevokeToken;
 use Cosray\Commands\SendTestMail;
 use Cosray\Commands\SetPassword;
+use Cosray\Commands\ShowSystemInfo;
 use Cosray\Commands\StripLocation;
 use Cosray\Commands\SyncPublications;
 use Cosray\Commands\Titles;
@@ -122,6 +123,7 @@ final class Commands
 			RetryJobs::class,
 			PruneJobs::class,
 			SendTestMail::class,
+			ShowSystemInfo::class,
 		]);
 
 		foreach ($app->bootstrap()->commands() as $commands) {

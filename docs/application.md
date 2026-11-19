@@ -138,7 +138,7 @@ Content, users, permissions and media are read per request. Changes to code, tem
 
 ## Console commands
 
-[Cosray\Console\Commands](../src/Console/Commands.php) registers the migration commands, index rebuilds, panel asset publishing, the user and token commands, the [job queue](queue.md) commands, and `mail:test` for the [mail](mail.md) setup. `php run help` lists the commands actually registered by the application; app-specific commands resolve lazily.
+[Cosray\Console\Commands](../src/Console/Commands.php) registers the migration commands, index rebuilds, panel asset publishing, the user and token commands, the [job queue](queue.md) commands, `mail:test` for the [mail](mail.md) setup, and `system:info`, which reports what the [system info](#system-info) page does, for the console's own PHP, and exits with 1 on a problem; `--json` prints it as JSON. `php run help` lists the commands actually registered by the application; app-specific commands resolve lazily.
 
 A project `run` script can load an `app/console.php` returning the runner:
 
@@ -342,7 +342,7 @@ final class Imports extends \Cosray\Controller\Panel\Panel
 }
 ```
 
-System links appear between Users and the profile, in registration order unless their `meta->order` differs. In either rail, `permission()` only hides a link from users without that permission, and a section left empty disappears; the route enforces the permission through `#[Permission]`. A page without `AREA` belongs to the content area. A link is current on its URL and on every page below it; when several links of a rail match, the longest wins. Pass `activePrefix` only for a link that should be current outside its own subtree.
+System links appear between Users and System info on one side and the profile on the other, in registration order unless their `meta->order` differs. In either rail, `permission()` only hides a link from users without that permission, and a section left empty disappears; the route enforces the permission through `#[Permission]`. A page without `AREA` belongs to the content area. A link is current on its URL and on every page below it; when several links of a rail match, the longest wins. Pass `activePrefix` only for a link that should be current outside its own subtree.
 
 Existing nodes open at `{panel.path}/node/{uid}`; creation uses `{panel.path}/node/create/{type}`. Build URLs through [NodeUrls](../src/Panel/NodeUrls.php):
 
@@ -410,13 +410,17 @@ $app->allow('role:shop', 'panel', 'edit-orders');
 $policy->permits($user, 'edit-orders');
 ```
 
-Routes use `#[Permission(...)]` middleware; panel controllers can call `$this->permits(...)`. The masthead's gear opens the system area for every panel user; its rail lists only the entries the user may open, Users with `edit-users` and everyone's profile. The Users screens need `edit-users`. Their write policy prevents editors from granting access beyond their own, changing their own roles/state, or removing the last active superuser. Password changes end other sessions and remembered logins. The profile page allows self-service account changes, with the current password required for a new one.
+Routes use `#[Permission(...)]` middleware; panel controllers can call `$this->permits(...)`. The masthead's gear opens the system area for every panel user; its rail lists only the entries the user may open, Users with `edit-users`, [System info](#system-info) with `view-system-info`, which only superusers hold by default, and everyone's profile. The Users screens need `edit-users`. Their write policy prevents editors from granting access beyond their own, changing their own roles/state, or removing the last active superuser. Password changes end other sessions and remembered logins. The profile page allows self-service account changes, with the current password required for a new one.
 
 Users have an email login and optional username without `@`. A subclass of [Cosray\User](../src/User.php), registered through `$app->user()`, adds fields like a node class. `#[Roles(...)]` limits assignable roles; `#[Roles]` allows none. Fields are neutral-locale values stored under `content` in `users.data`, without working copies, and hydrate on demand through [User\Fields](../src/User/Fields.php). See [User\Types](../src/User/Types.php) and its tests for type registration and default-type replacement.
 
 The panel speaks each language for which both its catalogs, `cosray` and `panel`, ship a file. It takes the language a user saved in the profile or the account menu, then the one chosen on the sign-in pages, kept in the cookie `{app.name}_panel_locale`, then `panel.locale`, then the browser's `Accept-Language`, then English. The sign-in pages offer the choice once there is more than one language.
 
 Dates, times, and numbers in the panel follow the panel language and a region. The region is the regional format a user chose in the profile, else the browser's first `Accept-Language` tag in that language, so `en-GB` gets day-first dates and a 24-hour clock in the English panel. Without one, `panel.region` applies, like `'panel.region' => 'GB'`; without that, the language's own default, which is the United States for English. Timestamps the system records, like when an entry changed, show in the user's chosen time zone, else in `app.timezone`; the profile offers the browser's time zone when it differs. Date and time fields keep their own `meta.timezone`, in the editor and in listing columns.
+
+### System info
+
+The system info page, `{panel.path}/system-info`, shows what the web server's PHP offers Cosray: the versions, the required and optional extensions, the upload and memory limits against `upload.maxsize` and `upload.maxsize.video`, the database server and the writable directories. Problems and warnings come first, with what to change. Its PHP tab lists every ini directive and loaded extension, and replaces `phpinfo()`, which would also show environment variables and the request's cookies; values that look like passwords are masked. A site lets admins see it with `$app->allow('role:admin', 'view-system-info')`. [SystemInfo](../src/SystemInfo.php) builds the report as plain data, for the page and `system:info`.
 
 ### User commands
 

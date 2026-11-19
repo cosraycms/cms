@@ -270,6 +270,10 @@ class Routes
 					->middleware($panelAuth)
 					->after($renderers->get('editor-save'));
 				$panel
+					->get('/system-info', [Panel\SystemInfo::class, 'index'], 'system-info')
+					->middleware($panelAuth)
+					->after($renderers->get('system-info'));
+				$panel
 					->get('/profile', [Panel\Users::class, 'profile'], 'profile')
 					->middleware($panelAuth)
 					->after($renderers->get('user'));

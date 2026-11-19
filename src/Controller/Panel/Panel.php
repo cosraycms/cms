@@ -507,6 +507,10 @@ abstract class Panel
 			$entries[] = $this->systemEntry(__('nav:users'), $panelPath . '/users', 'people');
 		}
 
+		if ($this->permits('view-system-info')) {
+			$entries[] = $this->systemEntry(__('nav:system-info'), $panelPath . '/system-info', 'info-circle');
+		}
+
 		foreach ($this->container->instance(SystemNav::class)->links() as $link) {
 			$permission = $link->meta->permission;
 
