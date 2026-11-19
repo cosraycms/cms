@@ -96,6 +96,11 @@ final class Queue
 		return $this->db->queue->failed()->all();
 	}
 
+	public function countFailed(): int
+	{
+		return (int) ($this->db->queue->countFailed()->one()['total'] ?? 0);
+	}
+
 	/** Queues failed jobs again with fresh attempts, one or all; returns how many. */
 	public function retry(?int $id = null): int
 	{

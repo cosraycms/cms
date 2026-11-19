@@ -66,8 +66,11 @@ final class SystemInfo
 			self::group('extensions', $this->extensions()),
 			self::group('limits', $this->limits()),
 			self::group('database', $this->database()),
+			self::group('queue', $this->queue()),
 			self::group('paths', $this->paths()),
 		];
+
+		$groups = array_values(array_filter($groups, static fn(array $group): bool => $group['entries'] !== []));
 
 		return ['status' => self::worst(array_column($groups, 'status')), 'groups' => $groups];
 	}
@@ -231,6 +234,23 @@ final class SystemInfo
 		} catch (Throwable) {
 			return null;
 		}
+	}
+
+	/** @return list<Entry> */
+	private function queue(): array
+	{
+		// Once the database proved unreachable, its entry already says so.
+		if (!$this->db->connected()) {
+			return [];
+		}
+
+		try {
+			$failed = new Queue($this->db)->countFailed();
+		} catch (Throwable) {
+			return [self::entry('queue.failed', null, 'warn')];
+		}
+
+		return [self::entry('queue.failed', $failed, $failed === 0 ? 'ok' : 'warn', 0)];
 	}
 
 	/** @return list<Entry> */

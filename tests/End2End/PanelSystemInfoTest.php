@@ -39,6 +39,7 @@ final class PanelSystemInfoTest extends End2EndTestCase
 			'//dt[normalize-space()="Migrations"]/following-sibling::dd[contains(., "all applied")]',
 			$html,
 		);
+		$this->assertHtmlNodeExists('//h2[normalize-space()="Job queue"]', $html);
 		$this->assertStringContainsString(PHP_VERSION, $html);
 		$this->assertHtmlNodeExists('//button[@data-copy="system-info-text"]', $html);
 		$this->assertHtmlNodeExists('//template[@id="system-info-text" and starts-with(., "System info")]', $html);

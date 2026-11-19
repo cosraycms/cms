@@ -29,6 +29,7 @@ final class Text
 			'extensions' => __('system-info:group-extensions'),
 			'limits' => __('system-info:group-limits'),
 			'database' => __('system-info:group-database'),
+			'queue' => __('system-info:group-queue'),
 			'paths' => __('system-info:group-paths'),
 			default => $key,
 		};
@@ -53,6 +54,7 @@ final class Text
 			'db.server' => __('system-info:db-server'),
 			'db.prefix' => __('system-info:db-prefix'),
 			'db.migrations' => __('system-info:db-migrations'),
+			'queue.failed' => __('system-info:queue-failed'),
 			'path.cache' => __('system-info:path-cache'),
 			'path.assets' => __('system-info:path-assets'),
 			default => str_starts_with($key, 'ext.') ? substr($key, 4) : $key,
@@ -70,6 +72,7 @@ final class Text
 				? __('system-info:unlimited')
 				: __('system-info:seconds', ['seconds' => (int) $value]),
 			$entry['key'] === 'db.server' && $value === null => __('system-info:unreachable'),
+			$entry['key'] === 'queue.failed' && $value === null => __('system-info:unknown'),
 			$entry['key'] === 'db.migrations' => match ($value) {
 				null => __('system-info:unknown'),
 				0 => __('system-info:all-applied'),
@@ -119,6 +122,9 @@ final class Text
 			'db.migrations' => $entry['value'] === null
 				? __('system-info:hint-migrations-unknown')
 				: __('system-info:hint-migrations'),
+			'queue.failed' => $entry['value'] === null
+				? __('system-info:hint-queue-unknown')
+				: __n('system-info:hint-queue-failed', 'system-info:hint-queue-failed-plural', (int) $entry['value']),
 			'path.cache', 'path.assets' => __('system-info:hint-path'),
 			'ext.imagick' => __('system-info:hint-imagick'),
 			default => str_starts_with($entry['key'], 'ext.')

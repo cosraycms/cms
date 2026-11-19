@@ -126,6 +126,7 @@ final class QueueTest extends IntegrationTestCase
 			$this->logger->records[0],
 		);
 		$this->assertSame([$id], array_column($this->queue->failed(), 'id'));
+		$this->assertSame(1, $this->queue->countFailed());
 	}
 
 	public function testAJobThatCannotSucceedFailsAtOnce(): void

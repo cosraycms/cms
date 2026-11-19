@@ -8,10 +8,12 @@ use Celema\Console\Buffer;
 use Celema\Console\Io;
 use Celema\Quma\Connection;
 use Celema\Quma\Database;
+use Celema\Quma\Delimiters;
 use Celema\Router\Router;
 use Celema\Verba\Translator;
 use Celema\Verba\Verba;
 use Cosray\App;
+use Cosray\Config;
 use Cosray\Console\Commands;
 use Cosray\Locales;
 use Cosray\SystemInfo;
@@ -140,7 +142,7 @@ final class SystemInfoTest extends TestCase
 	public function testAnUnreachableDatabaseIsAProblem(): void
 	{
 		$config = $this->config(['db.dsn' => 'pgsql:host=not-a-database.invalid;dbname=none;connect_timeout=1']);
-		$connection = new Connection((string) $config->db->dsn, self::root() . '/db/sql');
+		$connection = self::connection($config);
 		$info = new SystemInfo($config, new Database($connection), $connection, self::web([]));
 		$server = self::entry($info->report(), 'db.server');
 
@@ -156,7 +158,7 @@ final class SystemInfoTest extends TestCase
 		file_put_contents($dir . '/000001-first.sql', 'SELECT 1;');
 		file_put_contents($dir . '/000002-second.sql', 'SELECT 1;');
 		$config = $this->config(['db.dsn' => 'sqlite::memory:']);
-		$connection = new Connection('sqlite::memory:', self::root() . '/db/sql')->migrations(['default' => [$dir]]);
+		$connection = self::connection($config)->migrations(['default' => [$dir]]);
 		$db = new Database($connection);
 		$info = new SystemInfo($config, $db, $connection, self::web([]));
 
@@ -184,6 +186,28 @@ final class SystemInfoTest extends TestCase
 		$this->assertSame('all applied', new Text()->value($applied));
 	}
 
+	public function testFailedJobsAreAWarning(): void
+	{
+		$config = $this->config(['db.dsn' => 'sqlite::memory:']);
+		$connection = self::connection($config);
+		$db = new Database($connection);
+		$info = new SystemInfo($config, $db, $connection, self::web([]));
+		$db->execute('CREATE TABLE cms_jobs (state TEXT)')->run();
+		$db->execute("INSERT INTO cms_jobs (state) VALUES ('failed'), ('failed'), ('pending')")->run();
+		$failed = self::entry($info->report(), 'queue.failed');
+		$db->execute('DROP TABLE cms_jobs')->run();
+		$unreadable = self::entry($info->report(), 'queue.failed');
+
+		$this->assertSame('warn', $failed['status']);
+		$this->assertSame(2, $failed['value']);
+		$this->assertSame(
+			'2 jobs failed for good. php run queue:failed lists them, php run queue:retry queues them again.',
+			new Text()->hint($failed),
+		);
+		$this->assertSame('warn', $unreadable['status']);
+		$this->assertSame('unknown', new Text()->value($unreadable));
+	}
+
 	public function testDirectoriesPhpCannotWriteToAreAProblem(): void
 	{
 		$public = sys_get_temp_dir() . '/cosray-system-info-' . bin2hex(random_bytes(4));
@@ -208,7 +232,7 @@ final class SystemInfoTest extends TestCase
 
 		$this->assertNotSame('fail', $report['status']);
 		$this->assertSame(
-			['runtime', 'extensions', 'limits', 'database', 'paths'],
+			['runtime', 'extensions', 'limits', 'database', 'queue', 'paths'],
 			array_column($report['groups'], 'key'),
 		);
 	}
@@ -274,11 +298,18 @@ final class SystemInfoTest extends TestCase
 			...$settings,
 		]);
 
-		$connection = new Connection((string) $config->db->dsn, self::root() . '/db/sql');
+		$connection = self::connection($config);
 		$db = new Database($connection);
 		$db->execute('CREATE TABLE migrations (migration TEXT, applied TEXT)')->run();
+		$db->execute('CREATE TABLE cms_jobs (state TEXT)')->run();
 
 		return new SystemInfo($config, $db, $connection, $php);
+	}
+
+	private static function connection(Config $config): Connection
+	{
+		return new Connection((string) $config->db->dsn, self::root() . '/db/sql')
+			->placeholders(Delimiters::comments(), $config->db->placeholders);
 	}
 
 	/**
