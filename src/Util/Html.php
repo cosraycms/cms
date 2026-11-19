@@ -21,7 +21,13 @@ class Html
 		$allowedtags = '',
 		$ellipsis = '…',
 	) {
-		$result = strip_tags($html, $allowedtags);
+		// Rendered rich text has no whitespace between blocks; without it, their words run together.
+		$spaced = (string) preg_replace(
+			'~</(?:address|blockquote|dd|div|dt|figcaption|h[1-6]|li|p|pre|td|th)>|<br\s*/?>~i',
+			'$0 ',
+			$html,
+		);
+		$result = trim((string) preg_replace('/\s+/', ' ', strip_tags($spaced, $allowedtags)));
 
 		if (str_word_count($result, 0) > $limit) {
 			$words = str_word_count($result, 2);

@@ -156,6 +156,33 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertStringContainsString('<strong>World</strong>', (string) $value);
 	}
 
+	public function testRichTextExcerptSeparatesParagraphsAndLines(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$paragraph = static fn(array $content): array => ['type' => 'paragraph', 'content' => $content];
+		$field = new TestRichText('body', $owner, new ValueContext('body', [
+			'format' => 'cosray-richtext',
+			'version' => 1,
+			'value' => [
+				'en' => [
+					'type' => 'doc',
+					'content' => [
+						$paragraph([['type' => 'text', 'text' => 'Fish and burgers.']]),
+						$paragraph([
+							['type' => 'text', 'text' => 'Also:'],
+							['type' => 'hardBreak'],
+							['type' => 'text', 'text' => 'cake'],
+						]),
+					],
+				],
+			],
+		]));
+		$field->translate();
+
+		$this->assertSame('Fish and burgers. Also: cake', $field->value()->excerpt()->html);
+	}
+
 	public function testCodeValueFallsBackToDefaultLocaleAndKeepsSyntax(): void
 	{
 		$context = $this->createContext('de');
