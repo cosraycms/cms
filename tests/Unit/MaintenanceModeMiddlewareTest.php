@@ -53,7 +53,8 @@ final class MaintenanceModeMiddlewareTest extends TestCase
 			$refused = $this->refusal($method, '/contact');
 			$this->assertSame(503, $refused->statusCode());
 			$this->assertSame(90, $refused->retry());
-			$this->assertSame(['message' => 'Moving servers', 'retry' => 90], $refused->payload());
+			$this->assertSame('Moving servers', $refused->payload()['message'] ?? null);
+			$this->assertFalse($refused->payload()['full'] ?? null);
 		}
 	}
 

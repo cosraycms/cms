@@ -10,6 +10,7 @@ use Celema\Core\Factory\Factory;
 use Cosray\Config;
 use Cosray\Exception\DatabaseUnavailable;
 use Cosray\Exception\RuntimeException;
+use Cosray\Exception\UnderMaintenance;
 use Psr\Log\LoggerInterface as Logger;
 use Psr\Log\LogLevel;
 
@@ -70,6 +71,20 @@ final class Handler
 			);
 			$httpError = $rendererFactory->withTemplate('http-error');
 			$serverError = $rendererFactory->withTemplate('http-server-error');
+			$handler->renderer(
+				new MaintenanceRenderer(
+					dirs: $this->errorViews(),
+					builtin: $this->builtinViewPath(),
+					logger: $this->logger,
+					context: [
+						'debug' => $debug,
+						'env' => $this->config->env(),
+						'title' => $this->config->app->title,
+					],
+					trusted: $this->trustedClasses(),
+				),
+				UnderMaintenance::class,
+			);
 		}
 
 		$handler->renderer($httpError, DatabaseUnavailable::class)->log(LogLevel::ALERT);
@@ -139,6 +154,7 @@ final class Handler
 		return rtrim($this->config->path->root, '/') . '/' . ltrim($path, '/');
 	}
 
+	/** @return non-empty-string */
 	/** @return non-empty-string */
 	private function builtinViewPath(): string
 	{

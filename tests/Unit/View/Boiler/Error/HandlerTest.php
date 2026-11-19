@@ -171,19 +171,76 @@ final class HandlerTest extends TestCase
 		);
 	}
 
-	public function testMaintenanceAnswersServiceUnavailableWithoutLoggingAnError(): void
+	public function testMaintenanceShowsCosraysPageWithoutLoggingAnError(): void
 	{
 		$logger = new RecordingLogger();
-		$request = $this->psrRequest();
+		$request = $this->psrRequest()->withHeader('Accept-Language', 'en-GB,en;q=0.9');
 		$response = $this
-			->handler(logger: $logger)
+			->handler($this->errorConfig(['app.title' => 'Fish & Chips']), $logger)
 			->create()
-			->response(new UnderMaintenance($request, ['message' => null, 'retry' => 90]), $request);
+			->response($this->underMaintenance($request, '<b>Back at ten</b>', retry: 90), $request);
+		$body = (string) $response->getBody();
 
 		$this->assertSame(503, $response->getStatusCode());
 		$this->assertSame('90', $response->getHeaderLine('Retry-After'));
-		$this->assertStringContainsString('Service Unavailable', (string) $response->getBody());
+		$this->assertStringContainsString('<html lang="en">', $body);
+		$this->assertStringContainsString("We'll be right back", $body);
+		$this->assertStringContainsString('Changes cannot be saved right now', $body);
+		$this->assertStringContainsString('&lt;b&gt;Back at ten&lt;/b&gt;', $body);
+		$this->assertStringContainsString('Fish &amp; Chips', $body);
+		$this->assertStringContainsString('<meta http-equiv="refresh" content="90">', $body);
 		$this->assertSame([], $logger->records);
+	}
+
+	public function testTheMaintenancePageSpeaksTheClientsPreferredLanguage(): void
+	{
+		$request = $this->psrRequest()->withHeader('Accept-Language', 'fr, en;q=0.5, de-AT;q=0.8');
+		$body = (string) $this
+			->handler()
+			->create()
+			->response($this->underMaintenance($request, full: true), $request)
+			->getBody();
+
+		$this->assertStringContainsString('<html lang="de">', $body);
+		$this->assertStringContainsString('ist kurz nicht erreichbar', $body);
+	}
+
+	public function testASiteMaintenanceTemplateReplacesCosrays(): void
+	{
+		$request = $this->psrRequest()->withHeader('Accept-Language', 'de');
+		$config = $this->errorConfig(['path.views' => '/tests/Fixtures/Boiler/maintenance/site']);
+		$body = (string) $this
+			->handler($config)
+			->create()
+			->response($this->underMaintenance($request, 'Moving', retry: 30), $request)
+			->getBody();
+
+		$this->assertSame("<p>Site maintenance: Moving (30, de, writes)</p>\n", $body);
+	}
+
+	public function testAFailingSiteMaintenanceTemplateFallsBackToCosrays(): void
+	{
+		$logger = new RecordingLogger();
+		$request = $this->psrRequest();
+		$config = $this->errorConfig(['path.views' => '/tests/Fixtures/Boiler/maintenance/failing']);
+		$response = $this
+			->handler($config, $logger)
+			->create()
+			->response($this->underMaintenance($request), $request);
+
+		$this->assertSame(503, $response->getStatusCode());
+		$this->assertStringContainsString("We'll be right back", (string) $response->getBody());
+		$this->assertSame('warning', $logger->records[0][0] ?? null);
+		$this->assertStringContainsString('The menu table is being migrated', $logger->records[0][1] ?? '');
+	}
+
+	public function testJsonClientsGetTheMaintenanceStateInsteadOfThePage(): void
+	{
+		$request = $this->psrRequest()->withHeader('Accept', 'application/json');
+		$response = $this->handler()->create()->response($this->underMaintenance($request, 'Moving'), $request);
+
+		$this->assertSame(503, $response->getStatusCode());
+		$this->assertSame('Moving', json_decode((string) $response->getBody(), true)['message'] ?? null);
 	}
 
 	public function testUnreachableDatabaseReachesCustomRendererAsServiceUnavailable(): void
@@ -195,6 +252,20 @@ final class HandlerTest extends TestCase
 		$this->assertInstanceOf(DatabaseUnavailable::class, $renderer->rendered);
 		$this->assertInstanceOf(ConnectionFailed::class, $renderer->rendered->getPrevious());
 		$this->assertSame('30', $response->getHeaderLine('Retry-After'));
+	}
+
+	private function underMaintenance(
+		Request $request,
+		?string $message = null,
+		int $retry = 60,
+		bool $full = false,
+	): UnderMaintenance {
+		return new UnderMaintenance($request, [
+			'message' => $message,
+			'retry' => $retry,
+			'since' => '2026-11-19T20:00:00Z',
+			'full' => $full,
+		]);
 	}
 
 	private function connectionFailed(): ConnectionFailed

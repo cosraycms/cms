@@ -90,7 +90,12 @@ final class MaintenanceMode implements Middleware
 			);
 		}
 
-		throw new UnderMaintenance($request, ['message' => $state->message, 'retry' => $state->retry]);
+		throw new UnderMaintenance($request, [
+			'message' => $state->message,
+			'retry' => $state->retry,
+			'since' => $state->since,
+			'full' => $state->full,
+		]);
 	}
 
 	private function admit(#[SensitiveParameter] string $secret): Response

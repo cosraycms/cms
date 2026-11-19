@@ -41,6 +41,7 @@ final class MaintenanceModeTest extends End2EndTestCase
 		$page = $this->makeRequest('POST', '/');
 		$this->assertSame(503, $page->getStatusCode());
 		$this->assertSame('120', $page->getHeaderLine('Retry-After'));
+		$this->assertStringContainsString("We'll be right back", (string) $page->getBody());
 
 		$api = $this->makeRequest('POST', '/api/nodes', ['authToken' => 'any']);
 		$this->assertSame(503, $api->getStatusCode());
