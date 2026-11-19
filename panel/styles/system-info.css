@@ -5,6 +5,10 @@
 		align-content: start;
 	}
 
+	& .cms-system-info-copy {
+		margin-inline-start: auto;
+	}
+
 	& .cms-system-info-problems {
 		display: grid;
 		gap: var(--cms-space-2);

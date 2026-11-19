@@ -11,6 +11,7 @@ use Cosray\Panel\AssetFacts;
  * labels, values, and what to do about a problem.
  *
  * @phpstan-import-type Entry from \Cosray\SystemInfo
+ * @phpstan-import-type Report from \Cosray\SystemInfo
  */
 final class Text
 {
@@ -115,6 +116,42 @@ final class Text
 				? __('system-info:hint-extension', ['name' => substr($entry['key'], 4)])
 				: null,
 		};
+	}
+
+	/**
+	 * The report as plain text, to paste into a support request.
+	 *
+	 * @param Report $report
+	 */
+	public function plain(array $report): string
+	{
+		$lines = [__('system-info:title')];
+		$hints = [];
+
+		foreach ($report['groups'] as $group) {
+			$lines[] = '';
+			$lines[] = $this->group($group['key']);
+
+			foreach ($group['entries'] as $entry) {
+				$status = match ($entry['status']) {
+					'fail' => ' [' . __('system-info:status-fail') . ']',
+					'warn' => ' [' . __('system-info:status-warn') . ']',
+					default => '',
+				};
+				$lines[] = '  ' . $this->label($entry['key']) . ': ' . $this->value($entry) . $status;
+				$hint = $this->hint($entry);
+
+				if ($hint !== null) {
+					$hints[] = '- ' . $this->label($entry['key']) . ': ' . $hint;
+				}
+			}
+		}
+
+		if ($hints !== []) {
+			array_push($lines, '', ...$hints);
+		}
+
+		return implode("\n", $lines) . "\n";
 	}
 
 	private function bytes(int $bytes): string

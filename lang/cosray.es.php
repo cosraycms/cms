@@ -539,6 +539,7 @@ return [
 		'status:view' => 'Ver en el sitio web',
 		'status:visibility' => 'Visibilidad',
 		'system-info:all-good' => 'Todo lo que Cosray comprueba está en orden.',
+		'system-info:copy' => 'Copiar informe',
 		'system-info:db-driver' => 'Controlador',
 		'system-info:db-prefix' => 'Espacio de nombres',
 		'system-info:db-server' => 'Versión del servidor',

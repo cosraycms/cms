@@ -16,6 +16,7 @@ return [
 		'common:close' => 'Close',
 		'common:copied' => 'Copied',
 		'common:copy' => 'Copy',
+		'common:copy-failed' => 'Copying failed',
 		'common:dialog' => 'Dialog',
 		'common:edit' => 'Edit',
 		'common:error' => 'Error',

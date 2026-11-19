@@ -58,7 +58,9 @@ final class SystemInfo extends Panel
 		$groups = [];
 		$problems = ['fail' => [], 'warn' => []];
 
-		foreach ($this->report->report()['groups'] as $group) {
+		$report = $this->report->report();
+
+		foreach ($report['groups'] as $group) {
 			$entries = [];
 
 			foreach ($group['entries'] as $entry) {
@@ -85,6 +87,7 @@ final class SystemInfo extends Panel
 			'groups' => $groups,
 			'failures' => $problems['fail'],
 			'warnings' => $problems['warn'],
+			'text' => $text->plain($report),
 		]);
 	}
 }

@@ -31,6 +31,12 @@ $tones = ['fail' => 'danger', 'warn' => 'warning'];
 						value="<?= escape((string) u($search)) ?>"
 						placeholder="<?= escape(__('system-info:search')) ?>" />
 				</form>
+			<?php else: ?>
+				<button type="button" class="cms-button cms-button-secondary cms-button-small cms-system-info-copy" data-copy="system-info-text">
+					<?= Icon::render('copy') ?>
+					<?= escape(__('system-info:copy')) ?>
+				</button>
+				<template id="system-info-text"><?= escape((string) u($text)) ?></template>
 			<?php endif ?>
 		</div>
 

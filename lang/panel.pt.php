@@ -19,6 +19,7 @@ return [
 		'common:close' => 'Fechar',
 		'common:copied' => 'Copiado',
 		'common:copy' => 'Copiar',
+		'common:copy-failed' => 'Não foi possível copiar',
 		'common:dialog' => 'Caixa de diálogo',
 		'common:edit' => 'Editar',
 		'common:error' => 'Erro',

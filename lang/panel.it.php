@@ -25,6 +25,7 @@ return [
 		'common:close' => 'Chiudi',
 		'common:copied' => 'Copiato',
 		'common:copy' => 'Copia',
+		'common:copy-failed' => 'Copia non riuscita',
 		'common:dialog' => 'Finestra di dialogo',
 		'common:edit' => 'Modifica',
 		'common:error' => 'Errore',

@@ -56,6 +56,19 @@ final class SystemInfoTest extends TestCase
 		);
 	}
 
+	public function testThePlainTextReportMarksProblemsAndEndsWithTheirFixes(): void
+	{
+		$text = new Text()->plain($this->info(self::web(['upload_max_filesize' => '2M']))->report());
+
+		$this->assertStringStartsWith("System info\n\nRuntime\n", $text);
+		$this->assertStringContainsString("\n  Largest upload: 2.0 MB [Problem]\n", $text);
+		$this->assertStringEndsWith(
+			"\n- Largest video upload: Videos over 2.0 MB fail: Cosray accepts videos up to 256.0 MB. "
+				. "Raise upload_max_filesize and post_max_size.\n",
+			$text,
+		);
+	}
+
 	public function testTheSmallerOfTheTwoUploadDirectivesLimitsUploads(): void
 	{
 		$post = self::entry(

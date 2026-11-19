@@ -19,6 +19,7 @@ return [
 		'common:close' => 'Sluiten',
 		'common:copied' => 'Gekopieerd',
 		'common:copy' => 'Kopiëren',
+		'common:copy-failed' => 'Kopiëren mislukt',
 		'common:dialog' => 'Dialoogvenster',
 		'common:edit' => 'Bewerken',
 		'common:error' => 'Fout',

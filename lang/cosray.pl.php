@@ -555,6 +555,7 @@ return [
 		'status:view' => 'Zobacz w witrynie',
 		'status:visibility' => 'Widoczność',
 		'system-info:all-good' => 'Wszystko, co sprawdza Cosray, jest w porządku.',
+		'system-info:copy' => 'Kopiuj raport',
 		'system-info:db-driver' => 'Sterownik',
 		'system-info:db-prefix' => 'Przestrzeń nazw',
 		'system-info:db-server' => 'Wersja serwera',

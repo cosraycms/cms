@@ -32,6 +32,7 @@ return [
 		'common:close' => 'Zamknij',
 		'common:copied' => 'Skopiowano',
 		'common:copy' => 'Kopiuj',
+		'common:copy-failed' => 'Nie udało się skopiować',
 		'common:dialog' => 'Okno dialogowe',
 		'common:edit' => 'Edytuj',
 		'common:error' => 'Błąd',

@@ -539,6 +539,7 @@ return [
 		'status:view' => 'View on the website',
 		'status:visibility' => 'Visibility',
 		'system-info:all-good' => 'Everything Cosray checks is in order.',
+		'system-info:copy' => 'Copy report',
 		'system-info:db-driver' => 'Driver',
 		'system-info:db-prefix' => 'Namespace',
 		'system-info:db-server' => 'Server version',

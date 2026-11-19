@@ -420,7 +420,7 @@ Dates, times, and numbers in the panel follow the panel language and a region. T
 
 ### System info
 
-The system info page, `{panel.path}/system-info`, shows what the web server's PHP offers Cosray: the versions, the required and optional extensions, the upload and memory limits against `upload.maxsize` and `upload.maxsize.video`, the database server and the writable directories. Problems and warnings come first, with what to change. Its PHP tab lists every ini directive and loaded extension, and replaces `phpinfo()`, which would also show environment variables and the request's cookies; values that look like passwords are masked. A site lets admins see it with `$app->allow('role:admin', 'view-system-info')`. [SystemInfo](../src/SystemInfo.php) builds the report as plain data, for the page and `system:info`.
+The system info page, `{panel.path}/system-info`, shows what the web server's PHP offers Cosray: the versions, the required and optional extensions, the upload and memory limits against `upload.maxsize` and `upload.maxsize.video`, the database server and the writable directories. Problems and warnings come first, with what to change, and a button copies the whole report as plain text, for a support request. Its PHP tab lists every ini directive and loaded extension, and replaces `phpinfo()`, which would also show environment variables and the request's cookies; values that look like passwords are masked. A site lets admins see it with `$app->allow('role:admin', 'view-system-info')`. [SystemInfo](../src/SystemInfo.php) builds the report as plain data, for the page and `system:info`.
 
 ### User commands
 
