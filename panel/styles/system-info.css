@@ -5,6 +5,21 @@
 		align-content: start;
 	}
 
+	/* Columns where the pane is wide enough; each card stays whole. */
+	& .cms-system-info-groups {
+		columns: 26rem;
+		column-gap: var(--cms-space-4);
+
+		& > .cms-kit-card {
+			break-inside: avoid;
+			margin-bottom: var(--cms-space-4);
+		}
+
+		& > .cms-kit-card:last-child {
+			margin-bottom: 0;
+		}
+	}
+
 	& .cms-system-info-copy {
 		margin-inline-start: auto;
 	}
@@ -32,7 +47,7 @@
 
 	& .cms-system-info-entries {
 		display: grid;
-		grid-template-columns: minmax(10rem, max-content) 1fr;
+		grid-template-columns: minmax(8rem, max-content) minmax(0, 1fr);
 		gap: var(--cms-space-1-5) var(--cms-space-6);
 		margin: 0;
 
@@ -47,8 +62,7 @@
 
 		& dd {
 			display: flex;
-			flex-wrap: wrap;
-			align-items: center;
+			align-items: flex-start;
 			gap: var(--cms-space-2);
 			min-width: 0;
 			margin: 0;
@@ -57,7 +71,13 @@
 	}
 
 	& .cms-system-info-value {
+		min-width: 0;
 		overflow-wrap: anywhere;
+	}
+
+	& .cms-system-info-entries .cms-icon {
+		flex: none;
+		margin-top: 0.15em;
 	}
 
 	& .cms-system-info-ok {

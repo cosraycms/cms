@@ -141,32 +141,34 @@ $tones = ['fail' => 'danger', 'warn' => 'warning'];
 						</section>
 					<?php endif ?>
 
-					<?php foreach ($groups as $index => $group): ?>
-						<section class="cms-kit-card" aria-labelledby="system-info-group-<?= (int) $index ?>">
-							<div class="cms-kit-card-head">
-								<h2 id="system-info-group-<?= (int) $index ?>"><?= escape((string) $group['title']) ?></h2>
-							</div>
-							<dl class="cms-system-info-entries">
-								<?php foreach ((array) $group['entries'] as $entry): ?>
-									<div>
-										<dt><?= escape((string) $entry['label']) ?></dt>
-										<dd>
-											<span class="cms-system-info-value"><?= escape((string) $entry['value']) ?></span>
-											<?php if ($entry['status'] === 'ok'): ?>
-												<?= Icon::render('check-lg', 'cms-system-info-ok') ?>
-												<span class="cms-sr-only"><?= escape(__('system-info:status-ok')) ?></span>
-											<?php elseif (isset($tones[$entry['status']])): ?>
-												<?php $this->include('kit/pill', [
-													'label' => $entry['status'] === 'fail' ? __('system-info:status-fail') : __('system-info:status-warn'),
-													'tone' => $tones[$entry['status']],
-												]) ?>
-											<?php endif ?>
-										</dd>
-									</div>
-								<?php endforeach ?>
-							</dl>
-						</section>
-					<?php endforeach ?>
+					<div class="cms-system-info-groups">
+						<?php foreach ($groups as $index => $group): ?>
+							<section class="cms-kit-card" aria-labelledby="system-info-group-<?= (int) $index ?>">
+								<div class="cms-kit-card-head">
+									<h2 id="system-info-group-<?= (int) $index ?>"><?= escape((string) $group['title']) ?></h2>
+								</div>
+								<dl class="cms-system-info-entries">
+									<?php foreach ((array) $group['entries'] as $entry): ?>
+										<div>
+											<dt><?= escape((string) $entry['label']) ?></dt>
+											<dd>
+												<span class="cms-system-info-value"><?= escape((string) $entry['value']) ?></span>
+												<?php if ($entry['status'] === 'ok'): ?>
+													<?= Icon::render('check-lg', 'cms-system-info-ok') ?>
+													<span class="cms-sr-only"><?= escape(__('system-info:status-ok')) ?></span>
+												<?php elseif (isset($tones[$entry['status']])): ?>
+													<?php $this->include('kit/pill', [
+														'label' => $entry['status'] === 'fail' ? __('system-info:status-fail') : __('system-info:status-warn'),
+														'tone' => $tones[$entry['status']],
+													]) ?>
+												<?php endif ?>
+											</dd>
+										</div>
+									<?php endforeach ?>
+								</dl>
+							</section>
+						<?php endforeach ?>
+					</div>
 				</div>
 			<?php endif ?>
 		</div>
