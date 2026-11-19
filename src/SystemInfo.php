@@ -51,6 +51,9 @@ final class SystemInfo
 
 	private const int POSTGRESQL_MINIMUM = 17;
 
+	/** Runners from cron or after responses take due jobs within minutes; this long means none runs. */
+	private const int OVERDUE_MINUTES = 30;
+
 	public function __construct(
 		private readonly Config $config,
 		private readonly Database $db,
@@ -244,13 +247,19 @@ final class SystemInfo
 			return [];
 		}
 
+		$queue = new Queue($this->db);
+
 		try {
-			$failed = new Queue($this->db)->countFailed();
+			$overdue = $queue->countOverdue(self::OVERDUE_MINUTES);
+			$failed = $queue->countFailed();
 		} catch (Throwable) {
-			return [self::entry('queue.failed', null, 'warn')];
+			return [self::entry('queue.overdue', null, 'warn'), self::entry('queue.failed', null, 'warn')];
 		}
 
-		return [self::entry('queue.failed', $failed, $failed === 0 ? 'ok' : 'warn', 0)];
+		return [
+			self::entry('queue.overdue', $overdue, $overdue === 0 ? 'ok' : 'warn', self::OVERDUE_MINUTES),
+			self::entry('queue.failed', $failed, $failed === 0 ? 'ok' : 'warn', 0),
+		];
 	}
 
 	/** @return list<Entry> */

@@ -7,6 +7,7 @@ namespace Cosray;
 use Celema\Quma\Database;
 use Cosray\Contract\Job;
 use Cosray\Exception\RuntimeException;
+use DateTimeImmutable;
 use JsonException;
 
 /**
@@ -99,6 +100,18 @@ final class Queue
 	public function countFailed(): int
 	{
 		return (int) ($this->db->queue->countFailed()->one()['total'] ?? 0);
+	}
+
+	/**
+	 * The jobs that have waited longer than the given minutes past their
+	 * due time, running ones whose lease ran out included: a sign that
+	 * nothing runs the queue.
+	 */
+	public function countOverdue(int $minutes): int
+	{
+		$before = new DateTimeImmutable("-{$minutes} minutes")->format(DATE_ATOM);
+
+		return (int) ($this->db->queue->countOverdue(['before' => $before])->one()['total'] ?? 0);
 	}
 
 	/** Queues failed jobs again with fresh attempts, one or all; returns how many. */

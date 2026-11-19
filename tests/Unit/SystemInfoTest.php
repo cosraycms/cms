@@ -192,8 +192,10 @@ final class SystemInfoTest extends TestCase
 		$connection = self::connection($config);
 		$db = new Database($connection);
 		$info = new SystemInfo($config, $db, $connection, self::web([]));
-		$db->execute('CREATE TABLE cms_jobs (state TEXT)')->run();
-		$db->execute("INSERT INTO cms_jobs (state) VALUES ('failed'), ('failed'), ('pending')")->run();
+		$db->execute('CREATE TABLE cms_jobs (state TEXT, due TEXT)')->run();
+		$db->execute(
+			"INSERT INTO cms_jobs (state, due) VALUES ('failed', ''), ('failed', ''), ('pending', '9999')",
+		)->run();
 		$failed = self::entry($info->report(), 'queue.failed');
 		$db->execute('DROP TABLE cms_jobs')->run();
 		$unreadable = self::entry($info->report(), 'queue.failed');
@@ -206,6 +208,28 @@ final class SystemInfoTest extends TestCase
 		);
 		$this->assertSame('warn', $unreadable['status']);
 		$this->assertSame('unknown', new Text()->value($unreadable));
+	}
+
+	public function testJobsLongOverdueAreAWarning(): void
+	{
+		$config = $this->config(['db.dsn' => 'sqlite::memory:']);
+		$connection = self::connection($config);
+		$db = new Database($connection);
+		$info = new SystemInfo($config, $db, $connection, self::web([]));
+		$db->execute('CREATE TABLE cms_jobs (state TEXT, due TEXT)')->run();
+		$db->execute('INSERT INTO cms_jobs (state, due) VALUES (:state, :due)', [
+			'state' => 'pending',
+			'due' => new \DateTimeImmutable('-2 hours')->format(DATE_ATOM),
+		])->run();
+		$db->execute('INSERT INTO cms_jobs (state, due) VALUES (:state, :due)', [
+			'state' => 'pending',
+			'due' => new \DateTimeImmutable('-5 minutes')->format(DATE_ATOM),
+		])->run();
+		$overdue = self::entry($info->report(), 'queue.overdue');
+
+		$this->assertSame('warn', $overdue['status']);
+		$this->assertSame(1, $overdue['value']);
+		$this->assertStringStartsWith('1 job has been due for over 30 minutes.', (string) new Text()->hint($overdue));
 	}
 
 	public function testDirectoriesPhpCannotWriteToAreAProblem(): void
@@ -301,7 +325,7 @@ final class SystemInfoTest extends TestCase
 		$connection = self::connection($config);
 		$db = new Database($connection);
 		$db->execute('CREATE TABLE migrations (migration TEXT, applied TEXT)')->run();
-		$db->execute('CREATE TABLE cms_jobs (state TEXT)')->run();
+		$db->execute('CREATE TABLE cms_jobs (state TEXT, due TEXT)')->run();
 
 		return new SystemInfo($config, $db, $connection, $php);
 	}

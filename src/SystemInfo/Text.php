@@ -54,6 +54,7 @@ final class Text
 			'db.server' => __('system-info:db-server'),
 			'db.prefix' => __('system-info:db-prefix'),
 			'db.migrations' => __('system-info:db-migrations'),
+			'queue.overdue' => __('system-info:queue-overdue'),
 			'queue.failed' => __('system-info:queue-failed'),
 			'path.cache' => __('system-info:path-cache'),
 			'path.assets' => __('system-info:path-assets'),
@@ -72,7 +73,7 @@ final class Text
 				? __('system-info:unlimited')
 				: __('system-info:seconds', ['seconds' => (int) $value]),
 			$entry['key'] === 'db.server' && $value === null => __('system-info:unreachable'),
-			$entry['key'] === 'queue.failed' && $value === null => __('system-info:unknown'),
+			str_starts_with($entry['key'], 'queue.') && $value === null => __('system-info:unknown'),
 			$entry['key'] === 'db.migrations' => match ($value) {
 				null => __('system-info:unknown'),
 				0 => __('system-info:all-applied'),
@@ -122,6 +123,16 @@ final class Text
 			'db.migrations' => $entry['value'] === null
 				? __('system-info:hint-migrations-unknown')
 				: __('system-info:hint-migrations'),
+			'queue.overdue' => $entry['value'] === null
+				? __('system-info:hint-queue-unknown')
+				: __n(
+					'system-info:hint-queue-overdue',
+					'system-info:hint-queue-overdue-plural',
+					(int) $entry['value'],
+					[
+						'minutes' => (int) $expected,
+					],
+				),
 			'queue.failed' => $entry['value'] === null
 				? __('system-info:hint-queue-unknown')
 				: __n('system-info:hint-queue-failed', 'system-info:hint-queue-failed-plural', (int) $entry['value']),

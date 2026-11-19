@@ -155,6 +155,23 @@ final class QueueTest extends IntegrationTestCase
 		$this->assertSame('running', $this->job($held)['state'] ?? null);
 	}
 
+	public function testJobsLongPastTheirDueTimeCountAsOverdue(): void
+	{
+		$waiting = $this->queue->push(RecordingJob::class);
+		$abandoned = $this->queue->push(RecordingJob::class);
+		$this->queue->push(RecordingJob::class);
+		$this->queue->push(RecordingJob::class, delay: 3600);
+		$failed = $this->queue->push(RecordingJob::class);
+		$this->db()->execute(
+			"UPDATE cms.jobs SET due = now() - interval '2 hours',
+				state = CASE id WHEN :abandoned THEN 'running' WHEN :failed THEN 'failed' ELSE state END
+			WHERE id IN (:waiting, :abandoned, :failed)",
+			['waiting' => $waiting, 'abandoned' => $abandoned, 'failed' => $failed],
+		)->run();
+
+		$this->assertSame(2, $this->queue->countOverdue(30));
+	}
+
 	public function testAJobWhoseRunnerDiedDuringItsLastAttemptFails(): void
 	{
 		$id = $this->queue->push(RecordingJob::class);
