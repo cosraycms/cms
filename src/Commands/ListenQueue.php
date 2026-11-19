@@ -8,6 +8,7 @@ use Celema\Console\Command;
 use Celema\Console\Io;
 use Celema\Console\Opt;
 use Closure;
+use Cosray\Maintenance;
 use Cosray\Queue\Listener;
 use Cosray\Queue\Runner;
 
@@ -28,6 +29,7 @@ final class ListenQueue
 	public function __construct(
 		private readonly Closure $runner,
 		private readonly Listener $listener,
+		private readonly ?Maintenance $maintenance = null,
 	) {}
 
 	public function __invoke(
@@ -62,6 +64,16 @@ final class ListenQueue
 					$io->line('Ran %d job(s), stopped by %s.', $ran, $limit);
 
 					return 0;
+				}
+
+				// Jobs write content, which maintenance mode holds back.
+				if ($this->maintenance?->state() !== null) {
+					unset($runner);
+					$this->listener->wait(
+						$maxTime > 0 ? min(self::MAX_WAIT, $maxTime - (self::now() - $start)) : self::MAX_WAIT,
+					);
+
+					continue;
 				}
 
 				if (array_sum($runner->run($name, jobs: 1)) > 0) {

@@ -68,7 +68,7 @@ try {
 
 ## Running jobs
 
-Runners claim one job at a time, so any number can run at once: after responses, from cron and as a daemon alike. Pick per host:
+Runners claim one job at a time, so any number can run at once: after responses, from cron and as a daemon alike. None of them starts a job while [maintenance mode](maintenance.md) is on. Pick per host:
 
 - Without cron or a process manager, as on some shared hosting, leave it to the requests.
 - With cron, run `queue:work` every minute.

@@ -31,6 +31,9 @@ use Cosray\Commands\ListFailedJobs;
 use Cosray\Commands\ListTokens;
 use Cosray\Commands\ListUsers;
 use Cosray\Commands\LoginLink;
+use Cosray\Commands\MaintenanceOff;
+use Cosray\Commands\MaintenanceOn;
+use Cosray\Commands\MaintenanceStatus;
 use Cosray\Commands\MediaReport;
 use Cosray\Commands\PanelPublish;
 use Cosray\Commands\PruneJobs;
@@ -48,6 +51,7 @@ use Cosray\Commands\WarmMedia;
 use Cosray\Commands\WorkQueue;
 use Cosray\ContainerLogger;
 use Cosray\I18n\SchemaScanner;
+use Cosray\Maintenance;
 use Cosray\MigrationFactory;
 use Cosray\Node\Publications;
 use Cosray\Panel\Client;
@@ -114,16 +118,20 @@ final class Commands
 			LoginLink::class,
 			ActivateUser::class,
 			DeactivateUser::class,
-			WorkQueue::class => fn(): WorkQueue => new WorkQueue($this->jobRunner()),
+			WorkQueue::class => fn(): WorkQueue => new WorkQueue($this->jobRunner(), Maintenance::of($app->config)),
 			ListenQueue::class => fn(): ListenQueue => new ListenQueue(
 				$this->jobRunner(...),
 				Listener::fromConnection($this->conn()),
+				Maintenance::of($app->config),
 			),
 			ListFailedJobs::class,
 			RetryJobs::class,
 			PruneJobs::class,
 			SendTestMail::class,
 			ShowSystemInfo::class,
+			MaintenanceOn::class,
+			MaintenanceOff::class,
+			MaintenanceStatus::class,
 		]);
 
 		foreach ($app->bootstrap()->commands() as $commands) {

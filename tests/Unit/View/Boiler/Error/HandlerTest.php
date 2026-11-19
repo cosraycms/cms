@@ -10,6 +10,7 @@ use Celema\Core\Exception\HttpNotFound;
 use Celema\Quma\Exception\ConnectionFailed;
 use Cosray\Config;
 use Cosray\Exception\DatabaseUnavailable;
+use Cosray\Exception\UnderMaintenance;
 use Cosray\Tests\Fixtures\RecordingLogger;
 use Cosray\Tests\TestCase;
 use Cosray\View\Boiler\Error\Handler;
@@ -168,6 +169,21 @@ final class HandlerTest extends TestCase
 			[['alert', "Server error 503 for {$request->getMethod()} {$request->getUri()->getPath()}"]],
 			$logger->records,
 		);
+	}
+
+	public function testMaintenanceAnswersServiceUnavailableWithoutLoggingAnError(): void
+	{
+		$logger = new RecordingLogger();
+		$request = $this->psrRequest();
+		$response = $this
+			->handler(logger: $logger)
+			->create()
+			->response(new UnderMaintenance($request, ['message' => null, 'retry' => 90]), $request);
+
+		$this->assertSame(503, $response->getStatusCode());
+		$this->assertSame('90', $response->getHeaderLine('Retry-After'));
+		$this->assertStringContainsString('Service Unavailable', (string) $response->getBody());
+		$this->assertSame([], $logger->records);
 	}
 
 	public function testUnreachableDatabaseReachesCustomRendererAsServiceUnavailable(): void

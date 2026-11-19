@@ -35,6 +35,7 @@ class Config
 	private ?Config\Uid $uidConfig = null;
 	private ?Config\Queue $queueConfig = null;
 	private ?Config\Mail $mailConfig = null;
+	private ?Config\Maintenance $maintenanceConfig = null;
 
 	public Config\App $app {
 		get => $this->appConfig ??= new Config\App($this);
@@ -98,6 +99,10 @@ class Config
 
 	public Config\Mail $mail {
 		get => $this->mailConfig ??= new Config\Mail($this);
+	}
+
+	public Config\Maintenance $maintenance {
+		get => $this->maintenanceConfig ??= new Config\Maintenance($this);
 	}
 
 	/** @param BuiltinConfigInput&array<string, mixed> $settings */

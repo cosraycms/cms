@@ -30,6 +30,7 @@ use Cosray\Icons\Iconify;
 use Cosray\Icons\Local;
 use Cosray\Icons\Plugins as PluginIcons;
 use Cosray\Icons\Provider as IconProvider;
+use Cosray\Middleware\MaintenanceMode;
 use Cosray\Migration\Schemas;
 use Cosray\Node\Schema\Registry as NodeSchemas;
 use Cosray\Node\Types;
@@ -212,6 +213,10 @@ class Bootstrap implements CorePlugin
 		}
 
 		$app->teardown($this->runJobs(...));
+
+		$maintenance = Maintenance::of($this->config);
+		$this->container->add(Maintenance::class, $maintenance);
+		$app->middleware(new MaintenanceMode($this->config, $maintenance, $this->factory));
 
 		$this->routes = new Routes(
 			$this->config,
@@ -650,7 +655,8 @@ class Bootstrap implements CorePlugin
 	 */
 	protected function runJobs(): void
 	{
-		if (!$this->config->queue->afterResponse) {
+		// Jobs write content, which maintenance mode holds back.
+		if (!$this->config->queue->afterResponse || Maintenance::of($this->config)->state() !== null) {
 			return;
 		}
 

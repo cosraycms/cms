@@ -7,6 +7,7 @@ namespace Cosray\Commands;
 use Celema\Console\Command;
 use Celema\Console\Io;
 use Celema\Console\Opt;
+use Cosray\Maintenance;
 use Cosray\Queue\Runner;
 
 #[Command('queue:work', 'Runs due jobs until none is left', group: 'Queue')]
@@ -14,6 +15,7 @@ final class WorkQueue
 {
 	public function __construct(
 		private readonly Runner $runner,
+		private readonly ?Maintenance $maintenance = null,
 	) {}
 
 	public function __invoke(
@@ -25,6 +27,11 @@ final class WorkQueue
 		#[Opt('Start no job after this many seconds; 0 sets no limit')]
 		int $maxTime = 0,
 	): int {
+		// Jobs write content, which maintenance mode holds back; cron runs again later.
+		if ($this->maintenance?->state() !== null) {
+			return 0;
+		}
+
 		$counts = $this->runner->run(
 			queue: $queue === '' ? null : $queue,
 			jobs: $maxJobs > 0 ? $maxJobs : null,

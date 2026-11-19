@@ -89,6 +89,7 @@ These links describe a source checkout. Distribution archives omit development d
 | Headless delivery and integrations over JSON | [API](docs/api.md) |
 | Background jobs, retries, cron | [Job queue](docs/queue.md) |
 | Mail transports, templates, delivery | [Mail](docs/mail.md) |
+| Refusing writes during updates | [Maintenance mode](docs/maintenance.md) |
 | Site tests with PHPUnit | [Testing](docs/testing.md) |
 | CSS conventions and the live styleguide | [Panel styles](docs/panel-styles.md) |
 | Components and controller methods for plugin pages | [Panel kit](docs/panel-kit.md) |

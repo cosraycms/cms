@@ -11,6 +11,7 @@ use Cosray\Commands\PruneJobs;
 use Cosray\Commands\RetryJobs;
 use Cosray\Commands\WorkQueue;
 use Cosray\Exception\RuntimeException;
+use Cosray\Maintenance;
 use Cosray\Queue;
 use Cosray\Queue\Runner;
 use Cosray\Tests\Fixtures\Queue\FailingJob;
@@ -48,6 +49,25 @@ final class QueueTest extends IntegrationTestCase
 		$this->assertSame(['done' => 1, 'retried' => 0, 'failed' => 0], $this->runner()->run());
 		$this->assertSame([['to' => 'reader@example.com', 'amount' => 1.0, 'ü' => 'ß']], RecordingJob::$handled);
 		$this->assertNull($this->job($id));
+	}
+
+	public function testWorkWaitsWhileMaintenanceModeIsOn(): void
+	{
+		$maintenance = new Maintenance(
+			sys_get_temp_dir() . '/cosray-maintenance-' . bin2hex(random_bytes(6)) . '.json',
+		);
+		$this->queue->push(RecordingJob::class, ['to' => 'reader@example.com']);
+		$maintenance->on();
+
+		try {
+			$this->assertSame(0, (new WorkQueue($this->runner(), $maintenance))(new Io(new Buffer())));
+			$this->assertSame([], RecordingJob::$handled);
+		} finally {
+			$maintenance->off();
+		}
+
+		(new WorkQueue($this->runner(), $maintenance))(new Io(new Buffer()));
+		$this->assertSame([['to' => 'reader@example.com']], RecordingJob::$handled);
 	}
 
 	public function testAJobPushedInWorkThatIsUndoneIsNeverQueued(): void
