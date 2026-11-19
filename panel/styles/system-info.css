@@ -5,6 +5,11 @@
 		align-content: start;
 	}
 
+	/* Only the summary of problems carries a tone and its accent edge. */
+	& .cms-kit-card:not([data-tone]) {
+		border-left: 1px solid var(--cms-color-border);
+	}
+
 	/* Columns where the pane is wide enough; each card stays whole. */
 	& .cms-system-info-groups {
 		columns: 26rem;
