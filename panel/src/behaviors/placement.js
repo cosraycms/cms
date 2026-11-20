@@ -1338,6 +1338,18 @@ function onLostCapture(event) {
 }
 
 /**
+ * The browser took the gesture over, for a scroll or the system: it puts
+ * back what the drag moved.
+ *
+ * @param {PointerEvent} event
+ */
+function onPointerCancel(event) {
+	if (drag && drag.pointer === event.pointerId) {
+		finish(false);
+	}
+}
+
+/**
  * @param {KeyboardEvent} event
  */
 function onKeyDown(event) {
@@ -1364,7 +1376,7 @@ export function install() {
 	document.addEventListener('pointerdown', onPointerDown);
 	document.addEventListener('pointermove', onPointerMove);
 	document.addEventListener('pointerup', onPointerUp);
-	document.addEventListener('pointercancel', onPointerUp);
+	document.addEventListener('pointercancel', onPointerCancel);
 	document.addEventListener('lostpointercapture', onLostCapture);
 	document.addEventListener('keydown', onKeyDown, true);
 
@@ -1380,7 +1392,7 @@ export function install() {
 		document.removeEventListener('pointerdown', onPointerDown);
 		document.removeEventListener('pointermove', onPointerMove);
 		document.removeEventListener('pointerup', onPointerUp);
-		document.removeEventListener('pointercancel', onPointerUp);
+		document.removeEventListener('pointercancel', onPointerCancel);
 		document.removeEventListener('lostpointercapture', onLostCapture);
 		document.removeEventListener('keydown', onKeyDown, true);
 

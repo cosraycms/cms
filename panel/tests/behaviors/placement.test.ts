@@ -466,5 +466,15 @@ describe('placement on the canvas', () => {
 
 			expect(rows().map(spot)).toEqual(['1/1 5×1', '6/1 4×1', '10/1 3×1', '1/2 6×1', '7/2 6×1']);
 		});
+
+		it('puts everything back when the browser takes the gesture over', () => {
+			const { rows, grip } = scene();
+
+			pointer(grip, 'pointerdown', 950, 50);
+			pointer(document, 'pointermove', 950, 150);
+			pointer(document, 'pointercancel', 950, 150);
+
+			expect(rows().map(spot)).toEqual(['1/1 5×1', '6/1 4×1', '10/1 3×1', '1/2 6×1', '7/2 6×1']);
+		});
 	});
 });

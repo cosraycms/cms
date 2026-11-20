@@ -897,12 +897,12 @@ function rowSteps(current, event) {
  * the latter would otherwise leave a drag standing that refuses every
  * later one.
  */
-function end() {
+function end(keep = true) {
 	if (!drag) {
 		return;
 	}
 
-	const { handle, row, container, edge, moved, boxes } = drag;
+	const { handle, row, container, edge, moved, boxes, grid, widths, start } = drag;
 
 	drag = null;
 	handle.classList.remove('is-active');
@@ -913,6 +913,16 @@ function end() {
 	if (canvas) {
 		clearGuides(canvas);
 		unmark(canvas);
+	}
+
+	if (!keep) {
+		if (moved && boxes) {
+			applyPlaced(row, boxes, grid, widths);
+		} else if (moved) {
+			resizePart(row, 'colspan', start.colspan);
+		}
+
+		return;
 	}
 
 	if (moved && boxes) {
@@ -1014,6 +1024,18 @@ function onPointerUp(event) {
 function onLostCapture(event) {
 	if (drag && event.target === drag.handle) {
 		end();
+	}
+}
+
+/**
+ * The browser took the gesture over, for a scroll or the system: it puts
+ * back what the drag resized.
+ *
+ * @param {PointerEvent} event
+ */
+function onPointerCancel(event) {
+	if (drag && drag.pointer === event.pointerId) {
+		end(false);
 	}
 }
 
@@ -1225,7 +1247,7 @@ export function install() {
 	document.addEventListener('pointerdown', onPointerDown);
 	document.addEventListener('pointermove', onPointerMove);
 	document.addEventListener('pointerup', onPointerUp);
-	document.addEventListener('pointercancel', onPointerUp);
+	document.addEventListener('pointercancel', onPointerCancel);
 	document.addEventListener('lostpointercapture', onLostCapture);
 
 	return () => {
@@ -1238,7 +1260,7 @@ export function install() {
 		document.removeEventListener('pointerdown', onPointerDown);
 		document.removeEventListener('pointermove', onPointerMove);
 		document.removeEventListener('pointerup', onPointerUp);
-		document.removeEventListener('pointercancel', onPointerUp);
+		document.removeEventListener('pointercancel', onPointerCancel);
 		document.removeEventListener('lostpointercapture', onLostCapture);
 	};
 }
