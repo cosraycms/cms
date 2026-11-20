@@ -164,6 +164,8 @@ final class PanelAuthTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertHtmlNodeExists('/html[@data-theme="dark"]', $html);
+		// Before any stylesheet loads, the canvas is dark already.
+		$this->assertHtmlNodeExists('/html/head/meta[@name="color-scheme"][@content="dark"]', $html);
 		$this->assertHtmlNodeExists('//button[@data-theme-toggle][@aria-pressed="true"]', $html);
 	}
 

@@ -19,8 +19,13 @@ function theme(): string | undefined {
 	return document.documentElement.dataset.theme;
 }
 
+function scheme(): string | null | undefined {
+	return document.querySelector('meta[name="color-scheme"]')?.getAttribute('content');
+}
+
 beforeEach(() => {
 	history.replaceState(null, '', '/panel');
+	document.head.innerHTML = '<meta name="color-scheme" content="light dark">';
 	document.body.innerHTML =
 		'<button type="button" data-theme-toggle aria-pressed="false">Dark theme</button>';
 });
@@ -32,6 +37,7 @@ afterEach(() => {
 	document.cookie = 'cosray_panel=; path=/panel; max-age=0';
 	history.replaceState(null, '', '/');
 	document.body.innerHTML = '';
+	document.head.innerHTML = '';
 });
 
 describe('theme toggle', () => {
@@ -44,6 +50,7 @@ describe('theme toggle', () => {
 		expect(theme()).toBe('dark');
 		expect(document.cookie).toContain('cosray_panel=theme=dark');
 		expect(toggle().getAttribute('aria-pressed')).toBe('true');
+		expect(scheme()).toBe('dark');
 	});
 
 	it('follows the system again once the choice matches it', () => {
@@ -59,6 +66,7 @@ describe('theme toggle', () => {
 		expect(theme()).toBeUndefined();
 		expect(document.cookie).not.toContain('theme=');
 		expect(toggle().getAttribute('aria-pressed')).toBe('true');
+		expect(scheme()).toBe('light dark');
 	});
 
 	it('reports the system theme a page arrives in', () => {

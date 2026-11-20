@@ -42,6 +42,10 @@ function click(event) {
 		remember('theme', theme);
 	}
 
+	document
+		.querySelector('meta[name="color-scheme"]')
+		?.setAttribute('content', theme === system ? 'light dark' : theme);
+
 	sync();
 }
 
