@@ -134,7 +134,7 @@ function respond(items: Item[]): HTMLElement {
 	box.tabIndex = -1;
 	box.hidden = items.length === 0;
 	box.innerHTML =
-		'<span class="cms-errors-mark">!</span><div class="cms-errors-summary"><p class="cms-errors-title" role="alert">Not saved</p><p role="status" data-errors-status></p></div>';
+		'<span class="cms-errors-mark">!</span><div class="cms-errors-summary"><p class="cms-errors-status" role="status" data-errors-status></p><p class="cms-errors-title" role="alert">Not saved</p></div>';
 
 	const list = document.createElement('ul');
 	list.className = 'cms-errors-issues';
@@ -636,7 +636,6 @@ describe('errors behavior', () => {
 		input('content[styled][value][zxx]').dispatchEvent(new Event('change', { bubbles: true }));
 
 		expect(box.classList.contains('is-resolved')).toBe(true);
-		expect(box.querySelector('.cms-errors-lead')?.textContent).toBe('editor:errors-resolved');
 		expect(box.querySelector('[role="status"]')?.textContent).toBe('editor:errors-resolved');
 		expect(box.querySelector<HTMLElement>('.cms-errors-title')?.hidden).toBe(true);
 		expect(document.getElementById('editor-problems')?.hidden).toBe(true);

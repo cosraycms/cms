@@ -580,15 +580,16 @@ function renderBox(box) {
 		.querySelectorAll(':scope > :not(.cms-errors-title, [data-errors-status])')
 		.forEach((element) => element.remove());
 
+	// A live region from the start, so filling it is announced.
 	const status = summary.querySelector(':scope > [data-errors-status]');
 
 	if (status) {
 		status.textContent = resolved ? __('editor:errors-resolved') : '';
+	} else if (resolved) {
+		summary.append(create('p', 'cms-errors-lead', __('editor:errors-resolved')));
 	}
 
 	if (resolved) {
-		summary.append(create('p', 'cms-errors-lead', __('editor:errors-resolved')));
-
 		return;
 	}
 
