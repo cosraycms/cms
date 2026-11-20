@@ -6,6 +6,7 @@ namespace Cosray;
 
 use Celema\Core\App;
 use Celema\Core\Factory\Factory;
+use Celema\Core\Response;
 use Celema\Quma\Database;
 use Celema\Router\Group;
 use Celema\Router\Route;
@@ -22,6 +23,7 @@ use Cosray\Middleware\Session;
 use Cosray\Middleware\VerifyCsrf;
 use Cosray\Plugin\PanelRoutes;
 use Cosray\Security\Policy;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface as Logger;
 use Psr\Log\NullLogger;
 
@@ -144,6 +146,17 @@ class Routes
 					'/vendor/{plugin:[a-z0-9-]{1,64}}/...slug',
 					[Panel\Assets::class, 'vendor'],
 					'vendor.asset',
+				);
+				// The router trims a trailing slash off a literal pattern, not off a parameter.
+				$files->get(
+					'{trailing:/}',
+					static function (Request $request, Factory $factory): Response {
+						$path = rtrim($request->getUri()->getPath(), '/');
+						$query = $request->getUri()->getQuery();
+
+						return Response::create($factory)->redirect($query === '' ? $path : "{$path}?{$query}", 301);
+					},
+					'index.slash',
 				);
 			},
 			'cms.panel.',

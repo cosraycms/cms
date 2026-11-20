@@ -54,7 +54,7 @@ The unqualified names, `public` on PostgreSQL, are the site's own. Name the data
 | `app.url_prefix` | Application URL mount prefix; does not change filesystem locations |
 | `app.url` | Absolute URL the application is served under, like `https://example.org`, for links in mails and for absolute URLs without a request, as in jobs and commands; `APP_URL` in the environment. Never taken from a request's host |
 | `app.trusted_proxies` | IP addresses and CIDR ranges of reverse proxies, like `['127.0.0.1', '10.0.0.0/8']`; `TRUSTED_PROXIES`, comma-separated, in the environment. A request from one of them takes its client address from `X-Forwarded-For` |
-| `panel.path` | Panel URL path; defaults to `/panel` |
+| `panel.path` | Panel URL path; defaults to `/panel`. The path with a trailing slash redirects to it |
 
 `path.assets` and `path.cache` couple directories below the document root to media URL paths. Either directory may be a symlink to one outside the document root, for example to keep uploads and renditions in a directory shared between deployed releases; the web server must then follow symlinks. With `app.url_prefix => '/site'`, an original below `$root/public/assets` has a URL starting with `/site/assets/`. The router applies the prefix to routes, but panel-generated links and login redirects do not consistently include non-empty prefixes yet.
 

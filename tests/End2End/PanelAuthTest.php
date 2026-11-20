@@ -198,6 +198,20 @@ final class PanelAuthTest extends End2EndTestCase
 		$this->assertSame('/admin/login?next=%2Fadmin', $response->getHeaderLine('Location'));
 	}
 
+	public function testThePanelPathWithATrailingSlashLeadsToThePanel(): void
+	{
+		$response = $this->makeRequest('GET', '/panel/', ['query' => ['notice' => 'saved']]);
+
+		$this->assertResponseStatus(301, $response);
+		$this->assertSame('/panel?notice=saved', $response->getHeaderLine('Location'));
+
+		$this->app = $this->createApp(['panel.path' => '/admin/panel']);
+		$nested = $this->makeRequest('GET', '/admin/panel/');
+
+		$this->assertResponseStatus(301, $nested);
+		$this->assertSame('/admin/panel', $nested->getHeaderLine('Location'));
+	}
+
 	/**
 	 * Element control modules resolve against this base. A boosted navigation
 	 * upgrades the custom elements in the swapped markup while inserting them,
