@@ -10,6 +10,7 @@ import { reportChange } from '../lib/control.js';
 import { icon } from '../lib/icons.js';
 import { __, __n } from '../lib/locale.js';
 import { panelBase } from '../lib/runtime.js';
+import { composing } from '../lib/composing.js';
 
 /**
  * @typedef {object} NodeInfo
@@ -461,7 +462,7 @@ export class CosrayReference extends HTMLElement {
 
 	/** @param {KeyboardEvent} event */
 	async #keydown(event) {
-		if (this.#immutable || event.isComposing) return;
+		if (this.#immutable || composing(event)) return;
 
 		if (event.key === 'Escape' && this.#open) {
 			event.preventDefault();

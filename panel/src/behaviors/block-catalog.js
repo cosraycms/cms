@@ -3,6 +3,7 @@
 import { cosray } from '../lib/bridge.js';
 import { __, __n } from '../lib/locale.js';
 import { insertion, insert } from './repeater.js';
+import { composing } from '../lib/composing.js';
 
 /** @typedef {'before' | 'after'} Position */
 
@@ -92,7 +93,7 @@ function catalog(host, anchored, choose) {
 		if (choice && visible.includes(choice)) rove(choice);
 	});
 	host.addEventListener('keydown', (event) => {
-		if (event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+		if (composing(event) || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
 			return;
 		if (event.target === search) {
 			if (event.key === 'ArrowDown' || event.key === 'Enter') {

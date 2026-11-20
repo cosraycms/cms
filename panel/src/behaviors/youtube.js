@@ -1,3 +1,5 @@
+import { composing } from '../lib/composing.js';
+
 const ID = /^[A-Za-z0-9_-]{11}$/;
 
 /**
@@ -232,7 +234,7 @@ function onClick(event) {
 function onKeydown(event) {
 	const control = event.target;
 	if (!(control instanceof HTMLInputElement) || !control.matches('[data-youtube-input]')) return;
-	if (event.isComposing || control.readOnly || event.key !== 'Enter') return;
+	if (composing(event) || control.readOnly || event.key !== 'Enter') return;
 
 	event.preventDefault();
 	confirm(/** @type {Element} */ (control.closest('[data-youtube]')));

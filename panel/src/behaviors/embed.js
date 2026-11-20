@@ -4,6 +4,8 @@
 // cancels or presses Escape. Messages carry the node uid and only go to the
 // origins the site allows to frame the panel.
 
+import { composing } from '../lib/composing.js';
+
 const ROOT = '[data-embed]';
 const INDICATOR = 'editor-dirty';
 const STATUS = 'editor-status';
@@ -93,7 +95,7 @@ function escape(event) {
 	if (
 		event.key !== 'Escape' ||
 		event.defaultPrevented ||
-		event.isComposing ||
+		composing(event) ||
 		document.querySelector('dialog[open]') !== null ||
 		[...document.querySelectorAll('[popover]')].some((element) => element.matches(':popover-open'))
 	) {

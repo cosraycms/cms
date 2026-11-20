@@ -6,6 +6,8 @@
 // else — internal buttons, Enter in a field — is blocked. This keeps plugin
 // element markup safe by default without an audit of every button.
 
+import { composing } from '../lib/composing.js';
+
 const FORM = 'node-editor-form';
 
 // Input types whose Enter activates the control itself instead of
@@ -44,7 +46,7 @@ function guard(event) {
 function implicit(event) {
 	const field = event.target;
 
-	if (event.key !== 'Enter' || event.isComposing || !(field instanceof HTMLInputElement)) {
+	if (event.key !== 'Enter' || composing(event) || !(field instanceof HTMLInputElement)) {
 		return;
 	}
 
