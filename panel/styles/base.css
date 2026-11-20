@@ -19,6 +19,7 @@ h6 {
 	font-weight: 600;
 	line-height: 1.25;
 	color: var(--cms-color-text);
+	text-wrap: balance;
 }
 
 p,

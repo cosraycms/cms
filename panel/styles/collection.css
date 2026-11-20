@@ -330,6 +330,7 @@
 	}
 
 	& .cms-collection-empty {
+		text-wrap: balance;
 		display: grid;
 		place-items: center;
 		gap: var(--cms-space-2);

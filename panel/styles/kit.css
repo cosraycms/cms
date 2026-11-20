@@ -172,6 +172,7 @@
 }
 
 .cms-kit-empty {
+	text-wrap: balance;
 	display: grid;
 	place-items: center;
 	align-content: center;
