@@ -65,7 +65,7 @@
 	}
 
 	& .cms-styleguide-count {
-		color: var(--cms-color-text-faint);
+		color: var(--cms-color-text-subtle);
 		font-variant-numeric: tabular-nums;
 	}
 
@@ -126,7 +126,7 @@
 		min-width: 0;
 		margin-left: auto;
 		overflow: hidden;
-		color: var(--cms-color-text-faint);
+		color: var(--cms-color-text-subtle);
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}

@@ -109,7 +109,7 @@
 }
 
 .cms-kit-filter-count {
-	color: var(--cms-color-text-faint);
+	color: var(--cms-color-text-subtle);
 	font-variant-numeric: tabular-nums;
 }
 

@@ -64,7 +64,7 @@ button:not(:disabled) {
 
 input::placeholder,
 textarea::placeholder {
-	color: var(--cms-color-text-faint);
+	color: var(--cms-color-text-subtle);
 }
 
 img,

@@ -17,7 +17,7 @@
 		box-shadow 0.12s ease;
 
 	&::placeholder {
-		color: var(--cms-color-text-faint);
+		color: var(--cms-color-text-subtle);
 	}
 
 	/* Transparent, not none: forced colours drop the ring and paint the outline. */

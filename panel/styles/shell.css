@@ -370,7 +370,7 @@
 	}
 
 	/* A rail's scrollbar shows only while the pointer is over it. */
-	@media (hover: hover) {
+	@media (hover: hover) and (not (prefers-contrast: more)) {
 		.cms-scrollbar-quiet:not(:hover) {
 			scrollbar-color: transparent transparent;
 		}
@@ -467,7 +467,7 @@
 		margin-left: auto;
 		flex-shrink: 0;
 		line-height: 1.25rem;
-		color: var(--cms-color-text-faint);
+		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-xs);
 		font-variant-numeric: tabular-nums;
 		font-weight: 500;
@@ -480,7 +480,7 @@
 		margin-top: var(--cms-space-3);
 		padding: 0.4375rem 0.625rem;
 		border-radius: var(--cms-radius-md);
-		color: var(--cms-color-text-faint);
+		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-sm);
 		text-decoration: none;
 

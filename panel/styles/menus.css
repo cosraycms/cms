@@ -4,7 +4,7 @@
    recognizable. */
 .cms-menus .cms-locale-variant.is-fallback,
 .cms-sidebar .cms-locale-variant.is-fallback {
-	color: var(--cms-color-text-faint);
+	color: var(--cms-color-text-subtle);
 }
 
 .cms-menus {

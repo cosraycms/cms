@@ -123,6 +123,7 @@
 	--cms-color-neutral-200: #e0e0dd;
 	--cms-color-neutral-300: #d2d2d0;
 	--cms-color-neutral-400: #a7a7a5;
+	--cms-color-neutral-450: #8a8a88;
 	--cms-color-neutral-500: #737371;
 	--cms-color-neutral-600: #585856;
 	--cms-color-neutral-700: #474745;
@@ -217,7 +218,8 @@
 	--cms-color-text-requirement: var(--cms-color-text-subtle);
 	--cms-color-text-muted: light-dark(var(--cms-color-neutral-600), var(--cms-color-neutral-300));
 	--cms-color-text-subtle: light-dark(var(--cms-color-neutral-500), var(--cms-color-neutral-400));
-	--cms-color-text-faint: light-dark(var(--cms-color-neutral-400), var(--cms-color-neutral-500));
+	/* Icons, grips and separators only: 3:1, too faint for text. */
+	--cms-color-text-faint: light-dark(var(--cms-color-neutral-450), var(--cms-color-neutral-500));
 
 	/*
 	 * Text on a filled status surface — toasts, badges, the danger button.
@@ -591,7 +593,7 @@
 	 */
 	--cms-scrollbar-width: thin;
 	--cms-scrollbar-gutter: transparent;
-	--cms-scrollbar-thumb: var(--cms-color-neutral-300);
+	--cms-scrollbar-thumb: var(--cms-color-text-faint);
 
 	/**
 	 * Component — shell
@@ -669,5 +671,7 @@
 		--cms-color-text-subtle: light-dark(var(--cms-color-neutral-600), var(--cms-color-neutral-300));
 		--cms-color-text-faint: light-dark(var(--cms-color-neutral-500), var(--cms-color-neutral-400));
 		--cms-switch-bg: var(--cms-color-neutral-500);
+		--cms-scrollbar-width: auto;
+		--cms-scrollbar-thumb: var(--cms-color-text-subtle);
 	}
 }

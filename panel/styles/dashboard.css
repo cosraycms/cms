@@ -56,7 +56,7 @@
 		font-size: var(--cms-font-size-xs);
 		font-weight: 600;
 		letter-spacing: 0.09em;
-		color: var(--cms-color-text-faint);
+		color: var(--cms-color-text-subtle);
 		text-transform: uppercase;
 	}
 
@@ -116,7 +116,7 @@
 	& .cms-dashboard-changed {
 		font-size: var(--cms-font-size-xs);
 		font-variant-numeric: tabular-nums;
-		color: var(--cms-color-text-faint);
+		color: var(--cms-color-text-subtle);
 		white-space: nowrap;
 	}
 

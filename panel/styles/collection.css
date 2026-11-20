@@ -329,7 +329,7 @@
 		gap: var(--cms-space-2);
 		min-height: 18rem;
 		padding: var(--cms-space-8);
-		color: var(--cms-color-text-faint);
+		color: var(--cms-color-text-subtle);
 		text-align: center;
 
 		& strong {
@@ -971,7 +971,7 @@
 			border-bottom: 0;
 
 			&::before {
-				color: var(--cms-color-text-faint);
+				color: var(--cms-color-text-subtle);
 				font-size: var(--cms-font-size-xs);
 				font-weight: 500;
 				letter-spacing: 0.04em;

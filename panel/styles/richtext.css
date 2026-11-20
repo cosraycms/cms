@@ -347,7 +347,7 @@
 			content: attr(data-placeholder);
 			float: inline-start;
 			height: 0;
-			color: var(--cms-color-text-faint);
+			color: var(--cms-color-text-subtle);
 			pointer-events: none;
 		}
 
