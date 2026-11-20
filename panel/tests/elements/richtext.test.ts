@@ -256,6 +256,21 @@ describe('the menu follows the tools', () => {
 		);
 	});
 
+	it('says whether a toggle tool is on', async () => {
+		const { element } = await field(['h2', 'bullet-list', 'undo']);
+		const button = (label: string) =>
+			element.querySelector<HTMLButtonElement>(
+				`.cms-richtext-toolbar-btns [aria-label="richtext:${label}"]`,
+			)!;
+
+		expect(button('heading-2').getAttribute('aria-pressed')).toBe('false');
+		button('heading-2').click();
+		await tick();
+
+		expect(button('heading-2').getAttribute('aria-pressed')).toBe('true');
+		expect(button('undo').hasAttribute('aria-pressed')).toBe(false);
+	});
+
 	it('toggles a list from the keyboard', async () => {
 		const { element, changes } = await field(['bullet-list']);
 

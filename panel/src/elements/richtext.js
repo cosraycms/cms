@@ -184,9 +184,13 @@ function tool(updates, parent, spec, kind) {
 	updates.push(() => {
 		const active = spec.active?.() ?? false;
 
-		if (kind === 'menu' && spec.active) control.setAttribute('aria-checked', String(active));
+		if (kind === 'menu') {
+			if (spec.active) control.setAttribute('aria-checked', String(active));
 
-		control.classList.toggle('is-active', active);
+			control.classList.toggle('is-active', active);
+		} else if (spec.active) {
+			control.setAttribute('aria-pressed', String(active));
+		}
 
 		const visible = spec.visible?.() ?? true;
 

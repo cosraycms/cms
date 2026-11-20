@@ -124,7 +124,9 @@ export function inlineEditor({ value, label, readonly = false, change, focus, bl
 		button.addEventListener('mousedown', (event) => event.preventDefault());
 		button.addEventListener('click', () => editor.run(/** @type {Command} */ (command())));
 		bubble?.append(button);
-		updates.push(() => button.classList.toggle('is-active', isMarkActive(editor.view.state, mark)));
+		updates.push(() =>
+			button.setAttribute('aria-pressed', String(isMarkActive(editor.view.state, mark))),
+		);
 	}
 
 	for (const update of updates) update();

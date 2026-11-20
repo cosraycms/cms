@@ -20,9 +20,15 @@
 		box-shadow: var(--cms-focus-ring);
 	}
 
-	.cms-richtext-toolbar-btn.is-active {
+	.cms-richtext-toolbar-btn[aria-pressed='true'] {
 		background-color: var(--cms-color-accent);
 		color: var(--cms-color-text-on-accent);
+
+		@media (forced-colors: active) {
+			forced-color-adjust: none;
+			background: Highlight;
+			color: HighlightText;
+		}
 	}
 
 	/* The bubble's offset origin. */
@@ -75,7 +81,7 @@
 		background: var(--cms-color-surface);
 		box-shadow: var(--cms-shadow-sm);
 
-		& .cms-richtext-toolbar-btn:not(.is-active) {
+		& .cms-richtext-toolbar-btn:not([aria-pressed='true']) {
 			color: var(--cms-color-text-subtle);
 
 			&:hover {
