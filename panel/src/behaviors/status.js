@@ -243,7 +243,37 @@ function done(event) {
 }
 
 /** @returns {() => void} */
+/**
+ * Escape hides the head's tooltip until the pointer or focus leaves.
+ *
+ * @param {KeyboardEvent} event
+ */
+function dismissTip(event) {
+	const dots = document.getElementById(DOTS);
+
+	if (
+		event.key === 'Escape' &&
+		dots &&
+		!dots.hasAttribute('data-dismissed') &&
+		(dots.matches(':hover') || dots === document.activeElement)
+	) {
+		dots.setAttribute('data-dismissed', '');
+		event.preventDefault();
+	}
+}
+
+/** @param {Event} event */
+function restoreTip(event) {
+	if (event.target instanceof Element && event.target.id === DOTS) {
+		event.target.removeAttribute('data-dismissed');
+	}
+}
+
 export function install() {
+	document.addEventListener('keydown', dismissTip);
+	// pointerleave does not bubble; the capture phase still sees it.
+	document.addEventListener('pointerleave', restoreTip, true);
+	document.addEventListener('focusout', restoreTip);
 	document.addEventListener(EVENT, autosave);
 	document.addEventListener('change', change);
 	document.addEventListener('htmx:after:swap', follow);
@@ -251,6 +281,9 @@ export function install() {
 	follow();
 
 	return () => {
+		document.removeEventListener('keydown', dismissTip);
+		document.removeEventListener('pointerleave', restoreTip, true);
+		document.removeEventListener('focusout', restoreTip);
 		document.removeEventListener(EVENT, autosave);
 		document.removeEventListener('change', change);
 		document.removeEventListener('htmx:after:swap', follow);

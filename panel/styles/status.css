@@ -361,11 +361,18 @@ button.cms-status-dots {
 		line-height: 1.4;
 		text-align: start;
 		white-space: normal;
-		pointer-events: none;
+
+		/* Bridges the gap, so the pointer can move onto the tooltip. */
+		&::before {
+			position: absolute;
+			inset-inline: 0;
+			bottom: 100%;
+			height: var(--cms-space-2);
+			content: '';
+		}
 	}
 
-	&:hover .cms-status-dots-tooltip,
-	&:focus-visible .cms-status-dots-tooltip {
+	&:is(:hover, :focus-visible):not([data-dismissed]) .cms-status-dots-tooltip {
 		display: flex;
 	}
 

@@ -66,6 +66,19 @@ function hidden(id: string): boolean {
 }
 
 describe('status', () => {
+	it('hides the head’s tooltip on Escape until focus leaves', () => {
+		document.body.insertAdjacentHTML('beforeend', head('none'));
+		uninstall.push(install());
+		const dots = document.getElementById('editor-status-dots')!;
+		dots.focus();
+
+		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+		expect(dots.hasAttribute('data-dismissed')).toBe(true);
+
+		dots.blur();
+		expect(dots.hasAttribute('data-dismissed')).toBe(false);
+	});
+
 	it('moves the user’s stage with the autosave and offers to save and apply', () => {
 		document.body.insertAdjacentHTML('beforeend', head('none'));
 		uninstall.push(install());
