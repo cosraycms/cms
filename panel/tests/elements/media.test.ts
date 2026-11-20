@@ -422,6 +422,23 @@ describe('image details', () => {
 		expect(modal.querySelector('[id$="-title"]')).toBeNull();
 	});
 
+	it('says when copying the address failed', async () => {
+		vi.stubGlobal('navigator', {
+			...navigator,
+			clipboard: { writeText: () => Promise.reject(new Error('denied')) },
+		});
+		document.execCommand = () => false;
+		await details();
+		const address = document.querySelector<HTMLElement>('.cms-image-details-address')!;
+
+		address.querySelector<HTMLButtonElement>('button')!.click();
+
+		await vi.waitFor(() =>
+			expect(address.querySelector('[role="status"]')?.textContent).toBe('common:copy-failed'),
+		);
+		vi.unstubAllGlobals();
+	});
+
 	describe('link', () => {
 		const row = () => document.querySelector<HTMLElement>('.cms-modal .cms-link-row');
 		const rowButton = (label: string) =>

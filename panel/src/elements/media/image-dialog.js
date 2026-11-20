@@ -7,6 +7,7 @@
 /** @import { LibraryItem } from '../../lib/library-browser.js' */
 
 import { cosray } from '../../lib/bridge.js';
+import { copyText } from '../../lib/clipboard.js';
 import { patchItemMeta } from '../../lib/content.js';
 import { docText } from '../../lib/inline-doc.js';
 import { extension, humanSize } from '../../lib/library.js';
@@ -38,8 +39,8 @@ import { button, contentLocales, create, effectiveText, replaceMenu, svg } from 
  */
 
 /**
- * The picture's address, to read and to copy. Without a secure context, as on
- * a plain http development host, there is no clipboard API to write to.
+ * The picture's address, to read and to copy. A toast would wait behind the
+ * dialog, so a status next to the button says how copying went.
  *
  * @param {string} url
  * @returns {HTMLElement}
@@ -55,25 +56,23 @@ function address(url) {
 		'cms-image-details-copy',
 		__('common:copy'),
 		() => {
-			void (async () => {
-				try {
-					await navigator.clipboard.writeText(input.value);
-				} catch {
-					input.select();
-					document.execCommand('copy');
-				}
-
-				copy.replaceChildren(svg('check-lg'));
-				copy.title = __('common:copied');
+			void copyText(input.value).then((copied) => {
+				const said = copied ? __('common:copied') : __('common:copy-failed');
+				copy.replaceChildren(svg(copied ? 'check-lg' : 'x-lg'));
+				copy.title = said;
+				status.textContent = said;
 				setTimeout(() => {
 					copy.replaceChildren(svg('copy'));
 					copy.title = __('common:copy');
+					status.textContent = '';
 				}, 1500);
-			})();
+			});
 		},
 		'copy',
 	);
-	row.append(input, copy);
+	const status = create('span', 'cms-sr-only');
+	status.setAttribute('role', 'status');
+	row.append(input, copy, status);
 
 	return row;
 }
