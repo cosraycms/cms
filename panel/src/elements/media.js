@@ -49,6 +49,7 @@ function error(owner, message) {
 /**
  * @typedef {object} MediaField
  * @property {string} [name]
+ * @property {string} [label]
  * @property {boolean} [immutable] The field cannot change: no bar, no drop zone, no per-item
  *     actions.
  * @property {boolean} [translate]
@@ -438,6 +439,11 @@ class MediaControl extends HTMLElement {
 		frame.classList.toggle('is-empty', empty);
 		frame.classList.toggle('is-readonly', readonly);
 		frame.setAttribute('role', 'group');
+
+		if (this.field.label) {
+			frame.setAttribute('aria-label', this.field.label);
+		}
+
 		this.#frame = frame;
 		nodes.push(frame);
 

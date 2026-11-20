@@ -77,7 +77,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeExists(
 			'//div[@data-repeater-row]//div[contains(@class, "cms-field")]'
-				. '/label[@class="cms-field-label"]',
+				. '/div[@class="cms-field-label"]/label[not(@class)]',
 			$html,
 		);
 		// No block marks a field on its canvas as required: reaching for the

@@ -110,6 +110,20 @@ describe('cosray host', () => {
 		});
 	});
 
+	it('hands a click on itself, as from its label, to the control inside', async () => {
+		const element = host({ value: null }, { id: 'field-body-zxx' });
+		await vi.waitFor(() => expect(element.querySelector('test-control')).not.toBeNull());
+		const hidden = document.createElement('button');
+		hidden.hidden = true;
+		const textarea = document.createElement('textarea');
+		element.querySelector('test-control')!.append(hidden, textarea);
+
+		// jsdom does not route a label's click to a form-associated element.
+		element.click();
+
+		expect(document.activeElement).toBe(textarea);
+	});
+
 	it('mirrors change details into one form value', async () => {
 		const element = host({ value: { en: 'Before' }, meta: { old: true } });
 		await vi.waitFor(() => expect(element.querySelector('test-control')).not.toBeNull());

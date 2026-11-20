@@ -163,10 +163,12 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 			$this->makeRequest('GET', '/panel/node/preview-editor'),
 		);
 		$this->assertHtmlNodeExists(
-			'//div[@data-field="contentBlocks"]/label//button[@data-layout-preview="contentBlocks"]',
+			'//div[@data-field="contentBlocks"]/div[@class="cms-field-label"]/button[@data-layout-preview="contentBlocks"]',
 			$html,
 		);
 		$this->assertHtmlNodeMissing('//div[@data-field="title"]//button[@data-layout-preview]', $html);
+		// A button inside a label would become part of the control's name.
+		$this->assertHtmlNodeMissing('//label//button', $html);
 		$this->assertHtmlNodeExists(
 			'//dialog[@data-layout-preview-dialog][@data-url="/panel/node/preview-editor/blocks"]'
 				. '//iframe[@sandbox="allow-same-origin"][@data-layout-preview-frame]',

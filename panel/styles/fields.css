@@ -21,7 +21,7 @@
 		font-weight: 500;
 		line-height: 1.25rem;
 
-		& > div {
+		& > :is(div, label) {
 			min-width: 0;
 			overflow-wrap: anywhere;
 		}

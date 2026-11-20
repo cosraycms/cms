@@ -451,13 +451,15 @@ final class PanelEditorRouteTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$matched = preg_match(
-			'#<cosray-host\s+name="content\[gallery\]\[json\]".*?<script type="application/json">(.*?)</script>#s',
+			'#<cosray-host\s[^>]*?name="content\[gallery\]\[json\]".*?<script type="application/json">(.*?)</script>#s',
 			$this->getHtmlResponse($response),
 			$match,
 		);
 		$this->assertSame(1, $matched);
 		$payload = json_decode($match[1], true, flags: JSON_THROW_ON_ERROR);
 		$this->assertSame('docpayload01.pdf', $payload['assets']['docpayload01']['filename'] ?? null);
+		// The field's label names the host, which hands focus to its control.
+		$this->assertHtmlNodeExists('//cosray-host[@id = //label/@for]', $this->getHtmlResponse($response));
 	}
 
 	public function testElementControlsRenderThroughTheFormHost(): void

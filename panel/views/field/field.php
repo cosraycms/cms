@@ -53,6 +53,13 @@ $required = (bool) ($field['required'] ?? false);
 $immutable = (bool) ($field['immutable'] ?? false);
 $when = $field['when'] ?? null;
 $metaControl = $ownMeta ? $field['metaControl'] ?? null : null;
+// Controls that report being required themselves, so the label's word
+// would be announced twice.
+$announcesRequired = in_array(
+	$controlName,
+	['text', 'number', 'date', 'time', 'datetime', 'color', 'textarea', 'iframe', 'youtube', 'checkbox', 'option'],
+	true,
+) || in_array($control['props']['tag'] ?? null, ['cosray-richtext', 'cosray-code', 'cosray-reference'], true);
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
 
@@ -67,24 +74,27 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<?= $required ? 'data-required="true"' : '' ?>
 	<?= $immutable ? 'data-readonly="true"' : '' ?>
 	<?= is_array($when) ? "data-when='" . json_encode($when, $jsonFlags) . "'" : '' ?>>
-	<?php // Kept in the tree when hidden: the control needs its name. ?>
-	<label
-		id="<?= escape($labelFor) ?>-label"
-		for="<?= escape($labelFor) ?>"
-		<?= $variants ? 'data-locale-label-for="' . escape($idRoot) . '"' : '' ?>
-		class="cms-field-label<?= $bareLabel && !is_array($metaControl) ? ' cms-sr-only' : '' ?>">
-		<div<?= $bareLabel ? ' class="cms-sr-only"' : '' ?>>
+	<?php // Kept in the tree when hidden: the control needs its name. The
+	// buttons stay outside the label, which would otherwise name the control. ?>
+	<div class="cms-field-label<?= $bareLabel && !is_array($metaControl) ? ' cms-sr-only' : '' ?>">
+		<label
+			id="<?= escape($labelFor) ?>-label"
+			for="<?= escape($labelFor) ?>"
+			<?= $variants ? 'data-locale-label-for="' . escape($idRoot) . '"' : '' ?>
+			<?= $bareLabel ? 'class="cms-sr-only"' : '' ?>>
 			<span class="cms-field-name"><?= escape((string) ($field['label'] ?? $fieldName)) ?></span>
 			<?php // A field the editor cannot change is never also required of them. ?>
 			<?php if ($immutable): ?>
 				<span class="cms-field-state"><?= escape(__('field:readonly')) ?></span>
 			<?php elseif ($required): ?>
-				<span class="cms-field-requirement"><?= escape(__('field:required')) ?></span>
+				<span class="cms-field-requirement"<?= $announcesRequired ? ' aria-hidden="true"' : '' ?>><?= escape(
+					__('field:required'),
+				) ?></span>
 			<?php endif ?>
 			<?php if ($changed): ?>
 				<span class="cms-changed" data-restored-mark><?= escape(__('editor:changed')) ?></span>
 			<?php endif ?>
-		</div>
+		</label>
 		<?php if (is_array($metaControl)): ?>
 			<button type="button" class="cms-field-button" data-dialog-open="meta">
 				<?= escape(__('field:meta')) ?>
@@ -96,7 +106,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				<?= escape(__('editor:layout-preview')) ?>
 			</button>
 		<?php endif ?>
-	</label>
+	</div>
 	<div class="cms-field-body">
 		<?php if ($controlName === 'blocks'): ?>
 			<?php // The grid the blocks were placed on is saved with them. ?>

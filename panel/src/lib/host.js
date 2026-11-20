@@ -62,6 +62,12 @@ export class CosrayHost extends HTMLElement {
 		this.addEventListener('cosray-change', (event) => {
 			this.#apply(/** @type {CustomEvent<ChangeDetail>} */ (event).detail);
 		});
+		// A label's click arrives at the host itself; the control inside takes focus.
+		this.addEventListener('click', (event) => {
+			if (event.target === this) {
+				this.#focusControl();
+			}
+		});
 		void this.#mount();
 	}
 
@@ -144,6 +150,22 @@ export class CosrayHost extends HTMLElement {
 
 		this.#element = element;
 		this.append(element);
+	}
+
+	#focusControl() {
+		for (const control of this.querySelectorAll(
+			'[contenteditable="true"], textarea, input:not([type="hidden"]), select, button',
+		)) {
+			if (
+				control instanceof HTMLElement &&
+				!control.matches(':disabled') &&
+				control.checkVisibility()
+			) {
+				control.focus();
+
+				return;
+			}
+		}
 	}
 
 	// The slot an owner's settings dialog offers this control, so an element

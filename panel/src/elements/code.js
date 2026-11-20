@@ -25,6 +25,7 @@ import {
 /**
  * @typedef {object} CodeField
  * @property {string} name
+ * @property {string} [label]
  * @property {boolean} [required]
  * @property {boolean} [immutable]
  * @property {boolean} [translate]
@@ -227,9 +228,11 @@ export class CosrayCode extends HTMLElement {
 			matchBrackets(false),
 			highlightBracketPairs(),
 		);
-		// The host submits the value; the browser still guards a required
-		// field through the editor's own textarea, as the mirror used to.
 		this.#editor.textarea.required = this.field.required ?? false;
+
+		if (this.field.label) {
+			this.#editor.textarea.setAttribute('aria-label', this.field.label);
+		}
 
 		if (syntax !== this.#syntax[ZXX]) {
 			void this.#applySyntax();

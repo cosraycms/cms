@@ -23,6 +23,7 @@ import { panelBase } from '../lib/runtime.js';
  * @typedef {object} ReferenceField
  * @property {string} [name]
  * @property {string} [label]
+ * @property {boolean} [required]
  * @property {boolean} [immutable]
  * @property {string} [ownerType]
  * @property {{ max?: number }} [limit]
@@ -522,6 +523,11 @@ export class CosrayReference extends HTMLElement {
 		input.classList.toggle('cms-reference-single', single);
 		input.classList.toggle('has-selection', single && this.#items.length > 0);
 		input.setAttribute('aria-label', label);
+		if (this.field?.required === true && !immutable) {
+			input.setAttribute('aria-required', 'true');
+		} else {
+			input.removeAttribute('aria-required');
+		}
 		input.readOnly = immutable;
 		input.placeholder = single && title ? title : __('reference:placeholder');
 

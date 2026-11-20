@@ -16,6 +16,7 @@ $node = (string) ($node ?? '');
 $assets = (array) (u($assets ?? null) ?? []);
 $fieldName = (string) ($field['name'] ?? '');
 $nameRoot = (string) ($nameRoot ?? "content[{$fieldName}]");
+$id = (string) ($id ?? '');
 
 $props = (array) ($control['props'] ?? []);
 $tag = (string) ($props['tag'] ?? '');
@@ -40,6 +41,7 @@ $payload = [
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
 <cosray-host
+	<?= $id !== '' ? 'id="' . escape($id) . '"' : '' ?>
 	name="<?= escape("{$nameRoot}[json]") ?>"
 	tag="<?= escape($tag) ?>"
 	module="<?= escape($module) ?>"

@@ -58,6 +58,7 @@ import {
 /**
  * @typedef {object} RichtextField
  * @property {string} name
+ * @property {string} [label]
  * @property {boolean} [required]
  * @property {boolean} [immutable]
  * @property {boolean} [translate]
@@ -861,6 +862,8 @@ export class CosrayRichtext extends HTMLElement {
 				Object.keys(field.richtextStyles ?? {}),
 			),
 			line: field.line === true,
+			label: field.label,
+			required: field.required === true && !readonly,
 			bubbleElement: bubble,
 			assetUrl: (uid) => this.#assetUrl(uid),
 			editable: () => !readonly,
