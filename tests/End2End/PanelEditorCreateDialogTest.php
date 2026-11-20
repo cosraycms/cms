@@ -74,7 +74,7 @@ final class PanelEditorCreateDialogTest extends End2EndTestCase
 
 		$this->assertSame('', $response->getHeaderLine('HX-Location'));
 		$this->assertHtmlNodeExists(
-			'//*[@id="editor-errors" and @hx-swap-oob="true" and @role="alert"]',
+			'//*[@id="editor-errors" and @hx-swap-oob="true" and not(@hidden)]//*[@role="alert"]',
 			$this->getHtmlResponse($response),
 		);
 	}

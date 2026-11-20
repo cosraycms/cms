@@ -45,11 +45,13 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	class="cms-errors"
 	tabindex="-1"
 	hx-swap-oob="true"
-	<?= $saved || $issues === [] ? 'hidden' : 'role="alert"' ?>>
+	<?= $saved || $issues === [] ? 'hidden' : '' ?>>
 	<?php if (!$saved && $issues !== []): ?>
 		<span class="cms-errors-mark" aria-hidden="true">!</span>
 		<div class="cms-errors-summary">
-			<p class="cms-errors-title"><?= escape(__('editor:not-saved')) ?></p>
+			<?php // Only the title alerts: the rest changes as fields are edited. ?>
+			<p class="cms-errors-title" role="alert"><?= escape(__('editor:not-saved')) ?></p>
+			<p class="cms-sr-only" role="status" data-errors-status></p>
 			<ul class="cms-errors-issues">
 				<?php foreach ($issues as $issue): ?>
 					<?php $path = $issue['path'] ?? null; ?>

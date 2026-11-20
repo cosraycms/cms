@@ -134,7 +134,7 @@ function respond(items: Item[]): HTMLElement {
 	box.tabIndex = -1;
 	box.hidden = items.length === 0;
 	box.innerHTML =
-		'<span class="cms-errors-mark">!</span><div class="cms-errors-summary"><p class="cms-errors-title">Not saved</p></div>';
+		'<span class="cms-errors-mark">!</span><div class="cms-errors-summary"><p class="cms-errors-title" role="alert">Not saved</p><p role="status" data-errors-status></p></div>';
 
 	const list = document.createElement('ul');
 	list.className = 'cms-errors-issues';
@@ -607,6 +607,19 @@ describe('errors behavior', () => {
 		expect(document.activeElement).toBe(input('content[title][value][de]'));
 	});
 
+	it('keeps the summary that changes with every edit out of the alert', () => {
+		const box = respond([
+			{ path: ['content', 'title', 'value', 'en'], message: 'Title is required' },
+			{ path: ['content', 'styled', 'value', 'zxx'], message: 'Styled is invalid' },
+		]);
+
+		input('content[title][value][en]').dispatchEvent(new Event('input', { bubbles: true }));
+
+		expect(box.querySelector('[role="alert"] .cms-errors-chips')).toBeNull();
+		expect(box.closest('[role="alert"]')).toBeNull();
+		expect(box.querySelector('[role="status"]')?.textContent).toBe('');
+	});
+
 	it('says so once every reported field has been edited', () => {
 		const box = respond([
 			{ path: ['content', 'styled', 'value', 'zxx'], message: 'Styled is invalid' },
@@ -616,6 +629,7 @@ describe('errors behavior', () => {
 
 		expect(box.classList.contains('is-resolved')).toBe(true);
 		expect(box.querySelector('.cms-errors-lead')?.textContent).toBe('editor:errors-resolved');
+		expect(box.querySelector('[role="status"]')?.textContent).toBe('editor:errors-resolved');
 		expect(box.querySelector<HTMLElement>('.cms-errors-title')?.hidden).toBe(true);
 		expect(document.getElementById('editor-problems')?.hidden).toBe(true);
 	});

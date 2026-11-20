@@ -521,8 +521,14 @@ function renderBox(box) {
 
 	summary.querySelector(':scope > .cms-errors-title')?.toggleAttribute('hidden', resolved);
 	summary
-		.querySelectorAll(':scope > :not(.cms-errors-title)')
+		.querySelectorAll(':scope > :not(.cms-errors-title, [data-errors-status])')
 		.forEach((element) => element.remove());
+
+	const status = summary.querySelector(':scope > [data-errors-status]');
+
+	if (status) {
+		status.textContent = resolved ? __('editor:errors-resolved') : '';
+	}
 
 	if (resolved) {
 		summary.append(create('p', 'cms-errors-lead', __('editor:errors-resolved')));
