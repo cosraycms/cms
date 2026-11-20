@@ -297,6 +297,22 @@ describe('placement on the canvas', () => {
 		expect(rows().map(spot)).toEqual(['1/1 6×1', '1/2 12×1']);
 	});
 
+	it('keeps focus in a block the reading order moved, without an atomic move', () => {
+		const { grid, rows } = editor([
+			{ colspan: 12, col: 1, row: 1 },
+			{ colspan: 6, col: 1, row: 2 },
+		]);
+		expect('moveBefore' in grid).toBe(false);
+		const lower = rows()[1];
+		const kebab = lower.querySelector<HTMLElement>(':scope > .cms-block-chrome .cms-block-kebab')!;
+		kebab.focus();
+
+		menuItem(lower, '[data-repeater-move="up"][data-places~="block"]').click();
+
+		expect(rows()[0]).toBe(lower);
+		expect(document.activeElement).toBe(kebab);
+	});
+
 	it('offers the top edge only where it moves, and raises it into free rows from the keyboard', () => {
 		const { rows } = editor([
 			{ colspan: 7, rowspan: 2, col: 1, row: 1 },

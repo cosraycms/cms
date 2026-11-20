@@ -196,6 +196,35 @@ describe('repeater behavior', () => {
 		]);
 	});
 
+	it('keeps focus on the control that moved its row', () => {
+		const container = repeater([
+			row('0', 'a'),
+			row('1', 'b', '<button type="button" data-repeater-move="up">Up</button>'),
+		]);
+		const up = container.querySelector<HTMLElement>('[data-repeater-move="up"]')!;
+		up.focus();
+		up.click();
+
+		expect(Array.from(container.querySelectorAll('input'), (input) => input.value)).toEqual([
+			'b',
+			'a',
+		]);
+		expect(document.activeElement).toBe(up);
+	});
+
+	it('hands focus to the next row, else the previous one, else the add button on removal', () => {
+		const container = repeater([row('0', 'a'), row('1', 'b')]);
+		const removes = () => container.querySelectorAll<HTMLElement>('[data-repeater-remove]');
+
+		removes()[0]!.focus();
+		removes()[0]!.click();
+		expect(document.activeElement).toBe(container.querySelector('input'));
+
+		removes()[0]!.focus();
+		removes()[0]!.click();
+		expect(document.activeElement).toBe(container.querySelector('[data-repeater-add]'));
+	});
+
 	it('moves a row down and renumbers', () => {
 		const container = repeater([row('0', 'a'), row('1', 'b')]);
 		const first = container.querySelectorAll<HTMLElement>('[data-repeater-row]')[0];

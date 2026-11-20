@@ -671,6 +671,20 @@ export function animate(grid, change, still) {
 }
 
 /**
+ * @param {Element} row
+ * @returns {Element | null}
+ */
+function nextRow(row) {
+	let sibling = row.nextElementSibling;
+
+	while (sibling && !sibling.matches('[data-repeater-row]')) {
+		sibling = sibling.nextElementSibling;
+	}
+
+	return sibling;
+}
+
+/**
  * The rows in reading order in the DOM; true when any moved.
  *
  * @param {HTMLElement} grid
@@ -684,21 +698,36 @@ function reorder(grid) {
 		return false;
 	}
 
-	// An atomic move keeps focus and element state; append reconnects.
-	/**
-	 * @param {HTMLElement} row
-	 */
-	const move = (row) => {
-		if ('moveBefore' in grid) {
+	// An atomic move keeps focus and element state; without it a move
+	// reconnects, so only rows out of place move and focus is put back.
+	const atomic = 'moveBefore' in grid;
+	const focused = document.activeElement;
+	/** @type {Element | null} */
+	let next = rows[0] ?? null;
+
+	for (const row of order) {
+		if (row === next) {
+			next = nextRow(row);
+
+			continue;
+		}
+
+		if (atomic) {
 			/** @type {HTMLElement & { moveBefore(node: Node, child: Node | null): void }} */ (
 				grid
-			).moveBefore(row, null);
+			).moveBefore(row, next);
 		} else {
-			grid.append(row);
+			grid.insertBefore(row, next);
 		}
-	};
+	}
 
-	order.forEach(move);
+	if (
+		focused instanceof HTMLElement &&
+		focused !== document.activeElement &&
+		grid.contains(focused)
+	) {
+		focused.focus({ preventScroll: true });
+	}
 
 	return true;
 }

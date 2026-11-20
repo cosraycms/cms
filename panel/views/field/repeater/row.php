@@ -24,7 +24,12 @@ $subField = ['required' => false, 'immutable' => false];
 			'data' => null,
 		]) ?>
 	</div>
-	<button type="button" class="cms-button" data-repeater-remove>
+	<button
+		type="button"
+		class="cms-button"
+		id="<?= $this->escape($itemId) ?>-remove"
+		aria-labelledby="<?= $this->escape($itemId) ?>-remove <?= $this->escape($itemId) ?>-label"
+		data-repeater-remove>
 		<?= $this->escape(__('field:remove')) ?>
 	</button>
 </div>

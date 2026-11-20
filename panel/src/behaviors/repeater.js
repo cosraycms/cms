@@ -355,6 +355,8 @@ export function focusRow(row) {
 	if (document.activeElement !== row) row.removeAttribute('tabindex');
 }
 
+const FOCUSABLE =
+	'button, input:not([type="hidden"]), select, textarea, [contenteditable="true"], [tabindex="0"]';
 const CONTROL = 'input, textarea, select';
 
 /**
@@ -487,13 +489,53 @@ function move(mover) {
 		return;
 	}
 
+	// The neighbour moves, so the row and the focus inside it stay put.
 	if (direction === 'up') {
-		sibling.before(row);
+		row.after(sibling);
 	} else {
-		sibling.after(row);
+		row.before(sibling);
 	}
 
 	changed(container);
+}
+
+/**
+ * Removes a row; focus inside it goes to the next row, else the previous
+ * one, else the field's add button.
+ *
+ * @param {HTMLElement} row
+ * @param {HTMLElement | null} container
+ */
+function removeRow(row, container) {
+	const focused = row.contains(document.activeElement);
+	const neighbour = [row.nextElementSibling, row.previousElementSibling].find(
+		(sibling) => sibling instanceof HTMLElement && sibling.matches('[data-repeater-row]'),
+	);
+
+	row.remove();
+
+	if (!focused) {
+		return;
+	}
+
+	const scopes = [neighbour, container].filter((scope) => scope instanceof HTMLElement);
+
+	for (const scope of scopes) {
+		const target = Array.from(
+			scope.querySelectorAll(neighbour === scope ? FOCUSABLE : '[data-repeater-add]'),
+		).find(
+			(element) =>
+				element instanceof HTMLElement &&
+				!element.matches(':disabled') &&
+				element.checkVisibility(),
+		);
+
+		if (target instanceof HTMLElement) {
+			target.focus({ preventScroll: true });
+
+			return;
+		}
+	}
 }
 
 // Named inputs only: element controls (the image card's alt text, say)
@@ -642,7 +684,11 @@ function onClick(event) {
 
 	if (remove) {
 		const container = /** @type {HTMLElement | null} */ (remove.closest('[data-repeater]'));
-		remove.closest('[data-repeater-row]')?.remove();
+		const row = /** @type {HTMLElement | null} */ (remove.closest('[data-repeater-row]'));
+
+		if (row) {
+			removeRow(row, container);
+		}
 
 		if (container) {
 			changed(container);
