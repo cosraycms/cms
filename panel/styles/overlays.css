@@ -221,7 +221,7 @@
 		}
 
 		&.is-online {
-			border-color: color-mix(in oklch, var(--cms-color-success), transparent 65%);
+			border-color: color-mix(in oklab, var(--cms-color-success), transparent 65%);
 			background: var(--cms-color-success-surface);
 			color: var(--cms-color-success-text);
 		}
@@ -357,7 +357,7 @@
 		border-start-start-radius: 0;
 		border-end-start-radius: 0;
 		border-inline-start-color: color-mix(
-			in oklch,
+			in oklab,
 			var(--button-border),
 			var(--cms-color-shade) 14%
 		);

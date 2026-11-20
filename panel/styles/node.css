@@ -62,7 +62,7 @@
 		cursor: pointer;
 
 		&:hover {
-			background: color-mix(in oklch, var(--cms-color-danger), var(--cms-color-surface) 84%);
+			background: color-mix(in oklab, var(--cms-color-danger), var(--cms-color-surface) 84%);
 		}
 
 		&:focus-visible {
@@ -372,7 +372,7 @@
 		cursor: pointer;
 
 		&:hover {
-			background: color-mix(in oklch, var(--cms-color-danger), var(--cms-color-surface) 84%);
+			background: color-mix(in oklab, var(--cms-color-danger), var(--cms-color-surface) 84%);
 		}
 
 		&:focus-visible {
@@ -389,7 +389,7 @@
 
 	&.is-resolved {
 		align-items: center;
-		border-color: color-mix(in oklch, var(--cms-color-success), transparent 70%);
+		border-color: color-mix(in oklab, var(--cms-color-success), transparent 70%);
 
 		& .cms-errors-mark {
 			background: var(--cms-color-success);

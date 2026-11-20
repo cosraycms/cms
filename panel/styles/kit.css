@@ -227,7 +227,7 @@
 .cms-kit-pill {
 	display: inline-block;
 	padding: 0 var(--cms-space-2);
-	border: 1px solid color-mix(in oklch, var(--tone), transparent 65%);
+	border: 1px solid color-mix(in oklab, var(--tone), transparent 65%);
 	border-radius: var(--cms-radius-full);
 	background: var(--tone-surface);
 	color: var(--tone-text);

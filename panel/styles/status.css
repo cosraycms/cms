@@ -23,7 +23,7 @@
 	}
 
 	&.is-published {
-		border-color: color-mix(in oklch, var(--cms-color-success), transparent 70%);
+		border-color: color-mix(in oklab, var(--cms-color-success), transparent 70%);
 		background: var(--cms-color-success-surface);
 		color: var(--cms-color-success-text);
 	}
@@ -31,7 +31,7 @@
 	&.is-changes,
 	&.is-hidden,
 	&.is-unsaved {
-		border-color: color-mix(in oklch, var(--cms-color-warning), transparent 70%);
+		border-color: color-mix(in oklab, var(--cms-color-warning), transparent 70%);
 		background: var(--cms-color-warning-surface);
 		color: var(--cms-color-warning-text);
 	}
@@ -43,7 +43,7 @@
 	}
 
 	&.is-locked {
-		border-color: color-mix(in oklch, var(--cms-color-danger), transparent 70%);
+		border-color: color-mix(in oklab, var(--cms-color-danger), transparent 70%);
 		background: var(--cms-color-danger-surface);
 		color: var(--cms-color-danger-text);
 	}
@@ -94,7 +94,7 @@
 .cms-stage-mark {
 	--tone: var(--cms-color-stage-idle);
 	--ink: var(--cms-color-stage-idle-ink);
-	--fill: color-mix(in oklch, var(--tone) var(--cms-stage-tint), transparent);
+	--fill: color-mix(in oklab, var(--tone) var(--cms-stage-tint), transparent);
 	--cms-icon-size: calc(var(--size) / 2);
 	--halo: round(calc(var(--size) * var(--cms-stage-halo)), 1px);
 	display: inline-grid;
@@ -108,12 +108,12 @@
 	outline: var(--halo) solid
 		light-dark(
 			color-mix(
-				in oklch,
+				in oklab,
 				var(--cms-stage-halo-color, var(--tone)) var(--cms-stage-halo-strength),
 				transparent
 			),
 			color-mix(
-				in oklch,
+				in oklab,
 				var(--cms-stage-halo-color, var(--tone)) var(--cms-stage-halo-strength-dark),
 				transparent
 			)
@@ -123,7 +123,7 @@
 	&:not([data-state='none']) {
 		--fill: light-dark(
 			var(--tone),
-			color-mix(in oklch, var(--tone) var(--cms-stage-fill-dark), transparent)
+			color-mix(in oklab, var(--tone) var(--cms-stage-fill-dark), transparent)
 		);
 	}
 
@@ -251,7 +251,7 @@
 		background: var(--color);
 		outline: var(--halo) solid
 			color-mix(
-				in oklch,
+				in oklab,
 				var(--cms-stage-halo-color, var(--color)) var(--cms-stage-dot-halo-strength),
 				transparent
 			);
@@ -405,7 +405,7 @@ button.cms-status-dots .cms-status-dots-tooltip {
 	color-scheme: dark;
 
 	& .cms-stage-mark[data-state='none'] {
-		--fill: color-mix(in oklch, var(--tone) max(var(--cms-stage-tint), 30%), transparent);
+		--fill: color-mix(in oklab, var(--tone) max(var(--cms-stage-tint), 30%), transparent);
 	}
 }
 
@@ -565,8 +565,8 @@ button.cms-status-dots .cms-status-dots-tooltip {
 		--tone: var(--cms-color-text-subtle);
 		padding: 0 var(--cms-space-1-5);
 		border-radius: var(--cms-radius-sm);
-		background: color-mix(in oklch, var(--tone), transparent 86%);
-		color: color-mix(in oklch, var(--tone), var(--cms-color-shade) 25%);
+		background: color-mix(in oklab, var(--tone), transparent 86%);
+		color: color-mix(in oklab, var(--tone), var(--cms-color-shade) 25%);
 		font-size: 0.6875rem;
 		font-weight: 500;
 		line-height: 1.125rem;
@@ -614,7 +614,7 @@ button.cms-status-dots .cms-status-dots-tooltip {
 		cursor: pointer;
 
 		&:hover {
-			background: color-mix(in oklch, var(--cms-color-danger), transparent 92%);
+			background: color-mix(in oklab, var(--cms-color-danger), transparent 92%);
 		}
 
 		&:focus-visible {

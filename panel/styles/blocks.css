@@ -537,9 +537,9 @@
 		pointer-events: none;
 
 		&.is-own {
-			outline: 1px dashed color-mix(in oklch, var(--cms-color-accent), transparent 40%);
+			outline: 1px dashed color-mix(in oklab, var(--cms-color-accent), transparent 40%);
 			outline-offset: -1px;
-			background: color-mix(in oklch, var(--cms-color-accent), transparent 90%);
+			background: color-mix(in oklab, var(--cms-color-accent), transparent 90%);
 		}
 
 		&.is-free {

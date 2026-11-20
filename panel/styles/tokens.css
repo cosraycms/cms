@@ -252,7 +252,7 @@
 	/* Behind the words a search found; dimmed on a dark canvas, so the text stays light. */
 	--cms-color-highlight: light-dark(
 		var(--cms-color-yellow-200),
-		color-mix(in oklch, var(--cms-color-yellow-200), var(--cms-color-neutral-900) 72%)
+		color-mix(in oklab, var(--cms-color-yellow-200), var(--cms-color-neutral-900) 72%)
 	);
 
 	/*
@@ -275,17 +275,17 @@
 
 	/* Toward the surface, not the shade: a dark accent has little room to darken. */
 	--cms-color-accent-hover: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-color-accent),
 		var(--cms-color-surface) 20%
 	);
-	--cms-color-accent-text: color-mix(in oklch, var(--cms-color-accent), var(--cms-color-shade) 12%);
+	--cms-color-accent-text: color-mix(in oklab, var(--cms-color-accent), var(--cms-color-shade) 12%);
 	--cms-color-accent-surface: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-color-accent),
 		var(--cms-color-surface) 90%
 	);
-	--cms-color-accent-ring: color-mix(in oklch, var(--cms-color-accent), transparent 72%);
+	--cms-color-accent-ring: color-mix(in oklab, var(--cms-color-accent), transparent 72%);
 
 	/**
 	 * Semantic — focus
@@ -299,7 +299,7 @@
 	--cms-focus-outline: 2px solid var(--cms-color-focus);
 	--cms-focus-offset: 2px;
 	--cms-focus-ring: 0 0 0 1px var(--cms-color-focus);
-	--cms-error-ring: 0 0 0 3px color-mix(in oklch, var(--cms-color-danger), transparent 82%);
+	--cms-error-ring: 0 0 0 3px color-mix(in oklab, var(--cms-color-danger), transparent 82%);
 
 	/**
 	 * Semantic — depth
@@ -326,13 +326,13 @@
 	 * of them follow the theme instead of pinning themselves to the light one.
 	 */
 	--cms-color-info: light-dark(var(--cms-color-blue-600), var(--cms-color-blue-400));
-	--cms-color-info-text: color-mix(in oklch, var(--cms-color-info), var(--cms-color-shade) 12%);
+	--cms-color-info-text: color-mix(in oklab, var(--cms-color-info), var(--cms-color-shade) 12%);
 	--cms-color-info-surface: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-color-info),
 		var(--cms-color-surface) 90%
 	);
-	--cms-color-info-ring: color-mix(in oklch, var(--cms-color-info), transparent 72%);
+	--cms-color-info-ring: color-mix(in oklab, var(--cms-color-info), transparent 72%);
 
 	/* Status dots: one colour per stage, red only for a problem. */
 	--cms-color-stage-main: light-dark(var(--cms-color-stage-green), var(--cms-color-green-400));
@@ -345,7 +345,7 @@
 	   stage's colour on a faint wash of it. */
 	--cms-color-stage-main-ink: light-dark(white, var(--cms-color-stage-main));
 	--cms-color-stage-draft-ink: light-dark(
-		color-mix(in oklch, var(--cms-color-stage-draft), var(--cms-color-shade) 55%),
+		color-mix(in oklab, var(--cms-color-stage-draft), var(--cms-color-shade) 55%),
 		var(--cms-color-stage-draft)
 	);
 	--cms-color-stage-mine-ink: light-dark(white, var(--cms-color-stage-mine));
@@ -355,55 +355,55 @@
 	--cms-color-stage-idle: var(--cms-color-text-subtle);
 	--cms-color-stage-offline: var(--cms-color-stage-idle);
 	--cms-color-stage-idle-ink: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-color-stage-idle),
 		var(--cms-color-shade) 18%
 	);
 	--cms-color-stage-offline-ink: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-color-stage-offline),
 		var(--cms-color-shade) 18%
 	);
 	--cms-color-success: light-dark(var(--cms-color-green-600), var(--cms-color-green-400));
 	--cms-color-success-text: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-color-success),
 		var(--cms-color-shade) 12%
 	);
 	--cms-color-success-surface: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-color-success),
 		var(--cms-color-surface) 88%
 	);
 
 	--cms-color-warning: light-dark(var(--cms-color-amber-600), var(--cms-color-amber-400));
 	--cms-color-warning-text: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-color-warning),
 		var(--cms-color-shade) 12%
 	);
 	--cms-color-warning-surface: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-color-warning),
 		var(--cms-color-surface) 88%
 	);
 
 	--cms-color-danger: light-dark(var(--cms-color-red-600), var(--cms-color-red-400));
 	--cms-color-danger-hover: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-color-danger),
 		var(--cms-color-shade) 12%
 	);
-	--cms-color-danger-text: color-mix(in oklch, var(--cms-color-danger), var(--cms-color-shade) 12%);
+	--cms-color-danger-text: color-mix(in oklab, var(--cms-color-danger), var(--cms-color-shade) 12%);
 	--cms-color-danger-surface: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-color-danger),
 		var(--cms-color-surface) 90%
 	);
 
 	/* The palette's own vermillion clears only 3:1: edges and markers, never text. */
 	--cms-color-danger-border: light-dark(var(--cms-color-red-500), var(--cms-color-red-400));
-	--cms-color-danger-border-soft: color-mix(in oklch, var(--cms-color-danger), transparent 70%);
+	--cms-color-danger-border-soft: color-mix(in oklab, var(--cms-color-danger), transparent 70%);
 
 	/**
 	 * Component — controls
@@ -427,14 +427,14 @@
 	--cms-button-primary-bg: var(--cms-color-accent);
 	--cms-button-primary-text: var(--cms-color-text-on-accent);
 	--cms-button-primary-border: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-button-primary-bg),
 		var(--cms-color-black) 25%
 	);
 	--cms-button-primary-hover-bg: var(--cms-color-accent-hover);
 	--cms-button-primary-hover-text: var(--cms-button-primary-text);
 	--cms-button-primary-hover-border: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-button-primary-hover-bg),
 		var(--cms-color-black) 25%
 	);
@@ -471,14 +471,14 @@
 	--cms-button-danger-solid-bg: var(--cms-color-danger);
 	--cms-button-danger-solid-text: var(--cms-color-text-on-fill);
 	--cms-button-danger-solid-border: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-button-danger-solid-bg),
 		var(--cms-color-black) 25%
 	);
 	--cms-button-danger-solid-hover-bg: var(--cms-color-danger-hover);
 	--cms-button-danger-solid-hover-text: var(--cms-button-danger-solid-text);
 	--cms-button-danger-solid-hover-border: color-mix(
-		in oklch,
+		in oklab,
 		var(--cms-button-danger-solid-hover-bg),
 		var(--cms-color-black) 25%
 	);
