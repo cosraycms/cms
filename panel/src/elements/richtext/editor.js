@@ -11,12 +11,12 @@ import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 import { dropCursor } from 'prosemirror-dropcursor';
 import { gapCursor } from 'prosemirror-gapcursor';
-import { schema, parser, serializer } from './schema.js';
+import { schema, serializer } from './schema.js';
 import { buildKeymap, buildInputRules } from './keymap.js';
 import { bubbleMenu } from './bubble-menu.js';
 import { flatten, lineText, linePlugins, toLine } from './line.js';
 import { clean } from './vocabulary.js';
-import { docToPm, pmToDoc } from './format.js';
+import { docToPm, parseHtml, pmToDoc } from './format.js';
 
 /**
  * The internal editor driver seam: components talk documents in the
@@ -52,12 +52,6 @@ import { docToPm, pmToDoc } from './format.js';
  * @property {string} [placeholder] Shown on a blank document's empty line; none when empty.
  */
 
-/** @param {string} html */
-function parseContent(html) {
-	const container = document.createElement('div');
-	container.innerHTML = html;
-	return parser.parse(container);
-}
 
 /**
  * @param {EditorState} state
@@ -224,7 +218,7 @@ export default function createEditor(options) {
 		},
 
 		setContent(html) {
-			const { content } = clean(new Slice(parseContent(html).content, 0, 0), vocabulary);
+			const { content } = clean(new Slice(parseHtml(html).content, 0, 0), vocabulary);
 			const tr = view.state.tr.replaceWith(
 				0,
 				view.state.doc.content.size,

@@ -82,10 +82,18 @@ export function htmlToDoc(html) {
 		return null;
 	}
 
-	const container = document.createElement('div');
-	container.innerHTML = html;
+	return pmToDoc(parseHtml(html));
+}
 
-	return pmToDoc(parser.parse(container));
+/**
+ * Parses stored or typed HTML into a document of the schema.
+ *
+ * @param {string} html
+ * @returns {PmNode}
+ */
+export function parseHtml(html) {
+	// An inert document: markup parsed into the live one loads images and runs their handlers.
+	return parser.parse(new DOMParser().parseFromString(html, 'text/html').body);
 }
 
 /** @returns {PmNode} */
