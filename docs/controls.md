@@ -289,7 +289,7 @@ The [host](../panel/src/lib/host.js) assigns JavaScript properties, not attribut
 | --- | --- |
 | `value` | Full stored value shape, usually a locale map |
 | `meta` | Field metadata when present |
-| `field` | Field properties; `immutable` signals read-only, `presentation: 'block'` requests the current content-first block presentation |
+| `field` | Field properties; `label` names the control, `descriptionId`, when the field has a description, is the id to reference with `aria-describedby`, `immutable` signals read-only, `presentation: 'block'` requests the current content-first block presentation |
 | `node` | Owner node UID, or an empty string during creation |
 | `locale` | Selected editing locale; neutral controls still use `zxx` |
 | `locales` | `{default, all: [{id, title, fallback?}]}` |

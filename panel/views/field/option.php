@@ -24,7 +24,12 @@ $options = array_map(
 );
 ?>
 <?php if (($props['display'] ?? 'select') === 'radio'): ?>
-	<div class="cms-radio-group" id="<?= escape($id) ?>">
+	<div
+		class="cms-radio-group"
+		id="<?= escape($id) ?>"
+		role="radiogroup"
+		aria-labelledby="<?= escape($id) ?>-label"
+		<?= isset($field['descriptionId']) ? 'aria-describedby="' . escape((string) $field['descriptionId']) . '"' : '' ?>>
 		<?php foreach ($options as $option): ?>
 			<label class="cms-radio-option">
 				<input
@@ -44,6 +49,7 @@ $options = array_map(
 		class="cms-select"
 		id="<?= escape($id) ?>"
 		name="<?= escape($name) ?>"
+		<?= isset($field['descriptionId']) ? 'aria-describedby="' . escape((string) $field['descriptionId']) . '"' : '' ?>
 		<?= $required ? 'required' : '' ?>
 		<?= $disabled ? 'disabled' : '' ?>>
 		<?php foreach ($options as $option): ?>

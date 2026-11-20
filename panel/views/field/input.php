@@ -23,5 +23,6 @@ $value = is_scalar($value) ? (string) $value : '';
 			<?= $attr ?>="<?= escape((string) $attrValue) ?>"
 		<?php endif ?>
 	<?php endforeach ?>
+	<?= isset($field['descriptionId']) ? 'aria-describedby="' . escape((string) $field['descriptionId']) . '"' : '' ?>
 	<?= $field['required'] ?? false ? 'required' : '' ?>
 	<?= $field['immutable'] ?? false ? 'readonly' : '' ?> />

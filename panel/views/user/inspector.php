@@ -55,13 +55,15 @@ $hide = __('user:access-hide');
 				<div class="cms-inspector-field" data-field="active">
 					<label class="cms-inspector-toggle">
 						<span class="cms-inspector-copy">
-							<span class="cms-inspector-title"><?= escape(__('user:active')) ?></span>
-							<span class="cms-inspector-help"><?= escape(__('user:active-help')) ?></span>
+							<span class="cms-inspector-title" id="user-active-title"><?= escape(__('user:active')) ?></span>
+							<span class="cms-inspector-help" id="user-active-help"><?= escape(__('user:active-help')) ?></span>
 						</span>
 						<input
 							type="checkbox"
 							role="switch"
 							class="cms-switch"
+							aria-labelledby="user-active-title"
+							aria-describedby="user-active-help"
 							name="active"
 							value="1"
 							<?= $user->active ? 'checked' : '' ?> />
@@ -71,7 +73,11 @@ $hide = __('user:access-hide');
 				<?php if ($roles !== []): ?>
 					<div class="cms-inspector-field" data-field="roles">
 						<div class="cms-inspector-label" id="user-roles-label"><?= escape(__('user:roles')) ?></div>
-						<div class="cms-radio-group" role="group" aria-labelledby="user-roles-label">
+						<div
+							class="cms-radio-group"
+							role="group"
+							aria-labelledby="user-roles-label"
+							aria-describedby="user-roles-help">
 							<?php foreach ($roles as $role): ?>
 								<label class="cms-checkbox-label">
 									<input
@@ -85,7 +91,7 @@ $hide = __('user:access-hide');
 								</label>
 							<?php endforeach ?>
 						</div>
-						<span class="cms-inspector-help"><?= escape(__('user:roles-help')) ?></span>
+						<span class="cms-inspector-help" id="user-roles-help"><?= escape(__('user:roles-help')) ?></span>
 					</div>
 				<?php endif ?>
 			</fieldset>

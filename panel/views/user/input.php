@@ -22,7 +22,7 @@ $width = (int) ($width ?? 50);
 		<div>
 			<span class="cms-field-name"><?= escape($label) ?></span>
 			<?php if ($required): ?>
-				<span class="cms-field-requirement"><?= escape(__('field:required')) ?></span>
+				<span class="cms-field-requirement" aria-hidden="true"><?= escape(__('field:required')) ?></span>
 			<?php endif ?>
 		</div>
 	</label>
@@ -35,10 +35,11 @@ $width = (int) ($width ?? 50);
 				type="<?= escape($type) ?>"
 				value="<?= escape($value) ?>"
 				autocomplete="<?= escape($autocomplete) ?>"
+				<?= is_string($help) ? 'aria-describedby="user-' . escape($name) . '-help"' : '' ?>
 				<?= $required ? 'required' : '' ?> />
 		</div>
 		<?php if (is_string($help)): ?>
-			<div class="cms-field-description"><?= escape($help) ?></div>
+			<div class="cms-field-description" id="user-<?= escape($name) ?>-help"><?= escape($help) ?></div>
 		<?php endif ?>
 	</div>
 </div>

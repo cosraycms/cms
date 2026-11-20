@@ -40,6 +40,7 @@ $palette = array_map(
 		name="<?= escape($name) ?>"
 		value="<?= escape($value) ?>"
 		data-color-value
+		<?= isset($field['descriptionId']) ? 'aria-describedby="' . escape((string) $field['descriptionId']) . '"' : '' ?>
 		autocomplete="off"
 		spellcheck="false"
 		<?= $field['required'] ?? false ? 'required' : '' ?>

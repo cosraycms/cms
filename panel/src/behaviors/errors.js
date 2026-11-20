@@ -27,6 +27,7 @@ const PROBLEMS = 'editor-problems';
 const FORM = 'node-editor-form';
 const INVALID = 'data-invalid';
 const MESSAGE = 'data-error-message';
+const NOTE = 'cms-error-';
 const EMPTY = new Set(['missing', 'null', 'rule.required']);
 
 /**
@@ -264,13 +265,36 @@ function addErrorLocale(field, locale) {
 }
 
 /**
+ * Adds an error note to the control's descriptions, or without a note
+ * takes all of them out again; the field's own description stays.
+ *
+ * @param {Element} control
+ * @param {string} [note]
+ */
+function describe(control, note) {
+	const ids = (control.getAttribute('aria-describedby') ?? '')
+		.split(' ')
+		.filter((id) => id !== '' && (note !== undefined || !id.startsWith(NOTE)));
+
+	if (note && !ids.includes(note)) {
+		ids.push(note);
+	}
+
+	if (ids.length > 0) {
+		control.setAttribute('aria-describedby', ids.join(' '));
+	} else {
+		control.removeAttribute('aria-describedby');
+	}
+}
+
+/**
  * @param {Element} field
  */
 function unmark(field) {
 	field.querySelectorAll(`[${MESSAGE}]`).forEach((message) => message.remove());
 	field.querySelectorAll('[aria-invalid]').forEach((control) => {
 		control.removeAttribute('aria-invalid');
-		control.removeAttribute('aria-describedby');
+		describe(control);
 	});
 	field.querySelectorAll('.has-error').forEach((badge) => badge.classList.remove('has-error'));
 	field.removeAttribute(INVALID);
@@ -412,7 +436,7 @@ function show(problem) {
 			note = document.createElement('p');
 			note.className = 'cms-field-error';
 			note.setAttribute(MESSAGE, '');
-			note.id = `cms-error-${++counter}`;
+			note.id = `${NOTE}${++counter}`;
 			note.textContent = text;
 			notes.set(text, note);
 
@@ -431,7 +455,7 @@ function show(problem) {
 
 		if (native(issue.control)) {
 			issue.control.setAttribute('aria-invalid', 'true');
-			issue.control.setAttribute('aria-describedby', note.id);
+			describe(issue.control, note.id);
 		}
 
 		// An issue inside the meta dialog is invisible until opened.

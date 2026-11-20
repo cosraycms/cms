@@ -48,10 +48,10 @@ $manages = (bool) $manages;
 						max="10"
 						placeholder="∞"
 						value="<?= escape($maxDepth === null ? '' : (string) $maxDepth) ?>"
-						<?= isset($errors['maxDepth']) ? 'aria-invalid="true"' : '' ?> />
+						<?= isset($errors['maxDepth']) ? 'aria-describedby="menu-max-depth-error" aria-invalid="true"' : '' ?> />
 				</div>
 				<?php if (isset($errors['maxDepth'])): ?>
-					<p class="cms-menus-error"><?= escape((string) $errors['maxDepth']) ?></p>
+					<p class="cms-menus-error" id="menu-max-depth-error"><?= escape((string) $errors['maxDepth']) ?></p>
 				<?php endif ?>
 			</div>
 
@@ -67,10 +67,10 @@ $manages = (bool) $manages;
 						pattern="[a-z0-9-]{1,32}"
 						value="<?= escape($handle) ?>"
 						<?= $manages ? '' : 'disabled' ?>
-						<?= isset($errors['menu']) ? 'aria-invalid="true"' : '' ?> />
+						<?= isset($errors['menu']) ? 'aria-describedby="menu-handle-error" aria-invalid="true"' : '' ?> />
 				</div>
 				<?php if (isset($errors['menu'])): ?>
-					<p class="cms-menus-error"><?= escape((string) $errors['menu']) ?></p>
+					<p class="cms-menus-error" id="menu-handle-error"><?= escape((string) $errors['menu']) ?></p>
 				<?php endif ?>
 			</div>
 

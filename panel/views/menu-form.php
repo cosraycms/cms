@@ -58,9 +58,10 @@ $maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 							required
 							pattern="[a-z0-9-]{1,32}"
 							value="<?= escape($handle) ?>"
+							aria-describedby="menu-handle-help"
 							<?= isset($errors['menu']) ? 'aria-invalid="true"' : '' ?> />
 					</div>
-					<p class="cms-menus-help"><?= escape(__('menu:handle-help')) ?></p>
+					<p class="cms-menus-help" id="menu-handle-help"><?= escape(__('menu:handle-help')) ?></p>
 				</div>
 
 				<?php $this->include('menu/localized', [
@@ -87,11 +88,12 @@ $maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 							max="10"
 							placeholder="∞"
 							value="<?= escape($maxDepth === null ? '' : (string) $maxDepth) ?>"
+							aria-describedby="menu-max-depth-help<?= isset($errors['maxDepth']) ? ' menu-max-depth-error' : '' ?>"
 							<?= isset($errors['maxDepth']) ? 'aria-invalid="true"' : '' ?> />
 					</div>
-					<p class="cms-menus-help"><?= escape(__('menu:max-depth-help')) ?></p>
+					<p class="cms-menus-help" id="menu-max-depth-help"><?= escape(__('menu:max-depth-help')) ?></p>
 					<?php if (isset($errors['maxDepth'])): ?>
-						<p class="cms-menus-error"><?= escape((string) $errors['maxDepth']) ?></p>
+						<p class="cms-menus-error" id="menu-max-depth-error"><?= escape((string) $errors['maxDepth']) ?></p>
 					<?php endif ?>
 				</div>
 

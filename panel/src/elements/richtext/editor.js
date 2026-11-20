@@ -46,6 +46,7 @@ import { docToPm, parseHtml, pmToDoc } from './format.js';
  * @property {boolean} [line] One paragraph of text: Enter does nothing and a paste lands on the line.
  * @property {string} [label] The accessible name, where no label element names the editor.
  * @property {boolean} [required] Tells assistive technology that the field needs content.
+ * @property {string} [describedBy] The id of the field's description.
  * @property {HTMLElement} [bubbleElement] The menu over a selection, for a field without a toolbar.
  * @property {(uid: string) => string | null} [assetUrl] Resolve an asset uid to a display URL for inline images.
  * @property {() => boolean} [editable] Whether the document takes input; the view stays selectable
@@ -122,6 +123,7 @@ export default function createEditor(options) {
 		line = false,
 		label,
 		required = false,
+		describedBy,
 		bubbleElement,
 		assetUrl,
 		editable,
@@ -148,11 +150,12 @@ export default function createEditor(options) {
 
 	plugins.push(placeholderPlugin(hint));
 
-	if (label || required) {
+	if (label || required || describedBy) {
 		/** @type {Record<string, string>} */
 		const attributes = {};
 		if (label) attributes['aria-label'] = label;
 		if (required) attributes['aria-required'] = 'true';
+		if (describedBy) attributes['aria-describedby'] = describedBy;
 		plugins.push(new Plugin({ props: { attributes } }));
 	}
 

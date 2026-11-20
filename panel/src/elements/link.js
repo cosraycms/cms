@@ -15,6 +15,7 @@ import { linkRow, linkText } from './link/row.js';
 /**
  * @typedef {object} LinkField
  * @property {string} [label]
+ * @property {string} [descriptionId]
  * @property {boolean} [immutable]
  * @property {boolean} [translate]
  */
@@ -89,6 +90,10 @@ export class CosrayLink extends HTMLElement {
 
 		if (this.field.label) {
 			this.#root.setAttribute('aria-label', this.field.label);
+		}
+
+		if (this.field.descriptionId) {
+			this.#root.setAttribute('aria-describedby', this.field.descriptionId);
 		}
 
 		this.append(this.#root);

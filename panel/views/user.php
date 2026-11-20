@@ -148,7 +148,11 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 									) ?></div></label>
 									<div class="cms-field-body">
 										<div class="cms-field-control">
-											<select class="cms-input" id="user-panel-region" name="panel_region">
+											<select
+												class="cms-input"
+												id="user-panel-region"
+												name="panel_region"
+												<?= is_string($formatExample) ? 'aria-describedby="user-panel-region-example"' : '' ?>>
 												<option value=""><?= escape(
 													is_string($panelRegionAuto)
 														? __('user:panel-region-auto', ['region' => $panelRegionAuto])
@@ -162,7 +166,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 											</select>
 										</div>
 										<?php if (is_string($formatExample)): ?>
-											<div class="cms-field-description"><?= escape(
+											<div class="cms-field-description" id="user-panel-region-example"><?= escape(
 												__('user:panel-format-example', ['example' => $formatExample]),
 											) ?></div>
 										<?php endif ?>

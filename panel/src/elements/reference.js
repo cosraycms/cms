@@ -24,6 +24,7 @@ import { panelBase } from '../lib/runtime.js';
  * @property {string} [name]
  * @property {string} [label]
  * @property {boolean} [required]
+ * @property {string} [descriptionId]
  * @property {boolean} [immutable]
  * @property {string} [ownerType]
  * @property {{ max?: number }} [limit]
@@ -527,6 +528,10 @@ export class CosrayReference extends HTMLElement {
 			input.setAttribute('aria-required', 'true');
 		} else {
 			input.removeAttribute('aria-required');
+		}
+
+		if (this.field?.descriptionId) {
+			input.setAttribute('aria-describedby', this.field.descriptionId);
 		}
 		input.readOnly = immutable;
 		input.placeholder = single && title ? title : __('reference:placeholder');

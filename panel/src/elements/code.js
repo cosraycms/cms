@@ -26,6 +26,7 @@ import {
  * @typedef {object} CodeField
  * @property {string} name
  * @property {string} [label]
+ * @property {string} [descriptionId]
  * @property {boolean} [required]
  * @property {boolean} [immutable]
  * @property {boolean} [translate]
@@ -232,6 +233,10 @@ export class CosrayCode extends HTMLElement {
 
 		if (this.field.label) {
 			this.#editor.textarea.setAttribute('aria-label', this.field.label);
+		}
+
+		if (this.field.descriptionId) {
+			this.#editor.textarea.setAttribute('aria-describedby', this.field.descriptionId);
 		}
 
 		if (syntax !== this.#syntax[ZXX]) {

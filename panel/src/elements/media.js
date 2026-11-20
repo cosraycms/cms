@@ -50,6 +50,7 @@ function error(owner, message) {
  * @typedef {object} MediaField
  * @property {string} [name]
  * @property {string} [label]
+ * @property {string} [descriptionId]
  * @property {boolean} [immutable] The field cannot change: no bar, no drop zone, no per-item
  *     actions.
  * @property {boolean} [translate]
@@ -442,6 +443,10 @@ class MediaControl extends HTMLElement {
 
 		if (this.field.label) {
 			frame.setAttribute('aria-label', this.field.label);
+		}
+
+		if (this.field.descriptionId) {
+			frame.setAttribute('aria-describedby', this.field.descriptionId);
 		}
 
 		this.#frame = frame;

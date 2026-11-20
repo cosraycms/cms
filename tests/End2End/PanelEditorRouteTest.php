@@ -667,6 +667,34 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//textarea[@name="content[intro][value][de]"][@rows="8"]', $html);
 	}
 
+	public function testEveryLocaleVariantIsDescribedByTheFieldDescription(): void
+	{
+		$this->authenticateAs('editor');
+		$documentType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-document'",
+		)->first();
+		$typeId = $documentType ? (int) $documentType['type'] : $this->createTestType('test-document');
+		$this->createTestNode([
+			'uid' => 'panel-editor-described',
+			'type' => $typeId,
+			'published' => true,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['zxx' => 'Described']],
+			],
+		]);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/node/panel-editor-described'));
+
+		foreach (['en', 'de'] as $locale) {
+			$this->assertHtmlNodeExists(
+				"//textarea[@name=\"content[intro][value][{$locale}]\"]"
+					. '[@aria-describedby = //div[@class="cms-field-description"]'
+					. '[normalize-space() = "A brief introduction to the document"]/@id]',
+				$html,
+			);
+		}
+	}
+
 	public function testEmbeddedFieldsRenderInsideConfiguredFieldset(): void
 	{
 		$this->authenticateAs('editor');

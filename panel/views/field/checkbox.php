@@ -21,6 +21,7 @@ $value = u($value ?? null);
 		id="<?= escape($id) ?>"
 		role="radiogroup"
 		aria-labelledby="<?= escape($id) ?>-label"
+		<?= isset($field['descriptionId']) ? 'aria-describedby="' . escape((string) $field['descriptionId']) . '"' : '' ?>
 		data-checkbox>
 		<?php foreach (['null' => null, 'true' => true, 'false' => false] as $state => $choice): ?>
 			<label class="cms-tristate-option">
@@ -50,7 +51,7 @@ $value = u($value ?? null);
 				role="switch"
 				class="cms-switch"
 				aria-labelledby="<?= escape($id) ?>-label"
-				aria-describedby="<?= escape($id) ?>-status"
+				aria-describedby="<?= escape(trim("{$id}-status " . ($field['descriptionId'] ?? ''))) ?>"
 				value="1"
 				<?= $value ? 'checked' : '' ?>
 				<?= $immutable ? 'disabled' : '' ?> />

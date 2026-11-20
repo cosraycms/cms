@@ -19,5 +19,6 @@ $fallbackPreview ??= false;
 	name="<?= escape($name) ?>"
 	<?= is_string($placeholder) && $placeholder !== '' ? 'placeholder="' . escape($placeholder) . '"' : '' ?>
 	rows="<?= $rows ?>"
+	<?= isset($field['descriptionId']) ? 'aria-describedby="' . escape((string) $field['descriptionId']) . '"' : '' ?>
 	<?= $field['required'] ?? false ? 'required' : '' ?>
 	<?= $field['immutable'] ?? false ? 'readonly' : '' ?>><?= escape($value) ?></textarea>

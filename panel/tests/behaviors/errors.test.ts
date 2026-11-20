@@ -12,24 +12,24 @@ function editor(): void {
 		<form id="node-editor-form">
 			<div id="editor-errors" class="cms-errors" tabindex="-1" hidden></div>
 			<div class="cms-field" data-field="title">
-				<label class="cms-field-label"><div><span class="cms-field-name">Title</span></div></label>
+				<div class="cms-field-label"><label><span class="cms-field-name">Title</span></label></div>
 				<div class="cms-field-control">
 					<div class="cms-locale-variant" data-locale="en">
-						<input name="content[title][value][en]" type="text" />
+						<input name="content[title][value][en]" type="text" aria-describedby="field-title-description" />
 					</div>
 					<div class="cms-locale-variant" data-locale="de" hidden>
 						<input name="content[title][value][de]" type="text" />
 					</div>
 				</div>
-				<div class="cms-field-description">About the title</div>
+				<div class="cms-field-description" id="field-title-description">About the title</div>
 			</div>
 			<div class="cms-field" data-field="body">
 				<div class="cms-field-control"><x-host name="content[body][json]"></x-host></div>
 			</div>
 			<div class="cms-field" data-field="styled">
-				<label class="cms-field-label"><div><span class="cms-field-name">Styled</span></div>
+				<div class="cms-field-label"><label><span class="cms-field-name">Styled</span></label>
 					<button type="button" class="cms-field-button" data-dialog-open="meta">Meta</button>
-				</label>
+				</div>
 				<div class="cms-field-control"><input name="content[styled][value][zxx]" type="text" /></div>
 				<dialog data-dialog="meta">
 					<input name="content[styled][meta][cssClass][zxx]" type="text" />
@@ -211,7 +211,7 @@ describe('errors behavior', () => {
 		expect(wrapper.getAttribute('data-invalid')).toBe('true');
 		expect(input?.getAttribute('aria-invalid')).toBe('true');
 		expect(note?.textContent).toBe('Title is required');
-		expect(input?.getAttribute('aria-describedby')).toBe(note?.id);
+		expect(input?.getAttribute('aria-describedby')).toBe(`field-title-description ${note?.id}`);
 	});
 
 	it('focuses the first field on arrival', () => {
@@ -541,6 +541,7 @@ describe('errors behavior', () => {
 		expect(field('title').hasAttribute('data-invalid')).toBe(false);
 		expect(field('title').querySelector('[data-error-message]')).toBeNull();
 		expect(title.hasAttribute('aria-invalid')).toBe(false);
+		expect(title.getAttribute('aria-describedby')).toBe('field-title-description');
 		// The untouched field stays, in the summary too.
 		expect(field('styled').getAttribute('data-invalid')).toBe('true');
 		expect(box.hidden).toBe(false);

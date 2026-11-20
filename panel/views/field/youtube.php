@@ -44,6 +44,7 @@ $ratio = $side('aspectRatioX', 16) . ' / ' . $side('aspectRatioY', 9);
 			placeholder="<?= escape($placeholder) ?>"
 			aria-label="<?= escape((string) ($field['label'] ?? __('block:youtube'))) ?>"
 			<?= !$readonly && ($field['required'] ?? false) ? 'aria-required="true"' : '' ?>
+			<?= isset($field['descriptionId']) ? 'aria-describedby="' . escape((string) $field['descriptionId']) . '"' : '' ?>
 			autocomplete="off"
 			spellcheck="false"
 			<?= $readonly ? 'readonly' : '' ?> />

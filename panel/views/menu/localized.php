@@ -18,6 +18,7 @@ $helpHidden = (bool) ($helpHidden ?? false);
 $section = u($section ?? null);
 $sectionHide = u($sectionHide ?? null);
 $sectionHidden = (bool) ($sectionHidden ?? false);
+$described = trim((is_string($help) ? "{$id}-help " : '') . (is_string($error) ? "{$id}-error" : ''));
 ?>
 <div
 	class="cms-field<?= is_string($error) ? ' has-error' : '' ?>"
@@ -42,6 +43,7 @@ $sectionHidden = (bool) ($sectionHidden ?? false);
 					name="<?= escape($name) ?>[<?= escape($locale['id']) ?>]"
 					type="text"
 					value="<?= escape((string) ($values[$locale['id']] ?? '')) ?>"
+					<?= $described !== '' ? 'aria-describedby="' . escape($described) . '"' : '' ?>
 					<?= is_string($error) ? 'aria-invalid="true"' : '' ?> />
 			</div>
 		<?php endforeach ?>
@@ -49,10 +51,11 @@ $sectionHidden = (bool) ($sectionHidden ?? false);
 	<?php if (is_string($help)): ?>
 		<p
 			class="cms-menus-help"
+			id="<?= escape($id) ?>-help"
 			<?= is_string($helpSection) ? 'data-menu-section="' . escape($helpSection) . '"' : '' ?>
 			<?= $helpHidden ? 'hidden' : '' ?>><?= escape($help) ?></p>
 	<?php endif ?>
 	<?php if (is_string($error)): ?>
-		<p class="cms-menus-error"><?= escape($error) ?></p>
+		<p class="cms-menus-error" id="<?= escape($id) ?>-error"><?= escape($error) ?></p>
 	<?php endif ?>
 </div>

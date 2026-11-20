@@ -180,8 +180,8 @@ $saveHelp = match (true) {
 			</div>
 			<label class="cms-inspector-toggle">
 				<span class="cms-inspector-copy">
-					<span class="cms-inspector-title"><?= escape(__($routable ? 'editor:published-label' : 'editor:active-label')) ?></span>
-					<span class="cms-inspector-help"><?= escape(__(match (true) {
+					<span class="cms-inspector-title" id="editor-published-title"><?= escape(__($routable ? 'editor:published-label' : 'editor:active-label')) ?></span>
+					<span class="cms-inspector-help" id="editor-published-help"><?= escape(__(match (true) {
 						$routable => $drafts ? 'editor:published-help' : 'editor:published-help-saved',
 						default => $drafts ? 'editor:active-help' : 'editor:active-help-saved',
 					})) ?></span>
@@ -189,7 +189,10 @@ $saveHelp = match (true) {
 				<input
 					id="editor-published-switch"
 					type="checkbox"
+					role="switch"
 					class="cms-switch is-publish"
+					aria-labelledby="editor-published-title"
+					aria-describedby="editor-published-help"
 					form="node-editor-visibility"
 					name="published"
 					value="1"
@@ -198,12 +201,15 @@ $saveHelp = match (true) {
 			</label>
 			<label class="cms-inspector-toggle">
 				<span class="cms-inspector-copy">
-					<span class="cms-inspector-title"><?= escape(__('editor:listed-label')) ?></span>
-					<span class="cms-inspector-help"><?= escape(__('editor:listed-help')) ?></span>
+					<span class="cms-inspector-title" id="editor-listed-title"><?= escape(__('editor:listed-label')) ?></span>
+					<span class="cms-inspector-help" id="editor-listed-help"><?= escape(__('editor:listed-help')) ?></span>
 				</span>
 				<input
 					type="checkbox"
+					role="switch"
 					class="cms-switch"
+					aria-labelledby="editor-listed-title"
+					aria-describedby="editor-listed-help"
 					form="node-editor-visibility"
 					name="listed"
 					value="1"

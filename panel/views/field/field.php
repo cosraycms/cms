@@ -49,6 +49,12 @@ $columns = $controlName === 'blocks'
 
 $labelFor = $idRoot . '-' . ($variants ? $defaultLocale : $neutral);
 $description = $field['description'] ?? null;
+
+// Controls point aria-describedby at the description; element controls
+// read the id from their field.
+if (is_string($description) && $description !== '') {
+	$field['descriptionId'] = "{$idRoot}-description";
+}
 $required = (bool) ($field['required'] ?? false);
 $immutable = (bool) ($field['immutable'] ?? false);
 $when = $field['when'] ?? null;
@@ -174,7 +180,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			<?php endif ?>
 		</div>
 		<?php if (is_string($description) && $description !== ''): ?>
-			<div class="cms-field-description"><?= escape($description) ?></div>
+			<div class="cms-field-description" id="<?= escape($idRoot) ?>-description"><?= escape($description) ?></div>
 		<?php endif ?>
 	</div>
 	<?php if (is_array($metaControl)): ?>
