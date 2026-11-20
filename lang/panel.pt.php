@@ -25,6 +25,7 @@ return [
 		'common:error' => 'Erro',
 		'common:load-more' => 'Carregar mais',
 		'common:loading' => 'A carregar…',
+		'common:notifications' => 'Notificações',
 		'common:ok' => 'OK',
 		'common:open' => 'Abrir',
 		'common:remove' => 'Remover',

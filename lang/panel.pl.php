@@ -38,6 +38,7 @@ return [
 		'common:error' => 'Błąd',
 		'common:load-more' => 'Wczytaj więcej',
 		'common:loading' => 'Wczytywanie…',
+		'common:notifications' => 'Powiadomienia',
 		'common:ok' => 'OK',
 		'common:open' => 'Otwórz',
 		'common:remove' => 'Usuń',

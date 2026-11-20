@@ -28,6 +28,7 @@ return [
 		'common:error' => 'Erreur',
 		'common:load-more' => 'Charger plus',
 		'common:loading' => 'Chargement…',
+		'common:notifications' => 'Notifications',
 		'common:ok' => 'OK',
 		'common:open' => 'Ouvrir',
 		'common:remove' => 'Retirer',

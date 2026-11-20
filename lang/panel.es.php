@@ -31,6 +31,7 @@ return [
 		'common:error' => 'Error',
 		'common:load-more' => 'Cargar más',
 		'common:loading' => 'Cargando…',
+		'common:notifications' => 'Notificaciones',
 		'common:ok' => 'Aceptar',
 		'common:open' => 'Abrir',
 		'common:remove' => 'Quitar',

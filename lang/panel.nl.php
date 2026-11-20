@@ -25,6 +25,7 @@ return [
 		'common:error' => 'Fout',
 		'common:load-more' => 'Meer laden',
 		'common:loading' => 'Laden…',
+		'common:notifications' => 'Meldingen',
 		'common:ok' => 'OK',
 		'common:open' => 'Openen',
 		'common:remove' => 'Verwijderen',
