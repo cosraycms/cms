@@ -2,18 +2,16 @@
 
 use function Cosray\escape;
 
-// Out-of-band response of the editor's preview: the overlay with the working
+// Out-of-band response of the editor's preview: the dialog with the working
 // state and the user's edits on top, which the request kept without saving
 // them, and the status with those edits.
 
 $preview = (string) u($preview);
 ?>
-<div id="editor-preview" class="cms-node-preview" hx-swap-oob="true">
-	<button type="button" class="cms-node-preview-close" data-overlay-close>
-		<?= escape(__('editor:close')) ?>
-	</button>
+<dialog id="editor-preview" class="cms-modal cms-node-preview" data-size="full" hx-swap-oob="true">
+	<?php $this->include('component/modal-header', ['title' => __('editor:preview')]) ?>
 	<iframe src="<?= escape($preview) ?>" title="<?= escape(__('editor:preview')) ?>"></iframe>
-</div>
+</dialog>
 <?php $this->include('component/status-dots', [
 	'status' => $status,
 	'id' => 'editor-status-dots',

@@ -182,7 +182,6 @@ return [
 		'editor:apply-publish-help' => 'Depois, os visitantes veem a versão principal',
 		'editor:cancel' => 'Cancelar',
 		'editor:changed' => 'alterado',
-		'editor:close' => 'fechar',
 		'editor:conflict-draft' => 'O rascunho foi alterado entretanto',
 		'editor:conflict-entry' => 'A entrada foi alterada entretanto',
 		'editor:conflict-help' => ':editor guardou em :time. As minhas alterações baseiam-se numa versão anterior – guardar substituiria esta versão.',

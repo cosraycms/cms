@@ -300,7 +300,7 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 		<input type="hidden" name="_complete" value="1" />
 	</form>
 
-	<div id="editor-preview" hidden></div>
+	<dialog id="editor-preview" class="cms-modal cms-node-preview" data-size="full"></dialog>
 	<?php // The source of the requests that leave the editor after a form
 	// dropped it: no form, whose fields would end up in the URL. ?>
 	<span id="editor-leave" hidden data-dirty-bypass></span>

@@ -182,7 +182,6 @@ return [
 		'editor:apply-publish-help' => 'Les visiteurs voient ensuite la version principale',
 		'editor:cancel' => 'Annuler',
 		'editor:changed' => 'modifié',
-		'editor:close' => 'fermer',
 		'editor:conflict-draft' => 'Le brouillon a changé entre-temps',
 		'editor:conflict-entry' => 'L’entrée a changé entre-temps',
 		'editor:conflict-help' => ':editor a enregistré le :time. Mes modifications reposent sur une version plus ancienne – enregistrer écraserait cette version.',

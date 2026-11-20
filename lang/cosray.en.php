@@ -182,7 +182,6 @@ return [
 		'editor:apply-publish-help' => 'Visitors see the main version afterwards',
 		'editor:cancel' => 'Cancel',
 		'editor:changed' => 'changed',
-		'editor:close' => 'close',
 		'editor:conflict-draft' => 'The draft has changed meanwhile',
 		'editor:conflict-entry' => 'The entry has changed meanwhile',
 		'editor:conflict-help' => ':editor saved on :time. My changes are based on an older version – saving would overwrite this version.',

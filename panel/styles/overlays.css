@@ -25,6 +25,10 @@
 	&[data-size='wide'] {
 		--width: 72rem;
 	}
+	&[data-size='full'] {
+		--width: 100%;
+		height: calc(100dvh - 2 * var(--cms-space-4));
+	}
 	/* Sized by the viewport, not the content, so stepping through images keeps it still. */
 	&[data-size='stage'] {
 		--width: 80rem;

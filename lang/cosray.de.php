@@ -185,7 +185,6 @@ return [
 		'editor:apply-publish-help' => 'Besucher sehen die Hauptfassung danach',
 		'editor:cancel' => 'Abbrechen',
 		'editor:changed' => 'geändert',
-		'editor:close' => 'schließen',
 		'editor:conflict-draft' => 'Der Entwurf wurde inzwischen geändert',
 		'editor:conflict-entry' => 'Der Eintrag wurde inzwischen geändert',
 		'editor:conflict-help' => ':editor hat am :time gespeichert. Meine Änderungen beruhen auf einer älteren Fassung – Speichern würde diese Fassung überschreiben.',

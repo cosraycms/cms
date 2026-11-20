@@ -196,7 +196,6 @@ return [
 		'editor:apply-publish-help' => 'Następnie odwiedzający widzą wersję główną',
 		'editor:cancel' => 'Anuluj',
 		'editor:changed' => 'zmienione',
-		'editor:close' => 'zamknij',
 		'editor:conflict-draft' => 'Wersja robocza zmieniła się w międzyczasie',
 		'editor:conflict-entry' => 'Wpis zmienił się w międzyczasie',
 		'editor:conflict-help' => ':editor zapisał(a) :time. Moje zmiany opierają się na starszej wersji – zapisanie nadpisałoby tę wersję.',

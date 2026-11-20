@@ -182,7 +182,6 @@ return [
 		'editor:apply-publish-help' => 'Después, los visitantes ven la versión principal',
 		'editor:cancel' => 'Cancelar',
 		'editor:changed' => 'modificado',
-		'editor:close' => 'cerrar',
 		'editor:conflict-draft' => 'El borrador ha cambiado entretanto',
 		'editor:conflict-entry' => 'La entrada ha cambiado entretanto',
 		'editor:conflict-help' => ':editor guardó el :time. Mis cambios se basan en una versión anterior: guardar sobrescribiría esta versión.',

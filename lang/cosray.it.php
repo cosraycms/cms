@@ -182,7 +182,6 @@ return [
 		'editor:apply-publish-help' => 'Dopo, i visitatori vedono la versione principale',
 		'editor:cancel' => 'Annulla',
 		'editor:changed' => 'modificato',
-		'editor:close' => 'chiudi',
 		'editor:conflict-draft' => 'La bozza è cambiata nel frattempo',
 		'editor:conflict-entry' => 'La voce è cambiata nel frattempo',
 		'editor:conflict-help' => ':editor ha salvato il :time. Le mie modifiche si basano su una versione precedente – salvare sovrascriverebbe questa versione.',

@@ -185,7 +185,6 @@ return [
 		'editor:apply-publish-help' => 'Bezoekers zien daarna de hoofdversie',
 		'editor:cancel' => 'Annuleren',
 		'editor:changed' => 'gewijzigd',
-		'editor:close' => 'sluiten',
 		'editor:conflict-draft' => 'Het concept is intussen gewijzigd',
 		'editor:conflict-entry' => 'Het item is intussen gewijzigd',
 		'editor:conflict-help' => ':editor heeft op :time opgeslagen. Mijn wijzigingen zijn gebaseerd op een oudere versie – opslaan zou deze versie overschrijven.',
