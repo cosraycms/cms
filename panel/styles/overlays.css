@@ -305,6 +305,12 @@
 
 		&.is-active {
 			background: var(--cms-color-selected);
+
+			@media (forced-colors: active) {
+				forced-color-adjust: none;
+				background: Highlight;
+				color: HighlightText;
+			}
 		}
 
 		&.cms-action-menu-danger {
@@ -396,6 +402,12 @@
 		&[aria-selected='true'] {
 			border-bottom-color: var(--cms-color-accent);
 			color: var(--cms-color-accent);
+
+			@media (forced-colors: active) {
+				forced-color-adjust: none;
+				background: Highlight;
+				color: HighlightText;
+			}
 		}
 
 		&:focus-visible {

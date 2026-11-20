@@ -186,6 +186,12 @@
 			background: var(--current-bg);
 			color: var(--cms-color-text);
 
+			@media (forced-colors: active) {
+				forced-color-adjust: none;
+				background: Highlight;
+				color: HighlightText;
+			}
+
 			& .cms-icon {
 				color: currentColor;
 			}

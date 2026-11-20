@@ -255,7 +255,6 @@
 		font-size: var(--cms-font-size-sm);
 		font-weight: 500;
 		color: var(--cms-color-text-muted);
-		outline: none;
 	}
 
 	.cms-richtext-dropdown-button:hover {
@@ -263,7 +262,8 @@
 	}
 
 	.cms-richtext-dropdown-button:focus-visible {
-		box-shadow: inset 0 0 0 2px var(--cms-color-focus);
+		outline: 2px solid var(--cms-color-focus);
+		outline-offset: -2px;
 	}
 
 	.cms-richtext-compact-tools-button {

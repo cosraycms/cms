@@ -427,8 +427,14 @@
 		}
 
 		&:has(:focus-visible) {
-			border-color: var(--cms-color-focus);
-			box-shadow: var(--cms-focus-ring);
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		/* The colour is the content here, not decoration the system may replace. */
+		@media (forced-colors: active) {
+			forced-color-adjust: none;
+			border-color: ButtonText;
 		}
 	}
 
@@ -466,11 +472,19 @@
 			&[aria-pressed='true'] {
 				outline: 2px solid var(--cms-color-text);
 				outline-offset: 2px;
+
+				@media (forced-colors: active) {
+					outline-color: Highlight;
+				}
 			}
 
 			&:focus-visible {
-				border-color: var(--cms-color-focus);
-				box-shadow: var(--cms-focus-ring);
+				outline: var(--cms-focus-outline);
+				outline-offset: var(--cms-focus-offset);
+
+				@media (forced-colors: active) {
+					outline-color: CanvasText;
+				}
 			}
 
 			&:disabled {

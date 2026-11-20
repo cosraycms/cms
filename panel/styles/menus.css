@@ -347,6 +347,12 @@
 		/* Which item the pane is editing — a state, not a focus position. */
 		&.is-selected {
 			background: var(--cms-color-selected);
+
+			/* The system keeps the border but drops the background. */
+			@media (forced-colors: active) {
+				border-width: 3px;
+				border-style: double;
+			}
 		}
 
 		/* A hidden item is still fully editable, only visibly not part of the
