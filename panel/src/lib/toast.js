@@ -4,7 +4,8 @@
 // of band as a plain `<div data-toast="error">message</div>` appended to the
 // region; install() turns those into toasts after every swap. A full page
 // load leaves them in their out-of-band wrapper, which install() empties
-// into the region.
+// into the region. A modal dialog makes the region inert, so toasts raised
+// while one is open wait until the last one closes.
 
 import { __ } from './locale.js';
 
@@ -22,11 +23,49 @@ function region() {
 		element = document.createElement('div');
 		element.id = REGION;
 		element.className = 'cms-toasts';
+		element.setAttribute('role', 'region');
+		element.setAttribute('aria-label', __('common:notifications'));
 		element.setAttribute('aria-live', 'polite');
 		document.body.append(element);
 	}
 
 	return element;
+}
+
+/** @type {HTMLElement[]} */
+const held = [];
+
+/** @type {HTMLElement | null} */
+let returnTo = null;
+
+// Every panel dialog opens modal, and jsdom cannot match :modal.
+function blocked() {
+	return document.querySelector('dialog[open]') !== null;
+}
+
+/**
+ * Where focus goes when the focused toast closes: the next toast, else the
+ * place it came from.
+ *
+ * @param {HTMLElement} item
+ */
+function dismiss(item) {
+	const focused = item.contains(document.activeElement);
+	const items = Array.from(region().querySelectorAll('.cms-toasts-item'));
+	const index = items.indexOf(item);
+	const next = items[index + 1] ?? items[index - 1];
+
+	item.remove();
+
+	if (!focused) {
+		return;
+	}
+
+	const target = next?.querySelector('button') ?? returnTo;
+
+	if (target instanceof HTMLElement && target.isConnected) {
+		target.focus({ preventScroll: true });
+	}
 }
 
 /**
@@ -66,7 +105,7 @@ function upgrade(item) {
 	close.className = 'cms-toasts-close';
 	close.setAttribute('aria-label', __('common:close'));
 	close.textContent = '×';
-	close.addEventListener('click', () => item.remove());
+	close.addEventListener('click', () => dismiss(item));
 
 	delete item.dataset.toast;
 	item.className = `cms-toasts-item is-${kind}`;
@@ -88,6 +127,18 @@ export function toast(kind, message) {
 	const item = document.createElement('div');
 	item.dataset.toast = kind;
 	item.textContent = message;
+	show(item);
+}
+
+/** @param {HTMLElement} item */
+function show(item) {
+	if (blocked()) {
+		item.remove();
+		held.push(item);
+
+		return;
+	}
+
 	region().append(item);
 	upgrade(item);
 }
@@ -95,8 +146,29 @@ export function toast(kind, message) {
 function settle() {
 	for (const item of document.querySelectorAll(`#${REGION} > [data-toast]`)) {
 		if (item instanceof HTMLElement) {
-			upgrade(item);
+			show(item);
 		}
+	}
+}
+
+function release() {
+	if (!blocked()) {
+		held.splice(0).forEach(show);
+	}
+}
+
+/** @param {FocusEvent} event */
+function remember(event) {
+	const from = event.relatedTarget;
+	const to = event.target;
+
+	if (
+		to instanceof Node &&
+		region().contains(to) &&
+		from instanceof HTMLElement &&
+		!region().contains(from)
+	) {
+		returnTo = from;
 	}
 }
 
@@ -109,6 +181,15 @@ export function install() {
 
 	settle();
 	document.addEventListener('htmx:after:swap', settle);
+	// close does not bubble.
+	document.addEventListener('close', release, true);
+	document.addEventListener('focusin', remember);
 
-	return () => document.removeEventListener('htmx:after:swap', settle);
+	return () => {
+		document.removeEventListener('htmx:after:swap', settle);
+		document.removeEventListener('close', release, true);
+		document.removeEventListener('focusin', remember);
+		held.length = 0;
+		returnTo = null;
+	};
 }

@@ -139,6 +139,7 @@ return [
 		'common:move-right' => 'Mover a la derecha',
 		'common:move-up' => 'Mover hacia arriba',
 		'common:no' => 'No',
+		'common:notifications' => 'Notificaciones',
 		'common:open' => 'Abrir',
 		'common:reset' => 'Restablecer',
 		'common:save' => 'Guardar',

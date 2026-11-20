@@ -80,4 +80,43 @@ describe('toasts', () => {
 		]);
 		expect(document.querySelector('[hx-swap-oob]')).toBeNull();
 	});
+
+	it('holds toasts while a modal dialog is open and shows them once it closes', () => {
+		document.body.insertAdjacentHTML('beforeend', '<dialog open></dialog>');
+		const dialog = document.querySelector('dialog')!;
+		toast('error', 'Refused');
+		document
+			.getElementById('cms-toasts')!
+			.insertAdjacentHTML('beforeend', '<div data-toast="warning">Later</div>');
+		document.dispatchEvent(new Event('htmx:after:swap'));
+
+		expect(toasts()).toHaveLength(0);
+		expect(document.querySelectorAll('#cms-toasts > *')).toHaveLength(0);
+
+		dialog.close();
+		dialog.dispatchEvent(new Event('close'));
+
+		expect(toasts().map((item) => item.querySelector('.cms-toasts-message')?.textContent)).toEqual([
+			'Refused',
+			'Later',
+		]);
+	});
+
+	it('moves focus to the next toast, else back where it came from, when one is closed', () => {
+		document.body.insertAdjacentHTML('afterbegin', '<button id="origin">Origin</button>');
+		const origin = document.getElementById('origin')!;
+		toast('error', 'First');
+		toast('error', 'Second');
+		const [first, second] = toasts().map((item) =>
+			item.querySelector<HTMLButtonElement>('button')!,
+		);
+
+		origin.focus();
+		first.focus();
+		first.click();
+		expect(document.activeElement).toBe(second);
+
+		second.click();
+		expect(document.activeElement).toBe(origin);
+	});
 });

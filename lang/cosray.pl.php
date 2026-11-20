@@ -149,6 +149,7 @@ return [
 		'common:move-right' => 'Przesuń w prawo',
 		'common:move-up' => 'Przesuń w górę',
 		'common:no' => 'Nie',
+		'common:notifications' => 'Powiadomienia',
 		'common:open' => 'Otwórz',
 		'common:reset' => 'Resetuj',
 		'common:save' => 'Zapisz',

@@ -465,6 +465,7 @@ export function openImageDialog({ owner, add }) {
 
 				if (!chosen) return;
 
+				body.querySelector(':scope > .cms-field-error')?.remove();
 				file.disabled = true;
 				upload.disabled = true;
 				upload.textContent = __('upload:uploading');
@@ -478,7 +479,10 @@ export function openImageDialog({ owner, add }) {
 				file.value = '';
 
 				if (!result.ok || !result.uid) {
-					cosray().toast.error(result.error ?? __('upload:failed'));
+					// A toast would wait behind the modal dialog.
+					const error = create('p', 'cms-field-error', result.error ?? __('upload:failed'));
+					error.setAttribute('role', 'alert');
+					row.after(error);
 
 					return;
 				}

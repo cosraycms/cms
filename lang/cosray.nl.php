@@ -142,6 +142,7 @@ return [
 		'common:move-right' => 'Naar rechts verplaatsen',
 		'common:move-up' => 'Omhoog verplaatsen',
 		'common:no' => 'Nee',
+		'common:notifications' => 'Meldingen',
 		'common:open' => 'Openen',
 		'common:reset' => 'Wissen',
 		'common:save' => 'Opslaan',

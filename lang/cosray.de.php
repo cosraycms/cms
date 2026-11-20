@@ -142,6 +142,7 @@ return [
 		'common:move-right' => 'Nach rechts verschieben',
 		'common:move-up' => 'Nach oben verschieben',
 		'common:no' => 'Nein',
+		'common:notifications' => 'Benachrichtigungen',
 		'common:open' => 'Öffnen',
 		'common:reset' => 'Zurücksetzen',
 		'common:save' => 'Speichern',
