@@ -403,9 +403,16 @@ export function openLinkDialog({ owner, href, node, asset, blank, rel, add }) {
 
 					if (next < 0) return;
 
+					// Arrows only move focus: every tab loads a list, so Enter or
+					// Space chooses one.
 					event.preventDefault();
-					select(tabs[next].id);
-					/** @type {HTMLElement | null} */ (tablist.children[next])?.focus();
+					const target = /** @type {HTMLElement | null} */ (tablist.children[next]);
+
+					for (const other of tablist.querySelectorAll('[role="tab"]')) {
+						other.setAttribute('tabindex', other === target ? '0' : '-1');
+					}
+
+					target?.focus();
 				});
 				tablist.append(tab);
 			}

@@ -192,6 +192,21 @@ describe('richtext dialogs', () => {
 		expect(notify).toHaveBeenCalledOnce();
 	});
 
+	it('moves between link tabs by arrow without loading each one', async () => {
+		await editor();
+		pickerWith({ uid: 'doc', filename: 'doc.pdf', url: '/doc.pdf', kind: 'file' });
+		await action('richtext:add-page-link');
+		const tabs = [...document.querySelectorAll<HTMLElement>('dialog [role="tab"]')];
+		const ajax = vi.mocked(window.htmx.ajax);
+		ajax.mockClear();
+
+		tabs[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+
+		expect(document.activeElement).toBe(tabs[1]);
+		expect(tabs[0]!.getAttribute('aria-selected')).toBe('true');
+		expect(ajax).not.toHaveBeenCalled();
+	});
+
 	it('links the selection to an asset picked on the files tab', async () => {
 		const { content, notify } = await editor();
 		pickerWith({
