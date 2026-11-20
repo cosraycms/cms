@@ -12,6 +12,7 @@ $required = (bool) ($required ?? false);
 $help = u($help ?? null);
 $autocomplete = (string) ($autocomplete ?? 'off');
 $width = (int) ($width ?? 50);
+$identifier = in_array($name, ['email', 'username'], true);
 ?>
 
 <div
@@ -35,6 +36,7 @@ $width = (int) ($width ?? 50);
 				type="<?= escape($type) ?>"
 				value="<?= escape($value) ?>"
 				autocomplete="<?= escape($autocomplete) ?>"
+				<?= $identifier ? 'autocapitalize="none" autocorrect="off" spellcheck="false"' : '' ?>
 				<?= is_string($help) ? 'aria-describedby="user-' . escape($name) . '-help"' : '' ?>
 				<?= $required ? 'required' : '' ?> />
 		</div>

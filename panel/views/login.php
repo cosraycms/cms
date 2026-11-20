@@ -30,6 +30,9 @@ $this->layout('layer/document');
 					name="login"
 					type="text"
 					autocomplete="username"
+					autocapitalize="none"
+					autocorrect="off"
+					spellcheck="false"
 					value="<?= escape($login) ?>"
 					required />
 			</div>

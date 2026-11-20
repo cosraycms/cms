@@ -111,17 +111,21 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 									'type' => 'email',
 									'value' => $user->email,
 									'required' => true,
+									// Another user's form must not take the editor's own data.
+									'autocomplete' => $profile ? 'email' : 'off',
 								]) ?>
 								<?php $this->include('user/input', [
 									'name' => 'username',
 									'label' => __('user:username'),
 									'value' => $user->username,
 									'help' => __('user:username-help'),
+									'autocomplete' => $profile ? 'username' : 'off',
 								]) ?>
 								<?php $this->include('user/input', [
 									'name' => 'name',
 									'label' => __('user:name'),
 									'value' => $user->name ?? '',
+									'autocomplete' => $profile ? 'name' : 'off',
 								]) ?>
 								<?php if (count($panelLocaleChoices) > 1): ?>
 									<div class="cms-field" style="grid-column: span 50 / span 50" data-field="panel_locale">

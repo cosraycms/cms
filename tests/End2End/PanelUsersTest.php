@@ -185,7 +185,10 @@ final class PanelUsersTest extends End2EndTestCase
 		$this->authenticateAs('editor');
 		$self = $this->currentUser();
 
-		$this->assertResponseOk($this->makeRequest('GET', '/panel/profile'));
+		$profile = $this->makeRequest('GET', '/panel/profile');
+		$this->assertResponseOk($profile);
+		// The browser may fill in the user's own data, never into another user's form.
+		$this->assertHtmlNodeExists('//input[@name="email"][@autocomplete="email"]', $this->getHtmlResponse($profile));
 
 		$html = $this->getHtmlResponse($this->save('/panel/profile', [
 			'email' => $self->email,
