@@ -161,8 +161,10 @@
 		--ink: var(--cms-color-stage-mine-ink);
 	}
 
-	&[data-stage='mine'][data-state='saving'] {
-		animation: cms-stage-mark-pulse 0.9s ease-in-out infinite;
+	@media (prefers-reduced-motion: no-preference) {
+		&[data-stage='mine'][data-state='saving'] {
+			animation: cms-stage-mark-pulse 0.9s ease-in-out infinite;
+		}
 	}
 
 	/* A problem shows "!" in place of the pencil, as status.js only moves the state. */
@@ -186,12 +188,6 @@
 @keyframes cms-stage-mark-pulse {
 	50% {
 		opacity: 0.5;
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.cms-stage-mark[data-state='saving'] {
-		animation: none !important;
 	}
 }
 
