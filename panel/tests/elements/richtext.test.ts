@@ -58,8 +58,8 @@ async function editSource(element: HTMLElement, html: string): Promise<void> {
 	await tick();
 	const input = element.querySelector('textarea')!;
 	input.value = html;
+	// A paste, drop or composition fires input without a key.
 	input.dispatchEvent(new Event('input', { bubbles: true }));
-	input.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
 	await tick();
 }
 
@@ -85,6 +85,17 @@ describe('source view', () => {
 		await tick();
 
 		expect(source.closest('[hidden]')).not.toBeNull();
+	});
+
+	it('reports nothing for keys that leave the source unchanged', async () => {
+		const { element, changes } = await richtext({ en: doc('Hello'), de: null });
+		await editSource(element, '<p>Hello there</p>');
+		changes.mockClear();
+		const source = element.querySelector('textarea')!;
+		source.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowLeft', bubbles: true }));
+		await tick();
+
+		expect(changes).not.toHaveBeenCalled();
 	});
 });
 

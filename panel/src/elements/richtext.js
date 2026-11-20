@@ -927,7 +927,7 @@ export class CosrayRichtext extends HTMLElement {
 		backButton.addEventListener('click', () => showSource(false));
 		// setContent dispatches a changed transaction, which routes the parsed
 		// document back through onUpdate.
-		source.addEventListener('keyup', () => this.#editor?.setContent(source.value));
+		source.addEventListener('input', () => this.#editor?.setContent(source.value));
 
 		if (classes.length > 0) {
 			const { wrap, menu } = dropdown(
