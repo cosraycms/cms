@@ -3,7 +3,7 @@
 	flex: 1 1 auto;
 	flex-direction: column;
 	min-height: 0;
-	overflow: hidden;
+	overflow: clip;
 
 	& .cms-collection-body {
 		display: flex;
@@ -19,7 +19,7 @@
 		border-inline-start: var(--cms-pane-border-start);
 		border-inline-end: var(--cms-pane-border-end);
 		background: var(--cms-pane-bg);
-		overflow: hidden;
+		overflow: clip;
 
 		/* The list paints over the body, so the shade lies on top of both. */
 		&::after {
@@ -253,7 +253,7 @@
 		min-height: 0;
 		border-top: 1px solid var(--cms-color-border);
 		background: var(--cms-pane-bg);
-		overflow: hidden;
+		overflow: clip;
 	}
 
 	/*

@@ -342,7 +342,7 @@
 
 	.ProseMirror {
 		padding: var(--cms-space-4);
-		max-height: 60vh;
+		max-height: 60svh;
 		overflow-y: auto;
 		line-height: 1.65;
 		white-space: pre-wrap;
@@ -486,7 +486,7 @@
 	}
 
 	& .cms-link-dialog-panel {
-		max-height: 60vh;
+		max-height: 60svh;
 		overflow-y: auto;
 	}
 
@@ -551,7 +551,7 @@
 	}
 
 	& .cms-image-dialog-library {
-		max-height: 60vh;
+		max-height: 60svh;
 		overflow-y: auto;
 	}
 }
@@ -585,7 +585,7 @@
 		margin: 0;
 		padding: 0;
 		list-style: none;
-		max-height: 50vh;
+		max-height: 50svh;
 		overflow-y: auto;
 	}
 

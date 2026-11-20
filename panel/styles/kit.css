@@ -10,7 +10,7 @@
 	flex: 1 1 auto;
 	flex-direction: column;
 	min-height: 0;
-	overflow: hidden;
+	overflow: clip;
 }
 
 .cms-kit-body {
@@ -26,7 +26,7 @@
 	border-inline-start: var(--cms-pane-border-start);
 	border-inline-end: var(--cms-pane-border-end);
 	background: var(--cms-pane-bg);
-	overflow: hidden;
+	overflow: clip;
 
 	&::after {
 		content: '';

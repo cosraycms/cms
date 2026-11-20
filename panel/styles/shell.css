@@ -13,7 +13,7 @@
 	height: 100dvh;
 	padding-inline: 0;
 	background: var(--cms-color-canvas);
-	overflow: hidden;
+	overflow: clip;
 
 	& .cms-shell-frame {
 		display: flex;
@@ -27,7 +27,7 @@
 		border-radius: 0;
 		background: var(--cms-color-surface);
 		box-shadow: none;
-		overflow: hidden;
+		overflow: clip;
 
 		/*
 		 * The pane is a box inside the white frame, and its corner and edge only
