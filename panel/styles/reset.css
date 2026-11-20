@@ -1,14 +1,18 @@
-* {
+*,
+*::before,
+*::after {
 	box-sizing: border-box;
 }
 
 html,
 body {
 	min-height: 100%;
+	margin: 0;
+	padding: 0;
 }
 
-body {
-	margin: 0;
+a {
+	color: inherit;
 }
 
 a,
@@ -19,15 +23,28 @@ select {
 	font: inherit;
 }
 
+button,
+input,
+select,
+textarea {
+	color: inherit;
+}
+
 button {
+	margin: 0;
 	padding: 0;
 	border: 0;
 	background: transparent;
-	color: inherit;
+}
+
+button:not(:disabled) {
 	cursor: pointer;
 }
 
-img {
+img,
+svg,
+video,
+canvas {
 	display: block;
 	max-width: 100%;
 }

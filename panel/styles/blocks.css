@@ -1090,7 +1090,7 @@
 		border-radius: var(--cms-radius-md);
 		background: #fff;
 		transform-origin: top left;
-		transition: opacity var(--cms-duration-fast, 120ms) ease;
+		transition: opacity 120ms ease;
 	}
 }
 

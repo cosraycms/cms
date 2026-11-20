@@ -1,15 +1,3 @@
-*,
-*::before,
-*::after {
-	box-sizing: border-box;
-}
-
-html,
-body {
-	margin: 0;
-	padding: 0;
-}
-
 body {
 	background: var(--cms-color-canvas);
 	color: var(--cms-color-text);
@@ -18,10 +6,6 @@ body {
 	line-height: 1.45;
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
-}
-
-a {
-	color: inherit;
 }
 
 h1,
@@ -43,36 +27,9 @@ ol {
 	margin: 0 0 var(--cms-space-4);
 }
 
-button,
-input,
-select,
-textarea {
-	font: inherit;
-	color: inherit;
-}
-
-button {
-	border: 0;
-	margin: 0;
-	padding: 0;
-	background: transparent;
-}
-
-button:not(:disabled) {
-	cursor: pointer;
-}
-
 input::placeholder,
 textarea::placeholder {
 	color: var(--cms-color-text-subtle);
-}
-
-img,
-svg,
-video,
-canvas {
-	display: block;
-	max-width: 100%;
 }
 
 .cms-icon {
@@ -91,7 +48,7 @@ canvas {
 	padding: 0;
 	margin: -1px;
 	overflow: hidden;
-	clip: rect(0, 0, 0, 0);
+	clip-path: inset(50%);
 	white-space: nowrap;
 	border: 0;
 }
