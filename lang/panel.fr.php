@@ -43,6 +43,7 @@ return [
 		'editor:errors-empty' => ['Un champ obligatoire est vide :', ':count champs obligatoires sont vides :'],
 		'editor:errors-invalid' => ['Un champ doit être corrigé :', ':count champs doivent être corrigés :'],
 		'editor:errors-resolved' => 'Tous les champs signalés ont été modifiés. Enregistrez à nouveau.',
+		'editor:has-errors' => 'contient des erreurs',
 		'editor:leave' => 'Quitter sans enregistrer',
 		'editor:leave-confirm' => 'Des modifications ne sont pas enregistrées. Quitter quand même l’éditeur ?',
 		'editor:problems' => [':count problème', ':count problèmes'],

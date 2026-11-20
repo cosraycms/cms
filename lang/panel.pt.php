@@ -40,6 +40,7 @@ return [
 		'editor:errors-empty' => ['Um campo obrigatório está vazio:', ':count campos obrigatórios estão vazios:'],
 		'editor:errors-invalid' => ['Um campo tem de ser corrigido:', ':count campos têm de ser corrigidos:'],
 		'editor:errors-resolved' => 'Todos os campos assinalados foram editados. Guarde novamente.',
+		'editor:has-errors' => 'contém erros',
 		'editor:leave' => 'Sair sem guardar',
 		'editor:leave-confirm' => 'Há alterações por guardar. Sair do editor mesmo assim?',
 		'editor:problems' => [':count problema', ':count problemas'],

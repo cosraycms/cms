@@ -37,6 +37,7 @@ return [
 		'editor:errors-empty' => ['One required field is empty:', ':count required fields are empty:'],
 		'editor:errors-invalid' => ['One field needs correcting:', ':count fields need correcting:'],
 		'editor:errors-resolved' => 'All reported fields have been edited. Save again.',
+		'editor:has-errors' => 'has errors',
 		'editor:leave' => 'Leave without saving',
 		'editor:leave-confirm' => 'There are unsaved changes. Leave this editor anyway?',
 		'editor:problems' => [':count problem', ':count problems'],

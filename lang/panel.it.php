@@ -46,6 +46,7 @@ return [
 		'editor:errors-empty' => ['Un campo obbligatorio è vuoto:', ':count campi obbligatori sono vuoti:'],
 		'editor:errors-invalid' => ['Un campo va corretto:', ':count campi vanno corretti:'],
 		'editor:errors-resolved' => 'Tutti i campi segnalati sono stati modificati. Salva di nuovo.',
+		'editor:has-errors' => 'contiene errori',
 		'editor:leave' => 'Esci senza salvare',
 		'editor:leave-confirm' => 'Ci sono modifiche non salvate. Uscire comunque dall’editor?',
 		'editor:problems' => [':count problema', ':count problemi'],

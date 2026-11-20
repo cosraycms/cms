@@ -40,6 +40,7 @@ return [
 		'editor:errors-empty' => ['Eén verplicht veld is leeg:', ':count verplichte velden zijn leeg:'],
 		'editor:errors-invalid' => ['Eén veld moet worden gecorrigeerd:', ':count velden moeten worden gecorrigeerd:'],
 		'editor:errors-resolved' => 'Alle gemelde velden zijn bewerkt. Sla opnieuw op.',
+		'editor:has-errors' => 'bevat fouten',
 		'editor:leave' => 'Verlaten zonder opslaan',
 		'editor:leave-confirm' => 'Er zijn niet-opgeslagen wijzigingen. De editor toch verlaten?',
 		'editor:problems' => [':count probleem', ':count problemen'],

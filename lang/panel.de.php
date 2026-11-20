@@ -46,6 +46,7 @@ return [
 		'editor:errors-empty' => ['Ein Pflichtfeld ist noch leer:', ':count Pflichtfelder sind noch leer:'],
 		'editor:errors-invalid' => ['Ein Feld muss korrigiert werden:', ':count Felder müssen korrigiert werden:'],
 		'editor:errors-resolved' => 'Alle gemeldeten Felder wurden bearbeitet – jetzt erneut speichern.',
+		'editor:has-errors' => 'enthält Fehler',
 		'editor:leave' => 'Ohne Speichern verlassen',
 		'editor:leave-confirm' => 'Es gibt ungespeicherte Änderungen. Den Editor trotzdem verlassen?',
 		'editor:problems' => [':count Problem', ':count Probleme'],

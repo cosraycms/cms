@@ -249,6 +249,7 @@ describe('errors behavior', () => {
 
 		for (const copy of form.querySelectorAll<HTMLElement>('[data-content-locale-control]')) {
 			expect(copy.classList.contains('has-error')).toBe(true);
+			expect(copy.getAttribute('aria-invalid')).toBe('true');
 			expect(copy.dataset.errorLocales).toBe('de');
 			expect(
 				copy.querySelector('[data-content-locale-option="de"]')?.classList.contains('has-error'),
@@ -495,6 +496,11 @@ describe('errors behavior', () => {
 
 		expect(tab.classList.contains('has-error')).toBe(true);
 		expect(shortcut.classList.contains('has-error')).toBe(true);
+		// Neither colour alone nor silent: a mark, and a description.
+		expect(tab.querySelector('.cms-error-badge')).not.toBeNull();
+		const described = document.getElementById(tab.getAttribute('aria-describedby') ?? '');
+		expect(described?.textContent).toBe('editor:has-errors');
+		expect(shortcut.getAttribute('aria-describedby')).toBe(described?.id);
 		expect(panel.hidden).toBe(true);
 
 		box.querySelector<HTMLElement>('[data-error-jump]')?.click();
@@ -511,6 +517,8 @@ describe('errors behavior', () => {
 
 		expect(tab.classList.contains('has-error')).toBe(false);
 		expect(shortcut.classList.contains('has-error')).toBe(false);
+		expect(tab.querySelector('.cms-error-badge')).toBeNull();
+		expect(tab.hasAttribute('aria-describedby')).toBe(false);
 	});
 
 	it('opens the paths dialog on summary click', () => {

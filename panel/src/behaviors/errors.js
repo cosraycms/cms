@@ -28,6 +28,7 @@ const FORM = 'node-editor-form';
 const INVALID = 'data-invalid';
 const MESSAGE = 'data-error-message';
 const NOTE = 'cms-error-';
+const BADGE_TEXT = 'cms-error-badge-text';
 const EMPTY = new Set(['missing', 'null', 'rule.required']);
 
 /**
@@ -202,6 +203,47 @@ function contentLocale(form, path, control) {
 }
 
 /**
+ * Marks a language, tab or button whose content holds an issue: a mark that
+ * does not rest on colour alone, and a description for assistive technology.
+ *
+ * @param {Element} element
+ * @param {boolean} on
+ */
+function flag(element, on) {
+	element.classList.toggle('has-error', on);
+
+	const mark = element.querySelector(':scope > .cms-error-badge');
+	const ids = (element.getAttribute('aria-describedby') ?? '')
+		.split(' ')
+		.filter((id) => id !== '' && id !== BADGE_TEXT);
+
+	if (on) {
+		if (!document.getElementById(BADGE_TEXT)) {
+			const text = create('span', undefined, __('editor:has-errors'));
+			text.id = BADGE_TEXT;
+			text.hidden = true;
+			document.body.append(text);
+		}
+
+		if (!mark) {
+			const badge = create('span', 'cms-error-badge');
+			badge.setAttribute('aria-hidden', 'true');
+			element.append(badge);
+		}
+
+		ids.push(BADGE_TEXT);
+	} else {
+		mark?.remove();
+	}
+
+	if (ids.length > 0) {
+		element.setAttribute('aria-describedby', ids.join(' '));
+	} else {
+		element.removeAttribute('aria-describedby');
+	}
+}
+
+/**
  * @param {Element} form
  */
 function refreshContentBadge(form) {
@@ -217,11 +259,17 @@ function refreshContentBadge(form) {
 		form.querySelectorAll('[data-content-locale-control]')
 	).forEach((control) => {
 		control.classList.toggle('has-error', locales.size > 0);
-		control.toggleAttribute('aria-invalid', locales.size > 0);
+
+		if (locales.size > 0) {
+			control.setAttribute('aria-invalid', 'true');
+		} else {
+			control.removeAttribute('aria-invalid');
+		}
+
 		/** @type {NodeListOf<HTMLElement>} */ (
 			control.querySelectorAll('[data-content-locale-option]')
 		).forEach((option) => {
-			option.classList.toggle('has-error', locales.has(option.dataset.contentLocaleOption ?? ''));
+			flag(option, locales.has(option.dataset.contentLocaleOption ?? ''));
 		});
 
 		if (locales.size > 0) {
@@ -244,8 +292,12 @@ function refreshTabBadges(form) {
 		const panel = document.getElementById(tab.getAttribute('aria-controls') ?? '');
 		const invalid = panel?.querySelector(`[${INVALID}]`) != null;
 
-		tab.classList.toggle('has-error', invalid);
-		form.querySelector(`[data-inspector-open="${tab.id}"]`)?.classList.toggle('has-error', invalid);
+		flag(tab, invalid);
+		const shortcut = form.querySelector(`[data-inspector-open="${tab.id}"]`);
+
+		if (shortcut) {
+			flag(shortcut, invalid);
+		}
 	});
 }
 
@@ -296,7 +348,7 @@ function unmark(field) {
 		control.removeAttribute('aria-invalid');
 		describe(control);
 	});
-	field.querySelectorAll('.has-error').forEach((badge) => badge.classList.remove('has-error'));
+	field.querySelectorAll('.has-error').forEach((badge) => flag(badge, false));
 	field.removeAttribute(INVALID);
 	field.removeAttribute('data-error-locales');
 
@@ -316,12 +368,12 @@ function wipe() {
 		control.removeAttribute('aria-invalid');
 		control
 			.querySelectorAll('[data-content-locale-option].has-error')
-			.forEach((option) => option.classList.remove('has-error'));
+			.forEach((option) => flag(option, false));
 		delete (/** @type {HTMLElement} */ (control).dataset.errorLocales);
 	});
 	document
 		.querySelectorAll('[data-tabs] [role="tab"].has-error')
-		.forEach((tab) => tab.classList.remove('has-error'));
+		.forEach((tab) => flag(tab, false));
 	problems = [];
 	general = [];
 	jumps = new WeakMap();
@@ -460,7 +512,11 @@ function show(problem) {
 
 		// An issue inside the meta dialog is invisible until opened.
 		if (issue.control.closest('dialog[data-dialog="meta"]')) {
-			field.querySelector('[data-dialog-open="meta"]')?.classList.add('has-error');
+			const opener = field.querySelector('[data-dialog-open="meta"]');
+
+			if (opener) {
+				flag(opener, true);
+			}
 		}
 	}
 

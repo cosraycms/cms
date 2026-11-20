@@ -53,6 +53,7 @@ return [
 		'editor:errors-empty' => ['Jedno wymagane pole jest puste:', ':count wymagane pola są puste:', ':count wymaganych pól jest pustych:'],
 		'editor:errors-invalid' => ['Jedno pole wymaga poprawienia:', ':count pola wymagają poprawienia:', ':count pól wymaga poprawienia:'],
 		'editor:errors-resolved' => 'Wszystkie zgłoszone pola zostały zmienione. Zapisz ponownie.',
+		'editor:has-errors' => 'zawiera błędy',
 		'editor:leave' => 'Wyjdź bez zapisywania',
 		'editor:leave-confirm' => 'Są niezapisane zmiany. Mimo to opuścić edytor?',
 		'editor:problems' => [':count problem', ':count problemy', ':count problemów'],

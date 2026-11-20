@@ -117,6 +117,32 @@
 	}
 }
 
+/* errors.js puts this mark on a language, tab or button whose content holds
+   an issue, so the state does not rest on its colour alone. */
+.cms-error-badge {
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	width: 0.75rem;
+	height: 0.75rem;
+	margin-inline-start: var(--cms-space-1);
+	border-radius: var(--cms-radius-full);
+	background: var(--cms-color-danger);
+	color: var(--cms-color-text-on-fill);
+	font-size: 0.5625rem;
+	font-weight: 700;
+	line-height: 1;
+	vertical-align: middle;
+
+	&::before {
+		content: '!';
+	}
+
+	@media (forced-colors: active) {
+		border: 1px solid currentColor;
+	}
+}
+
 .cms-fieldset {
 	min-width: 0;
 	margin: 0;
