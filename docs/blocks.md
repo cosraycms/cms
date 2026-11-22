@@ -307,11 +307,12 @@ Import the shipped [resources/blocks.css](../resources/blocks.css), or copy it w
 @import "vendor/cosray/cms/resources/blocks.css";
 ```
 
-It uses the `cosray.blocks` cascade layer, so ordinary unlayered site CSS wins. A block with a position sits on its lines: `grid-column: var(--col) / span var(--colspan)`, and the same for rows. Below the stacking threshold every block takes the full width in document order, which is the reading order. A split is a subgrid on both axes, so its blocks share the field's tracks; a site with its own grid sheet needs the same rules, or a split's blocks fall back to normal flow inside it.
+It uses the `cosray.blocks` cascade layer, so ordinary unlayered site CSS wins. A block with a position sits on its lines: `grid-column: var(--col) / span var(--colspan)`, and the same for rows. The first and last element of a block lose their outer margins, so the gap alone separates blocks. Below the stacking threshold every block takes the full width in document order, which is the reading order. A split is a subgrid on both axes, so its blocks share the field's tracks; a site with its own grid sheet needs the same rules, or a split's blocks fall back to normal flow inside it.
 
 Override points:
 
-- `--blocks-gap` sets the gap between blocks, `2rem` by default. Use a context-independent length such as `rem` or `px`; font-relative values follow whatever font size the container has. A field that needs a different gap gets a class of its own through the `class` render argument.
+- `--blocks-gap` sets the gap between blocks, `2rem` by default. Use a context-independent length such as `rem` or `px`; font-relative values follow whatever font size the container has. A field that needs a different gap gets a class of its own through the `class` render argument. A gap equal to the paragraph spacing sets consecutive text blocks apart like paragraphs. Unlayered site typography, such as Tailwind's `.prose p`, wins over the margin reset, so the site repeats it: `.cosray-block > p:first-child { margin-top: 0 }` and `.cosray-block > p:last-child { margin-bottom: 0 }`.
+- The container is an inline-size container and has no width of its own content. An ancestor that takes its width from its content, such as an item of a flex row, shrinks to its other content and the gaps; give it its width from outside, for example by leaving it in normal block flow.
 - Container queries and gallery rules can be replaced by site styles. `Stack` collapses the grid below the sheet's threshold; `Preserve` and `Custom` leave it to the site.
 
 The stylesheet itself is the reference for selectors and defaults; its implementation is not duplicated here.
