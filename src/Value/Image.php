@@ -66,8 +66,9 @@ class Image extends File
 
 	/**
 	 * The image in a `<figure>`, inside its link when it has one, with its
-	 * caption and attribution when it has them. The figure stays without them,
-	 * so pages keep the same structure.
+	 * caption in a `<span>` and its attribution in a `<small>` when it has
+	 * them, so a site can style either and set them apart. The figure stays
+	 * without them, so pages keep the same structure.
 	 *
 	 * @param ?Markup $image Instead of the plain `img()`
 	 */
@@ -77,12 +78,12 @@ class Image extends File
 			return new Markup('');
 		}
 
-		$text = (string) $this->caption();
+		$caption = trim((string) $this->caption());
 		$attribution = $this->attribution();
-
-		if ($attribution !== '') {
-			$text = trim($text . ' <small>' . escape($attribution) . '</small>');
-		}
+		$text = implode(' ', array_filter([
+			$caption === '' ? '' : "<span>{$caption}</span>",
+			$attribution === '' ? '' : '<small>' . escape($attribution) . '</small>',
+		]));
 
 		return new Markup(
 			'<figure'

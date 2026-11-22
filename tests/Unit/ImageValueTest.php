@@ -302,7 +302,7 @@ final class ImageValueTest extends TestCase
 		$this->assertSame(
 			'<figure><a href="/about" rel="noopener">'
 				. $image->img()
-				. '</a><figcaption>Words <small>© &lt;Jane&gt;</small></figcaption></figure>',
+				. '</a><figcaption><span>Words</span> <small>© &lt;Jane&gt;</small></figcaption></figure>',
 			(string) $image->figure(),
 		);
 	}
@@ -362,7 +362,7 @@ final class ImageValueTest extends TestCase
 			'<div class="cosray-image-gallery">'
 				. '<figure class="cosray-image-gallery-item"><img src="/cache/im/'
 				. self::UID
-				. '/pic-block-thumb.jpg" loading="lazy" width="480" height="240" alt="A &lt;kettle&gt;"><figcaption>Words</figcaption></figure>'
+				. '/pic-block-thumb.jpg" loading="lazy" width="480" height="240" alt="A &lt;kettle&gt;"><figcaption><span>Words</span></figcaption></figure>'
 				. '<figure class="cosray-image-gallery-item"><img src="/cache/im/'
 				. self::UID
 				. '/pic-block-thumb.jpg" loading="lazy" width="480" height="240" alt=""></figure></div>',

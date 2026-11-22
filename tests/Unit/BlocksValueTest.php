@@ -523,7 +523,7 @@ final class BlocksValueTest extends TestCase
 		$this->assertStringContainsString('<figure class="site-figure"><img ', $html);
 		$this->assertStringContainsString('alt="Title only"', $html);
 		$this->assertStringEndsWith(
-			'<figcaption>Sun &amp; &lt;sea&gt;</figcaption></figure></div></div>',
+			'<figcaption><span>Sun &amp; &lt;sea&gt;</span></figcaption></figure></div></div>',
 			$html,
 		);
 	}
@@ -546,7 +546,7 @@ final class BlocksValueTest extends TestCase
 		$this->seedAsset('blockimg12345', 'pic.jpg');
 
 		$this->assertStringContainsString(
-			'<figcaption>Sun &amp; <em>&lt;sea&gt;</em></figcaption>',
+			'<figcaption><span>Sun &amp; <em>&lt;sea&gt;</em></span></figcaption>',
 			$blocks->render()->html,
 		);
 		$this->assertSame('Sun & <sea>', $blocks->image()?->captionText());
@@ -557,7 +557,10 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([$this->image(['uid' => 'blockimg12345'])]);
 		$this->seedAsset('blockimg12345', 'pic.jpg', meta: ['caption' => ['en' => 'From the catalog']]);
 
-		$this->assertStringContainsString('<figcaption>From the catalog</figcaption>', $blocks->render()->html);
+		$this->assertStringContainsString(
+			'<figcaption><span>From the catalog</span></figcaption>',
+			$blocks->render()->html,
+		);
 		$this->assertSame('From the catalog', (string) $blocks->image()?->caption());
 	}
 
@@ -596,7 +599,7 @@ final class BlocksValueTest extends TestCase
 		$html = $blocks->render()->html;
 
 		$this->assertMatchesRegularExpression(
-			'#<figure[^>]*><a href="/about" rel="noopener"><img [^>]+></a><figcaption>Words</figcaption></figure>#',
+			'#<figure[^>]*><a href="/about" rel="noopener"><img [^>]+></a><figcaption><span>Words</span></figcaption></figure>#',
 			$html,
 		);
 	}
@@ -618,7 +621,7 @@ final class BlocksValueTest extends TestCase
 
 		$this->assertMatchesRegularExpression(
 			'#<figure class="site-image-gallery-item"><img [^>]+>'
-				. '<figcaption>Own <small>© &lt;Own&gt;</small></figcaption></figure>#',
+				. '<figcaption><span>Own</span> <small>© &lt;Own&gt;</small></figcaption></figure>#',
 			$html,
 		);
 		$this->assertMatchesRegularExpression(

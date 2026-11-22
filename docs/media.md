@@ -84,7 +84,7 @@ An attribute decides what editors can fill in, not the markup. A template prints
 <?= $page->photos->gallery() ?>              // a wrapper with a <figure> per image
 ```
 
-`figure()` prints what `linked()`, `caption()` and `attribution()` return, whichever attributes the field declares, so values from the media screen count. Without text it still prints the `<figure>`, so pages keep the same structure. The attribution sits in a `<small>`. Pass your own image or a class with `$page->cover->figure($page->cover->img('photo'), 'cover')`.
+`figure()` prints what `linked()`, `caption()` and `attribution()` return, whichever attributes the field declares, so values from the media screen count. Without text it still prints the `<figure>`, so pages keep the same structure. The caption sits in a `<span>` and the attribution in a `<small>`, so a site can set them apart, for example with `figcaption > span + small::before { content: "· "; }`. Pass your own image or a class with `$page->cover->figure($page->cover->img('photo'), 'cover')`.
 
 `img()` prints root-relative URLs and the `width` and `height` of the rendition, so the browser keeps the space while the image loads; `url()` gives an absolute URL. Further named arguments become attributes and can replace those: `img(loading: 'lazy')`, `img(width: null)` or `img(...['data-zoom' => '2'])`. It needs `height: auto` from a stylesheet wherever CSS changes an image's width, as it does for any image with these attributes.
 
@@ -105,7 +105,7 @@ An attribute decides what editors can fill in, not the markup. A template prints
 			height="320"
 			alt="…"
 		/>
-		<figcaption>Words <small>© Jane Doe</small></figcaption>
+		<figcaption><span>Words</span> <small>© Jane Doe</small></figcaption>
 	</figure>
 </div>
 ```
