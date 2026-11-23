@@ -263,7 +263,7 @@ final class Defaults
 	{
 		return [
 			// Maintenance mode is on while this file exists; releases that share a site point it to one path.
-			'maintenance.file' => $env->string('MAINTENANCE_FILE') ?? $root . '/maintenance.json',
+			'maintenance.file' => $env->string('MAINTENANCE_FILE') ?? $root . '/var/maintenance.json',
 			// Paths served during maintenance as usual, like a health check.
 			'maintenance.allow' => [],
 		];

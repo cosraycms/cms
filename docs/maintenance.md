@@ -16,7 +16,7 @@ php run maintenance:off
 - `--retry` sets the seconds clients are told to wait in `Retry-After`, 60 by default.
 - `--message` reaches API clients as the problem's `detail` and visitors on the [maintenance page](#maintenance-page).
 
-The mode is the file `maintenance.file` names, `maintenance.json` in the project root by default, or `MAINTENANCE_FILE` in the environment. It is a file rather than a database row, so it holds while migrations change the database. Keep it out of version control. Where a deploy installs each release in a directory of its own, point `MAINTENANCE_FILE` to a path the releases share, so the release serving requests sees the mode the deploy turns on in the next one. The commands need to write in its directory; the web server only reads the file.
+The mode is the file `maintenance.file` names, `var/maintenance.json` in the project root by default, or `MAINTENANCE_FILE` in the environment. It is a file rather than a database row, so it holds while migrations change the database. Keep it out of version control. Where a deploy installs each release in a directory of its own, point `MAINTENANCE_FILE` to a path the releases share, so the release serving requests sees the mode the deploy turns on in the next one. The commands need to write in its directory; the web server only reads the file.
 
 A file without valid content, such as one made with `touch`, turns the mode on as well: it refuses writes, says 60 seconds, and lets nobody pass.
 

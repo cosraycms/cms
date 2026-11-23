@@ -108,9 +108,9 @@ final class MaintenanceTest extends TestCase
 		new Maintenance($this->dir . '/missing/maintenance.json')->on();
 	}
 
-	public function testTheFileDefaultsToTheProjectRoot(): void
+	public function testTheFileDefaultsToTheVarDirectory(): void
 	{
-		$this->assertSame(self::root() . '/maintenance.json', $this->config()->maintenance->file);
+		$this->assertSame(self::root() . '/var/maintenance.json', $this->config()->maintenance->file);
 		$this->assertSame($this->file(), $this->config(['maintenance.file' => $this->file()])->maintenance->file);
 	}
 
