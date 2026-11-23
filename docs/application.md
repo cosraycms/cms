@@ -81,7 +81,9 @@ Error pages use a separate Boiler renderer. Project `http-error.php` and `http-s
 
 ## Logging
 
-Pass a PSR-3 logger to `$app->logger()` before the app handles its first request. Without one, records from `notice` up go to PHP's error log. Services and controllers receive the logger by declaring a `Psr\Log\LoggerInterface` constructor parameter.
+Without further setup, Cosray appends records to `var/log/app.log` in the project root and creates the directory when it is missing. `log.file`, or `LOG_FILE` in the environment, names another file; an empty `LOG_FILE` sends records from `notice` up to PHP's error log instead, for hosts that collect it. `log.level`, or `LOG_LEVEL`, sets the lowest level written to the file, `debug` by default; production usually wants `warning`. Keep the file out of version control, and let the host rotate it, for example with `logrotate`.
+
+To log elsewhere, pass a PSR-3 logger to `$app->logger()` before the app handles its first request; it replaces the default. Services and controllers receive the logger by declaring a `Psr\Log\LoggerInterface` constructor parameter.
 
 Besides server errors and PHP diagnostics, Cosray logs logins (failed ones as `warning`, naming the account only when it exists), panel logins refused for missing permission, sign-ins and reset requests refused as too many (`warning`), logouts, the creation and deletion of users and changes to their roles, activation and password (`notice`), and uploads the server could not store (`error`). Client addresses are `REMOTE_ADDR`. Behind a reverse proxy, that is the proxy's address unless `app.trusted_proxies` lists it: then the client address is the last one in `X-Forwarded-For` that is not a trusted proxy. List only proxies that replace or append to that header, since clients can send it themselves.
 

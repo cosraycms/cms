@@ -9,6 +9,7 @@ use Celema\Container\Entry;
 use Celema\Core\App;
 use Celema\Core\Factory\Factory;
 use Celema\Core\Plugin as CorePlugin;
+use Celema\Log\Logger as FileLogger;
 use Celema\Quma\Connection;
 use Celema\Quma\Database;
 use Celema\Quma\Delimiters;
@@ -205,7 +206,11 @@ class Bootstrap implements CorePlugin
 		// Services can depend on a logger whether or not the application
 		// registers one, before or after boot; logger() replaces this entry.
 		if (!$this->container->has(Logger::class)) {
-			$this->container->add(Logger::class, ErrorLog::class);
+			$file = $this->config->log->file;
+			$this->container->add(
+				Logger::class,
+				$file === null ? new ErrorLog() : new FileLogger($file, $this->config->log->level),
+			);
 		}
 
 		if (!$this->container->has(Webhooks::class)) {

@@ -99,7 +99,10 @@ namespace Cosray\Config;
  *     'mail.views': string|list<string>,
  *
  *     'maintenance.file': string,
- *     'maintenance.allow': list<string>
+ *     'maintenance.allow': list<string>,
+ *
+ *     'log.file': string,
+ *     'log.level': string
  * }
  *
  * @phpstan-type BuiltinConfigInput = array{
@@ -161,7 +164,9 @@ namespace Cosray\Config;
  *     'mail.redirect'?: string|list<string>,
  *     'mail.views'?: string|list<string>,
  *     'maintenance.file'?: string,
- *     'maintenance.allow'?: list<string>
+ *     'maintenance.allow'?: list<string>,
+ *     'log.file'?: string,
+ *     'log.level'?: string
  * }
  */
 final class Types {}

@@ -22,6 +22,7 @@ $app = App::create($root, [
 	),
 	'app.secret' => 'browser-tests',
 	'path.public' => "{$root}/.run/public",
+	'log.file' => "{$root}/.run/var/log/app.log",
 	'path.views' => '/views',
 	'media.sizes' => ['wide' => ['width' => 600]],
 ]);

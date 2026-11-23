@@ -24,6 +24,7 @@
 		"celema/boiler": "^0.9",
 		"celema/console": "^0.7",
 		"celema/core": "^0.10.1",
+		"celema/log": "^0.4.2",
 		"celema/quma": "^0.12",
 		"celema/router": "^0.7",
 		"celema/session": "^0.4",

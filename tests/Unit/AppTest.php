@@ -128,6 +128,35 @@ final class AppTest extends TestCase
 		$this->assertInstanceOf(LoggerInterface::class, $app->container()->get(LoggerInterface::class));
 	}
 
+	public function testServicesLogToTheConfiguredFileWithoutARegisteredLogger(): void
+	{
+		$dir = sys_get_temp_dir() . '/cosray-log-' . bin2hex(random_bytes(4));
+		$file = "{$dir}/log/app.log";
+		$logger = $this
+			->app(['log.file' => $file, 'log.level' => 'info'])
+			->boot()
+			->container()
+			->get(LoggerInterface::class);
+
+		try {
+			$logger->info('Imported {count} pages', ['count' => 3]);
+			$logger->debug('Skipped a draft');
+			$log = (string) file_get_contents($file);
+		} finally {
+			if (is_file($file)) {
+				unlink($file);
+			}
+
+			if (is_dir("{$dir}/log")) {
+				rmdir("{$dir}/log");
+				rmdir($dir);
+			}
+		}
+
+		$this->assertStringContainsString('INFO: Imported 3 pages', $log);
+		$this->assertStringNotContainsString('Skipped a draft', $log);
+	}
+
 	public function testBootKeepsTheRegisteredLogger(): void
 	{
 		$logger = new RecordingLogger();

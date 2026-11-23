@@ -37,6 +37,8 @@ final class ConfigTest extends TestCase
 			'APP_URL',
 			'AUTH_REMEMBER_LIFETIME',
 			'CMS_DSN',
+			'LOG_FILE',
+			'LOG_LEVEL',
 			'DATABASE_URL',
 			'MAILER_DSN',
 			'MAILER_FROM',
@@ -193,6 +195,27 @@ final class ConfigTest extends TestCase
 		$this->assertSame('test-secret', $config->app->secret);
 		$this->assertSame('Europe/Berlin', $config->app->timezone->getName());
 		$this->assertTrue($config->session->enabled);
+	}
+
+	public function testLogDefaultsToTheVarDirectory(): void
+	{
+		$config = new Config(self::root());
+
+		$this->assertSame(self::root() . '/var/log/app.log', $config->log->file);
+		$this->assertSame('debug', $config->log->level);
+	}
+
+	public function testEnvironmentVariablesConfigureLog(): void
+	{
+		$this->setEnvironment(['LOG_FILE' => '/srv/shared/app.log', 'LOG_LEVEL' => 'warning']);
+		$config = new Config(self::root());
+
+		$this->assertSame('/srv/shared/app.log', $config->log->file);
+		$this->assertSame('warning', $config->log->level);
+
+		$this->setEnvironment(['LOG_FILE' => '']);
+
+		$this->assertNull(new Config(self::root())->log->file);
 	}
 
 	public function testJobsRunAfterResponsesUnlessTheEnvironmentTurnsItOff(): void

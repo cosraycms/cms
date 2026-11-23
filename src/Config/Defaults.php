@@ -31,6 +31,7 @@ final class Defaults
 			self::queue($env),
 			self::mail($env),
 			self::maintenance($root, $env),
+			self::log($root, $env),
 		);
 	}
 
@@ -266,6 +267,17 @@ final class Defaults
 			'maintenance.file' => $env->string('MAINTENANCE_FILE') ?? $root . '/var/maintenance.json',
 			// Paths served during maintenance as usual, like a health check.
 			'maintenance.allow' => [],
+		];
+	}
+
+	/** @return array<string, mixed> */
+	private static function log(string $root, Env $env): array
+	{
+		return [
+			// Used only while the application registers no logger of its own;
+			// an empty LOG_FILE leaves notices and above to PHP's error log.
+			'log.file' => $env->string('LOG_FILE') ?? $root . '/var/log/app.log',
+			'log.level' => $env->string('LOG_LEVEL') ?? 'debug',
 		];
 	}
 }

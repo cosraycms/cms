@@ -186,6 +186,7 @@ class TestCase extends BaseTestCase
 		return new Config(self::root(), array_merge([
 			'app.name' => 'cosray',
 			'app.debug' => $debug,
+			'log.file' => '',
 		], $settings));
 	}
 
