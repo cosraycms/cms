@@ -95,7 +95,7 @@ The front controller boots the app and serves it:
 
 ```php
 // public/index.php
-$app = require dirname(__DIR__) . '/boot/app.php';
+$app = require dirname(__DIR__) . '/config/boot.php';
 
 return $app->serve();
 ```
@@ -142,7 +142,7 @@ Content, users, permissions and media are read per request. Changes to code, tem
 
 [Cosray\Console\Commands](../src/Console/Commands.php) registers the migration commands, index rebuilds, panel asset publishing, the user and token commands, the [job queue](queue.md) commands, `mail:test` for the [mail](mail.md) setup, the [maintenance mode](maintenance.md) commands, and `system:info`, which reports what the [system info](#system-info) page does, for the console's own PHP, and exits with 1 on a problem; `--json` prints it as JSON. `php run help` lists the commands actually registered by the application; app-specific commands resolve lazily.
 
-A project `run` script can load an `app/console.php` returning the runner:
+A project `run` script can load a `config/console.php` returning the runner:
 
 ```php
 <?php
@@ -151,7 +151,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
-exit((require __DIR__ . '/app/console.php')->run());
+exit((require __DIR__ . '/config/console.php')->run());
 ```
 
 ```php
@@ -161,7 +161,7 @@ declare(strict_types=1);
 
 use Cosray\Console\Commands;
 
-$app = require __DIR__ . '/app.php';
+$app = require __DIR__ . '/boot.php';
 $commands = new Commands($app);
 $commands->server(port: 6913, watch: ['src/**/*.php', 'views/**/*.php']);
 $commands->i18n('mysite', locales: ['de', 'en'], scan: ['src', 'views']);

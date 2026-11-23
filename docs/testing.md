@@ -69,7 +69,7 @@ final class ContactTest extends TestCase
 }
 ```
 
-- `createApp()` returns what the project's `boot/app.php` returns. Override it for another layout, like `return require dirname(__DIR__) . '/app/app.php';`. It must create the app, not return one created earlier.
+- `createApp()` returns what the project's `config/boot.php` returns. Override it for another layout, like `return require dirname(__DIR__) . '/bootstrap.php';`. It must create the app, not return one created earlier.
 - `get()` and `post()` handle a request as the site would and return the response without sending it. A path goes to `http://localhost`; give an absolute URL for another host, like a locale's domain. Requests come from `127.0.0.1`. `post()` sends a form as a browser does, and with `files:` a multipart upload: each file is the path of a local file or an `UploadedFileInterface`. For anything else, build a request with `serverRequest()`, add to it, and pass it to `request()`.
 - `actingAs($user)` signs a user in for the following requests, with a session as the panel's sign-in starts it, and every request that changes data then carries the session's CSRF token. `user(roles: ['admin'])` creates an active user for the test.
 - `service()` returns a service of the app as a job or a command gets it: without a request, in the default locale. Create content with [`Node\Writer`](content.md#programmatic-creation) and menus with `Cosray\Menus`, read what was stored with `Cms`, and what was queued with [`Mailer::queued()`](mail.md#testing) and [`Queue::pending()`](queue.md#testing).

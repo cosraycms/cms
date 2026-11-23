@@ -79,12 +79,12 @@ abstract class TestCase extends PHPUnitTestCase
 
 	/**
 	 * Creates the site's app, anew for each test. By default it returns what
-	 * the project's `boot/app.php` returns.
+	 * the project's `config/boot.php` returns.
 	 */
 	protected function createApp(): App
 	{
 		$root = realpath(InstalledVersions::getRootPackage()['install_path']);
-		$file = "{$root}/boot/app.php";
+		$file = "{$root}/config/boot.php";
 
 		if (!is_file($file)) {
 			throw new RuntimeException("{$file} does not exist; override createApp() to create the site's app.");

@@ -212,7 +212,7 @@ final class TestingTestCaseTest extends TestCase
 	public function testTheDefaultAppIsTheOneTheProjectBoots(): void
 	{
 		$this->expectException(RuntimeException::class);
-		$this->expectExceptionMessage("boot/app.php does not exist; override createApp() to create the site's app.");
+		$this->expectExceptionMessage("config/boot.php does not exist; override createApp() to create the site's app.");
 
 		parent::createApp();
 	}
