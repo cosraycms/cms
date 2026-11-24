@@ -113,15 +113,34 @@ describe('cosray host', () => {
 	it('hands a click on itself, as from its label, to the control inside', async () => {
 		const element = host({ value: null }, { id: 'field-body-zxx' });
 		await vi.waitFor(() => expect(element.querySelector('test-control')).not.toBeNull());
-		const hidden = document.createElement('button');
+		const hidden = document.createElement('textarea');
 		hidden.hidden = true;
+		const tool = document.createElement('button');
 		const textarea = document.createElement('textarea');
-		element.querySelector('test-control')!.append(hidden, textarea);
+		element.querySelector('test-control')!.append(hidden, tool, textarea);
 
 		// jsdom does not route a label's click to a form-associated element.
 		element.click();
 
 		expect(document.activeElement).toBe(textarea);
+
+		textarea.remove();
+		element.focus();
+
+		expect(document.activeElement).toBe(tool);
+	});
+
+	it('hands error messages to the control, also those set before it mounts', async () => {
+		const element = host({ value: null });
+		element.errorIds = ['cms-error-1'];
+		await vi.waitFor(() => expect(element.querySelector('test-control')).not.toBeNull());
+		const control = element.querySelector<Control>('test-control')!;
+
+		expect(control.errorIds).toEqual(['cms-error-1']);
+
+		element.errorIds = [];
+
+		expect(control.errorIds).toEqual([]);
 	});
 
 	it('mirrors change details into one form value', async () => {

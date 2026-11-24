@@ -339,6 +339,8 @@ export class CosrayRichtext extends HTMLElement {
 	assets = {};
 
 	#locale = ZXX;
+	/** @type {readonly string[]} */
+	#errorIds = [];
 	#rendered = false;
 	/** @type {RichtextValue | null} */
 	#map = null;
@@ -365,6 +367,16 @@ export class CosrayRichtext extends HTMLElement {
 		if (this.#rendered && editedLocale(this.field, locale) !== previous) {
 			this.#mount();
 		}
+	}
+
+	/** @type {readonly string[]} */
+	get errorIds() {
+		return this.#errorIds;
+	}
+
+	set errorIds(ids) {
+		this.#errorIds = [...ids];
+		this.#editor?.errors(this.#errorIds);
 	}
 
 	connectedCallback() {
@@ -885,6 +897,10 @@ export class CosrayRichtext extends HTMLElement {
 				for (const update of updates) update();
 			},
 		});
+
+		if (this.#errorIds.length > 0) {
+			this.#editor.errors(this.#errorIds);
+		}
 
 		return root;
 	}

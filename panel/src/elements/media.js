@@ -13,7 +13,7 @@
 import Sortable from 'sortablejs';
 import { cosray } from '../lib/bridge.js';
 import { ZXX, patchItemMeta, pruneItemMeta } from '../lib/content.js';
-import { fallbackLabel, reportChange } from '../lib/control.js';
+import { applyControlAria, fallbackLabel, reportChange } from '../lib/control.js';
 import { resolveFallback } from '../lib/fallback.js';
 import { __, __n } from '../lib/locale.js';
 import { alert } from '../lib/modal.js';
@@ -123,6 +123,8 @@ class MediaControl extends HTMLElement {
 	#depth = 0;
 	/** @type {HTMLElement | null} */
 	#frame = null;
+	/** @type {readonly string[]} */
+	#errorIds = [];
 	/** @type {HTMLInputElement | null} */
 	#picker = null;
 	/** @type {HTMLElement[]} What this control put into the settings slot. */
@@ -163,6 +165,19 @@ class MediaControl extends HTMLElement {
 			this.#render();
 		} else if (this.#translate) {
 			for (const follow of [...this.#followers, ...this.#dialogs]) follow(locale);
+		}
+	}
+
+	/** @type {readonly string[]} */
+	get errorIds() {
+		return this.#errorIds;
+	}
+
+	set errorIds(ids) {
+		this.#errorIds = [...ids];
+
+		if (this.#frame) {
+			applyControlAria(this.#frame, this.field, this.#errorIds);
 		}
 	}
 
@@ -445,10 +460,7 @@ class MediaControl extends HTMLElement {
 			frame.setAttribute('aria-label', this.field.label);
 		}
 
-		if (this.field.descriptionId) {
-			frame.setAttribute('aria-describedby', this.field.descriptionId);
-		}
-
+		applyControlAria(frame, this.field, this.#errorIds);
 		this.#frame = frame;
 		nodes.push(frame);
 

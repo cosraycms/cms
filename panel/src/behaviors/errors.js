@@ -349,6 +349,11 @@ function unmark(field) {
 		describe(control);
 	});
 	field.querySelectorAll('.has-error').forEach((badge) => flag(badge, false));
+	field.querySelectorAll('cosray-host').forEach((host) => {
+		if (hosted(host) && host.errorIds.length > 0) {
+			host.errorIds = [];
+		}
+	});
 	field.removeAttribute(INVALID);
 	field.removeAttribute('data-error-locales');
 
@@ -392,6 +397,16 @@ function native(control) {
 	);
 }
 
+/**
+ * An element control's host, which hands error messages to the element.
+ *
+ * @param {Element} control
+ * @returns {control is Element & { errorIds: readonly string[], ready: Promise<void> }}
+ */
+function hosted(control) {
+	return control.localName === 'cosray-host' && 'errorIds' in control && 'ready' in control;
+}
+
 // What the field asks for: text is filled in, anything else chosen.
 /**
  * @param {Element} control
@@ -402,7 +417,7 @@ function request(control) {
 		control instanceof HTMLTextAreaElement ||
 		(control instanceof HTMLInputElement &&
 			!['date', 'time', 'datetime-local', 'month', 'week', 'color'].includes(control.type)) ||
-		control.matches('cosray-richtext, cosray-code, cosray-link');
+		['cosray-richtext', 'cosray-code', 'cosray-link'].includes(control.getAttribute('tag') ?? '');
 
 	return typed ? __('editor:error-fill') : __('editor:error-choose');
 }
@@ -508,6 +523,8 @@ function show(problem) {
 		if (native(issue.control)) {
 			issue.control.setAttribute('aria-invalid', 'true');
 			describe(issue.control, note.id);
+		} else if (hosted(issue.control)) {
+			issue.control.errorIds = [...new Set([...issue.control.errorIds, note.id])];
 		}
 
 		// An issue inside the meta dialog is invisible until opened.
@@ -729,14 +746,37 @@ function paint(box) {
 	problems.forEach(show);
 	render();
 
-	// The error-summary pattern: the box announces itself as an alert while
-	// the first field that can take focus as it stands gets it.
 	const first = problems[0]?.issues[0]?.control;
 
-	if (first instanceof HTMLElement && first.checkVisibility()) {
-		jump(/** @type {Problem} */ (problems[0]));
+	// A failed save renders the fields anew, and an element control mounts later.
+	if (first && hosted(first)) {
+		const active = document.activeElement;
 
-		if (problems[0]?.field.contains(document.activeElement)) {
+		void first.ready.then(() => {
+			if (lastBox === box && document.activeElement === active) {
+				arrive(box);
+			}
+		});
+
+		return;
+	}
+
+	arrive(box);
+}
+
+// The error-summary pattern: the box announces itself as an alert while
+// the first field that can take focus as it stands gets it.
+/**
+ * @param {HTMLElement} box
+ */
+function arrive(box) {
+	const problem = problems[0];
+	const first = problem?.issues[0]?.control;
+
+	if (problem && first instanceof HTMLElement && first.checkVisibility()) {
+		jump(problem);
+
+		if (problem.field.contains(document.activeElement)) {
 			return;
 		}
 	}

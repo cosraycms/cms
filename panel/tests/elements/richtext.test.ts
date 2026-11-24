@@ -69,6 +69,24 @@ afterEach(async () => {
 });
 
 describe('source view', () => {
+	it('marks its text invalid by the editor messages, also after a language switch', async () => {
+		const { element } = await richtext({ en: doc('Hello') });
+		const text = () => element.querySelector('.cms-richtext-content > .ProseMirror');
+		(element as unknown as { errorIds: string[] }).errorIds = ['cms-error-1'];
+
+		expect(text()?.getAttribute('aria-invalid')).toBe('true');
+		expect(text()?.getAttribute('aria-describedby')).toBe('cms-error-1');
+
+		element.locale = 'en';
+
+		expect(text()?.getAttribute('aria-describedby')).toBe('cms-error-1');
+
+		(element as unknown as { errorIds: string[] }).errorIds = [];
+
+		expect(text()?.hasAttribute('aria-invalid')).toBe(false);
+		expect(text()?.hasAttribute('aria-describedby')).toBe(false);
+	});
+
 	it('names its document as a text box of several lines', async () => {
 		const element = document.createElement('cosray-richtext') as RichtextElement;
 		Object.assign(element, {

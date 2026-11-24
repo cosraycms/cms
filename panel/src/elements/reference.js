@@ -6,7 +6,7 @@
 /** @import { LocaleMap } from '../types/data' */
 
 import { ZXX } from '../lib/content.js';
-import { reportChange } from '../lib/control.js';
+import { applyControlAria, reportChange } from '../lib/control.js';
 import { icon } from '../lib/icons.js';
 import { __, __n } from '../lib/locale.js';
 import { panelBase } from '../lib/runtime.js';
@@ -104,6 +104,8 @@ export class CosrayReference extends HTMLElement {
 	node = '';
 
 	#id = `cms-reference-${++ids}`;
+	/** @type {readonly string[]} */
+	#errorIds = [];
 	#started = false;
 	/** @type {NodeInfo[]} */
 	#items = [];
@@ -178,6 +180,16 @@ export class CosrayReference extends HTMLElement {
 		return this.#open && this.#active >= 0 && this.#choices[this.#active]
 			? `${this.#id}-${this.#active}`
 			: undefined;
+	}
+
+	/** @type {readonly string[]} */
+	get errorIds() {
+		return this.#errorIds;
+	}
+
+	set errorIds(ids) {
+		this.#errorIds = [...ids];
+		applyControlAria(this.#input, this.field ?? {}, this.#errorIds);
 	}
 
 	connectedCallback() {
@@ -531,9 +543,7 @@ export class CosrayReference extends HTMLElement {
 			input.removeAttribute('aria-required');
 		}
 
-		if (this.field?.descriptionId) {
-			input.setAttribute('aria-describedby', this.field.descriptionId);
-		}
+		applyControlAria(input, this.field ?? {}, this.#errorIds);
 		input.readOnly = immutable;
 		input.placeholder = single && title ? title : __('reference:placeholder');
 

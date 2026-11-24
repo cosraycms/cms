@@ -49,3 +49,40 @@ export function reportChange(element, detail) {
 		new CustomEvent('cosray-change', { detail, bubbles: true, composed: true }),
 	);
 }
+
+/**
+ * The ARIA state of the part that carries the field's name: described by
+ * the field's help text and the editor's error messages, invalid while
+ * there are any.
+ *
+ * @param {{ descriptionId?: string }} field
+ * @param {readonly string[]} errorIds
+ * @returns {{ 'aria-describedby'?: string, 'aria-invalid'?: string }}
+ */
+export function controlAria(field, errorIds) {
+	const ids = [field.descriptionId ?? '', ...errorIds].filter((id) => id !== '');
+
+	return {
+		...(ids.length > 0 ? { 'aria-describedby': ids.join(' ') } : {}),
+		...(errorIds.length > 0 ? { 'aria-invalid': 'true' } : {}),
+	};
+}
+
+/**
+ * @param {Element} element
+ * @param {{ descriptionId?: string }} field
+ * @param {readonly string[]} errorIds
+ */
+export function applyControlAria(element, field, errorIds) {
+	const aria = controlAria(field, errorIds);
+
+	for (const name of /** @type {const} */ (['aria-describedby', 'aria-invalid'])) {
+		const value = aria[name];
+
+		if (value === undefined) {
+			element.removeAttribute(name);
+		} else {
+			element.setAttribute(name, value);
+		}
+	}
+}

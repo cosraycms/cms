@@ -7,7 +7,7 @@
 /** @import { LibraryItem } from '../lib/library-browser.js' */
 
 import { ZXX } from '../lib/content.js';
-import { editedLocale, fallbackLabel, reportChange } from '../lib/control.js';
+import { applyControlAria, editedLocale, fallbackLabel, reportChange } from '../lib/control.js';
 import { resolveFallback } from '../lib/fallback.js';
 import { create } from './media/views.js';
 import { linkRow, linkText } from './link/row.js';
@@ -48,6 +48,8 @@ export class CosrayLink extends HTMLElement {
 	/** @type {LocaleMap<StoredLink | null>} */
 	#value = {};
 	#locale = ZXX;
+	/** @type {readonly string[]} */
+	#errorIds = [];
 	#rendered = false;
 	/** @type {Record<string, AssetInfo>} */
 	#picked = {};
@@ -80,6 +82,19 @@ export class CosrayLink extends HTMLElement {
 		}
 	}
 
+	/** @type {readonly string[]} */
+	get errorIds() {
+		return this.#errorIds;
+	}
+
+	set errorIds(ids) {
+		this.#errorIds = [...ids];
+
+		if (this.#rendered) {
+			applyControlAria(this.#root, this.field, this.#errorIds);
+		}
+	}
+
 	connectedCallback() {
 		if (this.#rendered) {
 			return;
@@ -92,10 +107,7 @@ export class CosrayLink extends HTMLElement {
 			this.#root.setAttribute('aria-label', this.field.label);
 		}
 
-		if (this.field.descriptionId) {
-			this.#root.setAttribute('aria-describedby', this.field.descriptionId);
-		}
-
+		applyControlAria(this.#root, this.field, this.#errorIds);
 		this.append(this.#root);
 		this.#render();
 	}

@@ -7,6 +7,7 @@ use Cosray\Locales;
 use Cosray\Tests\Browser\Collection\Articles;
 use Cosray\Tests\Browser\Node\Article;
 use Cosray\Tests\Browser\Node\MediaPage;
+use Cosray\Tests\Browser\Node\Notice;
 
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
@@ -30,6 +31,7 @@ $locales = new Locales();
 $locales->add('en', title: 'English', pgDict: 'english');
 $app->node(MediaPage::class);
 $app->node(Article::class);
+$app->node(Notice::class);
 $app->section('Content')->collection(Articles::class);
 $app->load($locales);
 $app->boot();

@@ -125,6 +125,18 @@ function editor(): void {
 	}
 }
 
+// Stands in for the element host: what errors.js relies on is errorIds, ready and focus().
+class StubHost extends HTMLElement {
+	errorIds: readonly string[] = [];
+	ready = Promise.resolve();
+
+	override focus(options?: FocusOptions): void {
+		this.querySelector('textarea')?.focus(options);
+	}
+}
+
+customElements.define('cosray-host', StubHost);
+
 type Item = { path: unknown; message: string; code?: string };
 
 function respond(items: Item[]): HTMLElement {
@@ -233,6 +245,35 @@ describe('errors behavior', () => {
 		respond([{ path: ['content', 'body', 'value', 'de'], message: 'Body is invalid' }]);
 
 		expect(field('body').getAttribute('data-invalid')).toBe('true');
+	});
+
+	it('hands the messages to an element host and focuses its control once mounted', async () => {
+		const host = document.createElement('cosray-host') as StubHost;
+		host.setAttribute('name', 'content[body][json]');
+		host.setAttribute('tag', 'cosray-richtext');
+		const mounted = Promise.withResolvers<void>();
+		host.ready = mounted.promise;
+		document.querySelector('x-host')!.replaceWith(host);
+
+		respond([
+			{ path: ['content', 'body', 'value', 'zxx'], message: 'Body is required', code: 'missing' },
+		]);
+
+		const note = field('body').querySelector('[data-error-message]');
+		expect(note?.textContent).toBe('editor:error-fill');
+		expect(host.errorIds).toEqual([note?.id]);
+
+		const textarea = document.createElement('textarea');
+		host.append(textarea);
+		mounted.resolve();
+		await mounted.promise;
+		await Promise.resolve();
+
+		expect(document.activeElement).toBe(textarea);
+
+		host.dispatchEvent(new CustomEvent('cosray-change', { bubbles: true }));
+
+		expect(host.errorIds).toEqual([]);
 	});
 
 	it('badges and switches the node control for a native variant', () => {

@@ -17,6 +17,7 @@ import { bubbleMenu } from './bubble-menu.js';
 import { flatten, lineText, linePlugins, toLine } from './line.js';
 import { clean } from './vocabulary.js';
 import { docToPm, parseHtml, pmToDoc } from './format.js';
+import { controlAria } from '../../lib/control.js';
 
 /**
  * The internal editor driver seam: components talk documents in the
@@ -30,6 +31,7 @@ import { docToPm, parseHtml, pmToDoc } from './format.js';
  * @property {(command: Command) => void} run
  * @property {(doc: RichtextDoc | null) => void} load Replaces the document, with a fresh history.
  * @property {(text: string) => void} placeholder
+ * @property {(ids: readonly string[]) => void} errors Describes the editor by these error messages and marks it invalid while there are any.
  * @property {() => RichtextDoc} getDoc
  * @property {() => string} getHTML
  * @property {(html: string) => void} setContent
@@ -150,16 +152,25 @@ export default function createEditor(options) {
 
 	plugins.push(placeholderPlugin(hint));
 
-	if (label || required || describedBy) {
-		// Without a role, a contenteditable is generic, and its name goes unannounced.
-		/** @type {Record<string, string>} */
-		const attributes = { role: 'textbox' };
-		if (!line) attributes['aria-multiline'] = 'true';
-		if (label) attributes['aria-label'] = label;
-		if (required) attributes['aria-required'] = 'true';
-		if (describedBy) attributes['aria-describedby'] = describedBy;
-		plugins.push(new Plugin({ props: { attributes } }));
-	}
+	/** @type {{ errorIds: readonly string[] }} */
+	const aria = { errorIds: [] };
+	plugins.push(
+		new Plugin({
+			props: {
+				attributes: () => {
+					/** @type {Record<string, string>} */
+					const attributes = controlAria({ descriptionId: describedBy }, aria.errorIds);
+					// Without a role, a contenteditable is generic, and its name goes unannounced.
+					attributes.role = 'textbox';
+					if (!line) attributes['aria-multiline'] = 'true';
+					if (label) attributes['aria-label'] = label;
+					if (required) attributes['aria-required'] = 'true';
+
+					return attributes;
+				},
+			},
+		}),
+	);
 
 	const state = EditorState.create({
 		doc: read(content),
@@ -216,6 +227,11 @@ export default function createEditor(options) {
 
 		placeholder(text) {
 			hint.text = text;
+			view.dispatch(view.state.tr);
+		},
+
+		errors(ids) {
+			aria.errorIds = [...ids];
 			view.dispatch(view.state.tr);
 		},
 

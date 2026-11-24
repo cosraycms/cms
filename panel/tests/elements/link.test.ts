@@ -84,6 +84,20 @@ describe('link field', () => {
 		expect(element.querySelector('[role="group"]')?.getAttribute('aria-label')).toBe('Target');
 	});
 
+	it('marks its group invalid by the editor messages', () => {
+		const { element } = link({ value: { zxx: null } });
+		(element as unknown as { errorIds: string[] }).errorIds = ['cms-error-1'];
+		const group = element.querySelector('[role="group"]');
+
+		expect(group?.getAttribute('aria-invalid')).toBe('true');
+		expect(group?.getAttribute('aria-describedby')).toBe('cms-error-1');
+
+		(element as unknown as { errorIds: string[] }).errorIds = [];
+
+		expect(group?.hasAttribute('aria-invalid')).toBe(false);
+		expect(group?.hasAttribute('aria-describedby')).toBe(false);
+	});
+
 	it('stores a chosen address for every language when neutral', async () => {
 		const { element, changes } = link({ value: { zxx: null } });
 

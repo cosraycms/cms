@@ -124,6 +124,19 @@ describe('reference browsing', () => {
 		},
 	);
 
+	it('marks its input invalid by the editor messages', async () => {
+		const { element, input } = await picker({ descriptionId: 'help' });
+		(element as unknown as { errorIds: string[] }).errorIds = ['cms-error-1'];
+
+		expect(input.getAttribute('aria-invalid')).toBe('true');
+		expect(input.getAttribute('aria-describedby')).toBe('help cms-error-1');
+
+		(element as unknown as { errorIds: string[] }).errorIds = [];
+
+		expect(input.hasAttribute('aria-invalid')).toBe(false);
+		expect(input.getAttribute('aria-describedby')).toBe('help');
+	});
+
 	it('loads a bounded first page on focus without changing the field', async () => {
 		fetchMock.mockResolvedValue(page(['a', 'b'], true));
 		const { element, input, changes } = await picker();

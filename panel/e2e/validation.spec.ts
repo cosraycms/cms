@@ -50,3 +50,29 @@ test('a failed save names the open fields and follows the edits', async ({ page 
 	await expect(summary).toBeHidden();
 	await expect(page.locator('#cms-toasts')).toContainText(/saved/i);
 });
+
+test('a failed save marks element controls and hands them focus', async ({ page }) => {
+	await openNode(page, 'notice');
+	const summary = page.locator('#editor-errors');
+	const body = page.getByRole('textbox', { name: 'Body' });
+	const picture = page.getByRole('group', { name: 'Picture' });
+
+	await page.getByLabel('Title').fill('Notice, edited');
+	await save(page);
+
+	await expect(summary.locator('.cms-errors-chip')).toHaveText(['Body →', 'Picture →']);
+	await expect(body).toBeFocused();
+	await expect(body).toHaveAttribute('aria-invalid', 'true');
+	await expect(body).toHaveAccessibleDescription('Please fill this in.');
+	await expect(picture).toHaveAttribute('aria-invalid', 'true');
+	await expect(picture).toHaveAccessibleDescription('Please choose something.');
+
+	await summary.getByRole('button', { name: /Picture/ }).click();
+	await expect(picture.getByRole('button').first()).toBeFocused();
+
+	await page.locator('.cms-field[data-field="body"] label').click();
+	await expect(body).toBeFocused();
+	await page.keyboard.type('Read this');
+	await expect(body).not.toHaveAttribute('aria-invalid');
+	await expect(summary.locator('.cms-errors-chip')).toHaveText(['Picture →']);
+});

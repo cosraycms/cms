@@ -136,6 +136,22 @@ describe('code editing', () => {
 		await vi.waitFor(() => expect(fallback()?.textContent).toContain('english'));
 	});
 
+	it('marks its text invalid by the editor messages', async () => {
+		const { element } = await code({
+			value: { zxx: '' },
+			field: { name: 'snippet', descriptionId: 'help' },
+		});
+		(element as unknown as { errorIds: string[] }).errorIds = ['cms-error-1'];
+
+		expect(input(element).getAttribute('aria-invalid')).toBe('true');
+		expect(input(element).getAttribute('aria-describedby')).toBe('help cms-error-1');
+
+		(element as unknown as { errorIds: string[] }).errorIds = [];
+
+		expect(input(element).hasAttribute('aria-invalid')).toBe(false);
+		expect(input(element).getAttribute('aria-describedby')).toBe('help');
+	});
+
 	it('lets the browser require a value when the field does', async () => {
 		const { element } = await code({
 			value: { zxx: '' },

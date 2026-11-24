@@ -42,7 +42,11 @@ export class CosrayHost extends HTMLElement {
 	/** @type {ContractElement | null} */
 	#element = null;
 	#locale = '';
+	/** @type {readonly string[]} */
+	#errorIds = [];
 	#started = false;
+	/** @type {Promise<void>} */
+	#ready = Promise.resolve();
 
 	connectedCallback() {
 		if (this.#started) {
@@ -65,10 +69,15 @@ export class CosrayHost extends HTMLElement {
 		// A label's click arrives at the host itself; the control inside takes focus.
 		this.addEventListener('click', (event) => {
 			if (event.target === this) {
-				this.#focusControl();
+				this.focus();
 			}
 		});
-		void this.#mount();
+		this.#ready = this.#mount();
+	}
+
+	/** Settles once the control is mounted, or has failed to load. */
+	get ready() {
+		return this.#ready;
 	}
 
 	// The content-language behavior assigns the editing locale; forward it.
@@ -83,6 +92,24 @@ export class CosrayHost extends HTMLElement {
 	/** @type {string} */
 	get locale() {
 		return this.#locale;
+	}
+
+	/** @type {readonly string[]} */
+	get errorIds() {
+		return this.#errorIds;
+	}
+
+	set errorIds(ids) {
+		this.#errorIds = [...ids];
+
+		if (this.#element) {
+			this.#element.errorIds = this.#errorIds;
+		}
+	}
+
+	/** @param {FocusOptions} [options] */
+	focus(options) {
+		this.#focusControl(options);
 	}
 
 	/**
@@ -142,6 +169,10 @@ export class CosrayHost extends HTMLElement {
 		element.locale = this.#locale;
 		element.locales = this.#payload.locales;
 		element.assets = this.#payload.assets ?? {};
+		if (this.#errorIds.length > 0) {
+			element.errorIds = this.#errorIds;
+		}
+
 		const settings = this.#settingsSlot();
 
 		if (settings) {
@@ -152,18 +183,24 @@ export class CosrayHost extends HTMLElement {
 		this.append(element);
 	}
 
-	#focusControl() {
-		for (const control of this.querySelectorAll(
-			'[contenteditable="true"], textarea, input:not([type="hidden"]), select, button',
-		)) {
-			if (
-				control instanceof HTMLElement &&
-				!control.matches(':disabled') &&
-				control.checkVisibility()
-			) {
-				control.focus();
+	// What takes text comes first: a richtext toolbar precedes its document.
+	/** @param {FocusOptions} [options] */
+	#focusControl(options) {
+		for (const selector of [
+			'[contenteditable="true"]',
+			'textarea, input:not([type="hidden"], [type="file"]), select',
+			'button',
+		]) {
+			for (const control of this.querySelectorAll(selector)) {
+				if (
+					control instanceof HTMLElement &&
+					!control.matches(':disabled') &&
+					control.checkVisibility()
+				) {
+					control.focus(options);
 
-				return;
+					return;
+				}
 			}
 		}
 	}

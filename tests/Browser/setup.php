@@ -110,6 +110,15 @@ $node->execute([
 $db->prepare("INSERT INTO cms.url_paths (node, path, locale, creator, editor) VALUES (:node, '/article', 'en', 1, 1)")
 	->execute(['node' => (int) $node->fetchColumn()]);
 
+// Saved empty: its required element fields fail every save.
+$type = (int) $db->query("INSERT INTO cms.types (handle) VALUES ('notice') RETURNING type")->fetchColumn();
+$node->execute([
+	'uid' => 'browsernotice',
+	'type' => $type,
+	'content' => json_encode(['title' => ['type' => 'text', 'value' => ['zxx' => 'Notice']]]),
+	'title' => json_encode(['en' => 'Notice']),
+]);
+
 $db->exec(
 	"WITH revision AS (
 		INSERT INTO cms.revisions (node, editor, content, settings)

@@ -187,6 +187,24 @@ describe('the frame', () => {
 		expect(ajax).toHaveBeenCalledWith('GET', '/panel/media/picker', expect.anything());
 	});
 
+	it('marks its group invalid by the editor messages, across renders', async () => {
+		const { element } = await files(5, 2, { descriptionId: 'help' });
+		const group = () => element.querySelector('.cms-media-field[role="group"]');
+		(element as unknown as { errorIds: string[] }).errorIds = ['cms-error-1'];
+
+		expect(group()?.getAttribute('aria-invalid')).toBe('true');
+		expect(group()?.getAttribute('aria-describedby')).toBe('help cms-error-1');
+
+		element.value = { zxx: [{ uid: 'a' }] };
+
+		expect(group()?.getAttribute('aria-describedby')).toBe('help cms-error-1');
+
+		(element as unknown as { errorIds: string[] }).errorIds = [];
+
+		expect(group()?.hasAttribute('aria-invalid')).toBe(false);
+		expect(group()?.getAttribute('aria-describedby')).toBe('help');
+	});
+
 	it('is the bar alone while empty', async () => {
 		const { element } = await files(1, 0);
 

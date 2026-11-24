@@ -12,7 +12,7 @@ import { defaultKeymap, editHistory, editorCommands } from 'prism-code-editor/co
 import { highlightBracketPairs } from 'prism-code-editor/highlight-brackets';
 import { matchBrackets } from 'prism-code-editor/match-brackets';
 import { ZXX, ensureLocales, ensureNeutral } from '../lib/content.js';
-import { editedLocale, fallbackLabel, reportChange } from '../lib/control.js';
+import { applyControlAria, editedLocale, fallbackLabel, reportChange } from '../lib/control.js';
 import { resolveFallback } from '../lib/fallback.js';
 import { __ } from '../lib/locale.js';
 import {
@@ -44,6 +44,8 @@ export class CosrayCode extends HTMLElement {
 	locales;
 
 	#locale = ZXX;
+	/** @type {readonly string[]} */
+	#errorIds = [];
 	#rendered = false;
 	/** @type {LocaleMap<string> | null} Edits so far, read from `value` on first render. */
 	#map = null;
@@ -87,6 +89,19 @@ export class CosrayCode extends HTMLElement {
 
 		if (this.#rendered && editedLocale(this.field, locale) !== previous) {
 			void this.#mount();
+		}
+	}
+
+	/** @type {readonly string[]} */
+	get errorIds() {
+		return this.#errorIds;
+	}
+
+	set errorIds(ids) {
+		this.#errorIds = [...ids];
+
+		if (this.#editor) {
+			applyControlAria(this.#editor.textarea, this.field, this.#errorIds);
 		}
 	}
 
@@ -235,9 +250,7 @@ export class CosrayCode extends HTMLElement {
 			this.#editor.textarea.setAttribute('aria-label', this.field.label);
 		}
 
-		if (this.field.descriptionId) {
-			this.#editor.textarea.setAttribute('aria-describedby', this.field.descriptionId);
-		}
+		applyControlAria(this.#editor.textarea, this.field, this.#errorIds);
 
 		if (syntax !== this.#syntax[ZXX]) {
 			void this.#applySyntax();

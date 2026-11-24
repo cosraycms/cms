@@ -241,7 +241,7 @@ Failed saves preserve the mounted form. Messages are in the panel language: [Val
 
 A jump reveals hidden targets by switching locale, opening the relevant inspector/tab/dialog, or expanding an entry. Editing a field closes its problem in the summary, the head, and at the field; a required native control counts as fixed only once it holds a value, and opens again on blur when emptied. When every reported field has been edited, the summary says so; nothing is validated in the browser, so only the next save confirms it.
 
-Current styling hooks include `.cms-field[data-invalid='true']`, `.cms-field-error`, and `.has-error`. Native controls receive accessible invalid/error associations. Custom elements currently receive field-level marking rather than a standardized per-sub-value error API.
+Current styling hooks include `.cms-field[data-invalid='true']`, `.cms-field-error`, and `.has-error`. Native controls receive `aria-invalid` and the messages through `aria-describedby`. An element control receives the ids of its field's messages as `errorIds` (see [the element contract](#the-element-contract)); focusing its host focuses the control's first text entry, else its first button.
 
 ## Blocks
 
@@ -293,10 +293,11 @@ The [host](../panel/src/lib/host.js) assigns JavaScript properties, not attribut
 | `node` | Owner node UID, or an empty string during creation |
 | `locale` | Selected editing locale; neutral controls still use `zxx` |
 | `locales` | `{default, all: [{id, title, fallback?}]}` |
+| `errorIds` | Ids of the editor's error messages for the field, empty while it has none. Set `aria-invalid="true"` while there are any on the part that carries `field.label`, and add them to its `aria-describedby` after `field.descriptionId`, as the built-in controls do with [`applyControlAria()`](../panel/src/lib/control.js) |
 | `assets` | Catalog metadata keyed by asset UID, for resolving previews from `{uid, meta?}` values |
 | `settings` | Optional external host for secondary controls, currently a block settings slot |
 
-Values and locale properties can be reassigned; handle repeated assignments idempotently. A settings slot is assigned once by the current host; without one, secondary UI remains inline.
+Values, locale properties and `errorIds` can be reassigned; handle repeated assignments idempotently. A settings slot is assigned once by the current host; without one, secondary UI remains inline.
 
 Report user edits using the full new value and optional meta:
 
