@@ -64,6 +64,16 @@ Core partials that also belong to the kit:
 | `.cms-input`, `.cms-textarea`, `.cms-select` | form controls |
 | `.cms-page-toolbar` | a row of filters or forms above the scrolling part |
 
+## Inspector sections
+
+`kit/inspector-section` draws a [section in the node editor's inspector](application.md#inspector-sections): `section`, a `Cosray\Panel\Inspector\Section`, and `oob` in a response that draws it again. The editor includes it for every registered section; a plugin includes it in the answers of its own routes. The section's template lays its content out in a narrow column with these classes:
+
+| Class | Use |
+| --- | --- |
+| `.cms-kit-inspector-field` | a label above its control |
+| `.cms-kit-inspector-row` | a line whose first child takes the room and whose other children, like a button, keep their size |
+| `.cms-kit-inspector-help` | a quiet line of help or state |
+
 ## Tones
 
 `data-tone` takes `neutral` (the default), `info`, `success`, `warning` or `danger`. A plugin's own CSS reads the same colors from the tone tokens `--cms-color-{tone}`, `--cms-color-{tone}-surface` and `--cms-color-{tone}-text` for `info`, `success`, `warning` and `danger`. They follow the light and dark theme.

@@ -8,6 +8,7 @@ use Cosray\Tests\Browser\Collection\Articles;
 use Cosray\Tests\Browser\Node\Article;
 use Cosray\Tests\Browser\Node\MediaPage;
 use Cosray\Tests\Browser\Node\Notice;
+use Cosray\Tests\Browser\Plugin\Notes;
 
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
@@ -33,6 +34,7 @@ $app->node(MediaPage::class);
 $app->node(Article::class);
 $app->node(Notice::class);
 $app->section('Content')->collection(Articles::class);
+$app->plugin(Notes::class);
 $app->load($locales);
 $app->boot();
 

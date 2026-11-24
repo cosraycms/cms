@@ -119,6 +119,88 @@
 	font-variant-numeric: tabular-nums;
 }
 
+/*
+ * An inspector section of kit/inspector-section, and what its template lays
+ * out in the narrow column: fields, rows with an action at their end, and
+ * help lines.
+ */
+.cms-kit-inspector {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-4);
+	min-width: 0;
+}
+
+.cms-kit-inspector-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cms-space-2);
+}
+
+/* As the headings of the status above it. */
+.cms-kit-inspector-heading {
+	margin: 0;
+	color: var(--cms-color-text-subtle);
+	font-size: var(--cms-font-size-xs);
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.cms-kit-inspector-instant {
+	--cms-icon-size: 0.75rem;
+	display: inline-flex;
+	align-items: center;
+	gap: var(--cms-space-1);
+	padding: 0 var(--cms-space-2);
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-full);
+	color: var(--cms-color-text-muted);
+	font-size: 0.6875rem;
+	line-height: 1.25rem;
+	white-space: nowrap;
+}
+
+.cms-kit-inspector-field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-1-5);
+	min-width: 0;
+
+	& > label {
+		color: var(--cms-color-text-label);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+	}
+}
+
+.cms-kit-inspector-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cms-space-2);
+	min-width: 0;
+	color: var(--cms-color-text);
+	font-size: var(--cms-font-size-sm);
+
+	& > :first-child {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	& > :not(:first-child) {
+		flex: 0 0 auto;
+	}
+}
+
+.cms-kit-inspector-help {
+	margin: 0;
+	color: var(--cms-color-text-subtle);
+	font-size: var(--cms-font-size-xs);
+	line-height: 1.4;
+}
+
 .cms-kit-foot {
 	display: flex;
 	align-items: center;

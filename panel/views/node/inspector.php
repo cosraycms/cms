@@ -167,6 +167,7 @@ $mark = static fn(string $setting): string => in_array($setting, $changed, true)
 						<section class="cms-inspector-section">
 							<?php $this->include('node/status', ['status' => $status]) ?>
 						</section>
+						<?php $this->include('node/sections', ['status' => $status]) ?>
 					<?php endif ?>
 				</div>
 			<?php endif ?>

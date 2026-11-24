@@ -368,6 +368,62 @@ Registered scripts load once per full document and do not run again after htmx n
 
 `panel.dashboard => false` removes the dashboard entry and directs panel home to the first collection, or media when there is none.
 
+### Inspector sections
+
+A site or a plugin can add a section to the status tab of the node editor's inspector, below the node's status, for state that belongs to a node but not to its content. A section implements [InspectorSection](../src/Contract/InspectorSection.php) and is registered with `$app->inspector->add()` or through `Registrar::inspectorSection()`:
+
+```php
+use Cosray\Config;
+use Cosray\Contract\InspectorSection;
+use Cosray\Node\Wrapper;
+use Cosray\Panel\Inspector\Section;
+
+final class StockSection implements InspectorSection
+{
+    public function __construct(
+        private readonly Config $config,
+        private readonly Stock $stock,
+    ) {}
+
+    public function section(Wrapper $node): ?Section
+    {
+        if ($node->meta->type->handle !== 'product') {
+            return null;
+        }
+
+        return new Section(
+            key: 'acme-shop',
+            title: __('acme-shop:stock'),
+            template: 'acme-shop:stock',
+            context: ['count' => $this->stock->of($node->meta->uid)],
+            action: "{$this->config->panel->path}/acme-shop/stock/{$node->meta->uid}",
+        );
+    }
+}
+
+$cms->inspectorSection(StockSection::class);
+```
+
+Class names are autowired per request, as dashboard cards are. The node is the stored one as the editor shows it, with its working copy; a node that is being created has no sections. `null` leaves the section out. Decide that by what stays the same while the editor is open, like the node's type or the user's permissions: the editor draws each section again after every save and switch, so its content follows the node, but it never removes one.
+
+The [Section](../src/Panel/Inspector/Section.php) names a `key`, unique among the sections, like the plugin's id; the heading; and the panel template of the content with its context. The editor's form wraps the inspector, and forms cannot nest, so a section's controls never join the editor's save. With an `action`, the editor keeps a form of the section's own outside its form, which posts there with the CSRF field, and the template's controls join it through the `form` variable they receive:
+
+```php
+<div class="cms-kit-inspector-row">
+    <input class="cms-input" type="number" name="count" value="<?= $count ?>" form="<?= $form ?>" aria-label="<?= __('acme-shop:stock') ?>" />
+    <button class="cms-button cms-button-secondary cms-button-small" type="submit" form="<?= $form ?>"><?= __('acme-shop:set') ?></button>
+</div>
+```
+
+Such controls act at once, like the editor's own publication switch, and do not mark the node as edited; the heading of a section with an action says so. The action is a [panel route](#panel-pages-and-navigation) of the plugin, whose template answers with the section drawn again and, where it helps, a toast:
+
+```php
+<?php $this->include('kit/inspector-section', ['section' => $section, 'oob' => true]) ?>
+<?php $this->include('component/toast', ['kind' => 'success', 'message' => __('acme-shop:stock-set')]) ?>
+```
+
+The [panel kit](panel-kit.md#inspector-sections) lists the classes for a section's content.
+
 ### Node listeners
 
 A node listener hears of every write to a node, through the panel, the API or PHP code alike. It implements [NodeListener](../src/Contract/NodeListener.php) and is registered by a site with `$app->nodeListener()` or by a plugin through `Registrar::nodeListener()`:

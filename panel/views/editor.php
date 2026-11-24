@@ -353,6 +353,18 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 			data-dirty-bypass
 			hidden><?php $this->include('component/csrf') ?></form>
 	<?php endif ?>
+	<?php foreach ((array) ($status['sections'] ?? []) as $section): ?>
+		<?php // A section's controls act at once too, through a form of its own. ?>
+		<?php if ($section->action !== null): ?>
+			<form
+				id="<?= escape($section->form()) ?>"
+				method="post"
+				action="<?= escape($section->action) ?>"
+				hx-swap="none"
+				data-dirty-bypass
+				hidden><?php $this->include('component/csrf') ?></form>
+		<?php endif ?>
+	<?php endforeach ?>
 	<?php if (is_array($autosave)): ?>
 		<?php $this->include('node/autosave', ['autosave' => $autosave]) ?>
 	<?php endif ?>

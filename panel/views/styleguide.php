@@ -477,6 +477,11 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 						<?php $this->include('kit/pagination', ['start' => 1, 'end' => 3, 'total' => 3, 'previous' => null, 'next' => null]) ?>
 					</div>
 				</div>
+				<div class="cms-styleguide-sample" data-sample="kit:inspector-section" style="display: block; max-width: 22rem">
+					<?php $this->include('kit/inspector-section', [
+						'section' => new \Cosray\Panel\Inspector\Section('styleguide', 'Reviews', 'styleguide/inspector-section'),
+					]) ?>
+				</div>
 				<div class="cms-styleguide-sample" data-sample="kit:empty" style="display: block">
 					<?php $this->include('kit/empty', ['title' => 'No reports yet', 'text' => 'Import a report file to start.']) ?>
 				</div>

@@ -12,6 +12,7 @@ use Cosray\Collection\Schema\Handler as CollectionHandler;
 use Cosray\Config;
 use Cosray\Contract\Block;
 use Cosray\Contract\DashboardCard;
+use Cosray\Contract\InspectorSection;
 use Cosray\Contract\NodeListener;
 use Cosray\Field\Schema\Handler as FieldHandler;
 use Cosray\Node\Schema\Handler as NodeHandler;
@@ -91,6 +92,17 @@ final class Registrar
 	public function dashboardCard(string|DashboardCard $card): void
 	{
 		$this->bootstrap->dashboard->add($card);
+	}
+
+	/**
+	 * A section in the status tab of the node editor's inspector; see
+	 * Cosray\Contract\InspectorSection.
+	 *
+	 * @param class-string<InspectorSection>|InspectorSection $section
+	 */
+	public function inspectorSection(string|InspectorSection $section): void
+	{
+		$this->bootstrap->inspector->add($section);
 	}
 
 	/**

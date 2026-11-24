@@ -35,6 +35,7 @@ final class TestPlugin implements Plugin
 		$cms->control('test-money-picker', 'test-money-picker', 'controls.js');
 		$cms->dashboardCard(TestDashboardCard::class);
 		$cms->nodeListener(TestWriteLog::class);
+		$cms->inspectorSection(TestInspectorSection::class);
 		$cms->templates(__DIR__ . '/views');
 		$cms->translations(__DIR__ . '/lang', scripts: true);
 		$cms->panel(static function (PanelRoutes $panel): void {
@@ -45,6 +46,7 @@ final class TestPlugin implements Plugin
 				'test-plugin:page',
 			);
 			$panel->get('/sub', [PageController::class, 'index'], 'sub')->render('test-plugin:page');
+			$panel->post('/notes/{uid}', [PageController::class, 'note'], 'note')->render('test-plugin:noted');
 		});
 		$cms->css('theme.css');
 		$cms->css("{$cms->config->panel->path}/vendor/test-plugin/theme.css");

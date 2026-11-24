@@ -22,6 +22,7 @@ use Cosray\Contract\NodeListener;
 use Cosray\Icons\Provider as IconProvider;
 use Cosray\Node\Types;
 use Cosray\Panel\Dashboard;
+use Cosray\Panel\Inspector;
 use Cosray\View\Boiler\Error\Handler as ErrorHandler;
 use Override;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -180,6 +181,11 @@ class App implements RouteAdder
 
 	public Dashboard $dashboard {
 		get => $this->bootstrap->dashboard;
+	}
+
+	/** The sections the node editor's inspector shows below the status. */
+	public Inspector $inspector {
+		get => $this->bootstrap->inspector;
 	}
 
 	public function navigation(): Navigation

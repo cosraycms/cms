@@ -72,7 +72,7 @@ $db->prepare(
 $db->beginTransaction();
 $type = (int) $db->query("INSERT INTO cms.types (handle) VALUES ('media-page') RETURNING type")->fetchColumn();
 
-foreach (['focal', 'crop', 'texts', 'strict', 'gallery', 'video', 'restore', 'later', 'stages'] as $name) {
+foreach (['focal', 'crop', 'texts', 'strict', 'gallery', 'video', 'restore', 'later', 'stages', 'section'] as $name) {
 	$node = $db->prepare(
 		'WITH n AS (
 			INSERT INTO cms.nodes (uid, locked, type, creator, content, title)

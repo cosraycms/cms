@@ -28,6 +28,8 @@ use Cosray\Node\Wrapper;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
 use Cosray\Panel\FormPatch;
+use Cosray\Panel\Inspector;
+use Cosray\Panel\Inspector\Section;
 use Cosray\Panel\NodeStatus;
 use Cosray\Panel\NodeUrls;
 use Cosray\Panel\System;
@@ -669,7 +671,27 @@ final class Editor extends Panel
 					'published' => (bool) ($data['published'] ?? false),
 					'hidden' => (bool) ($data['hidden'] ?? false),
 				],
+			'sections' => $this->sections($context, $cms, (string) ($data['uid'] ?? '')),
 		];
+	}
+
+	/**
+	 * The sections sites and plugins add to the inspector, for the node as
+	 * it is stored now.
+	 *
+	 * @return list<Section>
+	 */
+	private function sections(Context $context, Cms $cms, string $uid): array
+	{
+		$inspector = $context->container->has(Inspector::class) ? $context->container->get(Inspector::class) : null;
+
+		if (!$inspector instanceof Inspector || $inspector->isEmpty()) {
+			return [];
+		}
+
+		$node = $cms->node->working($uid);
+
+		return $node === null ? [] : $inspector->of($node, $context);
 	}
 
 	/**

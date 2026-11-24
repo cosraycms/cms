@@ -39,6 +39,7 @@ use Cosray\Node\Schema\Registry as NodeSchemas;
 use Cosray\Node\Types;
 use Cosray\Panel\Dashboard as PanelDashboard;
 use Cosray\Panel\Extras as PanelExtras;
+use Cosray\Panel\Inspector as PanelInspector;
 use Cosray\Plugin\Assets as PluginAssets;
 use Cosray\Plugin\Namespaces as PluginNamespaces;
 use Cosray\Plugin\PanelRoutes;
@@ -75,11 +76,16 @@ class Bootstrap implements CorePlugin
 	protected readonly CollectionSchemas $collectionSchemas;
 	protected readonly PanelDashboard $dashboardCards;
 	protected readonly NodeListeners $nodeListeners;
+	protected readonly PanelInspector $inspectorSections;
 	protected readonly Policy $policy;
 	protected readonly UserTypes $userTypes;
 
 	public PanelDashboard $dashboard {
 		get => $this->dashboardCards;
+	}
+
+	public PanelInspector $inspector {
+		get => $this->inspectorSections;
 	}
 
 	/** @var array<Entry> */
@@ -159,6 +165,7 @@ class Bootstrap implements CorePlugin
 		$this->systemNav = new SystemNav();
 		$this->dashboardCards = PanelDashboard::withDefaults();
 		$this->nodeListeners = new NodeListeners()->add(Webhooks::class);
+		$this->inspectorSections = new PanelInspector();
 		$this->policy = Policy::withDefaults();
 		$this->userTypes = new UserTypes();
 	}
@@ -197,6 +204,7 @@ class Bootstrap implements CorePlugin
 		$this->container->add(CollectionSchemaRegistry::class, $this->collectionSchemas->registry());
 		$this->container->add(PanelDashboard::class, $this->dashboardCards)->value();
 		$this->container->add(NodeListeners::class, $this->nodeListeners)->value();
+		$this->container->add(PanelInspector::class, $this->inspectorSections)->value();
 		$this->container->add(PluginAssets::class, $this->pluginAssets);
 		$this->container->add(PanelExtras::class, $this->panelExtras);
 		$this->container->add(Policy::class, $this->policy);
