@@ -125,6 +125,7 @@
 	--cms-color-neutral-400: #a7a7a5;
 	--cms-color-neutral-450: #8a8a88;
 	--cms-color-neutral-500: #737371;
+	--cms-color-neutral-550: #6b6b69;
 	--cms-color-neutral-600: #585856;
 	--cms-color-neutral-700: #474745;
 	--cms-color-neutral-800: #323230;
@@ -217,7 +218,8 @@
 	--cms-color-text-label: var(--cms-color-text);
 	--cms-color-text-requirement: var(--cms-color-text-subtle);
 	--cms-color-text-muted: light-dark(var(--cms-color-neutral-600), var(--cms-color-neutral-300));
-	--cms-color-text-subtle: light-dark(var(--cms-color-neutral-500), var(--cms-color-neutral-400));
+	/* 4.5:1 on every ground text sits on, the selected row's included. */
+	--cms-color-text-subtle: light-dark(var(--cms-color-neutral-550), var(--cms-color-neutral-400));
 	/* Icons, grips and separators only: 3:1, too faint for text. */
 	--cms-color-text-faint: light-dark(var(--cms-color-neutral-450), var(--cms-color-neutral-500));
 

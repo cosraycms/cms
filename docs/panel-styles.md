@@ -55,7 +55,7 @@ A project can restrict the entire panel to one scheme:
 
 This also outranks the styleguide's theme toggle. Theme overrides of border and text tokens can replace the panel's `prefers-contrast: more` adjustments, so verify that mode separately.
 
-Text needs 4.5:1 against its background in the default mode, not only under `prefers-contrast: more`: `--cms-color-text-subtle` is the quietest text color. `--cms-color-text-faint` reaches 3:1 and is for icons, grips, separators and scrollbar thumbs only.
+Text needs 4.5:1 against its background in the default mode, not only under `prefers-contrast: more`: `--cms-color-text-subtle` is the quietest text color and reaches it on every surface, hover and selected backgrounds included. `--cms-color-text-faint` reaches 3:1 and is for icons, grips, separators and scrollbar thumbs only.
 
 In forced-color modes, shadows and gradients can disappear. Focus and state must remain recognizable without them. Existing controls retain a transparent outline that the system can paint; replacing it with `outline: none` would lose that fallback. System color keywords such as `Canvas`, `ButtonText`, and `Highlight` are appropriate for explicit forced-color adjustments.
 
