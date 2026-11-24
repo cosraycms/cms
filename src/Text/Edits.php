@@ -6,8 +6,6 @@ namespace Cosray\Text;
 
 use Cosray\Cms;
 use Cosray\Context;
-use Cosray\Node\PathManager;
-use Cosray\Node\ReservedPaths;
 use Cosray\Node\Store;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
@@ -34,16 +32,7 @@ final class Edits
 		private readonly Cms $cms,
 		Types $types,
 	) {
-		$factory = $cms->nodeFactory();
-		$this->store = new Store(
-			$context->db,
-			new PathManager(ReservedPaths::fromConfig($context->config)),
-			$types,
-			$factory->uid(),
-			factory: $factory,
-			cms: $cms,
-			context: $context,
-		);
+		$this->store = Store::of($context, $cms, $types);
 		$this->texts = new Texts($context, $cms, $types);
 	}
 

@@ -20,8 +20,6 @@ use Cosray\Node\Duplicator;
 use Cosray\Node\Edits;
 use Cosray\Node\Essence;
 use Cosray\Node\Factory as NodeFactory;
-use Cosray\Node\PathManager;
-use Cosray\Node\ReservedPaths;
 use Cosray\Node\RoutePathGenerator;
 use Cosray\Node\Serializer;
 use Cosray\Node\Store;
@@ -722,15 +720,7 @@ final class Editor extends Panel
 
 	private function nodeStore(Context $context, Cms $cms): Store
 	{
-		return new Store(
-			$context->db,
-			new PathManager(ReservedPaths::fromConfig($context->config)),
-			$this->types(),
-			$cms->nodeFactory()->uid(),
-			factory: $cms->nodeFactory(),
-			cms: $cms,
-			context: $context,
-		);
+		return Store::of($context, $cms, $this->types());
 	}
 
 	/** @return Response|array<string, mixed> */

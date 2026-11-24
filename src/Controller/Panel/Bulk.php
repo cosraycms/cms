@@ -13,8 +13,6 @@ use Cosray\Collection\Listing;
 use Cosray\Context;
 use Cosray\Exception\NodeLocked;
 use Cosray\Node\Duplicator;
-use Cosray\Node\PathManager;
-use Cosray\Node\ReservedPaths;
 use Cosray\Node\Store;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
@@ -258,15 +256,7 @@ final class Bulk extends Panel
 
 	private function store(Context $context, Cms $cms): Store
 	{
-		return new Store(
-			$context->db,
-			new PathManager(ReservedPaths::fromConfig($context->config)),
-			$this->types(),
-			$cms->nodeFactory()->uid(),
-			factory: $cms->nodeFactory(),
-			cms: $cms,
-			context: $context,
-		);
+		return Store::of($context, $cms, $this->types());
 	}
 
 	/**

@@ -37,15 +37,7 @@ final class Duplicator
 		$this->titles = new TitleResolver($types);
 		$this->factory = $cms->nodeFactory();
 		$this->serializer = new Serializer($types, $this->factory->uid());
-		$this->store = new Store(
-			$context->db,
-			new PathManager(ReservedPaths::fromConfig($context->config)),
-			$types,
-			$this->factory->uid(),
-			factory: $this->factory,
-			cms: $cms,
-			context: $context,
-		);
+		$this->store = Store::of($context, $cms, $types);
 	}
 
 	/**

@@ -12,8 +12,6 @@ use Cosray\Actor;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Node\Factory;
-use Cosray\Node\PathManager;
-use Cosray\Node\ReservedPaths;
 use Cosray\Node\Store;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
@@ -36,15 +34,7 @@ final class Writer
 		private readonly Cms $cms,
 		private readonly Types $types,
 	) {
-		$this->store = new Store(
-			$context->db,
-			new PathManager(ReservedPaths::fromConfig($context->config)),
-			$types,
-			$cms->nodeFactory()->uid(),
-			factory: $cms->nodeFactory(),
-			cms: $cms,
-			context: $context,
-		);
+		$this->store = Store::of($context, $cms, $types);
 	}
 
 	/**

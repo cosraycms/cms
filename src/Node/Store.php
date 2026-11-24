@@ -88,6 +88,22 @@ class Store
 		));
 	}
 
+	/** The store as requests, jobs and commands use it, wired from their context. */
+	public static function of(Context $context, Cms $cms, Types $types, ?Factory $factory = null): self
+	{
+		$factory ??= $cms->nodeFactory();
+
+		return new self(
+			$context->db,
+			new PathManager(ReservedPaths::fromConfig($context->config)),
+			$types,
+			$factory->uid(),
+			factory: $factory,
+			cms: $cms,
+			context: $context,
+		);
+	}
+
 	/**
 	 * Writes the main version directly. A pending working copy is left
 	 * alone: this is the API path, and the editor's apply() is what

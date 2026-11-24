@@ -59,15 +59,7 @@ class Factory
 	public function create(string $class, Context $context, Cms $cms, array $data): object
 	{
 		$serializer = new Serializer($this->types, $this->uid, $context->assets());
-		$store = new Store(
-			$context->db,
-			new PathManager(ReservedPaths::fromConfig($context->config)),
-			$this->types,
-			$this->uid,
-			factory: $this,
-			cms: $cms,
-			context: $context,
-		);
+		$store = Store::of($context, $cms, $this->types, $this);
 		$type = $this->types->typeOf($class);
 		$types = $this->types;
 
