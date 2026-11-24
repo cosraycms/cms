@@ -806,6 +806,9 @@ class MediaControl extends HTMLElement {
 		const picker = document.createElement('input');
 		picker.type = 'file';
 		picker.id = this.field.name ?? this.#type;
+		// The bar's own buttons open it.
+		picker.tabIndex = -1;
+		picker.setAttribute('aria-hidden', 'true');
 		picker.multiple = multiple;
 		picker.accept = cosray()
 			.system()

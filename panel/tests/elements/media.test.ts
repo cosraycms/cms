@@ -172,6 +172,9 @@ describe('the frame', () => {
 		const picker = element.querySelector<HTMLInputElement>('input[type="file"]')!;
 		const click = vi.spyOn(picker, 'click').mockImplementation(() => {});
 
+		// The bar's buttons stand for it: no invisible stop for the keyboard or a screen reader.
+		expect(picker.tabIndex).toBe(-1);
+		expect(picker.getAttribute('aria-hidden')).toBe('true');
 		expect(bar.querySelector('.cms-media-field-tally')?.textContent).toBe('2 / 5');
 		expect(bar.querySelector('.cms-media-field-choose')?.textContent).toBe('upload:choose-files');
 
