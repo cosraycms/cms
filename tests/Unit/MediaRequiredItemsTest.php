@@ -183,6 +183,23 @@ final class MediaRequiredItemsTest extends TestCase
 		$this->assertCount(1, $this->issues($field, ['en' => [['uid' => self::BARE]], 'de' => [['uid' => self::UID]]]));
 	}
 
+	public function testARequiredFieldNeedsAnItem(): void
+	{
+		$field = $this->field()->required();
+
+		$this->assertCount(1, $this->issues($field, [Field::NEUTRAL_LOCALE => []]));
+		$this->assertSame([], $this->issues($field, $this->single(self::UID)));
+	}
+
+	public function testARequiredAsymmetricFieldNeedsAnItemInItsDefaultList(): void
+	{
+		$field = $this->field(locales: true)->required();
+		$field->translate(TranslateMode::Asymmetric);
+
+		$this->assertCount(1, $this->issues($field, ['en' => [], 'de' => [['uid' => self::UID]]]));
+		$this->assertSame([], $this->issues($field, ['en' => [['uid' => self::UID]], 'de' => []]));
+	}
+
 	public function testAVideoCanRequireItsCaption(): void
 	{
 		$field = new Video('clip', new FieldOwner($this->context(), 'test-node'), new ValueContext('clip', []));

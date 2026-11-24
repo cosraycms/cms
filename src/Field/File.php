@@ -115,7 +115,10 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 				->prepare(Prepare::nullAsEmpty(...));
 		} else {
 			$value = $shape
-				->add('value', $this->zxxShape($this->fileListShape(), $limitValidators))
+				->add('value', $this->zxxShape(
+					$this->fileListShape(),
+					$this->isRequired() ? [...$limitValidators, 'required'] : $limitValidators,
+				))
 				->rules(...$this->validators)
 				->prepare(Prepare::nullAsEmpty(...));
 		}
