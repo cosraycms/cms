@@ -6,15 +6,18 @@ namespace Cosray;
 
 use Celema\Quma\Database;
 use Closure;
+use Cosray\Contract\NodeListener;
 use Cosray\Exception\RuntimeException;
+use Cosray\Node\Write;
 use Cosray\Webhooks\Delivery;
+use Override;
 
 /**
  * Tells other systems that content changed, such as a static site build or a
  * cache in front of the API. Each event queues one delivery job per hook,
- * which retries a failed POST. The jobs are pushed inside the write's
- * transaction, so they exist only if the write commits, whether it happens
- * in a request, a job or a command.
+ * which retries a failed POST. It listens to the node writes, so the jobs
+ * are pushed inside the write's transaction and exist only if the write
+ * commits, whether it happens in a request, a job or a command.
  *
  *     'webhooks' => [
  *         ['url' => 'https://build.example.com/hook', 'secret' => $secret, 'events' => ['node.*']],
@@ -26,9 +29,24 @@ use Cosray\Webhooks\Delivery;
  * `type`; with a secret, `X-Cosray-Signature` carries `sha256=` and the
  * HMAC-SHA256 of the body.
  */
-final class Webhooks
+final class Webhooks implements NodeListener
 {
 	public const string USER_AGENT = 'cosray-webhooks';
+
+	/** The event each action of a write fires. */
+	private const array EVENTS = [
+		'created' => 'node.created',
+		'saved' => 'node.updated',
+		'applied' => 'node.updated',
+		'published' => 'node.updated',
+		'unpublished' => 'node.updated',
+		'hidden' => 'node.updated',
+		'shown' => 'node.updated',
+		'moved' => 'node.updated',
+		'drafted' => 'node.draft',
+		'discarded' => 'node.draft',
+		'deleted' => 'node.deleted',
+	];
 
 	/** @var list<array{url: string, secret: ?string, events: list<string>}> */
 	private readonly array $hooks;
@@ -62,6 +80,24 @@ final class Webhooks
 				$queue->push(Delivery::class, $request, queue: 'webhooks');
 			},
 		);
+	}
+
+	/** Fires each event of a write once; a node's creation stands for its other changes. */
+	#[Override]
+	public function written(Write $write): void
+	{
+		$events = array_unique(array_filter(array_map(
+			static fn(string $action): ?string => self::EVENTS[$action] ?? null,
+			$write->actions,
+		)));
+
+		if (in_array('node.created', $events, true)) {
+			$events = ['node.created'];
+		}
+
+		foreach ($events as $event) {
+			$this->record($event, ['uid' => $write->uid, 'type' => $write->type]);
+		}
 	}
 
 	/**

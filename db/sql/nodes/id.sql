@@ -1,1 +1,8 @@
-SELECT node FROM /*:cms.prefix:*/nodes WHERE uid = :uid;
+SELECT
+	n.node,
+	t.handle AS type
+FROM
+	/*:cms.prefix:*/nodes n
+	JOIN /*:cms.prefix:*/types t ON t.type = n.type
+WHERE
+	n.uid = :uid;

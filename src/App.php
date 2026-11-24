@@ -18,6 +18,7 @@ use Celema\Router\Route;
 use Celema\Router\RouteAdder;
 use Celema\Router\Router;
 use Closure;
+use Cosray\Contract\NodeListener;
 use Cosray\Icons\Provider as IconProvider;
 use Cosray\Node\Types;
 use Cosray\Panel\Dashboard;
@@ -217,6 +218,18 @@ class App implements RouteAdder
 	public function node(string $class): self
 	{
 		$this->bootstrap->node($class);
+
+		return $this;
+	}
+
+	/**
+	 * A listener that hears of every node write, in the write's transaction.
+	 *
+	 * @param class-string<NodeListener>|NodeListener $listener
+	 */
+	public function nodeListener(string|NodeListener $listener): self
+	{
+		$this->bootstrap->nodeListener($listener);
 
 		return $this;
 	}

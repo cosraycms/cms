@@ -368,6 +368,36 @@ Registered scripts load once per full document and do not run again after htmx n
 
 `panel.dashboard => false` removes the dashboard entry and directs panel home to the first collection, or media when there is none.
 
+### Node listeners
+
+A node listener hears of every write to a node, through the panel, the API or PHP code alike. It implements [NodeListener](../src/Contract/NodeListener.php) and is registered by a site with `$app->nodeListener()` or by a plugin through `Registrar::nodeListener()`:
+
+```php
+use Cosray\Contract\NodeListener;
+use Cosray\Node\Write;
+use Cosray\Queue;
+
+final class PurgeCache implements NodeListener
+{
+    public function __construct(
+        private readonly Queue $queue,
+    ) {}
+
+    public function written(Write $write): void
+    {
+        if ($write->has('published', 'unpublished', 'applied', 'saved', 'deleted')) {
+            $this->queue->push(PurgePage::class, ['uid' => $write->uid]);
+        }
+    }
+}
+
+$app->nodeListener(PurgeCache::class);
+```
+
+A [Write](../src/Node/Write.php) names the node's `uid` and `type`, the `actor`, the time `at` and the `actions` the write recorded as [events](content.md#history), such as `applied` and `published` for a working copy that went live. `has()` asks for any of several actions, and `data()` returns what an action recorded besides, like the parents of a move or the cause its caller gave.
+
+Listeners run inside the write's transaction, after its events are recorded, in the order they were registered. What a listener writes or queues is committed or rolled back with the write, and an exception fails the write, so keep a listener quick and push a [job](queue.md) for slow work. A write that changes nothing reaches no listener. A class name is built once per request, job run or command, with the constructor arguments nodes get; a class the container knows is taken from there. [Webhooks](api.md#webhooks) are a listener Cosray registers itself.
+
 ## Icons
 
 Icon ids such as `#[Icon('bi:check')]` resolve through the icon providers in order. By default these are the site's own SVG files below `icons.local.paths`, where `bi:check` means `bi/check.svg` and an unprefixed `logo` means `logo.svg`, then the [Iconify API](https://iconify.design/) for prefixed ids. `$app->icons()` adds a provider before them or, with `replace: true`, replaces both. Iconify responses are cached below `{path.public}{path.cache}/icons/`. Pages include icon markup inline, so icons can use `currentColor`.

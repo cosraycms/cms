@@ -22,6 +22,7 @@ use Cosray\Collection\Ref as CollectionRef;
 use Cosray\Collection\Schema\Registry as CollectionSchemaRegistry;
 use Cosray\Collection\Schemas as CollectionSchemas;
 use Cosray\Contract\Block;
+use Cosray\Contract\NodeListener;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Control\Registry as Controls;
 use Cosray\Field\Index as FieldIndex;
@@ -33,6 +34,7 @@ use Cosray\Icons\Plugins as PluginIcons;
 use Cosray\Icons\Provider as IconProvider;
 use Cosray\Middleware\MaintenanceMode;
 use Cosray\Migration\Schemas;
+use Cosray\Node\Listeners as NodeListeners;
 use Cosray\Node\Schema\Registry as NodeSchemas;
 use Cosray\Node\Types;
 use Cosray\Panel\Dashboard as PanelDashboard;
@@ -72,6 +74,7 @@ class Bootstrap implements CorePlugin
 	protected readonly Controls $controls;
 	protected readonly CollectionSchemas $collectionSchemas;
 	protected readonly PanelDashboard $dashboardCards;
+	protected readonly NodeListeners $nodeListeners;
 	protected readonly Policy $policy;
 	protected readonly UserTypes $userTypes;
 
@@ -155,6 +158,7 @@ class Bootstrap implements CorePlugin
 		$this->navigation->collection(AllContent::class);
 		$this->systemNav = new SystemNav();
 		$this->dashboardCards = PanelDashboard::withDefaults();
+		$this->nodeListeners = new NodeListeners()->add(Webhooks::class);
 		$this->policy = Policy::withDefaults();
 		$this->userTypes = new UserTypes();
 	}
@@ -192,6 +196,7 @@ class Bootstrap implements CorePlugin
 		$this->container->add(CollectionSchemas::class, $this->collectionSchemas);
 		$this->container->add(CollectionSchemaRegistry::class, $this->collectionSchemas->registry());
 		$this->container->add(PanelDashboard::class, $this->dashboardCards)->value();
+		$this->container->add(NodeListeners::class, $this->nodeListeners)->value();
 		$this->container->add(PluginAssets::class, $this->pluginAssets);
 		$this->container->add(PanelExtras::class, $this->panelExtras);
 		$this->container->add(Policy::class, $this->policy);
@@ -374,6 +379,12 @@ class Bootstrap implements CorePlugin
 	public function policy(): Policy
 	{
 		return $this->policy;
+	}
+
+	/** @param class-string<NodeListener>|NodeListener $listener */
+	public function nodeListener(string|NodeListener $listener): void
+	{
+		$this->nodeListeners->add($listener);
 	}
 
 	/** @param class-string<User> $class */

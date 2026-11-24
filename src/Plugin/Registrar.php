@@ -12,6 +12,7 @@ use Cosray\Collection\Schema\Handler as CollectionHandler;
 use Cosray\Config;
 use Cosray\Contract\Block;
 use Cosray\Contract\DashboardCard;
+use Cosray\Contract\NodeListener;
 use Cosray\Field\Schema\Handler as FieldHandler;
 use Cosray\Node\Schema\Handler as NodeHandler;
 use Cosray\Panel\Extras;
@@ -90,6 +91,17 @@ final class Registrar
 	public function dashboardCard(string|DashboardCard $card): void
 	{
 		$this->bootstrap->dashboard->add($card);
+	}
+
+	/**
+	 * A listener that hears of every node write, in the write's transaction;
+	 * see Cosray\Contract\NodeListener.
+	 *
+	 * @param class-string<NodeListener>|NodeListener $listener
+	 */
+	public function nodeListener(string|NodeListener $listener): void
+	{
+		$this->bootstrap->nodeListener($listener);
 	}
 
 	/** @param class-string<\Cosray\User> $class */

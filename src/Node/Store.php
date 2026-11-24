@@ -13,6 +13,7 @@ use Cosray\Actor;
 use Cosray\Block\Registry as Blocks;
 use Cosray\Cms;
 use Cosray\Context;
+use Cosray\Contract\NodeListener;
 use Cosray\Exception\NodeLocked;
 use Cosray\Exception\RoutePathError;
 use Cosray\Exception\RuntimeException;
@@ -24,7 +25,7 @@ use Cosray\Richtext\Normalizer;
 use Cosray\Title\Resolver as TitleResolver;
 use Cosray\Uid;
 use Cosray\Validation\ValidatorFactory;
-use Cosray\Webhooks;
+use DateTimeImmutable;
 use DateTimeInterface;
 use Throwable;
 
@@ -34,21 +35,6 @@ use Throwable;
 class Store
 {
 	private const int CREATE_UID_ATTEMPTS = 5;
-
-	/** The webhook event each action fires. */
-	private const array HOOKS = [
-		'created' => 'node.created',
-		'saved' => 'node.updated',
-		'applied' => 'node.updated',
-		'published' => 'node.updated',
-		'unpublished' => 'node.updated',
-		'hidden' => 'node.updated',
-		'shown' => 'node.updated',
-		'moved' => 'node.updated',
-		'drafted' => 'node.draft',
-		'discarded' => 'node.draft',
-		'deleted' => 'node.deleted',
-	];
 
 	/** Actions that leave `changed` alone. */
 	private const array UNDATED = ['drafted', 'discarded', 'locked', 'unlocked'];
@@ -66,6 +52,9 @@ class Store
 	private readonly Drafts $drafts;
 	private readonly Fulltext\Sync $fulltext;
 
+	/** @var ?list<NodeListener> built for the store's context on its first write */
+	private ?array $listening = null;
+
 	public function __construct(
 		private readonly Database $db,
 		private readonly PathManager $pathManager,
@@ -79,6 +68,7 @@ class Store
 		private readonly ?Factory $factory = null,
 		private readonly ?Cms $cms = null,
 		private readonly ?Context $context = null,
+		private readonly ?Listeners $listeners = null,
 	) {
 		$this->routePathGenerator = $routePathGenerator ?? new RoutePathGenerator($db, $types);
 		$this->scanner = new References\Scanner();
@@ -95,6 +85,7 @@ class Store
 	public static function of(Context $context, Cms $cms, Types $types, ?Factory $factory = null): self
 	{
 		$factory ??= $cms->nodeFactory();
+		$listeners = $context->container->has(Listeners::class) ? $context->container->get(Listeners::class) : null;
 
 		return new self(
 			$context->db,
@@ -104,6 +95,7 @@ class Store
 			factory: $factory,
 			cms: $cms,
 			context: $context,
+			listeners: $listeners instanceof Listeners ? $listeners : null,
 		);
 	}
 
@@ -606,13 +598,12 @@ class Store
 	/**
 	 * Records the actions of a write as events, all at the same time, and
 	 * dates the node by it; `edited` moves only with the main version.
-	 * The webhook deliveries are queued in the same transaction, each event
-	 * once per write; a node's creation stands for its other changes. A
-	 * descendant deleted with its parent is reported with the parent's type.
+	 * The node listeners hear of the write in the same transaction.
 	 *
 	 * @param list<Action> $actions
 	 * @param ?string $at the time of the actions, the current time without it
 	 * @param ?string $stamp the time the node is dated by instead, for imports
+	 * @param ?string $type the node's type where the passed node is another, as for a deleted descendant
 	 */
 	private function record(
 		object $node,
@@ -622,9 +613,8 @@ class Store
 		array $actions,
 		?string $at = null,
 		?string $stamp = null,
+		?string $type = null,
 	): void {
-		$hooks = [];
-
 		foreach ($actions as $action) {
 			$at = (string) $this->db->events->record([
 				'node' => $nodeId,
@@ -634,7 +624,6 @@ class Store
 				'data' => json_encode((object) ($action['data'] ?? [])),
 				'at' => $at,
 			])->one()['at'];
-			$hooks[self::HOOKS[$action['action']] ?? ''] = true;
 		}
 
 		$names = array_column($actions, 'action');
@@ -647,21 +636,21 @@ class Store
 			])->run();
 		}
 
-		unset($hooks['']);
-
-		if (isset($hooks['node.created'])) {
-			$hooks = ['node.created' => true];
-		}
-
-		$container = $this->context?->container;
-		$webhooks = $container !== null && $container->has(Webhooks::class) ? $container->get(Webhooks::class) : null;
-
-		if (!$webhooks instanceof Webhooks) {
+		if ($at === null || $this->listeners === null || $this->context === null) {
 			return;
 		}
 
-		foreach (array_keys($hooks) as $hook) {
-			$webhooks->record($hook, ['uid' => $uid, 'type' => (string) $this->types->get($node::class, 'handle')]);
+		$write = new Write(
+			$uid,
+			$type ?? (string) $this->types->get($node::class, 'handle'),
+			$actor,
+			new DateTimeImmutable($at),
+			$names,
+			array_column($actions, 'data', 'action'),
+		);
+
+		foreach ($this->listening ??= $this->listeners->for($this->context, $this->cms) as $listener) {
+			$listener->written($write);
 		}
 	}
 
@@ -841,12 +830,19 @@ class Store
 			$this->lock($uid);
 
 			foreach ($uids as $deleteUid) {
-				$nodeId = (int) $this->db->nodes->id(['uid' => $deleteUid])->one()['node'];
+				$row = $this->db->nodes->id(['uid' => $deleteUid])->one();
 				$this->db->nodes->delete([
 					'uid' => $deleteUid,
 					'editor' => $actor->id,
 				])->run();
-				$this->record($node, $nodeId, $deleteUid, $actor, [['action' => 'deleted']]);
+				$this->record(
+					$node,
+					(int) $row['node'],
+					$deleteUid,
+					$actor,
+					[['action' => 'deleted']],
+					type: (string) $row['type'],
+				);
 			}
 		}, 'Error while deleting: ');
 

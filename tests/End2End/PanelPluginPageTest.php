@@ -6,8 +6,13 @@ namespace Cosray\Tests\End2End;
 
 use Cosray\Bootstrap;
 use Cosray\Config;
+use Cosray\Console\Runtime;
+use Cosray\Node\Write;
+use Cosray\Node\Writer;
 use Cosray\Tests\End2EndTestCase;
+use Cosray\Tests\Fixtures\Node\TestDocument;
 use Cosray\Tests\Fixtures\Plugin\TestPlugin;
+use Cosray\Tests\Fixtures\Plugin\TestWriteLog;
 
 final class PanelPluginPageTest extends End2EndTestCase
 {
@@ -42,6 +47,20 @@ final class PanelPluginPageTest extends End2EndTestCase
 		// A relative stylesheet is served under the panel revision, a URL as it is.
 		$this->assertMatchesRegularExpression('~href="/panel/assets/[0-9a-z]+/plugins/test-plugin/theme\.css"~', $html);
 		$this->assertStringContainsString('href="/panel/vendor/test-plugin/theme.css"', $html);
+	}
+
+	public function testAPluginListenerHearsNodeWrites(): void
+	{
+		TestWriteLog::$writes = [];
+		// Built by the container, as a job or a command gets it.
+		$writer = new Runtime($this->app->container())->get(Writer::class);
+
+		$writer->create($writer->prepare(TestDocument::class, ['title' => 'Heard'])->uid('plugin-heard'));
+
+		$this->assertSame([['plugin-heard', 'test-document', ['created']]], array_map(
+			static fn(Write $write): array => [$write->uid, $write->type, $write->actions],
+			TestWriteLog::$writes,
+		));
 	}
 
 	public function testAPluginEntryJoinsTheSystemRailOfUsersWithItsPermission(): void
