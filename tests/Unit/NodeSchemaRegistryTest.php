@@ -97,6 +97,18 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertNull($registry->getHandler(new CustomIcon('star')));
 	}
 
+	public function testAHandlerRegisteredAfterATypeWasReadAppliesToIt(): void
+	{
+		$types = new Types(Registry::withDefaults());
+
+		// A site registers its types before plugins bring their handlers.
+		$this->assertNull($types->get(NodeWithCustomAttribute::class, 'icon'));
+
+		$types->registry()->register(CustomIcon::class, new CustomIconHandler());
+
+		$this->assertSame('star', $types->get(NodeWithCustomAttribute::class, 'icon'));
+	}
+
 	public function testRegistryAcceptsCustomHandler(): void
 	{
 		$registry = Registry::withDefaults();

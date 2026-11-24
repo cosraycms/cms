@@ -28,6 +28,8 @@ class Registry
 	/** @var array<string, callable(class-string, array<string, mixed>): mixed> */
 	private array $defaults = [];
 
+	private int $revision = 0;
+
 	public function __construct()
 	{
 		$this->registerDefaultProperties();
@@ -37,6 +39,13 @@ class Registry
 	public function register(string $schema, Handler $handler): void
 	{
 		$this->handlers[$schema] = $handler;
+		$this->revision++;
+	}
+
+	/** Moves with every handler and default added, so schemas resolved before can be told apart. */
+	public function revision(): int
+	{
+		return $this->revision;
 	}
 
 	public function getHandler(object $schema): ?Handler
@@ -50,6 +59,7 @@ class Registry
 	public function default(string $key, callable $resolver): void
 	{
 		$this->defaults[$key] = $resolver;
+		$this->revision++;
 	}
 
 	/**

@@ -11,6 +11,8 @@ class Types
 	/** @var array<class-string, Schema> */
 	private array $cache = [];
 
+	private int $revision = 0;
+
 	private readonly Registry $registry;
 
 	public function __construct(?Registry $registry = null)
@@ -28,6 +30,13 @@ class Types
 	 */
 	public function schemaOf(string $class): Schema
 	{
+		// A site registers its types before plugins register their handlers,
+		// so a schema read by then is resolved again with them.
+		if ($this->revision !== $this->registry->revision()) {
+			$this->cache = [];
+			$this->revision = $this->registry->revision();
+		}
+
 		return $this->cache[$class] ??= new Schema($class, $this->registry);
 	}
 
