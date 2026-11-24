@@ -151,8 +151,10 @@ export default function createEditor(options) {
 	plugins.push(placeholderPlugin(hint));
 
 	if (label || required || describedBy) {
+		// Without a role, a contenteditable is generic, and its name goes unannounced.
 		/** @type {Record<string, string>} */
-		const attributes = {};
+		const attributes = { role: 'textbox' };
+		if (!line) attributes['aria-multiline'] = 'true';
 		if (label) attributes['aria-label'] = label;
 		if (required) attributes['aria-required'] = 'true';
 		if (describedBy) attributes['aria-describedby'] = describedBy;

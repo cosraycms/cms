@@ -69,6 +69,23 @@ afterEach(async () => {
 });
 
 describe('source view', () => {
+	it('names its document as a text box of several lines', async () => {
+		const element = document.createElement('cosray-richtext') as RichtextElement;
+		Object.assign(element, {
+			value: null,
+			field: { name: 'body', label: 'Body' },
+			locale: 'zxx',
+			locales: { default: 'en', all: [{ id: 'en', title: 'English' }] },
+		});
+		document.body.append(element);
+		await tick();
+		const text = element.querySelector('.cms-richtext-content > .ProseMirror');
+
+		expect(text?.getAttribute('role')).toBe('textbox');
+		expect(text?.getAttribute('aria-multiline')).toBe('true');
+		expect(text?.getAttribute('aria-label')).toBe('Body');
+	});
+
 	it('returns to the content through a button that never submits the form', async () => {
 		const { element } = await richtext({ en: doc('Hello'), de: null });
 		await editSource(element, '<p>Hello</p>');
