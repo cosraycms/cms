@@ -236,6 +236,23 @@ describe('layout preview', () => {
 		expect(dialog().open).toBe(false);
 	});
 
+	it('reports a failed reload in the open dialog', async () => {
+		page();
+		const fetchMock = respond();
+
+		button().click();
+		await vi.waitFor(() => expect(dialog().open).toBe(true));
+		fetchMock.mockResolvedValue({ ok: false, text: () => Promise.resolve('') });
+		document.querySelector<HTMLElement>('[data-layout-preview-reload]')!.click();
+
+		await vi.waitFor(() => {
+			const alert = [...document.querySelectorAll('dialog[open]')].at(-1);
+			expect(alert?.querySelector('.cms-modal-body')?.textContent).toBe('Preview failed');
+		});
+		expect(dialog().open).toBe(true);
+		expect(document.querySelector('.cms-toasts-item')).toBeNull();
+	});
+
 	it('leaves a refused token to the refusal dialog', async () => {
 		page();
 		const refused = vi.fn();

@@ -2,6 +2,8 @@ import { openDialog } from '../lib/dialogs.js';
 import { nest } from '../lib/form-json.js';
 import { thumbnail } from './youtube.js';
 import { csrfToken, HEADER, noticeRefusal } from '../lib/csrf.js';
+import { __ } from '../lib/locale.js';
+import { alert } from '../lib/modal.js';
 import { toast } from '../lib/toast.js';
 
 // The layout preview of a blocks field: the field rendered through the
@@ -155,7 +157,14 @@ function body(form) {
 function fail(dialog) {
 	const message = dialog.dataset.error ?? '';
 
-	if (message !== '') {
+	if (message === '') {
+		return;
+	}
+
+	// A toast would wait for the dialog to close.
+	if (dialog instanceof HTMLDialogElement && dialog.open) {
+		void alert({ title: __('common:error'), message, owner: dialog });
+	} else {
 		toast('error', message);
 	}
 }
