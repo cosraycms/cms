@@ -44,6 +44,8 @@ Plugin pages build on a small set of documented panel components: Boiler partial
 | `kit/pill` | `label`; optional `tone` |
 | `kit/field` | `name`, `label`; optional `type` (`text`, `textarea`, `select`, `file` or another input type), `value`, `options` (for `select`), `description`, `error`, `placeholder`, `rows`, `required`, `accept`, `form`, `id` |
 
+A partial also sees the variables of the page that includes it. An optional argument a page leaves out is therefore taken from a page variable of the same name: a page that keeps its own list in `$actions` gets it as buttons in `kit/head`. Name page variables apart from the arguments above, or pass the argument.
+
 A field's description and error are tied to its control with `aria-describedby`, and an error marks the control `aria-invalid`. Group fields in `.cms-kit-fields`, a grid that wraps on narrow screens.
 
 Core partials that also belong to the kit:
