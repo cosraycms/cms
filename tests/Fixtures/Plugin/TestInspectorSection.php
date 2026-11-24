@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Fixtures\Plugin;
 
+use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Contract\InspectorSection;
 use Cosray\Node\Wrapper;
@@ -14,6 +15,7 @@ final class TestInspectorSection implements InspectorSection
 {
 	public function __construct(
 		private readonly Config $config,
+		public readonly ?Cms $cms = null,
 	) {}
 
 	public function section(Wrapper $node): ?Section

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Panel;
 
+use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Contract\InspectorSection;
 use Cosray\Exception\RuntimeException;
@@ -44,16 +45,18 @@ final class Inspector
 
 	/**
 	 * The sections of a node, in the order they were registered. A class
-	 * name is built for the request, as dashboard cards are.
+	 * name is built for the request, with the constructor arguments nodes
+	 * get, the request's Cms among them.
 	 *
 	 * @return list<Section>
 	 */
-	public function of(Wrapper $node, Context $context): array
+	public function of(Wrapper $node, Context $context, ?Cms $cms = null): array
 	{
 		$sections = [];
+		$types = $cms === null ? [] : [Cms::class => $cms];
 
 		foreach ($this->sections as $definition) {
-			$provider = is_string($definition) ? $context->create($definition) : $definition;
+			$provider = is_string($definition) ? $context->create($definition, $types) : $definition;
 			$section = $provider->section($node);
 
 			if ($section === null) {

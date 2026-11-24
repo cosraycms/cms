@@ -691,7 +691,7 @@ final class Editor extends Panel
 
 		$node = $cms->node->working($uid);
 
-		return $node === null ? [] : $inspector->of($node, $context);
+		return $node === null ? [] : $inspector->of($node, $context, $cms);
 	}
 
 	/**
