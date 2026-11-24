@@ -138,6 +138,13 @@
 	}
 }
 
+/* Uploads that failed, below the frame until the next upload. */
+.cms-media-field-failures:not(:empty) {
+	display: grid;
+	gap: var(--cms-space-1);
+	margin-top: var(--cms-space-1-5);
+}
+
 /* A media field's files as rows, in the field and in a fallback preview. */
 .cms-file-list {
 	display: flex;

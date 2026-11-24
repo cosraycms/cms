@@ -125,6 +125,13 @@ class MediaControl extends HTMLElement {
 	#frame = null;
 	/** @type {readonly string[]} */
 	#errorIds = [];
+	// Stays in place across renders: a live region announces what enters it.
+	#failures = (() => {
+		const region = create('div', 'cms-media-field-failures');
+		region.setAttribute('role', 'alert');
+
+		return region;
+	})();
 	/** @type {HTMLInputElement | null} */
 	#picker = null;
 	/** @type {HTMLElement[]} What this control put into the settings slot. */
@@ -591,8 +598,22 @@ class MediaControl extends HTMLElement {
 			this.#dropzone(frame, multiple);
 		}
 
-		this.replaceChildren(...nodes);
+		for (const child of [...this.childNodes]) {
+			if (child !== this.#failures) child.remove();
+		}
+
+		if (this.#failures.parentNode === this) {
+			this.#failures.before(...nodes);
+		} else {
+			this.append(...nodes, this.#failures);
+		}
+
 		restore?.();
+	}
+
+	/** @param {string} message */
+	#fail(message) {
+		this.#failures.append(create('p', 'cms-field-error', message));
 	}
 
 	/**
@@ -939,6 +960,7 @@ class MediaControl extends HTMLElement {
 		}
 
 		const type = this.#type;
+		this.#failures.replaceChildren();
 		this.#pending.set(identity, (this.#pending.get(identity) ?? 0) + 1);
 
 		if (this.#rendered) {
@@ -948,8 +970,10 @@ class MediaControl extends HTMLElement {
 		try {
 			const results = await Promise.all(files.map((file) => cosray().upload(type, file)));
 
-			for (const result of results) {
-				const uid = this.#accept(result, (message) => cosray().toast.error(message));
+			for (const [index, result] of results.entries()) {
+				// A refusal may not name the file.
+				const named = result && { ...result, filename: result.filename || files[index]?.name };
+				const uid = this.#accept(named, (message) => this.#fail(message));
 
 				if (uid) {
 					this.#add(identity, { uid });

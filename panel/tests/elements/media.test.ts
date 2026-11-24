@@ -7,8 +7,10 @@ import type { FileItem, LocaleMap, Meta, RichtextDoc } from '../../src/types/dat
 import { installBridge } from '../../src/lib/bridge-standalone';
 import '../../src/elements/media.js';
 
+const translate = vi.hoisted(() => vi.fn((id: string, _params?: Record<string, unknown>) => id));
+
 vi.mock('../../src/lib/locale.js', () => ({
-	__: (id: string) => id,
+	__: translate,
 	__n: (one: string, many: string, n: number) => (n === 1 ? one : many),
 }));
 
@@ -1675,6 +1677,34 @@ describe('media uploads', () => {
 			expect(element.textContent).toContain('uploaded.pdf');
 		},
 	);
+
+	it('says at the field which upload failed until the next one', async () => {
+		const toast = vi.spyOn(window.Cosray!.toast, 'error');
+		vi.spyOn(window.Cosray!, 'upload')
+			.mockResolvedValueOnce({ ok: false, error: 'Too big' })
+			.mockResolvedValueOnce({ ok: true, uid: 'fine', filename: 'fine.pdf' });
+		const { element } = await media('cosray-file', {
+			value: {},
+			field: { name: 'downloads' },
+		});
+		const failures = element.querySelector('[role="alert"]')!;
+		upload(element);
+
+		await vi.waitFor(() => {
+			expect(failures.querySelector('.cms-field-error')?.textContent).toBe('upload:file-error');
+		});
+		expect(translate).toHaveBeenCalledWith('upload:file-error', {
+			file: 'uploaded.pdf',
+			error: 'Too big',
+		});
+		expect(element.querySelector('[role="alert"]')).toBe(failures);
+		expect(toast).not.toHaveBeenCalled();
+
+		upload(element);
+
+		await vi.waitFor(() => expect(element.textContent).toContain('fine.pdf'));
+		expect(failures.childElementCount).toBe(0);
+	});
 
 	it('previews a fresh upload from its thumbnail and shows its size', async () => {
 		vi.spyOn(window.Cosray!, 'upload').mockResolvedValueOnce({
