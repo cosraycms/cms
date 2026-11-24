@@ -56,6 +56,9 @@ class Store
 	/** Actions that change the main version, and so `edited`. */
 	private const array EDITS = ['created', 'saved', 'applied'];
 
+	/** Actions that record the cause their caller gives. */
+	private const array CAUSED = ['saved', 'applied', 'published', 'unpublished', 'hidden', 'shown'];
+
 	private readonly RoutePathGenerator $routePathGenerator;
 	private readonly References\Scanner $scanner;
 	private readonly References\Sync $sync;
@@ -123,15 +126,16 @@ class Store
 	 * `published` flag, which the state carries.
 	 *
 	 * @param array<string, mixed> $data
+	 * @param array<string, mixed> $cause what the events record as the cause
 	 * @return array{success: true, uid: string}
 	 */
-	public function apply(object $node, array $data, Locales $locales, Actor $actor): array
+	public function apply(object $node, array $data, Locales $locales, Actor $actor, array $cause = []): array
 	{
 		$this->fulltext->validate($locales);
 		$data = $this->prepare($node, $data, $locales);
 		$nodeId = $this->nodeId($node);
 
-		$this->transaction(function () use ($node, $data, $locales, $actor, $nodeId): void {
+		$this->transaction(function () use ($node, $data, $locales, $actor, $nodeId, $cause): void {
 			$this->lock($data['uid']);
 			$at = $this->now();
 			$working = $this->holdsDrafts($node) ? $this->drafts->get($nodeId) : null;
@@ -150,7 +154,14 @@ class Store
 				$actions[] = ['action' => $this->holdsDrafts($node) ? 'applied' : 'saved', 'revision' => $revision];
 			}
 
-			$this->record($node, $nodeId, $data['uid'], $actor, [...$actions, ...$changes['actions']], $at);
+			$this->record(
+				$node,
+				$nodeId,
+				$data['uid'],
+				$actor,
+				self::caused([...$actions, ...$changes['actions']], $cause),
+				$at,
+			);
 		}, 'Error while applying: ');
 
 		return ['success' => true, 'uid' => $data['uid']];
@@ -248,10 +259,14 @@ class Store
 		$this->saveMain($node, $data, $locales, $actor, $cause);
 	}
 
-	/** Publishes the node or withdraws it, leaving its content and working copy alone. */
-	public function published(object $node, bool $published, Actor $actor): void
+	/**
+	 * Publishes the node or withdraws it, leaving its content and working copy alone.
+	 *
+	 * @param array<string, mixed> $cause what the event records as the cause
+	 */
+	public function published(object $node, bool $published, Actor $actor, array $cause = []): void
 	{
-		$this->switch($node, $actor, published: $published);
+		$this->switch($node, $actor, published: $published, cause: $cause);
 	}
 
 	/** Hides the node from listings or shows it again, applied immediately. */
@@ -264,9 +279,16 @@ class Store
 	 * Applies the working copy, if there is one, to the main version and,
 	 * asked to, publishes the node with it. A working copy left on a type
 	 * without drafts is not applied.
+	 *
+	 * @param array<string, mixed> $cause what the events record as the cause
 	 */
-	public function applyDraft(object $node, Locales $locales, Actor $actor, bool $publish = false): bool
-	{
+	public function applyDraft(
+		object $node,
+		Locales $locales,
+		Actor $actor,
+		bool $publish = false,
+		array $cause = [],
+	): bool {
 		$draft = $this->holdsDrafts($node) ? $this->drafts->get($this->nodeId($node)) : null;
 
 		if ($draft === null) {
@@ -274,7 +296,7 @@ class Store
 		}
 
 		$published = $publish || (bool) Factory::meta($node, 'published');
-		$this->apply($node, $this->workingData($node, $draft, published: $published), $locales, $actor);
+		$this->apply($node, $this->workingData($node, $draft, published: $published), $locales, $actor, $cause);
 
 		return true;
 	}
@@ -381,25 +403,50 @@ class Store
 		return ['success' => true, 'uid' => $data['uid']];
 	}
 
-	private function switch(object $node, Actor $actor, ?bool $published = null, ?bool $hidden = null): void
-	{
+	/** @param array<string, mixed> $cause what the events record as the cause */
+	private function switch(
+		object $node,
+		Actor $actor,
+		?bool $published = null,
+		?bool $hidden = null,
+		array $cause = [],
+	): void {
 		$this->assertPublication($node, (bool) $published, (bool) $hidden);
 		$uid = (string) Factory::meta($node, 'uid');
 		$nodeId = $this->nodeId($node);
 
-		$this->transaction(function () use ($node, $uid, $nodeId, $published, $hidden, $actor): void {
+		$this->transaction(function () use ($node, $uid, $nodeId, $published, $hidden, $actor, $cause): void {
 			$this->lock($uid);
 
 			if ($this->hasPublication($node)) {
-				$this->record(
-					$node,
-					$nodeId,
-					$uid,
-					$actor,
+				$this->record($node, $nodeId, $uid, $actor, self::caused(
 					$this->persistPublication($nodeId, $published, $hidden, $this->mainRevision($nodeId)),
-				);
+					$cause,
+				));
 			}
 		}, 'Error while publishing: ');
+	}
+
+	/**
+	 * Names the cause on the actions a caller asks for by name: the main
+	 * version it wrote and the publication it switched.
+	 *
+	 * @param list<Action> $actions
+	 * @param array<string, mixed> $cause
+	 * @return list<Action>
+	 */
+	private static function caused(array $actions, array $cause): array
+	{
+		if ($cause === []) {
+			return $actions;
+		}
+
+		return array_map(
+			static fn(array $action): array => in_array($action['action'], self::CAUSED, true)
+				? ['data' => [...$cause, ...($action['data'] ?? [])]] + $action
+				: $action,
+			$actions,
+		);
 	}
 
 	/**

@@ -11,7 +11,7 @@ use Cosray\Exception\RuntimeException;
 use DateTimeInterface;
 
 /**
- * Creates CMS nodes without exposing blueprint, serialization, and storage wiring.
+ * Creates and publishes CMS nodes without exposing blueprint, serialization, and storage wiring.
  *
  * @api
  */
@@ -28,15 +28,7 @@ final class Writer
 	) {
 		$this->factory = $cms->nodeFactory();
 		$this->serializer = new Serializer($types, $this->factory->uid());
-		$this->store = new Store(
-			$context->db,
-			new PathManager(ReservedPaths::fromConfig($context->config)),
-			$types,
-			$this->factory->uid(),
-			factory: $this->factory,
-			cms: $cms,
-			context: $context,
-		);
+		$this->store = Store::of($context, $cms, $types);
 	}
 
 	/**
@@ -80,6 +72,59 @@ final class Writer
 			$created,
 			$changed,
 		);
+	}
+
+	/**
+	 * Brings the node online with its working copy, if it has one, as
+	 * applying and publishing in the editor does. Returns whether anything
+	 * changed: a published node without a working copy stays as it is.
+	 * It checks no permissions: each caller checks them for its user.
+	 *
+	 * @param array<string, mixed> $cause what the events record as the cause
+	 */
+	public function publish(string $uid, Actor $actor, array $cause = []): bool
+	{
+		$node = $this->node($uid);
+
+		if ($this->store->applyDraft($node, $this->context->locales(), $actor, publish: true, cause: $cause)) {
+			return true;
+		}
+
+		if ((bool) Factory::meta($node, 'published')) {
+			return false;
+		}
+
+		$this->store->published($node, true, $actor, $cause);
+
+		return true;
+	}
+
+	/**
+	 * Takes the node offline and leaves its content and working copy alone.
+	 * Returns whether anything changed. It checks no permissions.
+	 *
+	 * @param array<string, mixed> $cause what the event records as the cause
+	 */
+	public function unpublish(string $uid, Actor $actor, array $cause = []): bool
+	{
+		$node = $this->node($uid);
+
+		if (!(bool) Factory::meta($node, 'published')) {
+			return false;
+		}
+
+		$this->store->published($node, false, $actor, $cause);
+
+		return true;
+	}
+
+	private function node(string $uid): object
+	{
+		$node = $this->cms->node->byUid($uid, published: null);
+
+		return $node === null
+			? throw new RuntimeException("There is no node with the uid '{$uid}'")
+			: Wrapper::unwrap($node);
 	}
 
 	/**

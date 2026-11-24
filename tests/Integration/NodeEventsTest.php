@@ -12,6 +12,7 @@ use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Commands\SyncPublications;
 use Cosray\Context;
+use Cosray\Exception\RuntimeException;
 use Cosray\Field\Services;
 use Cosray\Field\Text;
 use Cosray\Node\PathManager;
@@ -19,6 +20,7 @@ use Cosray\Node\Publications;
 use Cosray\Node\ReservedPaths;
 use Cosray\Node\Store;
 use Cosray\Node\Wrapper;
+use Cosray\Node\Writer;
 use Cosray\Tests\Fixtures\Node\TestDraftPage;
 use Cosray\Tests\Fixtures\Node\TestSetting;
 use Cosray\Tests\Fixtures\Node\TestSubmission;
@@ -166,6 +168,66 @@ final class NodeEventsTest extends IntegrationTestCase
 		$this->assertSame(['applied', 'published'], array_column($events, 'action'));
 		$this->assertSame($events[0]['at'], $events[1]['at']);
 		$this->assertSame($events[0]['at'], $this->nodeRow('together-page')['edited']);
+	}
+
+	public function testPublishingByUidAppliesTheWorkingCopyAndNamesTheCause(): void
+	{
+		$planner = new Actor($this->createTestUser(['uid' => 'writer-planner']));
+		$this->store->create(
+			$this->cms->nodeFactory()->blueprint(TestDraftPage::class, $this->context, $this->cms),
+			$this->payload('writer-page', 'Created', published: false),
+			$this->context->locales(),
+			Actor::system(),
+		);
+		$this->store->draft(
+			$this->node('writer-page'),
+			$this->payload('writer-page', 'Drafted', published: false),
+			$this->context->locales(),
+			Actor::system(),
+		);
+		$writer = new Writer($this->context, $this->cms, $this->services->types);
+		$cause = ['source' => 'test'];
+
+		$this->assertTrue($writer->publish('writer-page', $planner, $cause));
+		$this->assertFalse($writer->publish('writer-page', $planner, $cause));
+		$this->assertSame(
+			'Drafted',
+			json_decode($this->nodeRow('writer-page')['content'], true)['title']['value']['en'],
+		);
+		$this->assertSame(0, $this->rows('drafts', 'writer-page'));
+		$this->assertTrue($this->publication('writer-page')['published']);
+
+		$this->assertTrue($writer->unpublish('writer-page', $planner, $cause));
+		$this->assertFalse($writer->unpublish('writer-page', $planner, $cause));
+		$this->assertFalse($this->publication('writer-page')['published']);
+
+		$this->assertTrue($writer->publish('writer-page', $planner));
+
+		$this->assertSame(
+			[
+				['applied', $cause],
+				['published', $cause],
+				['unpublished', $cause],
+				['published', []],
+			],
+			array_values(array_map(
+				static fn(array $event): array => [$event['action'], json_decode($event['data'], true)],
+				array_filter(
+					$this->events('writer-page'),
+					static fn(array $event): bool => $event['actor'] === 'writer-planner',
+				),
+			)),
+		);
+	}
+
+	public function testPublishingAnUnknownNodeFails(): void
+	{
+		$writer = new Writer($this->context, $this->cms, $this->services->types);
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage("There is no node with the uid 'writer-missing'");
+
+		$writer->publish('writer-missing', Actor::system());
 	}
 
 	public function testARecordHasNoPublication(): void
