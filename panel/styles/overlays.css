@@ -350,7 +350,9 @@
 			}
 		}
 
-		&.cms-action-menu-danger {
+		/* Like a delete button, red only once chosen: at rest, red marks errors. */
+		&.cms-action-menu-danger:is(:hover, :focus-visible):not(:disabled, [aria-disabled='true']) {
+			background: var(--cms-color-danger-surface);
 			color: var(--cms-color-danger-text);
 		}
 
