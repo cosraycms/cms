@@ -12,8 +12,8 @@ use Psr\Http\Server\MiddlewareInterface as Middleware;
 use Psr\Http\Server\RequestHandlerInterface as Handler;
 
 /**
- * Keeps a site out of search engines while `app.indexable` is false: its
- * robots.txt turns every crawler away, a file of that name included, and
+ * Keeps a site out of search engines while `app.disallow_robots` is set:
+ * its robots.txt turns every crawler away, a file of that name included, and
  * every response asks not to be indexed. Files the web server serves itself
  * never reach it; they fall under the robots.txt rule alone.
  */

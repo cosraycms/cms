@@ -23,7 +23,7 @@ final class NoIndexTest extends End2EndTestCase
 
 	public function testANonIndexableSiteTurnsCrawlersAway(): void
 	{
-		$this->app = $this->createApp(['app.indexable' => false]);
+		$this->app = $this->createApp(['app.disallow_robots' => true]);
 
 		$robots = $this->makeRequest('GET', '/robots.txt');
 		$this->assertSame(200, $robots->getStatusCode());
@@ -35,7 +35,7 @@ final class NoIndexTest extends End2EndTestCase
 		$this->assertSame('noindex, nofollow', $page->getHeaderLine('X-Robots-Tag'));
 	}
 
-	public function testAnIndexableSiteLeavesRobotsAlone(): void
+	public function testRobotsAreLeftAloneByDefault(): void
 	{
 		$this->assertSame(404, $this->makeRequest('GET', '/robots.txt')->getStatusCode());
 		$this->assertFalse($this->makeRequest('GET', '/')->hasHeader('X-Robots-Tag'));

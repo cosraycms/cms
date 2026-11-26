@@ -45,11 +45,11 @@ final class App
 	}
 
 	/**
-	 * False turns search engines away: robots.txt disallows everything and
-	 * every response asks not to be indexed.
+	 * Turns search engines away: robots.txt disallows everything and every
+	 * response asks not to be indexed.
 	 */
-	public bool $indexable {
-		get => $this->config->get('app.indexable');
+	public bool $disallowRobots {
+		get => $this->config->get('app.disallow_robots');
 	}
 
 	public string $urlPrefix {

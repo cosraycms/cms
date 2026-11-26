@@ -29,7 +29,7 @@ final class ConfigTest extends TestCase
 		$this->clearEnvironment(
 			'APP_DEBUG',
 			'APP_ENV',
-			'APP_INDEXABLE',
+			'APP_DISALLOW_ROBOTS',
 			'APP_MISSING',
 			'APP_NAME',
 			'APP_REQUIRED',
@@ -47,8 +47,8 @@ final class ConfigTest extends TestCase
 			'MAILER_REDIRECT',
 			'PASSWORD_BREACH_CHECK',
 			'QUEUE_AFTER_RESPONSE',
-			'SITE_SESSION_ENABLED',
-			'TRUSTED_PROXIES',
+			'APP_TRUSTED_PROXIES',
+			'SESSION_ENABLED',
 			'SESSION_COOKIE_LIFETIME',
 			'SESSION_COOKIE_SECURE',
 			'SESSION_IDLE_TIMEOUT',
@@ -187,7 +187,7 @@ final class ConfigTest extends TestCase
 			'APP_ENV' => 'testing',
 			'APP_SECRET' => 'test-secret',
 			'APP_TIMEZONE' => 'Europe/Berlin',
-			'SITE_SESSION_ENABLED' => 'true',
+			'SESSION_ENABLED' => 'true',
 		]);
 		$config = new Config(self::root());
 
@@ -199,20 +199,20 @@ final class ConfigTest extends TestCase
 		$this->assertTrue($config->session->enabled);
 	}
 
-	public function testSitesAreIndexableUnlessTheEnvironmentTurnsItOff(): void
+	public function testRobotsAreAllowedUnlessTheEnvironmentDisallowsThem(): void
 	{
-		$this->assertTrue(new Config(self::root())->app->indexable);
+		$this->assertFalse(new Config(self::root())->app->disallowRobots);
 
-		$this->setEnvironment(['APP_INDEXABLE' => 'false']);
+		$this->setEnvironment(['APP_DISALLOW_ROBOTS' => 'true']);
 
-		$this->assertFalse(new Config(self::root())->app->indexable);
+		$this->assertTrue(new Config(self::root())->app->disallowRobots);
 	}
 
-	public function testIndexableMustBeABoolean(): void
+	public function testDisallowRobotsMustBeABoolean(): void
 	{
-		$this->setEnvironment(['APP_INDEXABLE' => 'staging']);
+		$this->setEnvironment(['APP_DISALLOW_ROBOTS' => 'staging']);
 
-		$this->throws(InvalidEnvironment::class, 'APP_INDEXABLE must be a boolean');
+		$this->throws(InvalidEnvironment::class, 'APP_DISALLOW_ROBOTS must be a boolean');
 
 		new Config(self::root());
 	}
@@ -283,7 +283,7 @@ final class ConfigTest extends TestCase
 	{
 		$this->assertSame([], new Config(self::root())->app->trustedProxies);
 
-		$this->setEnvironment(['TRUSTED_PROXIES' => '127.0.0.1, 10.0.0.0/8,']);
+		$this->setEnvironment(['APP_TRUSTED_PROXIES' => '127.0.0.1, 10.0.0.0/8,']);
 		$this->assertSame(['127.0.0.1', '10.0.0.0/8'], new Config(self::root())->app->trustedProxies);
 
 		$config = new Config(self::root(), ['app.trusted_proxies' => ['fd00::/8', 'proxy.example.org']]);
@@ -643,7 +643,7 @@ final class ConfigTest extends TestCase
 
 	public function testInvalidBooleanEnvironmentVariableFails(): void
 	{
-		$this->setEnvironment(['SITE_SESSION_ENABLED' => 'maybe']);
+		$this->setEnvironment(['SESSION_ENABLED' => 'maybe']);
 
 		$this->throws(InvalidEnvironment::class);
 

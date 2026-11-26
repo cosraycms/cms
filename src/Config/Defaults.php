@@ -43,15 +43,15 @@ final class Defaults
 			'app.title' => env('APP_TITLE', null),
 			'app.debug' => $env->bool('APP_DEBUG', false),
 			'app.env' => env('APP_ENV', ''),
-			// False keeps search engines away, as on a staging copy of a site.
-			'app.indexable' => $env->bool('APP_INDEXABLE', true),
+			// Keeps search engines away, as from a staging copy of a site.
+			'app.disallow_robots' => $env->bool('APP_DISALLOW_ROBOTS', false),
 			'app.secret' => env('APP_SECRET', null),
 			'app.timezone' => env('APP_TIMEZONE', 'UTC'),
 			'app.url_prefix' => '',
 			// The absolute URL for links in mails; never derived from a request.
 			'app.url' => env('APP_URL', null),
-			// Reverse proxies whose X-Forwarded-For names the client, comma-separated in TRUSTED_PROXIES.
-			'app.trusted_proxies' => $env->string('TRUSTED_PROXIES') ?? [],
+			// Reverse proxies whose X-Forwarded-For names the client, comma-separated in APP_TRUSTED_PROXIES.
+			'app.trusted_proxies' => $env->string('APP_TRUSTED_PROXIES') ?? [],
 			'plugins' => [],
 			'webhooks' => [],
 		];
@@ -160,7 +160,7 @@ final class Defaults
 	private static function session(Env $env): array
 	{
 		return [
-			'session.enabled' => $env->bool('SITE_SESSION_ENABLED', false),
+			'session.enabled' => $env->bool('SESSION_ENABLED', false),
 			'session.options' => [
 				'cookie_httponly' => true,
 				'cookie_samesite' => 'Lax',

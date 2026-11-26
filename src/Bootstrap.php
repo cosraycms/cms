@@ -237,7 +237,7 @@ class Bootstrap implements CorePlugin
 		$this->container->add(Maintenance::class, $maintenance);
 		$app->middleware(new MaintenanceMode($this->config, $maintenance, $this->factory));
 
-		if (!$this->config->app->indexable) {
+		if ($this->config->app->disallowRobots) {
 			$app->middleware(new NoIndex($this->factory, $this->config->app->urlPrefix));
 		}
 

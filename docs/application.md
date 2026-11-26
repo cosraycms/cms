@@ -22,13 +22,15 @@ $name = $app->config->get('app.name');
 
 Recognized environment variables are read from `$_SERVER`, then `$_ENV`, not `getenv()`. Cosray does **not** load `.env` files. If an application uses a loader such as `vlucas/phpdotenv`, run it before constructing the app and let it populate those arrays. Boolean and integer environment settings are validated at construction; malformed values and missing `requireEnv()` variables throw `Cosray\Exception\InvalidEnvironment`. Use native booleans and integers in PHP settings.
 
-The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); conversions and validation live in [Config/](../src/Config/). `session.enabled` controls frontend session middleware. The panel has its own session handling. `app.timezone` is the default time zone of panel timestamps; each user can choose another.
+An environment variable names the setting it fills: the setting's section, then its key, in capitals, so `app.url` is `APP_URL`, `log.level` is `LOG_LEVEL` and `session.enabled` is `SESSION_ENABLED`. `APP_` is therefore the section `app.*`: what concerns the application as a whole, such as its name, URL, environment, secret and time zone. Only names that other tools already fix keep their own: `DATABASE_URL` fills `db.dsn`, and `MAILER_DSN`, `MAILER_FROM` and `MAILER_REDIRECT` fill the `mail.*` settings, as Symfony Mailer names them.
+
+The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); conversions and validation live in [Config/](../src/Config/). `session.enabled`, `SESSION_ENABLED` in the environment, controls frontend session middleware. The panel has its own session handling. `app.timezone` is the default time zone of panel timestamps; each user can choose another.
 
 `app.name` names the session cookies, so changing it signs everyone out. The site's name as people read it, in mails for example, is `app.title`, `APP_TITLE` in the environment; it defaults to the host of `app.url`, else `app.name`.
 
 ### Search engines
 
-`app.indexable`, `APP_INDEXABLE` in the environment, is true by default. Set it to false on a copy of a site that search engines must not list, such as a staging server: `/robots.txt` then answers `Disallow: /` for every crawler, even where `public/robots.txt` exists, and every response the application renders carries `X-Robots-Tag: noindex, nofollow`. Files the web server serves itself, such as uploads and renditions, fall under the robots.txt rule alone; add the header in the web server to cover them too. The web server must pass `/robots.txt` to the application when no such file exists, which a general fallback to `index.php` does and a location that answers `/robots.txt` itself prevents.
+`app.disallow_robots`, `APP_DISALLOW_ROBOTS` in the environment, is false by default. Set it on a copy of a site that search engines must not list, such as a staging server: `/robots.txt` then answers `Disallow: /` for every crawler, even where `public/robots.txt` exists, and every response the application renders carries `X-Robots-Tag: noindex, nofollow`. Files the web server serves itself, such as uploads and renditions, fall under the robots.txt rule alone; add the header in the web server to cover them too. The web server must pass `/robots.txt` to the application when no such file exists, which a general fallback to `index.php` does and a location that answers `/robots.txt` itself prevents.
 
 The two signals limit each other: a crawler that obeys `Disallow` never fetches a page and so never sees its `noindex`, and may still list an address it found linked elsewhere, without its content. That is enough to keep a fresh staging site out of search results. To remove pages a search engine has already listed, they have to stay crawlable until it has seen the header. Neither signal restricts access; a site that must stay private needs authentication.
 
@@ -59,7 +61,7 @@ The unqualified names, `public` on PostgreSQL, are the site's own. Name the data
 | `path.cache` | Renditions below `path.public`, also their URL path; defaults to `/cache` |
 | `app.url_prefix` | Application URL mount prefix; does not change filesystem locations |
 | `app.url` | Absolute URL the application is served under, like `https://example.org`, for links in mails and for absolute URLs without a request, as in jobs and commands; `APP_URL` in the environment. Never taken from a request's host |
-| `app.trusted_proxies` | IP addresses and CIDR ranges of reverse proxies, like `['127.0.0.1', '10.0.0.0/8']`; `TRUSTED_PROXIES`, comma-separated, in the environment. A request from one of them takes its client address from `X-Forwarded-For` |
+| `app.trusted_proxies` | IP addresses and CIDR ranges of reverse proxies, like `['127.0.0.1', '10.0.0.0/8']`; `APP_TRUSTED_PROXIES`, comma-separated, in the environment. A request from one of them takes its client address from `X-Forwarded-For` |
 | `panel.path` | Panel URL path; defaults to `/panel`. The path with a trailing slash redirects to it |
 
 `path.assets` and `path.cache` couple directories below the document root to media URL paths. Either directory may be a symlink to one outside the document root, for example to keep uploads and renditions in a directory shared between deployed releases; the web server must then follow symlinks. With `app.url_prefix => '/site'`, an original below `$root/public/assets` has a URL starting with `/site/assets/`. The router applies the prefix to routes, but panel-generated links and login redirects do not consistently include non-empty prefixes yet.
@@ -162,7 +164,7 @@ server {
 ```
 
 - Every request without a file of its name goes to `index.php`, which also serves the panel, media renditions and the API.
-- `/robots.txt` needs that fallback too, where the site has no such file and is not [indexable](#search-engines). A location that answers it without `try_files`, as common templates have one, ends in nginx's own 404.
+- `/robots.txt` needs that fallback too, where the site has no such file and [disallows robots](#search-engines). A location that answers it without `try_files`, as common templates have one, ends in nginx's own 404.
 - Only the front controller runs. Any other PHP file answers 404, also one that found its way into the uploads below `public/assets`.
 - `$realpath_root` resolves a symlinked document root per request, so a deployment that switches a `current` link runs each request entirely in one release.
 - The panel loads its modules one by one, so it needs HTTP/2 and compression for CSS and JavaScript; see [Panel assets and theming](#panel-assets-and-theming).
