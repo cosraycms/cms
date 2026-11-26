@@ -154,6 +154,16 @@ final class RoutingTest extends End2EndTestCase
 		$this->assertStringContainsString('text/html', $contentType);
 	}
 
+	public function testHeadIsAnsweredLikeGet(): void
+	{
+		$this->loadFixtures('sample-nodes');
+
+		$response = $this->makeRequest('HEAD', '/');
+
+		$this->assertResponseOk($response);
+		$this->assertStringContainsString('text/html', $response->getHeaderLine('Content-Type'));
+	}
+
 	public function testHiddenNodesAreNotAccessible(): void
 	{
 		$typeId = $this->createTestType('hidden-test-page');

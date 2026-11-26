@@ -89,7 +89,8 @@ class Node
 	private function dispatch(object $node, Context $context, Cms $cms): Response
 	{
 		$request = $context->httpRequest();
-		$method = $request->method();
+		// HEAD is answered as GET; the emitter leaves out the body.
+		$method = $request->method() === 'HEAD' ? 'GET' : $request->method();
 		$inner = Wrapper::unwrap($node);
 		// A node implementing the request method's interface takes over that request completely.
 		$response = match (true) {
