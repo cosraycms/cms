@@ -10,6 +10,7 @@ use Cosray\Exception\InvalidEnvironment;
 use Cosray\Exception\RuntimeException;
 use Cosray\Tests\TestCase;
 use Cosray\Uid;
+use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransportFactory;
 
 /**
  * @internal
@@ -276,6 +277,7 @@ final class ConfigTest extends TestCase
 	{
 		$config = new Config(self::root());
 		$this->assertSame([], $config->mail->transports);
+		$this->assertSame([], $config->mail->factories);
 		$this->assertNull($config->mail->from);
 		$this->assertSame([], $config->mail->redirect);
 		$this->assertSame([self::root() . '/views/mail'], $config->mail->views);
@@ -307,6 +309,18 @@ final class ConfigTest extends TestCase
 		$this->throws(RuntimeException::class, '`mail.transports` takes DSNs by transport name.');
 
 		$config->mail->transports;
+	}
+
+	public function testMailFactoriesAreTransportFactoryClasses(): void
+	{
+		$config = new Config(self::root(), ['mail.factories' => [EsmtpTransportFactory::class]]);
+		$this->assertSame([EsmtpTransportFactory::class], $config->mail->factories);
+
+		$config = new Config(self::root(), ['mail.factories' => [self::class]]);
+
+		$this->throws(RuntimeException::class, '`mail.factories` takes a list of transport factory classes.');
+
+		$config->mail->factories;
 	}
 
 	public function testSessionOptionsCanBeChangedFromEnvironment(): void

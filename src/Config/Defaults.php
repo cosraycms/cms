@@ -251,6 +251,8 @@ final class Defaults
 		return [
 			// Symfony Mailer DSNs by name, the first is the default; MAILER_DSN names `default`.
 			'mail.transports' => $dsn !== null && $dsn !== '' ? ['default' => $dsn] : [],
+			// Transport factory classes for DSN schemes of mailer bridges outside Symfony.
+			'mail.factories' => [],
 			'mail.from' => $env->string('MAILER_FROM'),
 			// Addresses that get every mail instead of its recipients, comma-separated in MAILER_REDIRECT.
 			'mail.redirect' => $env->string('MAILER_REDIRECT') ?? [],

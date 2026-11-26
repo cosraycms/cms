@@ -94,6 +94,7 @@ namespace Cosray\Config;
  *     'queue.after_response': bool,
  *
  *     'mail.transports': array<string, string>,
+ *     'mail.factories': list<class-string>,
  *     'mail.from': ?string,
  *     'mail.redirect': string|list<string>,
  *     'mail.views': string|list<string>,
@@ -160,6 +161,7 @@ namespace Cosray\Config;
  *     'password.breach_check'?: bool,
  *     'queue.after_response'?: bool,
  *     'mail.transports'?: array<string, string>,
+ *     'mail.factories'?: list<class-string>,
  *     'mail.from'?: ?string,
  *     'mail.redirect'?: string|list<string>,
  *     'mail.views'?: string|list<string>,

@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface as Logger;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Mailer\EventListener\EnvelopeListener;
 use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Transport\TransportFactoryInterface;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Mime\Email;
 
@@ -75,6 +76,19 @@ final class Transports
 
 		return $this->transports = $this->build !== null
 			? ($this->build)($dsns, $dispatcher)
-			: Transport::fromDsns($dsns, $dispatcher, logger: $this->logger);
+			: new Transport($this->factories($dispatcher))->fromStrings($dsns);
+	}
+
+	/** @return list<TransportFactoryInterface> */
+	private function factories(EventDispatcher $dispatcher): array
+	{
+		return [
+			// The factories get the dispatcher, which carries the redirect.
+			...array_map(
+				fn(string $class): TransportFactoryInterface => new $class($dispatcher, null, $this->logger),
+				$this->config->mail->factories,
+			),
+			...Transport::getDefaultFactories($dispatcher, logger: $this->logger),
+		];
 	}
 }

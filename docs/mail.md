@@ -7,6 +7,7 @@ Cosray sends mail with [Symfony Mailer](https://symfony.com/doc/current/mailer.h
 | Setting | Environment | Meaning |
 | --- | --- | --- |
 | `mail.transports` | `MAILER_DSN` | Symfony Mailer DSNs by name. The first one is the default; `MAILER_DSN` fills the one named `default`. |
+| `mail.factories` | – | Transport factory classes for DSN schemes that Symfony Mailer does not know by itself. |
 | `mail.from` | `MAILER_FROM` | The sender of mails that name none, like `Example <noreply@example.com>`. |
 | `mail.redirect` | `MAILER_REDIRECT` | Addresses that receive every mail instead of its recipients, for staging and development. Comma-separated in the environment. |
 | `mail.views` | – | Template directories, searched in order. By default `mail` in the views directory. |
@@ -22,6 +23,16 @@ $app = App::create($root, [
 ```
 
 SMTP needs nothing else: `smtp://user:password@smtp.example.com:587`. Symfony Mailer also takes `sendmail://default` and `null://null`, which drops every mail. For a provider's API, install its bridge, like `symfony/mailersend-mailer`, and use the DSN its documentation gives. Locally, a mail catcher such as Mailpit works with `smtp://localhost:1025`.
+
+Symfony Mailer finds the transports of its own bridges, the `symfony/*-mailer` packages, by itself. A bridge from another vendor needs its transport factory in `mail.factories`:
+
+```php
+$app = App::create($root, [
+    'mail.factories' => [Vendor\Mailer\VendorTransportFactory::class],
+]);
+```
+
+The factories are tried before Symfony's own, in order. Cosray creates each one like Symfony's, with an event dispatcher, no HTTP client and the logger, so the class must take these constructor arguments, as subclasses of `Symfony\Component\Mailer\Transport\AbstractTransportFactory` do.
 
 `mail.redirect` changes where a mail goes, not the mail: its `To` and `Cc` headers stay as they are, so a redirected mail still shows whom it was meant for.
 

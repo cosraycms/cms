@@ -20,6 +20,7 @@ use Cosray\Mailer;
 use Cosray\Queue;
 use Cosray\Queue\Runner;
 use Cosray\Tests\Fixtures\Mail\RecordingTransport;
+use Cosray\Tests\Fixtures\Mail\RecordingTransportFactory;
 use Cosray\Tests\Fixtures\RecordingLogger;
 use Cosray\Tests\IntegrationTestCase;
 use Symfony\Component\Mailer\Exception\TransportException;
@@ -149,6 +150,28 @@ final class MailerTest extends IntegrationTestCase
 			self::addresses($message->getEnvelope()->getRecipients()),
 		);
 		$this->assertSame(['customer@example.com'], self::addresses($this->sent()[0]->getTo()));
+	}
+
+	public function testConfiguredFactoriesAddDsnSchemesThatHonourTheRedirect(): void
+	{
+		$config = $this->mailConfig([
+			'mail.transports' => ['default' => 'recording://default'],
+			'mail.factories' => [RecordingTransportFactory::class],
+			'mail.redirect' => 'dev@example.com',
+		]);
+
+		new Transports($config, $this->logger)->send(
+			new Email()
+				->from('site@example.com')
+				->to('customer@example.com')
+				->subject('Hi')
+				->text('Hello'),
+		);
+
+		$this->assertSame(
+			['dev@example.com'],
+			self::addresses(RecordingTransportFactory::$transport?->sent[0]->getEnvelope()->getRecipients() ?? []),
+		);
 	}
 
 	public function testATemplateRendersInTheLocaleItIsAskedFor(): void

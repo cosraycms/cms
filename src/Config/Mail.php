@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Config;
 
 use Cosray\Exception\RuntimeException;
+use Symfony\Component\Mailer\Transport\TransportFactoryInterface;
 
 final class Mail
 {
@@ -22,6 +23,16 @@ final class Mail
 	 */
 	public array $transports {
 		get => $this->transportsCache ??= self::transports($this->config->get('mail.transports'));
+	}
+
+	/**
+	 * Transport factories for DSN schemes Symfony Mailer does not know by
+	 * itself, tried before its own.
+	 *
+	 * @var list<class-string<TransportFactoryInterface>>
+	 */
+	public array $factories {
+		get => self::factories($this->config->get('mail.factories'));
 	}
 
 	/** The sender of mails that name none, like `Example <noreply@example.com>`. */
@@ -65,6 +76,22 @@ final class Mail
 		}
 
 		return $valid;
+	}
+
+	/** @return list<class-string<TransportFactoryInterface>> */
+	private static function factories(mixed $factories): array
+	{
+		if (!is_array($factories) || !array_is_list($factories)) {
+			throw new RuntimeException('`mail.factories` takes a list of transport factory classes.');
+		}
+
+		foreach ($factories as $factory) {
+			if (!is_string($factory) || !is_subclass_of($factory, TransportFactoryInterface::class)) {
+				throw new RuntimeException('`mail.factories` takes a list of transport factory classes.');
+			}
+		}
+
+		return $factories;
 	}
 
 	/** @return list<non-empty-string> */
