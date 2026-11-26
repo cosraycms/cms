@@ -33,6 +33,7 @@ final class PreviewTest extends End2EndTestCase
 		$response = $this->makeRequest('GET', '/preview/preview-working');
 
 		$this->assertResponseOk($response);
+		$this->assertSame('noindex, nofollow', $response->getHeaderLine('X-Robots-Tag'));
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('<h1>Working title</h1>', $html);
 		$this->assertStringNotContainsString('Live title', $html);

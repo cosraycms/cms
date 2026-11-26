@@ -32,6 +32,8 @@ The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); 
 
 `app.disallow_robots`, `APP_DISALLOW_ROBOTS` in the environment, is false by default. Set it on a copy of a site that search engines must not list, such as a staging server: `/robots.txt` then answers `Disallow: /` for every crawler, even where `public/robots.txt` exists, and every response the application renders carries `X-Robots-Tag: noindex, nofollow`. Files the web server serves itself, such as uploads and renditions, fall under the robots.txt rule alone; add the header in the web server to cover them too. The web server must pass `/robots.txt` to the application when no such file exists, which a general fallback to `index.php` does and a location that answers `/robots.txt` itself prevents.
 
+The panel and previews always carry `X-Robots-Tag: noindex, nofollow`, whatever the setting, so a login page found through a link never shows up in search results. robots.txt does not name the panel's path, which would announce it, and would keep crawlers from seeing the header.
+
 The two signals limit each other: a crawler that obeys `Disallow` never fetches a page and so never sees its `noindex`, and may still list an address it found linked elsewhere, without its content. That is enough to keep a fresh staging site out of search results. To remove pages a search engine has already listed, they have to stay crawlable until it has seen the header. Neither signal restricts access; a site that must stay private needs authentication.
 
 ### Database namespace

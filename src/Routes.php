@@ -15,6 +15,7 @@ use Cosray\Controller\Media;
 use Cosray\Controller\Node;
 use Cosray\Controller\Panel;
 use Cosray\Middleware\InitRequest;
+use Cosray\Middleware\NoIndex;
 use Cosray\Middleware\PanelAuth;
 use Cosray\Middleware\PanelFraming;
 use Cosray\Middleware\PanelLocale;
@@ -67,7 +68,7 @@ class Routes
 			'/preview/{uid:[A-Za-z0-9-_.]{1,64}}',
 			[Node::class, 'preview'],
 			'cms.preview',
-		)->middleware($this->session);
+		)->middleware(new NoIndex($this->factory), $this->session);
 
 		// Rendition fallback: the web server serves existing cache files
 		// natively; only misses reach PHP and get generated once.
@@ -175,6 +176,7 @@ class Routes
 				// with it the stored panel language preference) is available,
 				// and before VerifyCsrf, whose refusal is in that language.
 				$panel->middleware(
+					new NoIndex($this->factory),
 					new PanelFraming($this->config->panel->embed),
 					$this->session,
 					new PanelLocale($this->config),
