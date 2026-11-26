@@ -110,6 +110,63 @@ return $app->serve();
 
 Register plugins, services and routes before the first request. The container is sealed after it, and later registrations throw.
 
+### Web server
+
+Behind nginx, PHP-FPM runs the front controller. A server block that covers what Cosray expects:
+
+```nginx
+server {
+    # From nginx 1.25.1 on, `http2 on;` replaces the http2 parameter
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name example.org;
+    # ssl_certificate and ssl_certificate_key, for example from certbot
+
+    root /var/www/example.org/current/public;
+    index index.php;
+    charset utf-8;
+
+    # As large as the largest upload, upload.maxsize.video
+    client_max_body_size 256m;
+
+    gzip on;
+    gzip_vary on;
+    gzip_types text/css text/javascript application/javascript application/json image/svg+xml;
+
+    location / {
+        try_files $uri /index.php$is_args$args;
+    }
+
+    location = /robots.txt {
+        access_log off;
+        log_not_found off;
+        try_files $uri /index.php$is_args$args;
+    }
+
+    location = /index.php {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        fastcgi_pass unix:/run/php/php8.5-fpm.sock;
+    }
+
+    location ~ \.php$ {
+        return 404;
+    }
+
+    location ~ /\.(?!well-known/) {
+        deny all;
+    }
+}
+```
+
+- Every request without a file of its name goes to `index.php`, which also serves the panel, media renditions and the API.
+- `/robots.txt` needs that fallback too, where the site has no such file and is not [indexable](#search-engines). A location that answers it without `try_files`, as common templates have one, ends in nginx's own 404.
+- Only the front controller runs. Any other PHP file answers 404, also one that found its way into the uploads below `public/assets`.
+- `$realpath_root` resolves a symlinked document root per request, so a deployment that switches a `current` link runs each request entirely in one release.
+- The panel loads its modules one by one, so it needs HTTP/2 and compression for CSS and JavaScript; see [Panel assets and theming](#panel-assets-and-theming).
+- PHP's `upload_max_filesize` and `post_max_size` must allow uploads as large as `client_max_body_size`; see [Video](media.md#video).
+
 ### Worker mode
 
 A FrankenPHP worker boots the app once and keeps it in memory for many requests, which saves the boot and the database connection setup per request. Point the worker at the normal front controller and set the number of workers explicitly:
