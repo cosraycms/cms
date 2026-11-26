@@ -29,6 +29,7 @@ final class ConfigTest extends TestCase
 		$this->clearEnvironment(
 			'APP_DEBUG',
 			'APP_ENV',
+			'APP_INDEXABLE',
 			'APP_MISSING',
 			'APP_NAME',
 			'APP_REQUIRED',
@@ -196,6 +197,24 @@ final class ConfigTest extends TestCase
 		$this->assertSame('test-secret', $config->app->secret);
 		$this->assertSame('Europe/Berlin', $config->app->timezone->getName());
 		$this->assertTrue($config->session->enabled);
+	}
+
+	public function testSitesAreIndexableUnlessTheEnvironmentTurnsItOff(): void
+	{
+		$this->assertTrue(new Config(self::root())->app->indexable);
+
+		$this->setEnvironment(['APP_INDEXABLE' => 'false']);
+
+		$this->assertFalse(new Config(self::root())->app->indexable);
+	}
+
+	public function testIndexableMustBeABoolean(): void
+	{
+		$this->setEnvironment(['APP_INDEXABLE' => 'staging']);
+
+		$this->throws(InvalidEnvironment::class, 'APP_INDEXABLE must be a boolean');
+
+		new Config(self::root());
 	}
 
 	public function testLogDefaultsToTheVarDirectory(): void

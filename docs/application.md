@@ -26,6 +26,12 @@ The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); 
 
 `app.name` names the session cookies, so changing it signs everyone out. The site's name as people read it, in mails for example, is `app.title`, `APP_TITLE` in the environment; it defaults to the host of `app.url`, else `app.name`.
 
+### Search engines
+
+`app.indexable`, `APP_INDEXABLE` in the environment, is true by default. Set it to false on a copy of a site that search engines must not list, such as a staging server: `/robots.txt` then answers `Disallow: /` for every crawler, even where `public/robots.txt` exists, and every response the application renders carries `X-Robots-Tag: noindex, nofollow`. Files the web server serves itself, such as uploads and renditions, fall under the robots.txt rule alone; add the header in the web server to cover them too. The web server must pass `/robots.txt` to the application when no such file exists, which a general fallback to `index.php` does and a location that answers `/robots.txt` itself prevents.
+
+The two signals limit each other: a crawler that obeys `Disallow` never fetches a page and so never sees its `noindex`, and may still list an address it found linked elsewhere, without its content. That is enough to keep a fresh staging site out of search results. To remove pages a search engine has already listed, they have to stay crawlable until it has seen the header. Neither signal restricts access; a site that must stay private needs authentication.
+
 ### Database namespace
 
 Cosray keeps its tables in a namespace of their own: the PostgreSQL schema `cms` by default, which Cosray creates before its install migrations unless it exists, and the table-name prefix `cms_` on other drivers. The `cms.prefix` placeholder sets it. On PostgreSQL, a value ending in a dot names a schema; any other value is prepended to each table name.

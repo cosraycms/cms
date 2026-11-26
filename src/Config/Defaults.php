@@ -43,6 +43,8 @@ final class Defaults
 			'app.title' => env('APP_TITLE', null),
 			'app.debug' => $env->bool('APP_DEBUG', false),
 			'app.env' => env('APP_ENV', ''),
+			// False keeps search engines away, as on a staging copy of a site.
+			'app.indexable' => $env->bool('APP_INDEXABLE', true),
 			'app.secret' => env('APP_SECRET', null),
 			'app.timezone' => env('APP_TIMEZONE', 'UTC'),
 			'app.url_prefix' => '',

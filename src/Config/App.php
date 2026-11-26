@@ -44,6 +44,14 @@ final class App
 		get => $this->config->get('app.env');
 	}
 
+	/**
+	 * False turns search engines away: robots.txt disallows everything and
+	 * every response asks not to be indexed.
+	 */
+	public bool $indexable {
+		get => $this->config->get('app.indexable');
+	}
+
 	public string $urlPrefix {
 		get => $this->config->get('app.url_prefix');
 	}

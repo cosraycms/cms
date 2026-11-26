@@ -13,6 +13,7 @@ final class Env
 	/** @var list<string> */
 	private const BOOLEAN = [
 		'APP_DEBUG',
+		'APP_INDEXABLE',
 		'SITE_SESSION_ENABLED',
 		'SESSION_COOKIE_SECURE',
 		'QUEUE_AFTER_RESPONSE',

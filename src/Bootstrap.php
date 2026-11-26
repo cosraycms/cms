@@ -33,6 +33,7 @@ use Cosray\Icons\Local;
 use Cosray\Icons\Plugins as PluginIcons;
 use Cosray\Icons\Provider as IconProvider;
 use Cosray\Middleware\MaintenanceMode;
+use Cosray\Middleware\NoIndex;
 use Cosray\Migration\Schemas;
 use Cosray\Node\Listeners as NodeListeners;
 use Cosray\Node\Schema\Registry as NodeSchemas;
@@ -235,6 +236,10 @@ class Bootstrap implements CorePlugin
 		$maintenance = Maintenance::of($this->config);
 		$this->container->add(Maintenance::class, $maintenance);
 		$app->middleware(new MaintenanceMode($this->config, $maintenance, $this->factory));
+
+		if (!$this->config->app->indexable) {
+			$app->middleware(new NoIndex($this->factory, $this->config->app->urlPrefix));
+		}
 
 		$this->routes = new Routes(
 			$this->config,
