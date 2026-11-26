@@ -19,10 +19,16 @@ test('a plugin section acts at once through its own form and follows the node', 
 	await expect(section.locator('[data-note]')).toHaveText('Remember the photos');
 	await expect(section.getByLabel('Note')).toHaveValue('');
 	await expect(mine(page)).toHaveAttribute('data-state', 'none');
+	await expect(page).toHaveURL(/\/panel\/node\/browsersection$/);
 
 	// A switch of the node draws the section again.
 	await page.locator('#editor-published-switch').uncheck();
 	await expect(section.locator('[data-state]')).toHaveText('offline');
 	await page.locator('#editor-published-switch').check();
+	await expect(section.locator('[data-state]')).toHaveText('online');
+
+	// Forms that answer in place leave the editor's address, so a reload opens the editor again.
+	await expect(page).toHaveURL(/\/panel\/node\/browsersection$/);
+	await page.reload();
 	await expect(section.locator('[data-state]')).toHaveText('online');
 });
