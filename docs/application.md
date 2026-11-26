@@ -116,9 +116,10 @@ Behind nginx, PHP-FPM runs the front controller. A server block that covers what
 
 ```nginx
 server {
-    # From nginx 1.25.1 on, `http2 on;` replaces the http2 parameter
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    # Before nginx 1.25.1, as on Ubuntu 24.04: `listen 443 ssl http2;` instead
+    http2 on;
     server_name example.org;
     # ssl_certificate and ssl_certificate_key, for example from certbot
 
