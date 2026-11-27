@@ -26,11 +26,10 @@ final class PluginMigrationsTest extends TestCase
 {
 	private App $app;
 
-	public function testAPluginsMigrationsRunInItsNamespaceAfterDefault(): void
+	public function testAPluginsMigrationsRunInItsNamespaceBeforeTheSites(): void
 	{
-		$connection = $this->connection();
+		$connection = $this->connection(['db.migrations' => [self::root() . '/tests/Fixtures/migrations']]);
 
-		$this->assertSame(['default', 'test-plugin'], $connection->config->migrationOrder);
 		$this->assertArrayHasKey('test-plugin', $connection->config->migrations);
 		$this->assertStringNotContainsString(
 			'Fixtures/Plugin',
@@ -40,9 +39,41 @@ final class PluginMigrationsTest extends TestCase
 		[$exit, $output] = $this->migrate($connection, ['run', 'db:migrations']);
 		$this->assertSame(0, $exit, $output);
 		$this->assertStringContainsString(
-			"Would apply 1 migration:\n  - test-plugin:000000-000000-test-plugin.sql\n",
+			"Would apply 2 migrations:\n  - test-plugin:000000-000000-test-plugin.sql\n"
+				. "  - 261127-120000-clear-plugin-items.sql\n",
 			$output,
 		);
+	}
+
+	public function testASiteMigrationFindsTheTablesOfAPluginAddedInTheSameRun(): void
+	{
+		$connection = $this->connection(['db.migrations' => [self::root() . '/tests/Fixtures/migrations']]);
+
+		[$exit, $output] = $this->migrate($connection, ['run', 'db:migrations', '--test-run', '--yes']);
+
+		$this->assertSame(0, $exit, $output);
+		$this->assertStringContainsString('Rolled back 2 migrations', $output);
+		$this->assertSame([], $this->leftovers());
+	}
+
+	public function testANewMigrationGoesIntoTheSitesDirectory(): void
+	{
+		$dir = sys_get_temp_dir() . '/cosray-site-migrations-' . bin2hex(random_bytes(4));
+		mkdir($dir);
+
+		try {
+			$connection = $this->connection(['db.migrations' => [$dir]]);
+
+			[$exit, $output] = $this->migrate($connection, ['run', 'db:add-migration', 'add-teams.sql']);
+
+			$this->assertSame(0, $exit, $output);
+			$files = array_map(basename(...), glob($dir . '/*') ?: []);
+			$this->assertCount(1, $files);
+			$this->assertMatchesRegularExpression('/^\d{6}-\d{6}-add-teams\.sql$/', $files[0]);
+		} finally {
+			array_map(unlink(...), glob($dir . '/*') ?: []);
+			rmdir($dir);
+		}
 	}
 
 	public function testAPluginsTablesGoIntoASchemaOfItsOwnThatCosrayCreates(): void

@@ -269,6 +269,12 @@ $writer->create($prepared, new Actor($editorId));
 
 The lower-level [Node\Store](../src/Node/Store.php) takes `Locales` and an explicit `Cosray\Actor`; HTTP callers derive the actor from their authenticated session. See [working copies](content.md#working-copies) before choosing a store operation.
 
+### Migrations
+
+A site keeps its migrations in the directories `db.migrations` lists. `php run db:add-migration add-teams.sql` creates one in the first of them, named by the time it was created, such as `261127-142530-add-teams.sql`. Name files created by hand the same way, so that migrations from parallel branches neither collide nor need renumbering.
+
+`php run db:migrations --apply` runs the pending migrations of Cosray, the plugins and the site, on PostgreSQL and SQLite in one transaction: Cosray's update migrations first, recorded as `cms:{file}`, then each [plugin's](#plugins), recorded as `{id}:{file}`, and the site's last, recorded by their file name. Each runs on the schema of the ones before it, so a site migration finds the tables of a plugin added in the same deploy, even when the migration is older than the plugin. A plan without `--apply` lists the pending migrations in this order.
+
 ### Content migrations
 
 A site's PHP migrations ask for the same services in their constructors as commands do. Cosray builds them on the migration's own connection, so their writes join the transaction `php run db:migrations --apply` runs the migrations in: a failing migration leaves the content as it was. Each write becomes a new revision with an event, as any other write through the store does. [Api\Writer](../src/Api/Writer.php)`::patch()` changes fields of an existing node like a `PATCH` through the [API](api.md#nodes), on the main version and an editor's working copy alike, so applying that copy later keeps the change:
@@ -341,9 +347,9 @@ Settings use flat namespaced keys, such as `'acme-shop.currency' => 'USD'`. With
 
 `$cms->translations(__DIR__ . '/../lang')` registers the translation domain `{id}`, with catalogs named `{id}.{locale}.php`. It is searched after the app's domains and before Cosray's, so an app can still shadow a plugin's entry. Keys start with the plugin id by convention, such as `acme-shop:order-shipped`. A panel language the plugin ships no catalog for shows the entries of the next language in the panel's fallback chain, usually English. The panel sends only the `panel` domain to its scripts; pass `scripts: true` to send the plugin's catalog too, embedded in every full page load. A plugin repo registers Verba's `i18n:sync` and `i18n:status` for its own domain in its `run` script.
 
-`$cms->migrations($dir)` puts the plugin's migrations into a Quma namespace named after the plugin. They are recorded as `{id}:{file}`, such as `acme-shop:001-orders.sql`, so a plugin numbers its files itself. `php run db:migrations --apply` applies the site's and Cosray's migrations of `default` first, then each plugin's namespace in registration order, all in one transaction: a failing migration leaves the database unchanged, and a plan without `--apply` lists every namespace. The id is stored with these records, so renaming a plugin's id means renaming its records.
+`$cms->migrations($dir)` puts the plugin's migrations into a Quma namespace named after the plugin. They are recorded as `{id}:{file}`, such as `acme-shop:261127-142530-orders.sql`; name them by date, as a site does (see [migrations](#migrations)). `php run db:migrations --apply` applies them after Cosray's and before the site's, each plugin's namespace in registration order, all in one transaction: a failing migration leaves the database unchanged, and a plan without `--apply` lists every namespace. The id is stored with these records, so renaming a plugin's id means renaming its records.
 
-A plugin's migrations run after all of `default`, on an old database as on a fresh install, so they always meet the current core schema, not the one they were written against. Keep a migration's queries in its file instead of calling Cosray classes.
+A plugin's migrations run after all of Cosray's, on an old database as on a fresh install, so they always meet the current core schema, not the one they were written against. Keep a migration's queries in its file instead of calling Cosray classes.
 
 A plugin never creates tables, indexes or functions in Cosray's database namespace. Each plugin with migrations or SQL has a namespace of its own, named after its id in snake case, and its SQL reaches it through two placeholders: `{id}.prefix` for tables and `{id}.obj` for the names of indexes, triggers and constraints:
 

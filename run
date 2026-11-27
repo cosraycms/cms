@@ -39,16 +39,15 @@ $config = new Config(__DIR__, ['db.dsn' => $dsn]);
 $container = new Container();
 $container->add($config::class, $config);
 
-// Same namespace layout as Bootstrap::database(): `install` holds the schema
-// snapshot (init + seed, run once on a fresh database via `--namespace
-// install`), `default` the system update migrations. The seed bookkeeps all
-// update migrations, so the default namespace only applies ones added later.
+// The namespaces match Bootstrap's, as sites and the seed record update
+// migrations as `cms:<file>`; `db:add-migration` writes into the first one.
 $conn = new Connection($dsn, __DIR__ . '/db/sql')
 	->placeholders(Delimiters::comments(), $config->db->placeholders)
 	->migrations([
+		'cms' => [__DIR__ . '/db/migrations/update'],
 		'install' => [__DIR__ . '/db/migrations/install'],
-		'default' => [__DIR__ . '/db/migrations/update'],
 	])
+	->migrationOrder(['cms'])
 	->beforeMigrations(new Schemas($config->db, new Namespaces($config->db, []))->create(...));
 
 $runner = new Runner(QumaCommands::get($conn, migrationFactory: new MigrationFactory($container)));

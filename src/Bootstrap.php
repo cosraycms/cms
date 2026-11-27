@@ -626,24 +626,21 @@ class Bootstrap implements CorePlugin
 			$config->sql,
 			$this->pluginSql,
 		);
-		$migrationPaths = $config->migrations;
-
-		$namespacedMigrations = [];
-		$namespacedMigrations['install'] = [$root . '/db/migrations/install'];
-		$namespacedMigrations['default'] = array_merge($migrationPaths, [$root . '/db/migrations/update']);
-
-		// Each plugin's migrations run after all of default, in registration
-		// order; `install` only ever runs on its own, on an empty database.
-		foreach ($this->pluginMigrations as $id => $dirs) {
-			$namespacedMigrations[$id] = $dirs;
-		}
+		// `db:add-migration` writes into the first directory, which has to be the site's.
+		$migrations = [
+			'default' => $config->migrations,
+			'cms' => [$root . '/db/migrations/update'],
+			'install' => [$root . '/db/migrations/install'],
+			...$this->pluginMigrations,
+		];
 
 		$connection = new Connection(
 			$config->dsn ?? throw new RuntimeException('No database configured: set DATABASE_URL or db.dsn'),
 			$sql,
 		)
-			->migrations($namespacedMigrations)
-			->migrationOrder(['default', ...array_keys($this->pluginMigrations)])
+			->migrations($migrations)
+			// Plugins build on Cosray's schema and the site on both; `install` only runs on its own.
+			->migrationOrder(['cms', ...array_keys($this->pluginMigrations), 'default'])
 			->beforeMigrations(new Schemas($config, $this->pluginNamespaces)->create(...))
 			->fetch(PDO::FETCH_ASSOC)
 			->options($config->options)

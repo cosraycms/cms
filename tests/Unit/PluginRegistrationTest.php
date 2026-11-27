@@ -97,7 +97,7 @@ final class PluginRegistrationTest extends TestCase
 			[self::root() . '/tests/Fixtures/Plugin/db/migrations'],
 			$config->migrations['test-plugin'],
 		);
-		$this->assertSame(['default', 'test-plugin'], $config->migrationOrder);
+		$this->assertSame(['cms', 'test-plugin', 'default'], $config->migrationOrder);
 
 		$sql = $config->sql;
 		$sqlDirs = [];
